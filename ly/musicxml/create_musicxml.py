@@ -25,11 +25,9 @@ Uses xml.etree to create the XML document
 from __future__ import unicode_literals
 
 import sys
-try:
-    import xml.etree.cElementTree as etree
-except ImportError:
-    import xml.etree.ElementTree as etree
+import xml.etree.ElementTree as etree
 
+import info
 
 class create_musicXML():
     """ creates the XML-file from the source code according to the Music XML standard """
@@ -44,7 +42,7 @@ class create_musicXML():
         identification = etree.SubElement(self.root, "identification")
         encoding = etree.SubElement(identification, "encoding")
         software = etree.SubElement(encoding, "software")
-        software.text = "python-ly"
+        software.text = "{0} {1}".format(info.appname, info.version)
         encoding_date = etree.SubElement(encoding, "encoding-date")
         import datetime
         encoding_date.text = str(datetime.date.today())
@@ -172,10 +170,14 @@ class create_musicXML():
     def add_accidental(self, alter):
         """ create accidental """
         acc = etree.SubElement(self.current_note, "accidental")
-        if alter>0:     
+        if alter == 1:     
             acc.text = "sharp"
-        else:
+        elif alter == 2:
+            acc.text = "double-sharp"
+        elif alter == -1:
             acc.text = "flat"
+        elif alter == -2:
+            acc.text = "flat-flat"
                         
     def add_rest(self, pos):
         """ create rest """
@@ -266,32 +268,19 @@ class create_musicXML():
         linenode.text = str(line)   
         
     ##
-    # Create the XML document
+    # Create XML document
     ##
     
-    def musicxml(self, prettyprint=True):
-        xml = MusicXML(self.tree)
-        if prettyprint:
-            xml.indent("  ")
-        return xml
-
-
-class MusicXML(object):
-    """Represent a generated MusicXML tree."""
-    def __init__(self, tree):
-        self.tree = tree
-        self.root = tree.getroot()
-    
-    def indent(self, indent="  "):
+    def indent_xml(self, indent="  "):
         """ add indent and linebreaks to the created XML tree """
         import etreeutil
         etreeutil.indent(self.root, indent)
         
-    def tostring(self, encoding='UTF-8'):
+    def create_xmldoc(self, encoding='UTF-8'):
         """ output etree as a XML document """
         return etree.tostring(self.root, encoding=encoding, method="xml")
 
-    def write(self, file, encoding='UTF-8'):
+    def write_xmldoc(self, file, encoding='UTF-8'):
         """ write XML to a file (file obj or filename) """
         self.tree.write(file, encoding=encoding, xml_declaration=True, method="xml")
 
