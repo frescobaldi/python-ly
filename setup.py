@@ -6,13 +6,11 @@ from distutils.core import setup
 ###
 ### This setup script packages and/or installs:
 ### - the ly package
-### - the slexer module
 ### - the ly script
 
 
-sys.path.insert(0, 'src')
 from ly import pkginfo
-del sys.path[0]
+
 
 def packagelist(directory):
     """Return a sorted list with package names for all packages under the given directory."""
@@ -21,12 +19,8 @@ def packagelist(directory):
         for root, dirs, files in os.walk(directory)
         if '__init__.py' in files))
 
-package_dir = {
-    '': 'src',
-}
-
-scripts = ['ly']
-packages = packagelist('src/ly')
+scripts = ['bin/ly']
+packages = packagelist('./ly')
 py_modules = []
 
 with open('README.md', 'rb') as f:
@@ -43,7 +37,6 @@ classifiers = [
     'Operating System :: MacOS :: MacOS X',
     'Operating System :: Microsoft :: Windows',
     'Operating System :: POSIX',
-    'Programming Language :: Python :: 2.6',
     'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
     'Topic :: Multimedia :: Sound/Audio',
@@ -60,7 +53,6 @@ setup(
     url = pkginfo.url,
     license = pkginfo.license,
     
-    package_dir = package_dir,
     scripts = scripts,
     packages = packages,
     py_modules = py_modules,

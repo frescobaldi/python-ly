@@ -1,2 +1,2 @@
-include README.md ChangeLog
+include README.md INSTALL.md ChangeLog
 global-exclude *~
