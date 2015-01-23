@@ -12,6 +12,9 @@ The python-ly package is Free Software, licensed under the GPL. This package
 is written by the Frescobaldi developers and part of the Frescobaldi project.
 The main author is Wilbert Berendsen.
 
+Download from: https://pypi.python.org/pypi/python-ly  
+Development homepage: https://github.com/wbsoft/python-ly
+
 
 ### Functionality of the `ly` commandline tool:
 
