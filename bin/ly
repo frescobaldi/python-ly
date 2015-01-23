@@ -1,2 +1,4 @@
 #! python
-import ly.cli.main
+import sys
+from ly.cli.main import main
+sys.exit(main())

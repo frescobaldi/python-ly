@@ -379,4 +379,3 @@ def main():
             c.run(options, cursor, output)
     return exit_code
 
-sys.exit(main())
