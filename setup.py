@@ -23,7 +23,7 @@ scripts = ['bin/ly']
 packages = packagelist('./ly')
 py_modules = []
 
-with open('README.md', 'rb') as f:
+with open('README.rst', 'rb') as f:
     long_description = f.read().decode('utf-8')
 
 #data_files = [

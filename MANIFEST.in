@@ -1,2 +1,2 @@
-include README.md INSTALL.md ChangeLog
+include README.rst INSTALL.rst ChangeLog
 global-exclude *~
