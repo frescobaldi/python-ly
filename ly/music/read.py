@@ -406,7 +406,7 @@ class Reader(object):
         return item
     
     @_tokencls(lilypond.Articulation)
-    def handle_beam(self, t, source=None):
+    def handle_articulation(self, t, source=None):
         return self.factory(Articulation, t)
     
     def read_assignment(self, t):
