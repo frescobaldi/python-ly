@@ -1,12 +1,14 @@
 README for python-ly
 ====================
 
-This package provides a commandline program `ly` that can be used to do various
-manipulations with LilyPond files. LilyPond (www.lilypond.org) is a music
-typsetter using a plain text input file format.
 
-This package also provides a Python library `ly` containing various Python
-modules to parse, manipulate or create LilyPond files.
+This package provides a Python library `ly` containing various Python
+modules to parse, manipulate or create documents in LilyPond format.
+A command line program `ly` is also provided that can be used to do various
+manipulations with LilyPond files.
+
+The LilyPond format is a plain text input format that is used by the 
+GNU music typsetter LilyPond (www.lilypond.org).
 
 The python-ly package is Free Software, licensed under the GPL. This package 
 is written by the Frescobaldi developers and part of the Frescobaldi project.
