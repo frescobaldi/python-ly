@@ -1,6 +1,11 @@
 Changes for python-ly
 =====================
 
+2015-01-23: python-ly 0.7
+- first release as an officially separate project from Frescobaldi
+- add INSTALL.md to source distribution
+
+
 2015-01-23: python-ly 0.6
 - node and slexer are no longer toplevel modules; only the ly package
 

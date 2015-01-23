@@ -25,13 +25,13 @@ Information about the LY package.
 from __future__ import unicode_literals
 
 name = "python-ly"
-version = "0.6"
+version = "0.7"
 description = "Tool and library for manipulating LilyPond files"
 long_description = \
     "The python-ly package provides a Python library and a commandline tool " \
     "that can be used to parse and manipulate LilyPond source files."
 maintainer = "Wilbert Berendsen"
 maintainer_email = "info@frescobaldi.org"
-url = "http://www.frescobaldi.org/"
+url = "https://github.com/wbsoft/python-ly"
 license = "GPL"
 
