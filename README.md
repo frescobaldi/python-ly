@@ -8,7 +8,7 @@ A command line program `ly` is also provided that can be used to do various
 manipulations with LilyPond files.
 
 The LilyPond format is a plain text input format that is used by the 
-GNU music typsetter LilyPond (www.lilypond.org).
+GNU music typesetter LilyPond (www.lilypond.org).
 
 The python-ly package is Free Software, licensed under the GPL. This package 
 is written by the Frescobaldi developers and is used extensively by the
@@ -18,7 +18,7 @@ Download from: https://pypi.python.org/pypi/python-ly
 Development homepage: https://github.com/wbsoft/python-ly
 
 
-### Functionality of the `ly` commandline tool:
+### Functionality of the `ly` command line tool:
 
 With `ly` you can reformat, or re-indent LilyPond files, transpose music,
 translate pitch names, convert LilyPond to syntax-colored HTML, etc.
