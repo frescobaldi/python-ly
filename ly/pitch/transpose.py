@@ -374,7 +374,7 @@ def transpose(cursor, transposer):
                 lastPitch = transposeRelative(p, lastPitch)
         elif isinstance(t, ly.pitch.Pitch):
             # Handle just one pitch
-            transposeRelative(token, lastPitch)
+            transposeRelative(t, lastPitch)
 
     # Do it!
     with cursor.document as document:
