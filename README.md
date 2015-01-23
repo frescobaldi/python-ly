@@ -11,8 +11,8 @@ The LilyPond format is a plain text input format that is used by the
 GNU music typsetter LilyPond (www.lilypond.org).
 
 The python-ly package is Free Software, licensed under the GPL. This package 
-is written by the Frescobaldi developers and part of the Frescobaldi project.
-The main author is Wilbert Berendsen.
+is written by the Frescobaldi developers and is used extensively by the
+Frescobaldi project. The main author is Wilbert Berendsen.
 
 Download from: https://pypi.python.org/pypi/python-ly  
 Development homepage: https://github.com/wbsoft/python-ly
