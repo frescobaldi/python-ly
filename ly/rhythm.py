@@ -47,7 +47,7 @@ def remove_dups(iterable):
 
 
 def music_tokens(source, command=False, chord=False):
-    """Yield lists of tokens describing rests, skips or pitches.
+    r"""Yield lists of tokens describing rests, skips or pitches.
     
     source is a ly.document.Source instance following the state.
     
