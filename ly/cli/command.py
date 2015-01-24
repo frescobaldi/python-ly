@@ -188,7 +188,7 @@ class musicxml(_export_command):
     def run(self, opts, cursor, output):
         import ly.musicxml
         writer = ly.musicxml.writer()
-        writer.parse_tokens(ly.docinfo.DocInfo(cursor.document).tokens)
+        writer.parse_tree(ly.music.document(cursor.document))
         xml = writer.musicxml()
         if self.output:
             filename = self.output
