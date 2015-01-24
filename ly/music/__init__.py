@@ -37,8 +37,8 @@ iterate in musical time over the music tree, e.g. to convert music to
 another format.
 
 This package is not yet capable to construct documents entirely from scratch.
-This needs to be done. Until that time, the ly.dom module can be used to create
-documents from scratch.
+This needs to be developed. Until that time, the ly.dom module can be used
+instead.
 
 Some Item types can have a list of child items, but the tree structure is as
 linear as possible.
