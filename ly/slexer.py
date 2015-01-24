@@ -19,6 +19,7 @@
 
 """
 slexer -- Stateful Lexer
+========================
 
 parses text, searching for tokens represented by a regular expression.
 
@@ -50,68 +51,70 @@ A State can be frozen to be thawn later to resume parsing text starting in a
 particular context. A Fridge can be used to store and recover a state under a
 simple integer number.
 
-How to use slexer:
+How to use slexer::
 
-from slexer import Token, Parser, State
+    from slexer import Token, Parser, State
 
-# create token classes:
-class Word(Token):
-    rx = r'\w+'
+    # create token classes:
+    class Word(Token):
+        rx = r'\w+'
 
-class Number(Token):
-    rx = r'\d+'
+    class Number(Token):
+        rx = r'\d+'
 
-class String(Token):
-    pass
+    class String(Token):
+        pass
 
-class StringStart(String):
-    rx = '"'
-    def update_state(self, state):
-        state.enter(PString())
+    class StringStart(String):
+        rx = '"'
+        def update_state(self, state):
+            state.enter(PString())
 
-class StringEnd(String):
-    rx = '"'
-    def update_state(self, state):
-        state.leave()
+    class StringEnd(String):
+        rx = '"'
+        def update_state(self, state):
+            state.leave()
 
-# create parsers:
-class PTest(Parser):
-    '''Looks for numbers, words and the double quote.'''
-    items = (
-        Number,
-        Word,
-        StringStart,
-    )
+    # create parsers:
+    class PTest(Parser):
+        '''Looks for numbers, words and the double quote.'''
+        items = (
+            Number,
+            Word,
+            StringStart,
+        )
 
-class PString(Parser):
-    '''Returns String by default, quits at double quote.'''
-    default = String
-    items = (
-        StringEnd,
-    )
+    class PString(Parser):
+        '''Returns String by default, quits at double quote.'''
+        default = String
+        items = (
+            StringEnd,
+        )
 
-s = State(PTest)
-for t in s.tokens(
-    'een tekst met 7 woorden, '
-    'een "tekst met 2 aanhalingstekens" '
-    'en 2 of 3 nummers'):
-    print(t.__class__, t)
+    s = State(PTest)
+    for t in s.tokens(
+        'een tekst met 7 woorden, '
+        'een "tekst met 2 aanhalingstekens" '
+        'en 2 of 3 nummers'):
+        print(t.__class__, t)
 
-# results in:
-<class '__main__.Word'> een
-<class '__main__.Word'> tekst
-<class '__main__.Word'> met
-<class '__main__.Number'> 7
-<class '__main__.Word'> woorden
-<class '__main__.Word'> een
-<class '__main__.StringStart'> "
-<class '__main__.String'> tekst met 2 aanhalingstekens
-<class '__main__.StringEnd'> "
-<class '__main__.Word'> en
-<class '__main__.Number'> 2
-<class '__main__.Word'> of
-<class '__main__.Number'> 3
-<class '__main__.Word'> nummers
+
+Running the above code, the result is::
+
+    <class '__main__.Word'> een
+    <class '__main__.Word'> tekst
+    <class '__main__.Word'> met
+    <class '__main__.Number'> 7
+    <class '__main__.Word'> woorden
+    <class '__main__.Word'> een
+    <class '__main__.StringStart'> "
+    <class '__main__.String'> tekst met 2 aanhalingstekens
+    <class '__main__.StringEnd'> "
+    <class '__main__.Word'> en
+    <class '__main__.Number'> 2
+    <class '__main__.Word'> of
+    <class '__main__.Number'> 3
+    <class '__main__.Word'> nummers
 
 """
 
@@ -192,7 +195,7 @@ class State(object):
         possible: the default implementation of Token.update_state() calls
         Parser.update_state(), which does nothing by default).
         
-        E.g. in the Token subclass:
+        E.g. in the Token subclass::
         
             def update_state(self, state):
                 state.enter(SomeDifferentParser())
@@ -212,7 +215,8 @@ class State(object):
     def replace(self, parser):
         """Replace the current parser with a new one.
         
-        Somewhat equivalent to:
+        Somewhat equivalent to::
+        
             state.leave()
             state.enter(SomeDifferentParser)
         
@@ -224,14 +228,14 @@ class State(object):
     def depth(self):
         """Return the number of parsers currenly active (1 or more).
         
-        You can use this e.g. to keep parsing until some context ends:
+        You can use this e.g. to keep parsing until some context ends::
         
-        tokens = state.tokens(text) # iterator
-        depth = state.depth()
-        for token in tokens:
-            if state.depth() < depth:
-                break
-            # do something
+            tokens = state.tokens(text) # iterator
+            depth = state.depth()
+            for token in tokens:
+                if state.depth() < depth:
+                    break
+                # do something
         
         """
         return len(self.state)

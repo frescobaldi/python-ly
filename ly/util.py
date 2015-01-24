@@ -97,10 +97,11 @@ def mkid(*args):
     All strings are concatenated with the first character of every string
     uppercased, except for the first character, which is lowercased.
     
-    Examples:
-    mkid("Violin") ==> "violin"
-    mkid("soprano", "verse") ==> "sopranoVerse"
-    mkid("scoreOne", "choirII") ==> "scoreOneChoirII"
+    Examples::
+    
+        mkid("Violin") ==> "violin"
+        mkid("soprano", "verse") ==> "sopranoVerse"
+        mkid("scoreOne", "choirII") ==> "scoreOneChoirII"
     
     """
     result = []

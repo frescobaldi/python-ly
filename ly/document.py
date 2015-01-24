@@ -21,7 +21,7 @@
 DocumentBase and Document
 =========================
 
-Represents a lilypond source document (the text contents).
+Represents a LilyPond source document (the text contents).
 
 The Document implementation keeps the document in a (unicode) text string, 
 but you can inherit from the DocumentBase class to support other 
@@ -29,10 +29,12 @@ representations of the text content.
 
 Modifying is done inside a context (the with statement), e.g.:
 
-d = Document('some string')
-with d:
-    d[5:5] = 'different '
-d.plaintext()  --> 'some different string'
+.. code-block:: python
+
+    d = Document('some string')
+    with d:
+        d[5:5] = 'different '
+    d.plaintext()  --> 'some different string'
 
 Changes are applied when the context is exited, also the modified part of the
 document is re-tokenized. Changes may not overlap.
@@ -526,11 +528,13 @@ class Cursor(object):
     it remains the same. But when text is inserted at the end of a cursor, 
     the end position moves along with the new text. E.g.:
     
-    d = Document('hi there, folks!')
-    c = Cursor(d, 8, 8)
-    with d:
-        d[8:8] = 'new text'
-    c.start, c.end --> (8, 16)
+    .. code-block:: python
+    
+        d = Document('hi there, folks!')
+        c = Cursor(d, 8, 8)
+        with d:
+            d[8:8] = 'new text'
+        c.start, c.end --> (8, 16)
     
     Many tools in the ly module use this object to describe (part of) a
     document.

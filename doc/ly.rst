@@ -14,15 +14,39 @@ Subpackages
 
 .. toctree::
 
-    ly.cli
-    ly.data
     ly.lex
     ly.music
     ly.musicxml
     ly.pitch
+    ly.data
+    ly.cli
 
 Submodules
 ----------
+
+ly.slexer module
+----------------
+
+.. automodule:: ly.slexer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ly.document module
+------------------
+
+.. automodule:: ly.document
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ly.docinfo module
+-----------------
+
+.. automodule:: ly.docinfo
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 ly.barcheck module
 ------------------
@@ -48,24 +72,11 @@ ly.cursortools module
     :undoc-members:
     :show-inheritance:
 
-ly.docinfo module
------------------
-
-.. automodule:: ly.docinfo
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ly.document module
-------------------
-
-.. automodule:: ly.document
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ly.dom module
 -------------
+
+This module is deprecated. When `ly.music` is able to generate LilyPond code
+from scratch, this module will be removed.
 
 .. automodule:: ly.dom
     :members:
@@ -109,8 +120,7 @@ ly.pkginfo module
 
 .. automodule:: ly.pkginfo
     :members:
-    :undoc-members:
-    :show-inheritance:
+    :member-order: bysource
 
 ly.reformat module
 ------------------
@@ -124,14 +134,6 @@ ly.rhythm module
 ----------------
 
 .. automodule:: ly.rhythm
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ly.slexer module
-----------------
-
-.. automodule:: ly.slexer
     :members:
     :undoc-members:
     :show-inheritance:

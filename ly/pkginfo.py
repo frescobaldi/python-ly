@@ -18,20 +18,38 @@
 # See http://www.gnu.org/licenses/ for more information.
 
 """
-Information about the LY package.
+Meta-information about the LY package.
+
+This information is used by the install script, and also for the
+command ``ly --version``.
 
 """
 
 from __future__ import unicode_literals
 
+#: name of the package
 name = "python-ly"
+
+#: the current version
 version = "0.7"
+
+#: short description
 description = "Tool and library for manipulating LilyPond files"
+
+#: long description
 long_description = \
     "The python-ly package provides a Python library and a commandline tool " \
     "that can be used to parse and manipulate LilyPond source files."
+
+#: maintainer name
 maintainer = "Wilbert Berendsen"
+
+#: maintainer email
 maintainer_email = "info@frescobaldi.org"
+
+#: homepage
 url = "https://github.com/wbsoft/python-ly"
+
+#: license
 license = "GPL"
 
