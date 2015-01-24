@@ -862,7 +862,7 @@ class Partial(Item):
 
 
 class Clef(Item):
-    """A \\clef item."""
+    r"""A \\clef item."""
     _specifier = None
     
     def specifier(self):
@@ -872,7 +872,7 @@ class Clef(Item):
 
         
 class KeySignature(Item):
-    """A \\key pitch \\mode command."""
+    r"""A \\key pitch \\mode command."""
     def pitch(self):
         """The ly.pitch.Pitch that denotes the pitch."""
         for i in self.find(Note):
@@ -885,11 +885,11 @@ class KeySignature(Item):
 
 
 class PipeSymbol(Item):
-    """A |."""
+    """A \\|."""
 
 
 class VoiceSeparator(Item):
-    """A \\\\."""
+    r"""A \\\\."""
 
 
 class Postfix(Item):
@@ -906,7 +906,7 @@ class Slur(Item):
 
 
 class PhrasingSlur(Item):
-    """A \\( or \\)."""
+    r"""A \\( or \\)."""
     event = None
 
 
