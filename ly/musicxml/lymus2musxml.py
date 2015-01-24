@@ -34,7 +34,6 @@ to parse the source. It should prove more stable and easier to implement.
 from __future__ import unicode_literals
 from __future__ import print_function
 
-import documentinfo
 import ly.music
 
 from . import create_musicxml
@@ -83,8 +82,7 @@ class ParseSource():
         self.with_contxt = None
         self.schm_assignm = None
 
-    def parse_tree(self, doc):
-        mustree = documentinfo.music(doc)
+    def parse_tree(self, mustree):
         # print(mustree.dump())
         header_nodes = self.iter_header(mustree)
         if header_nodes:
