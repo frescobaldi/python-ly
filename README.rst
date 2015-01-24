@@ -37,7 +37,7 @@ Here is an example to re-indent and transpose a LilyPond file::
 
     ly "indent; transpose c d" -o output.ly file.ly
 
-To test the `ly` module without installing, use::
+To test the `ly` module from the current directory without installing, use::
 
     python -m ly <args...>
 
