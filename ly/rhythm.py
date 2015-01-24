@@ -52,7 +52,8 @@ def music_tokens(source, command=False, chord=False):
     source is a ly.document.Source instance following the state.
     
     The following keyword arguments can be used:
-    - command: whether to allow pitches in \relative, \transpose, etc.
+    
+    - command: whether to allow pitches in \\relative, \\transpose, etc.
     - chord: whether to allow pitches inside chords.
     
     """

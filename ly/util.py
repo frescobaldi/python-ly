@@ -64,6 +64,13 @@ _roman_numerals = (("M", 1000), ("CM", 900), ("D", 500), ("CD", 400),
 ("IV", 4), ("I", 1))
 
 def int2roman(n):
+    """Convert an integer value to a roman number string.
+    
+    E.g. 1 -> "I", 12 -> "XII", 2015 -> "MMXV"
+    
+    n has to be > 1.
+    
+    """
     if n < 1:
         raise ValueError('Roman numerals must be positive integers, got %s' % n)
     roman = []
