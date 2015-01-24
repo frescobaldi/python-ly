@@ -170,7 +170,7 @@ def rhythm_undot(cursor):
                 del d[tokens[0].pos:tokens[0].end]
 
 def rhythm_remove_scaling(cursor):
-    """Remove the scaling (``*3``, ``*1/3``) from all durations."""
+    """Remove the scaling (like ``*3``, ``*1/3``) from all durations."""
     source = ly.document.Source(cursor, True, tokens_with_position=True)
     with cursor.document as d:
         for tokens in duration_tokens(source, ly.lex.lilypond.Scaling):
@@ -178,7 +178,7 @@ def rhythm_remove_scaling(cursor):
                 del d[token.pos:token.end]
             
 def rhythm_remove_fraction_scaling(cursor):
-    """Remove the scaling containing fractions (``*1/3``) from all durations."""
+    """Remove the scaling containing fractions (like ``*1/3``) from all durations."""
     source = ly.document.Source(cursor, True, tokens_with_position=True)
     with cursor.document as d:
         for tokens in duration_tokens(source, ly.lex.lilypond.Scaling):
