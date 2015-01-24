@@ -68,5 +68,5 @@ Documentation
 
 The documentation is built using Sphinx and located in the doc directory.
 
-It can be read online at http://python-ly.readthedocs.org/
+It can be read online at http://python-ly.readthedocs.org/.
 
