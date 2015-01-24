@@ -35,34 +35,33 @@ The _token.py module contains base Token types and Token mixin classes.
 The State, Parser, FallthroughParser and Fridge classes from slexer are all
 slightly extended here,
 
-Usage:
+Usage::
 
->>> import ly.lex
->>> txt = r"\relative c' { c d e f-^ g }"
->>> s = ly.lex.state("lilypond")
->>> for t in s.tokens(txt):
-...     print(t, t.__class__.__name__)
-
-\relative Command
-  Space
-c Name
-' Unparsed
-  Space
-{ SequentialStart
-  Space
-c Note
-  Space
-d Note
-  Space
-e Note
-  Space
-f Note
-- Direction
-^ ScriptAbbreviation
-  Space
-g Note
-  Space
-} SequentialEnd
+    >>> import ly.lex
+    >>> txt = r"\relative c' { c d e f-^ g }"
+    >>> s = ly.lex.state("lilypond")
+    >>> for t in s.tokens(txt):
+    ...     print(t, t.__class__.__name__)
+    \relative Command
+      Space
+    c Name
+    ' Unparsed
+      Space
+    { SequentialStart
+      Space
+    c Note
+      Space
+    d Note
+      Space
+    e Note
+      Space
+    f Note
+    - Direction
+    ^ ScriptAbbreviation
+      Space
+    g Note
+      Space
+    } SequentialEnd
 
 A State() is used to parse text. The text is given to the tokens() method, that
 returns an iterator iterating over Token instances as they are found. Each token

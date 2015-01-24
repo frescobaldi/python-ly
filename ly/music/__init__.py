@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 # See http://www.gnu.org/licenses/ for more information.
 
-"""
+r"""
 An api to read music from the tokens of a ly.document.Document into a tree
 structure.
 
@@ -36,8 +36,9 @@ Using the Music.events() method and the events module, it is possible to
 iterate in musical time over the music tree, e.g. to convert music to
 another format.
 
-This package is not intended to construct documents entirely from scratch.
-(This can be done using the ly.dom module.)
+This package is not yet capable to construct documents entirely from scratch.
+This needs to be done. Until that time, the ly.dom module can be used to create
+documents from scratch.
 
 Some Item types can have a list of child items, but the tree structure is as
 linear as possible.
@@ -45,57 +46,57 @@ linear as possible.
 A convenience function is available to create a ly.music.items.Document
 instance for the specified ly.document.Document.
 
-Here is an example:
+Here is an example::
 
->>> import ly.document
->>> import ly.music
->>> d=ly.document.Document(r'''
-\version "2.18.0"
+    >>> import ly.document
+    >>> import ly.music
+    >>> d=ly.document.Document(r'''
+    \version "2.18.0"
 
-music = \relative {
-  \time 4/4
-  \key d \minor
-  d4 e f g
-  a g f e
-  d2
-}
+    music = \relative {
+      \time 4/4
+      \key d \minor
+      d4 e f g
+      a g f e
+      d2
+    }
 
-\score {
-  \new Staff <<
-    \music
-  >>
-}
-''')
->>> m=ly.music.document(d)
->>> print m.dump()
-<Document>
-  <Version u'\\version'>
-    <String u'"'>
-  <Assignment u'music'>
-    <Relative u'\\relative'>
-      <MusicList u'{'>
-        <TimeSignature u'\\time'>
-        <KeySignature u'\\key'>
-          <Note u'd'>
-          <Command u'\\minor'>
-        <Note u'd'>
-        <Note u'e'>
-        <Note u'f'>
-        <Note u'g'>
-        <Note u'a'>
-        <Note u'g'>
-        <Note u'f'>
-        <Note u'e'>
-        <Note u'd'>
-  <Score u'\\score'>
-    <Context u'\\new'>
-      <MusicList u'<<'>
-        <UserCommand u'\\music'>
->>> m[2][0][0]
-<MusicList u'<<'>
->>> m[2][0][0].length()
-Fraction(5, 2)
->>>
+    \score {
+      \new Staff <<
+        \music
+      >>
+    }
+    ''')
+    >>> m=ly.music.document(d)
+    >>> print m.dump()
+    <Document>
+      <Version u'\\version'>
+        <String u'"'>
+      <Assignment u'music'>
+        <Relative u'\\relative'>
+          <MusicList u'{'>
+            <TimeSignature u'\\time'>
+            <KeySignature u'\\key'>
+              <Note u'd'>
+              <Command u'\\minor'>
+            <Note u'd'>
+            <Note u'e'>
+            <Note u'f'>
+            <Note u'g'>
+            <Note u'a'>
+            <Note u'g'>
+            <Note u'f'>
+            <Note u'e'>
+            <Note u'd'>
+      <Score u'\\score'>
+        <Context u'\\new'>
+          <MusicList u'<<'>
+            <UserCommand u'\\music'>
+    >>> m[2][0][0]
+    <MusicList u'<<'>
+    >>> m[2][0][0].length()
+    Fraction(5, 2)
+    >>>
 
 """
 

@@ -31,16 +31,16 @@ A Node has children with list-like access methods and keeps also a reference to
 its parent. A Node can have one parent; appending a Node to another Node causes
 it to be removed from its parent node (if any).
 
-To iterate over the children of a Node:
+To iterate over the children of a Node::
 
     for n in node:
         do_something(n)
 
-To get the list of children of a Node:
+To get the list of children of a Node::
 
     children = list(node)
 
-Of course you can get the children directly using:
+Of course you can get the children directly using::
 
     child = node[3]
 
