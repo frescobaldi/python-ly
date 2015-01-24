@@ -63,4 +63,10 @@ of some modules:
 * ``ly.data``: layout objects, properties, interfaces, font glyphs etc extracted
   from LilyPond
 
+Documentation
+-------------
+
+The documentation is built using Sphinx and located in the doc directory.
+
+It can be read online at http://python-ly.readthedocs.org/
 
