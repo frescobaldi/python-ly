@@ -274,7 +274,7 @@ class Token(str):
     The subclass determines the type.
     
     You should put the regular expression string in the rx class attribute.
-    In the rx string, you may not use named groups starting with "g_".
+    In the rx string, you may not use named groups starting with "g\\_".
     
     To add token types to a Parser class, list the token class in the items
     attribute of the Parser class.
