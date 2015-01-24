@@ -1,6 +1,11 @@
 Changes for python-ly
 =====================
 
+2015-01-24: python-ly 0.8
+- fix (allbeit experimental) musicxml export
+- basic api documentation included
+
+
 2015-01-23: python-ly 0.7
 - first release as an officially separate project from Frescobaldi
 - add INSTALL.md to source distribution
