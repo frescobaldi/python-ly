@@ -560,13 +560,21 @@ class MusicXML(object):
 
     def write(self, file, encoding='UTF-8', doctype=True):
         """ write XML to a file (file obj or filename) """
-        if doctype:
-            with open(file,'wb') as f:
+        def write(f):
+            if doctype:
                 f.write((xml_decl_txt + "\n").format(encoding=encoding).encode(encoding))
                 f.write((doctype_txt + "\n").encode(encoding))
                 self.tree.write(f, encoding=encoding, xml_declaration=False)
+            else:
+                self.tree.write(f, encoding=encoding, xml_declaration=True, method="xml")
+        try:
+            file.write
+        except AttributeError:
+            # it is not a file object
+            with open(file, 'wb') as f:
+                write(f)
         else:
-            self.tree.write(file, encoding=encoding, xml_declaration=True, method="xml")
+            write(file) # do not close if it already was a file object
 
 
 xml_decl_txt = """<?xml version="1.0" encoding="{encoding}"?>"""
