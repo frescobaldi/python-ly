@@ -28,6 +28,7 @@ Contents:
 .. toctree::
    :maxdepth: 4
 
+   command
    ly
 
 
