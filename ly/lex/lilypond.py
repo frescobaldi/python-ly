@@ -1032,7 +1032,7 @@ class ExpectMusicList(FallthroughParser, ParseLilyPond):
         
 
 class ParseScore(ParseLilyPond):
-    """Parses the expression after \score {, leaving at } """
+    r"""Parses the expression after ``\score {``, leaving at ``}`` """
     items = (
         CloseBracket,
         Header, Layout, Midi, With,
@@ -1044,7 +1044,7 @@ class ExpectScore(ExpectOpenBracket):
             
 
 class ParseBook(ParseLilyPond):
-    """Parses the expression after \book {, leaving at } """
+    r"""Parses the expression after ``\book {``, leaving at ``}`` """
     items = (
         CloseBracket,
         MarkupStart, MarkupLines, MarkupList,
@@ -1060,7 +1060,7 @@ class ExpectBook(ExpectOpenBracket):
 
 
 class ParseBookPart(ParseLilyPond):
-    """Parses the expression after \bookpart {, leaving at } """
+    r"""Parses the expression after ``\bookpart {``, leaving at ``}`` """
     items = (
         CloseBracket,
         MarkupStart, MarkupLines, MarkupList,
@@ -1074,7 +1074,7 @@ class ExpectBookPart(ExpectOpenBracket):
 
 
 class ParsePaper(ParseLilyPond):
-    """Parses the expression after \paper {, leaving at } """
+    r"""Parses the expression after ``\paper {``, leaving at ``}`` """
     items = base_items + (
         CloseBracket,
         MarkupStart, MarkupLines, MarkupList,
@@ -1092,7 +1092,7 @@ class ExpectPaper(ExpectOpenBracket):
 
 
 class ParseHeader(ParseLilyPond):
-    """Parses the expression after \header {, leaving at } """
+    r"""Parses the expression after ``\header {``, leaving at ``}`` """
     items = (
         CloseBracket,
         MarkupStart, MarkupLines, MarkupList,
@@ -1108,7 +1108,7 @@ class ExpectHeader(ExpectOpenBracket):
         
 
 class ParseLayout(ParseLilyPond):
-    """Parses the expression after \layout {, leaving at } """
+    r"""Parses the expression after ``\layout {``, leaving at ``}`` """
     items = base_items + (
         CloseBracket,
         LayoutContext,
@@ -1128,7 +1128,7 @@ class ExpectLayout(ExpectOpenBracket):
         
 
 class ParseMidi(ParseLilyPond):
-    """Parses the expression after \midi {, leaving at } """
+    r"""Parses the expression after ``\midi {``, leaving at ``}`` """
     items = base_items + (
         CloseBracket,
         LayoutContext,
@@ -1148,7 +1148,7 @@ class ExpectMidi(ExpectOpenBracket):
 
 
 class ParseWith(ParseLilyPond):
-    """Parses the expression after \with {, leaving at } """
+    r"""Parses the expression after ``\with {``, leaving at ``}`` """
     items = (
         CloseBracket,
         ContextName,
@@ -1164,7 +1164,7 @@ class ExpectWith(ExpectOpenBracket):
         
 
 class ParseContext(ParseLilyPond):
-    """Parses the expression after (\layout {) \context {, leaving at } """
+    r"""Parses the expression after (``\layout {``) ``\context {``, leaving at ``}`` """
     items = (
         CloseBracket,
         BackSlashedContextName,
@@ -1186,7 +1186,7 @@ class ParseMusic(ParseLilyPond):
     
 
 class ParseChord(ParseMusic):
-    """LilyPond inside chords < >"""
+    """LilyPond inside chords ``< >``"""
     items = music_chord_items
 
 
@@ -1449,7 +1449,7 @@ class ParseInputMode(ParseLilyPond):
     
     
 class ParseLyricMode(ParseInputMode):
-    """Parser for \\lyrics, \\lyricmode, \\addlyrics, etc."""
+    """Parser for ``\\lyrics``, ``\\lyricmode``, ``\\addlyrics``, etc."""
     items = base_items + (
         CloseBracket,
         CloseSimultaneous,
