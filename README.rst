@@ -67,7 +67,7 @@ Documentation
 -------------
 
 The documentation is built using Sphinx and located in the doc directory.
-If you have Sphinx installed, you can build nicely formatted HTML documentstion
+If you have Sphinx installed, you can build nicely formatted HTML documentation
 by typing ``make html`` in the doc directory.
 
 You can also read the docs online at http://python-ly.readthedocs.org/.
