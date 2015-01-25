@@ -78,7 +78,7 @@ class CreateMusicXML():
             group_symbol = etree.SubElement(partgroup, "group-symbol")
             group_symbol.text = symbol
 
-    def create_part(self, name, abbr, midi):
+    def create_part(self, name=False, abbr=False, midi=False):
         """Create a new part """
         strnr = str(self.part_count)
         part = etree.SubElement(self.partlist, "score-part", id="P"+strnr)
@@ -110,28 +110,29 @@ class CreateMusicXML():
     # High-level node creation
     ##
 
-    def new_note(self, grace, pitch, base_scaling, voice, durtype, divs, dot, chord):
+    def new_note(self, step, octave, durtype, divdur, divs, alter=0,
+                 acc_token=0, voice=1, dot=0, chord=0, grace=(0,0)):
         """Create all nodes needed for a note. """
         self.create_note()
         if grace[0]:
             self.add_grace(grace[1])
         if chord:
             self.add_chord()
-        self.add_pitch(pitch[0], pitch[1], pitch[2])
+        self.add_pitch(step, alter, octave)
         if not grace[0]:
-            self.add_div_duration(self.count_duration(base_scaling, divs))
-        self.add_voice(voice)
+            self.add_div_duration(self.count_duration(divdur, divs))
         self.add_duration_type(durtype)
+        self.add_voice(voice)
         if dot:
             for i in range(dot):
                 self.add_dot()
-        if pitch[1] or pitch[3]:
-            if pitch[3] == '!': # cautionary
-                self.add_accidental(pitch[1], caut=True)
-            elif pitch[3] == '?': # parentheses
-                self.add_accidental(pitch[1], parenth=True)
+        if alter or acc_token:
+            if acc_token == '!': # cautionary
+                self.add_accidental(alter, caut=True)
+            elif acc_token == '?': # parentheses
+                self.add_accidental(alter, parenth=True)
             else:
-                self.add_accidental(pitch[1])
+                self.add_accidental(alter)
 
     def tuplet_note(self, fraction, base_scaling, ttype, divs):
         """Convert current note to tuplet """
