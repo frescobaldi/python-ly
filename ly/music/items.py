@@ -623,7 +623,7 @@ class Grace(Music):
 
 
 class AfterGrace(Music):
-    """The \afterGrace function with its two arguments.
+    """The \\afterGrace function with its two arguments.
     
     Only the duration of the first is counted.
     

@@ -185,7 +185,7 @@ Here is an example to re-indent and transpose a LilyPond file::
 
   ly "indent; transpose c d" -o output.ly file.ly
 
-Example using the '*' in the output file name::
+Examples using the '*' in the output file name::
 
   ly "transpose c d" *.ly -o '*-transposed.ly'
   ly highlight *.ly -o 'html/?.html'

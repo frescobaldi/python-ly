@@ -334,7 +334,7 @@ class ParseSource():
             self.mediator.set_by_property(cont_set.property(), val, group=True)
 
     def Command(self, command):
-        """ \bar, \rest etc """
+        """ \\bar, \\rest etc """
         if command.token == '\\rest':
             self.mediator.note2rest()
         elif command.token == '\\numericTimeSignature':

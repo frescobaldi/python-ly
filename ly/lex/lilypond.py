@@ -49,12 +49,12 @@ re_identifier_end = r"(?!-?[^\W\d])"
 
 
 class Identifier(_token.Token):
-    """A variable name, like "some-variable"."""
+    """A variable name, like ``some-variable``."""
     rx = r"(?<![^\W\d])" + re_identifier + re_identifier_end
 
 
 class IdentifierRef(_token.Token):
-    """A reference to an identifier, e.g. "\some-variable"."""
+    r"""A reference to an identifier, e.g. ``\\some-variable``."""
     rx = r"\\" + re_identifier + re_identifier_end
 
 
@@ -139,7 +139,7 @@ class StringQuoteEscape(_token.Character):
 
 
 class MusicItem(_token.Token):
-    """A note, rest, spacer, \skip or q."""
+    r"""A note, rest, spacer, ``\\skip`` or ``q``."""
 
     
 class Skip(MusicItem):
@@ -1275,7 +1275,7 @@ class ParseOverride(ParseLilyPond):
 
 
 class ParseRevert(FallthroughParser):
-    # parse the arguments of \revert
+    r"""parse the arguments of ``\revert``"""
     # allow both the old scheme syntax but also the dotted 2.18+ syntax
     # allow either a dot between the GrobName and the property path or not
     # correctly fall through when one property path has been parsed
@@ -1480,7 +1480,7 @@ class ExpectLyricMode(ExpectMusicList):
 
 
 class ParseChordMode(ParseInputMode, ParseMusic):
-    """Parser for \\chords and \\chordmode."""
+    """Parser for ``\\chords`` and ``\\chordmode``."""
     items = (
         OpenBracket,
         OpenSimultaneous,
@@ -1499,7 +1499,7 @@ class ExpectChordMode(ExpectMusicList):
         
 
 class ParseNoteMode(ParseMusic):
-    """Parser for \\notes and \\notemode. Same as Music itself."""
+    """Parser for ``\\notes`` and ``\\notemode``. Same as Music itself."""
 
 
 class ExpectNoteMode(ExpectMusicList):
@@ -1507,7 +1507,7 @@ class ExpectNoteMode(ExpectMusicList):
         
 
 class ParseDrumMode(ParseInputMode, ParseMusic):
-    """Parser for \\drums and \\drummode."""
+    """Parser for ``\\drums`` and ``\\drummode``."""
     # TODO: implement items (see ParseChordMode)
 
 
@@ -1516,7 +1516,7 @@ class ExpectDrumMode(ExpectMusicList):
         
 
 class ParseFigureMode(ParseInputMode, ParseMusic):
-    """Parser for \\figures and \\figuremode."""
+    """Parser for ``\\figures`` and ``\\figuremode``."""
     items = base_items + (
         CloseBracket,
         CloseSimultaneous,
@@ -1530,7 +1530,7 @@ class ParseFigureMode(ParseInputMode, ParseMusic):
 
 
 class ParseFigure(Parser):
-    """Parse inside < > in figure mode."""
+    """Parse inside ``< >`` in figure mode."""
     items = base_items + (
         FigureEnd,
         FigureBracket,
