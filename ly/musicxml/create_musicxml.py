@@ -124,7 +124,7 @@ class CreateMusicXML():
     # High-level node creation
     ##
 
-    def new_note(self, step, octave, durtype, divdur, divs, alter=0,
+    def new_note(self, step, octave, durtype, divdur, alter=0,
                  acc_token=0, voice=1, dot=0, chord=0, grace=(0,0)):
         """Create all nodes needed for a note. """
         self.create_note()
@@ -134,7 +134,7 @@ class CreateMusicXML():
             self.add_chord()
         self.add_pitch(step, alter, octave)
         if not grace[0]:
-            self.add_div_duration(self.count_duration(divdur, divs))
+            self.add_div_duration(divdur)
         self.add_duration_type(durtype)
         self.add_voice(voice)
         if dot:
@@ -237,17 +237,6 @@ class CreateMusicXML():
         """
         new_node = etree.SubElement(parentnode, nodename)
         new_node.text = str(txt)
-
-    ##
-    # Help functions
-    ##
-
-    def count_duration(self, base_scaling, divs):
-        base = base_scaling[0]
-        scaling = base_scaling[1]
-        duration = divs*4*base
-        duration = duration * scaling
-        return int(duration)
 
 
     ##

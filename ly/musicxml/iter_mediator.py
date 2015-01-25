@@ -134,9 +134,10 @@ class iterateMediatorScore():
 
     def new_xml_note(self, obj):
         """Create note specific xml-nodes."""
-        self.musxml.new_note(obj.base_note, obj.octave, obj.type, obj.duration,
-            self.divisions, obj.alter, obj.accidental_token, obj.voice,
-            obj.dot, obj.chord, obj.grace)
+        divdur = self.count_duration(obj.duration, self.divisions)
+        self.musxml.new_note(obj.base_note, obj.octave, obj.type, divdur,
+            obj.alter, obj.accidental_token, obj.voice, obj.dot, obj.chord,
+            obj.grace)
         for t in obj.tie:
             self.musxml.tie_note(t)
         for s in obj.slur:
@@ -167,3 +168,10 @@ class iterateMediatorScore():
         else:
             self.musxml.new_rest(obj.duration, obj.type, self.divisions, obj.pos,
             obj.dot, obj.voice)
+
+    def count_duration(self, base_scaling, divs):
+        base = base_scaling[0]
+        scaling = base_scaling[1]
+        duration = divs*4*base
+        duration = duration * scaling
+        return int(duration)
