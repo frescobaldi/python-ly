@@ -19,6 +19,10 @@
 
 """
 MusicXML functionality.
+
+This subpackage is created to convert LilyPond text to MusicXML with the help
+of the tree structure created by ly.music. But it is constructed in such a way
+that you can use some of the submodules for generic MusicXML creation and manipulation.
 """
 
 from __future__ import unicode_literals
@@ -39,15 +43,8 @@ def writer():
     # xml.tree is the ElementTree xml tree.
 
     """
-    #from . import source2musxml
-    #return source2musxml.parse_source()
-
-    """
-    new parser using ly.music
-    Under development!
-
-    """
-
+    import sys
+    print(sys.path)
     from . import lymus2musxml
     return lymus2musxml.ParseSource()
 

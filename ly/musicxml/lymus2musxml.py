@@ -18,17 +18,12 @@
 # See http://www.gnu.org/licenses/ for more information.
 
 """
-Export to Music XML.
+Using the tree structure from ly.music to initiate the conversion to MusicXML.
 
-Using ly.music document tree to convert the source to XML.
-
-Uses functions similar to items.Document.iter_music() to iter through
+Uses functions similar to ly.music.items.Document.iter_music() to iter through
 the node tree. But information about where a node branch ends
-is also added.
-
-This approach substitues the previous method of using ly.lex directly
-to parse the source. It should prove more stable and easier to implement.
-
+is also added. During the iteration the information needed for the conversion
+is captured.
 """
 
 from __future__ import unicode_literals

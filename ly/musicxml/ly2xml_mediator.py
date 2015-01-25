@@ -19,7 +19,7 @@
 
 """
 The information of the parsed source is organised into an object
-structure suitable for the transformation into a XML tree.
+structure with help of the classes in ly.musicxml.xml_objs.
 """
 
 from __future__ import unicode_literals
@@ -34,7 +34,8 @@ from . import xml_objs
 
 
 class Mediator():
-    """ Help class between the ly source parser and the XML creator """
+    """Help class that acts as mediator between the ly source parser
+    and the XML creating modules."""
 
     def __init__(self):
         """ create global lists """
