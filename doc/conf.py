@@ -232,7 +232,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', ly.pkginfo.name, u'python-ly Documentation',
+    ('command', 'ly', u'Manipulate LilyPond source files',
      [ly.pkginfo.maintainer], 1)
 ]
 
