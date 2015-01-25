@@ -35,7 +35,9 @@ def writer():
     import ly.musicxml
 
     e = ly.musicxml.writer()
+
     e.parse_text(lilypond_text) # or: e.parse_tokens(tokens)
+
     xml = e.musicxml()
 
     xml.write(filename)         # or: xml.tostring()

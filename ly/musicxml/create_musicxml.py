@@ -23,10 +23,15 @@ Uses xml.etree to create a Music XML document.
 Example:
 
 musxml = create_musicxml.CreateMusicXML()
+
 musxml.create_part()
+
 musxml.create_measure()
+
 musxml.new_note('C', 4, 'whole', (1,1), 1)
+
 xml = musxml.musicxml()
+
 xml.write(filename)
 """
 
