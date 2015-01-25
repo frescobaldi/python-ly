@@ -20,7 +20,7 @@
 """
 Uses xml.etree to create a Music XML document.
 
-Example:
+Example::
 
     musxml = create_musicxml.CreateMusicXML()
     musxml.create_part()
@@ -28,6 +28,7 @@ Example:
     musxml.new_note('C', 4, 'whole', 4)
     xml = musxml.musicxml()
     xml.write(filename)
+
 """
 
 from __future__ import unicode_literals

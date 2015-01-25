@@ -30,19 +30,14 @@ from __future__ import unicode_literals
 def writer():
     """Convert LilyPond text to MusicXML
 
-    Example:
+    Example::
 
-    import ly.musicxml
-
-    e = ly.musicxml.writer()
-
-    e.parse_text(lilypond_text) # or: e.parse_tokens(tokens)
-
-    xml = e.musicxml()
-
-    xml.write(filename)         # or: xml.tostring()
-
-    # xml.tree is the ElementTree xml tree.
+        import ly.musicxml
+        e = ly.musicxml.writer()
+        e.parse_text(lilypond_text) # or: e.parse_tokens(tokens)
+        xml = e.musicxml()
+        xml.write(filename)         # or: xml.tostring()
+        # xml.tree is the ElementTree xml tree.
 
     """
 
