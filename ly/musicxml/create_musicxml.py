@@ -19,6 +19,15 @@
 
 """
 Uses xml.etree to create a Music XML document.
+
+Example:
+
+musxml = create_musicxml.CreateMusicXML()
+musxml.create_part()
+musxml.create_measure()
+musxml.new_note('C', 4, 'whole', (1,1), 1)
+xml = musxml.musicxml()
+xml.write(filename)
 """
 
 from __future__ import unicode_literals
@@ -34,7 +43,7 @@ import ly.pkginfo
 
 
 class CreateMusicXML():
-    """ Creates the XML nodes according to the Music XML standard """
+    """ Creates the XML nodes according to the Music XML standard."""
 
     def __init__(self):
         """Creates the basic structure of the XML without any music."""
