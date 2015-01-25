@@ -43,8 +43,7 @@ def writer():
     # xml.tree is the ElementTree xml tree.
 
     """
-    import sys
-    print(sys.path)
+
     from . import lymus2musxml
     return lymus2musxml.ParseSource()
 
