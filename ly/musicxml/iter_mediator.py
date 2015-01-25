@@ -18,7 +18,8 @@
 # See http://www.gnu.org/licenses/ for more information.
 
 """
-The xml-file is built from the mediator objects
+A ly.musicxml.xml_objs.Score object is iterated and the Music XML node tree
+is constructed.
 
 """
 
@@ -31,7 +32,8 @@ from . import xml_objs
 class iterateMediatorScore():
 
     def __init__(self, score, musxml, div):
-        """ The mediator score is looped through and outputed to the xml-file. """
+        """Create the basic score information, and initiate the
+        iteration of the parts."""
         # score.debug_score([])
         self.musxml = musxml
         self.divisions = div
