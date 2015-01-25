@@ -115,10 +115,12 @@ class CreateMusicXML():
         self.part_count += 1
         self.bar_nr = 1
 
-    def create_measure(self):
+    def create_measure(self, **bar_attrs):
         """Create new measure """
         self.current_bar = etree.SubElement(self.current_part, "measure", number=str(self.bar_nr))
         self.bar_nr +=1
+        if bar_attrs:
+            self.new_bar_attr(**bar_attrs)
 
     ##
     # High-level node creation
@@ -207,7 +209,7 @@ class CreateMusicXML():
         if ornament == "wavy-line":
             self.add_wavyline(args['type'])
 
-    def new_bar_attr(self, clef, mustime, key, mode, divs):
+    def new_bar_attr(self, clef=0, mustime=0, key=None, mode=0, divs=0):
         """Create all bar attributes set. """
         self.create_bar_attr()
         if divs:
