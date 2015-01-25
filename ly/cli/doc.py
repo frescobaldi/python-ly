@@ -38,7 +38,7 @@ Options
   --output-encoding ENC  output encoding (default to input encoding)
   -d <variable=value>    set a variable
 
-The special option "--" considers the remaining arguments to be file names
+The special option ``--`` considers the remaining arguments to be file names.
 
 
 Arguments
@@ -53,7 +53,7 @@ output file, you can use two special characters in the output filename: a
 '*' will be replaced with the full path name of the current input file 
 (without extension), and a '?' will be replaced with the input filename 
 (without path and extension). If you don't want to have '*' or '?' replaced 
-in the output filename, you can set -d replace-pattern=false.
+in the output filename, you can set ``-d replace-pattern=false``.
 
 If you don't specify input or output filenames, standard input is read and
 standard output is written to.
@@ -142,7 +142,7 @@ If there is a default value, it is written between brackets:
          encoding to write (defaults to ``encoding``, also
          set by the ``--output-encoding`` argument)
 
-  ``in-place`` [false]
+  ``in-place`` [``false``]
          whether to overwrite input files (same as ``-i``)
 
   ``backup-suffix`` [~]
@@ -164,11 +164,11 @@ If there is a default value, it is written between brackets:
          in the ``<link rel="stylesheet">`` tag.
 
   ``inline-style`` [``false``]
-         whether to use inline style attributes for syntaxhighlighted HTML.
+         whether to use inline style attributes for syntax-highlighted HTML.
          By default a css shylesheet is embedded.
 
   ``number-lines`` [``false``]
-         whether to add line numbers when creating syntaxhighlighted HTML.
+         whether to add line numbers when creating syntax-highlighted HTML.
 
 These variables influence the output of information commands:
 
