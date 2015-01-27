@@ -175,7 +175,7 @@ class abs2rel(_edit_command):
     """convert absolute music to relative"""
     def run(self, opts, cursor, output):
         import ly.pitch.abs2rel
-        ly.pitch.rel2abs.abs2rel(cursor)
+        ly.pitch.abs2rel.abs2rel(cursor)
 
 
 class _export_command(_command):
