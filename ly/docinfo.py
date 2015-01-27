@@ -350,7 +350,7 @@ class DocInfo(object):
         DocInfo instance.
         
         """
-        return sum(map(lambda c: issubclass(c, cls), self.classes), False)
+        return sum([issubclass(c, cls) for c in self.classes], False)
 
     def counted_tokens(self):
         """Return a dictionary mapping classes to the number of instances of that class."""
