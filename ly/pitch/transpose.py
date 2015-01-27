@@ -176,7 +176,8 @@ class ModalTransposer(object):
         
         'Cb' returns 0, 'C' returns 7, 'B#' returns 14.
         """
-        circleOfFifths = ['Cb','Gb','Db','Ab','Eb','Bb','F','C','G','D','A','E','B','F#','C#']
+        circleOfFifths = ['Cb', 'Gb', 'Db', 'Ab', 'Eb', 'Bb', 'F',
+                          'C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#']
         return circleOfFifths.index(text.capitalize())
                   
     def transpose(self, pitch):

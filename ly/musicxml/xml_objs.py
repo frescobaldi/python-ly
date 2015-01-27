@@ -99,8 +99,8 @@ class ScorePart():
         self.staves = staves
 
     def set_first_bar(self, divisions):
-        initime = [4,4]
-        iniclef = ('G',2,0)
+        initime = [4, 4]
+        iniclef = ('G', 2, 0)
 
         def check_time(bar):
             for obj in bar.obj_list:
@@ -212,7 +212,7 @@ class Bar():
                     s *= obj.duration[1]
             elif isinstance(obj, BarBackup):
                 break
-        self.add(BarBackup((b,s)))
+        self.add(BarBackup((b, s)))
 
     def is_skip(self):
         """ Check if bar has nothing but skips. """
@@ -326,9 +326,9 @@ class BarNote(BarMus):
         self.octave = None
         self.accidental_token = accidental
         self.tie = []
-        self.grace = (0,0)
+        self.grace = (0, 0)
         self.gliss = None
-        self.tremolo = ('',0)
+        self.tremolo = ('', 0)
         self.skip = False
         self.slur = []
         self.artic = []
@@ -365,7 +365,7 @@ class BarNote(BarMus):
         self.adv_ornament = (ornament, {"type": end_type})
 
     def set_grace(self, slash):
-        self.grace = (1,slash)
+        self.grace = (1, slash)
 
     def set_gliss(self, line, endtype = "start", nr=1):
         if not line:
@@ -438,7 +438,7 @@ class BarAttr():
 
     def set_time(self, fractlist, numeric):
         self.time = fractlist
-        if not numeric and (fractlist == [2,2] or fractlist == [4,4]):
+        if not numeric and (fractlist == [2, 2] or fractlist == [4, 4]):
             self.time.append('common')
 
     def set_clef(self, clef):
@@ -480,11 +480,11 @@ class TempoDir():
         self.dots = dots
 
     def set_midi_tempo(self, unit, beats, dots):
-        u = Fraction(1,int(unit))
+        u = Fraction(1, int(unit))
         if dots:
             import math
-            den = int(math.pow(2,dots))
-            num = int(math.pow(2,dots+1)-1)
+            den = int(math.pow(2, dots))
+            num = int(math.pow(2, dots+1)-1)
             u *= Fraction(num, den)
         mult = 4*u
         return float(Fraction(beats)*mult)

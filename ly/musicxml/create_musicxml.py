@@ -123,7 +123,7 @@ class CreateMusicXML():
     ##
 
     def new_note(self, step, octave, durtype, divdur, alter=0,
-                 acc_token=0, voice=1, dot=0, chord=0, grace=(0,0)):
+                 acc_token=0, voice=1, dot=0, chord=0, grace=(0, 0)):
         """Create all nodes needed for a note. """
         self.create_note()
         if grace[0]:
