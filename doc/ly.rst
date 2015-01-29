@@ -1,5 +1,5 @@
-ly package
-==========
+The ``ly`` package
+==================
 
 Module contents
 ---------------
