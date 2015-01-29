@@ -39,6 +39,7 @@ its child nodes) ends.
 """
 
 from __future__ import unicode_literals
+from __future__ import division
 
 import itertools
 from fractions import Fraction
