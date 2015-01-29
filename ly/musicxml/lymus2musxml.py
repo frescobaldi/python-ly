@@ -32,8 +32,8 @@ from __future__ import print_function
 import ly.music
 
 from . import create_musicxml
-from . import iter_mediator
 from . import ly2xml_mediator
+from . import xml_objs
 
 #excluded from parsing
 excl_list = ['Version', 'Midi', 'Layout']
@@ -110,7 +110,7 @@ class ParseSource():
 
     def musicxml(self, prettyprint=True):
         self.mediator.check_score()
-        iter_mediator.iterateMediatorScore(
+        xml_objs.IterateXmlObjs(
             self.mediator.score, self.musxml, self.mediator.divisions)
         xml = self.musxml.musicxml(prettyprint)
         return xml
