@@ -500,7 +500,7 @@ class BarNote(BarMus):
     """ object to keep track of note parameters """
     def __init__(self, pitch_note, alter, accidental, duration, voice=1):
         BarMus.__init__(self, duration, voice)
-        self.base_note = pitch_note
+        self.base_note = pitch_note.upper()
         self.alter = alter
         self.octave = None
         self.accidental_token = accidental
@@ -615,7 +615,7 @@ class BarAttr():
         self.key = muskey
         self.mode = mode
 
-    def set_time(self, fractlist, numeric):
+    def set_time(self, fractlist, numeric=True):
         self.time = fractlist
         if not numeric and (fractlist == [2,2] or fractlist == [4,4]):
             self.time.append('common')
@@ -681,7 +681,7 @@ def durval2type(durval):
         "16th", "32nd", "64th",
         "128th", "256th", "512th", "1024th", "2048th"
     ] # Note: 2048 is supported by ly but not by MusicXML!
-    return xml_types[ly.duration.durations.index(durval)]
+    return xml_types[ly.duration.durations.index(str(durval))]
 
 def dur2lines(dur):
     if dur == 8:
