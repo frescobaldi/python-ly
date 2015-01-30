@@ -46,12 +46,12 @@ except NameError:
 import fractions
 import re
 
-import ly.node
 import ly.pitch
 import ly.duration
+from ly.node import WeakNode
 
 
-class LyNode(ly.node.WeakNode):
+class LyNode(WeakNode):
     """
     Base class for LilyPond objects, based on Node,
     which takes care of the tree structure.
