@@ -18,7 +18,34 @@
 # See http://www.gnu.org/licenses/ for more information.
 
 """
-Classes that holds information suitable for converting to musicXML.
+Classes that holds information about a musical score,
+suitable for converting to musicXML.
+
+When the score structure is built, it can easily be used to create a musicXML.
+
+Example::
+
+    from ly.musicxml import create_musicxml, xml_objs
+
+    musxml = create_musicxml.CreateMusicXML()
+
+    score = xml_objs.Score()
+    part = xml_objs.ScorePart()
+    score.partlist.append(part)
+    bar = xml_objs.Bar()
+    part.barlist.append(bar)
+    ba = xml_objs.BarAttr()
+    ba.set_time([4,4], True)
+    bar.obj_list.append(ba)
+    c = xml_objs.BarNote('c', 0, 0, (4,1))
+    c.set_octave(4)
+    c.set_durtype('1')
+    bar.obj_list.append(c)
+
+    xml_objs.IterateXmlObjs(score, musxml, 1)
+    xml = musxml.musicxml()
+    xml.write('test.xml')
+
 """
 
 from __future__ import unicode_literals
