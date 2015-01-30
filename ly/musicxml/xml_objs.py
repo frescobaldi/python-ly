@@ -35,16 +35,16 @@ Example::
     bar = xml_objs.Bar()
     part.barlist.append(bar)
     ba = xml_objs.BarAttr()
-    ba.set_time([4,4], True)
+    ba.set_time([4,4])
     bar.obj_list.append(ba)
-    c = xml_objs.BarNote('c', 0, 0, (4,1))
+    c = xml_objs.BarNote('c', 0, 0, (1,1))
     c.set_octave(4)
-    c.set_durtype('1')
+    c.set_durtype(1)
     bar.obj_list.append(c)
 
     xml_objs.IterateXmlObjs(score, musxml, 1)
     xml = musxml.musicxml()
-    xml.write('test.xml')
+    xml.write(filename)
 
 """
 
