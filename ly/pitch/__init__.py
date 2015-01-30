@@ -31,22 +31,22 @@ import ly.lex.lilypond
 
 pitchInfo = {
     'nederlands': (
-        ('c','d','e','f','g','a','b'),
-        ('eses', 'eseh', 'es', 'eh', '', 'ih','is','isih','isis'),
+        ('c', 'd', 'e', 'f', 'g', 'a', 'b'),
+        ('eses', 'eseh', 'es', 'eh', '', 'ih', 'is', 'isih', 'isis'),
         (('ees', 'es'), ('aes', 'as'))
     ),
     'english': (
-        ('c','d','e','f','g','a','b'),
+        ('c', 'd', 'e', 'f', 'g', 'a', 'b'),
         ('ff', 'tqf', 'f', 'qf', '', 'qs', 's', 'tqs', 'ss'),
     ),
     'deutsch': (
-        ('c','d','e','f','g','a','h'),
-        ('eses', 'eseh', 'es', 'eh', '', 'ih','is','isih','isis'),
+        ('c', 'd', 'e', 'f', 'g', 'a', 'h'),
+        ('eses', 'eseh', 'es', 'eh', '', 'ih', 'is', 'isih', 'isis'),
         (('ases', 'asas'), ('ees', 'es'), ('aes', 'as'), ('heses', 'heses'), ('hes', 'b'))
     ),
     'svenska': (
-        ('c','d','e','f','g','a','h'),
-        ('essess', '', 'ess', '', '', '','iss','','ississ'),
+        ('c', 'd', 'e', 'f', 'g', 'a', 'h'),
+        ('essess', '', 'ess', '', '', '', 'iss', '', 'ississ'),
         (('ees', 'es'), ('aes', 'as'), ('hessess', 'hessess'), ('hess', 'b'))
     ),
     'italiano': (

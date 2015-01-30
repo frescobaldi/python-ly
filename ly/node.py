@@ -115,11 +115,11 @@ class Node(object):
         self._children.remove(node)
         node._set_parent(None)
 
-    def __nonzero__(self):
+    def __bool__(self):
         """We are always true."""
         return True
     
-    __bool__ = __nonzero__
+    __nonzero__ = __bool__      # py2 compat
     
     def __len__(self):
         """Return the number of children."""

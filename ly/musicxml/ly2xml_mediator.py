@@ -24,6 +24,7 @@ structure with help of the classes in ly.musicxml.xml_objs.
 
 from __future__ import unicode_literals
 from __future__ import print_function
+from __future__ import division
 
 from fractions import Fraction
 
@@ -713,9 +714,9 @@ class Mediator():
             a = 4*den
             b = (1/base)*num
         c = a*divs
-        predur, mod = divmod(c,b)
+        predur, mod = divmod(c, b)
         if mod > 0:
-            mult = get_mult(a,b)
+            mult = get_mult(a, b)
             self.divisions = divs*mult
 
 
@@ -760,17 +761,17 @@ def clefname2clef(clefname):
     Add it to the python dictionary below.
     """
     clef_dict = {
-    "treble": ('G',2,0), "violin": ('G',2,0), "G": ('G',2,0),
-    "bass": ('F',4,0), "F": ('F',4,0),
-    "alto": ('C',3,0), "C": ('C',3,0),
-    "tenor": ('C',4,0), "treble_8": ('G',2,-1),
-    "bass_8": ('F',4,-1), "treble^8": ('G',2,1),
-    "bass^8": ('F',4,1), "percussion": ('percussion',0,0),
-    "tab": ('TAB',5,0), "soprano": ('C',1,0),
-    "mezzosoprano": ('C',2,0),
-    "baritone": ('C',5,0),
-    "varbaritone": ('F',3,0),
-    "french": ('G',1,0)
+    "treble": ('G', 2, 0), "violin": ('G', 2, 0), "G": ('G', 2, 0),
+    "bass": ('F', 4, 0), "F": ('F', 4, 0),
+    "alto": ('C', 3, 0), "C": ('C', 3, 0),
+    "tenor": ('C', 4, 0), "treble_8": ('G', 2, -1),
+    "bass_8": ('F', 4, -1), "treble^8": ('G', 2, 1),
+    "bass^8": ('F', 4, 1), "percussion": ('percussion', 0, 0),
+    "tab": ('TAB', 5, 0), "soprano": ('C', 1, 0),
+    "mezzosoprano": ('C', 2, 0),
+    "baritone": ('C', 5, 0),
+    "varbaritone": ('F', 3, 0),
+    "french": ('G', 1, 0)
     }
     try:
         clef = clef_dict[clefname]

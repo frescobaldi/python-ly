@@ -24,7 +24,7 @@ Query functions to get data from the LilyPond-generated _data.py module.
 def grob_properties(grob):
     """Returns the list of properties the named grob supports."""
     from . import _data
-    return sorted(uniq(prop
+    return sorted(set(prop
         for iface in _data.grobs.get(grob, [])
         for prop in _data.interfaces[iface]))
 
@@ -73,7 +73,7 @@ def grobs():
 def all_grob_properties():
     """Returns the list of all properties."""
     from . import _data
-    return sorted(uniq(sum(_data.interfaces.values(), [])))
+    return sorted(set(sum(_data.interfaces.values(), [])))
 
 def context_properties():
     """Returns the list of context properties."""
@@ -115,14 +115,3 @@ def all_scheme_words():
     from . import _data
     return _data.scheme_keywords + _data.scheme_functions \
         + _data.scheme_variables + _data.scheme_constants
-
-def uniq(iterable):
-    """Returns an iterable, removing duplicates. The items should be hashable."""
-    s, l = set(), 0
-    for i in iterable:
-        s.add(i)
-        if len(s) > l:
-            yield i
-            l = len(s)
-
-
