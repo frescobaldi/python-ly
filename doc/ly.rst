@@ -18,6 +18,7 @@ Subpackages
     ly.music
     ly.musicxml
     ly.pitch
+    ly.xml
     ly.data
     ly.cli
 
