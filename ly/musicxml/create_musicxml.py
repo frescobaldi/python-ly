@@ -570,14 +570,13 @@ class MusicXML(object):
                 self.tree.write(f, encoding=encoding, xml_declaration=False)
             else:
                 self.tree.write(f, encoding=encoding, xml_declaration=True, method="xml")
-        try:
-            file.write
-        except AttributeError:
+        if hasattr(file, 'write'):
+            write(file)
+            # do not close if it already was a file object
+        else:
             # it is not a file object
             with open(file, 'wb') as f:
                 write(f)
-        else:
-            write(file) # do not close if it already was a file object
 
 
 xml_decl_txt = """<?xml version="1.0" encoding="{encoding}"?>"""
