@@ -614,7 +614,7 @@ class Mediator():
         self.bar.add(tempo)
 
     def set_by_property(self, prprty, value, group=False):
-        """Generic setter for deferent properties."""
+        """Generic setter for different properties."""
         if prprty == 'instrumentName':
             if group:
                 self.set_groupname(value)
