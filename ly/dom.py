@@ -496,7 +496,7 @@ class SchemeList(Enclosed):
     pre, post = "(", ")"
     
     def ly(self, printer):
-        return self.pre + super(Enclosed, self).ly(printer) + self.post
+        return self.pre + Container.ly(self, printer) + self.post
 
 
 class StatementEnclosed(Named, Enclosed):
@@ -724,7 +724,7 @@ class LyricsTo(LyricMode):
     def ly(self, printer):
         res = ["\\" + self.name]
         res.append(printer.quoteString(format(self.cid)))
-        res.append(super(Named, self).ly(printer))
+        res.append(Enclosed.ly(self, printer))
         return " ".join(res)
         
 
