@@ -70,8 +70,9 @@ We can also access the origin of each music object:
 #(define indent-width 2)
 
 % convert a name value pair to an xml attribute
+% name is a symbol, value should be a string
 #(define (attr->string name value)
-   (string-append name "=\"" value "\""))
+   (string-append (symbol->string name) "=\"" value "\""))
 
 
 % convert an assoc list to an xml attribute string (joined with a space in between)
@@ -93,23 +94,29 @@ We can also access the origin of each music object:
          (ly:string-substitute "&" "&amp;" s)))))
 
 
-% show an open or close tag (for close, prefix the name with a "/")
-#(define (tag name indent)
-   (atag name indent '()))
-
-% show a tag with attributes
-#(define (atag name indent attrs)
+% show a tag
+#(define (xml-tag name indent attrs close-tag)
    (let ((s (string-append
              (make-string (* indent-width indent) #\space)
-             "<" name (attrs->string attrs) ">\n")))
+             "<"
+             (if (eq? close-tag 'close) "/" "")
+             (symbol->string name)
+             (attrs->string attrs)
+             (if (eq? close-tag 'self-close) "/" "")
+             ">\n")))
      (display s)))
+   
+% show an open tag
+#(define (open-tag name indent attrs)
+   (xml-tag name indent attrs #f))
 
-% show a open-close tag with attributes
-#(define (atagc name indent attrs)
-   (let ((s (string-append
-             (make-string (* indent-width indent) #\space)
-             "<" name (attrs->string attrs) "/>\n")))
-     (display s)))
+% show a close tag
+#(define (close-tag name indent)
+   (xml-tag name indent '() 'close))
+
+% show a self-closing tag
+#(define (self-close-tag name indent attrs)
+   (xml-tag name indent attrs 'self-close))
 
 
 
@@ -126,60 +133,60 @@ We can also access the origin of each music object:
             (tw (ly:music-property o 'tweaks))
             (location (ly:music-property o 'origin))
             )
-        (atag "music" indent (acons "name" (symbol->string name) '()))
-        (if (ly:music? e)
-            (begin 
-              (tag "element" (+ indent 1))
-              (obj->lily-xml e (+ indent 2))
-              (tag "/element" (+ indent 1))))
-        (if (and (list? es) (not (null? es)))
-            (begin 
-              (tag "elements" (+ indent 1))
-              (for-each (lambda (e)
-                          (obj->lily-xml e (+ indent 2))) es)
-              (tag "/elements" (+ indent 1))))
-        (if (and (list? as) (not (null? as)))
-            (begin 
-              (tag "articulations" (+ indent 1))
-              (for-each (lambda (e)
-                          (obj->lily-xml e (+ indent 2))) as)
-              (tag "/articulations" (+ indent 1))))
-        (if (and (list? tw) (not (null? tw)))
-            (begin 
-              (tag "tweaks" (+ indent 1))
-              (for-each (lambda (e)
-                          (obj->lily-xml e (+ indent 2))) tw)
-              (tag "/tweaks" (+ indent 1))))
+        (open-tag 'music indent (acons 'name (symbol->string name) '()))
         (if (ly:input-location? location)
             (let ((origin (ly:input-file-line-char-column location)))
-              (atagc "origin" (+ indent 1) (list
-                 `("filename" . ,(attribute-escape (car origin)))
-                 `("line"     . ,(number->string (cadr origin)))
-                 `("char"     . ,(number->string (caddr origin)))))))
-        (tag "/music" indent)))
+              (self-close-tag 'origin (+ indent 1) (list
+                 `(filename . ,(attribute-escape (car origin)))
+                 `(line     . ,(number->string (cadr origin)))
+                 `(char     . ,(number->string (caddr origin)))))))
+        (if (ly:music? e)
+            (begin 
+              (open-tag 'element (+ indent 1) '())
+              (obj->lily-xml e (+ indent 2))
+              (close-tag 'element (+ indent 1))))
+        (if (and (list? es) (not (null? es)))
+            (begin 
+              (open-tag 'elements (+ indent 1) '())
+              (for-each (lambda (e)
+                          (obj->lily-xml e (+ indent 2))) es)
+              (close-tag 'elements (+ indent 1))))
+        (if (and (list? as) (not (null? as)))
+            (begin 
+              (open-tag 'articulations (+ indent 1) '())
+              (for-each (lambda (e)
+                          (obj->lily-xml e (+ indent 2))) as)
+              (close-tag 'articulations (+ indent 1))))
+        (if (and (list? tw) (not (null? tw)))
+            (begin 
+              (open-tag 'tweaks (+ indent 1) '())
+              (for-each (lambda (e)
+                          (obj->lily-xml e (+ indent 2))) tw)
+              (close-tag 'tweaks (+ indent 1))))
+        (close-tag 'music indent)))
     
     ((number? o)
-     (atagc "number" indent (acons "value" (number->string o) '())))
+     (self-close-tag 'number indent (acons 'value (number->string o) '())))
     ((string? o)
-     (atagc "string" indent (acons "value" (attribute-escape o) '())))
+     (self-close-tag 'string indent (acons 'value (attribute-escape o) '())))
     ((boolean? o)
-     (atagc "boolean" indent (acons "value" (if o "true" "false") '())))
+     (self-close-tag 'boolean indent (acons 'value (if o "true" "false") '())))
     ((symbol? o)
-     (atagc "symbol" indent (acons "value" (symbol->string o) '())))
+     (self-close-tag 'symbol indent (acons 'value (symbol->string o) '())))
     ((list? o)
      (if (null? o)
-         (atagc "null" indent '()) ; or <list/> ??
+         (self-close-tag 'null indent '()) ; or <list/> ??
          (begin
-          (tag "list" indent)
+          (open-tag 'list indent '())
           (for-each (lambda (e)
                  (obj->lily-xml e (+ indent 1))) o)
-          (tag "/list" indent))))
+          (close-tag 'list indent))))
     ((pair? o)
      (begin
-       (tag "pair" indent)
+       (open-tag 'pair indent '())
        (obj->lily-xml (car o) (+ indent 1))
        (obj->lily-xml (cdr o) (+ indent 1))
-       (tag "/pair" indent)))
+       (close-tag 'pair indent)))
       
     )
   
@@ -190,4 +197,4 @@ displayLilyXML = #
 (define-music-function (parser location music) (ly:music?)
   (obj->lily-xml music 0))
 
-% \displayLilyXML { c d-\tweak color red -. e }
+% \displayLilyXML { c d-\tweak color #red -. e }
