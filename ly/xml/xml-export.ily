@@ -124,6 +124,7 @@ We can also access the origin of each music object:
             (es (ly:music-property o 'elements))
             (as (ly:music-property o 'articulations))
             (tw (ly:music-property o 'tweaks))
+            (location (ly:music-property o 'origin))
             )
         (atag "music" indent (acons "name" (symbol->string name) '()))
         (if (ly:music? e)
@@ -149,6 +150,12 @@ We can also access the origin of each music object:
               (for-each (lambda (e)
                           (obj->lily-xml e (+ indent 2))) tw)
               (tag "/tweaks" (+ indent 1))))
+        (if (ly:input-location? location)
+            (let ((origin (ly:input-file-line-char-column location)))
+              (atagc "origin" (+ indent 1) (list
+                 `("filename" . ,(attribute-escape (car origin)))
+                 `("line"     . ,(number->string (cadr origin)))
+                 `("char"     . ,(number->string (caddr origin)))))))
         (tag "/music" indent)))
     
     ((number? o)
