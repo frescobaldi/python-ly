@@ -69,6 +69,7 @@ class Mediator():
         self.lyric_syll = False
         self.lyric_nr = 1
         self.ongoing_wedge = False
+        self.oct_size = 0
 
     def new_header_assignment(self, name, value):
         """Distributing header information."""
@@ -585,9 +586,8 @@ class Mediator():
     def new_ottava(self, octdiff):
         nr = int(octdiff)
         if nr == 0:
-            size = self.oct_size
-            plac = self.oct_plac
-            octdir = "stop"
+            if self.oct_size:
+                self.current_note.set_oct_shift(self.oct_plac, "stop", self.oct_size)
         else:
             if nr < 0:
                 plac = "below"
@@ -595,10 +595,10 @@ class Mediator():
             elif nr > 0:
                 plac = "above"
                 octdir = "down"
-            size = abs(nr) * 7 + 1
-            self.oct_size = size
+            nr = abs(nr) * 7 + 1
+            self.current_note.set_oct_shift(plac, octdir, nr)
             self.oct_plac = plac
-        self.current_note.set_oct_shift(plac, octdir, size)
+        self.oct_size = nr
 
     def new_tempo(self, dur_tokens, tempo, string):
         unit, dots, rs = self.duration_from_tokens(dur_tokens)
