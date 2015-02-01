@@ -69,7 +69,7 @@ class Mediator():
         self.lyric_syll = False
         self.lyric_nr = 1
         self.ongoing_wedge = False
-        self.oct_size = 0
+        self.octdiff = 0
 
     def new_header_assignment(self, name, value):
         """Distributing header information."""
@@ -584,21 +584,26 @@ class Mediator():
         self.current_note.add_adv_ornament('wavy-line', end)
 
     def new_ottava(self, octdiff):
-        nr = int(octdiff)
-        if nr == 0:
-            if self.oct_size:
-                self.current_note.set_oct_shift(self.oct_plac, "stop", self.oct_size)
+        octdiff = int(octdiff)
+        if self.octdiff == octdiff:
+            return
+        if octdiff == 0:
+            if self.octdiff < 0:
+                plac = "below"
+            else:
+                plac = "above"
+            size = abs(self.octdiff) * 7 + 1
+            self.current_note.set_oct_shift(plac, "stop", size)
         else:
-            if nr < 0:
+            if octdiff < 0:
                 plac = "below"
                 octdir = "up"
-            elif nr > 0:
+            else:
                 plac = "above"
                 octdir = "down"
-            nr = abs(nr) * 7 + 1
-            self.current_note.set_oct_shift(plac, octdir, nr)
-            self.oct_plac = plac
-        self.oct_size = nr
+            size = abs(octdiff) * 7 + 1
+            self.current_note.set_oct_shift(plac, octdir, size)
+        self.octdiff = octdiff
 
     def new_tempo(self, dur_tokens, tempo, string):
         unit, dots, rs = self.duration_from_tokens(dur_tokens)
