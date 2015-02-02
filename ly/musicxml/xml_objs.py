@@ -131,7 +131,8 @@ class IterateXmlObjs():
             for mc in obj.multiclef:
                 self.musxml.add_clef(sign=mc[0][0], line=mc[0][1], nr=mc[1], oct_ch=mc[0][2])
         if obj.tempo:
-            self.musxml.create_tempo(obj.tempo.metr, obj.tempo.midi, obj.tempo.dots)
+            self.musxml.create_tempo(obj.tempo.text, obj.tempo.metr,
+                                     obj.tempo.midi, obj.tempo.dots)
 
     def before_note(self, obj):
         """Xml-nodes before note."""
@@ -626,7 +627,7 @@ class BarAttr():
     def set_barline(self, bl):
         self.barline = convert_barl(bl)
 
-    def set_tempo(self, unit, beats, dots=0, text=""):
+    def set_tempo(self, unit=0, beats=0, dots=0, text=""):
         self.tempo = TempoDir(unit, beats, dots, text)
 
     def has_attr(self):
@@ -653,10 +654,14 @@ class BarBackup():
 class TempoDir():
     """ Object that stores tempo direction information """
     def __init__(self, unit, beats, dots, text):
-        self.metr = durval2type(unit), beats
-        self.text = text
-        self.midi = self.set_midi_tempo(unit, beats, dots)
+        if unit:
+            self.metr = durval2type(unit), beats
+            self.midi = self.set_midi_tempo(unit, beats, dots)
+        else:
+            self.metr = 0
+            self.midi = 0
         self.dots = dots
+        self.text = text
 
     def set_midi_tempo(self, unit, beats, dots):
         u = Fraction(1, int(unit))

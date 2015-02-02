@@ -222,10 +222,13 @@ class CreateMusicXML():
     def new_backup(self, base_scaling, divs):
         self.add_backup(self.count_duration(base_scaling, divs))
 
-    def create_tempo(self, metronome, sound, dots):
+    def create_tempo(self, words, metronome, sound, dots):
         self.add_direction()
-        self.add_metron_dir(metronome[0], metronome[1], dots)
-        self.add_sound_dir(sound)
+        if words:
+            self.add_dirwords(words)
+        if metronome:
+            self.add_metron_dir(metronome[0], metronome[1], dots)
+            self.add_sound_dir(sound)
 
     def create_new_node(self, parentnode, nodename, txt):
         """ The Music XML language is extensive.
@@ -509,6 +512,12 @@ class CreateMusicXML():
         direction = etree.SubElement(self.current_bar, "direction", placement=plac)
         dirtypenode = etree.SubElement(direction, "direction-type")
         dyn_node = etree.SubElement(dirtypenode, "octave-shift", oct_dict)
+
+    def add_dirwords(self, words):
+        """Add words in direction, e. g. a tempo mark."""
+        dirtypenode = etree.SubElement(self.direction, "direction-type")
+        wordsnode = etree.SubElement(dirtypenode, "words")
+        wordsnode.text = words
 
     def add_metron_dir(self, unit, beats, dots):
         dirtypenode = etree.SubElement(self.direction, "direction-type")
