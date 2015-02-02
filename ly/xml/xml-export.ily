@@ -91,8 +91,6 @@ and maps to XML (using \displayLilyXML):
 
 %}
 
-#(define indent-width 2)
-
 % convert an assoc list to an xml attribute string (joined with a space in between)
 #(define (attrs->string attrs)
    (string-join
