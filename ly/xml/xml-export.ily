@@ -1,68 +1,92 @@
 \version "2.18.2"
-
-
-%%% code to map music data to XML
-
 %{
 
-\relative {
-  c d e
-}
+This module defines a music function that dumps a music expression to XML
 
-maps to (scheme):
 
-(make-music
-  'RelativeOctaveMusic
-  'element
+Usage e.g.:
+
+ \displayLilyXML { c d e f }
+
+The XML closely follows the LilyPond music structure.
+
+All (make-music 'MusicName ...) objects translate to a <music type="MusicName">
+tag. The music in the 'element and 'elements properties is put in the <element>
+and <elements> tags. (LilyPond uses 'element when there is a single music
+argument, and 'elements for a list of music arguments, but for example \repeat
+uses both: 'element for the repeated music and 'elements for the \alternatives.
+
+Thus <element>, if there, always has one <music> child. <elements>, if there,
+can have more than one <music> child.
+
+Each <music> element has an <origin> child element describing the source
+location.
+
+
+
+
+Example:
+
+This LilyPond music:
+
+  \relative {
+    c d e
+  }
+
+maps to Scheme (using \displayMusic):
+
   (make-music
-    'SequentialMusic
-    'elements
-    (list (make-music
-            'NoteEvent
-            'pitch
-            (ly:make-pitch -1 0 0)
-            'duration
-            (ly:make-duration 2 0 1))
-          (make-music
-            'NoteEvent
-            'pitch
-            (ly:make-pitch -1 1 0)
-            'duration
-            (ly:make-duration 2 0 1))
-          (make-music
-            'NoteEvent
-            'pitch
-            (ly:make-pitch -1 2 0)
-            'duration
-            (ly:make-duration 2 0 1)))))
+    'RelativeOctaveMusic
+    'element
+    (make-music
+      'SequentialMusic
+      'elements
+      (list (make-music
+              'NoteEvent
+              'pitch
+              (ly:make-pitch -1 0 0)
+              'duration
+              (ly:make-duration 2 0 1))
+            (make-music
+              'NoteEvent
+              'pitch
+              (ly:make-pitch -1 1 0)
+              'duration
+              (ly:make-duration 2 0 1))
+            (make-music
+              'NoteEvent
+              'pitch
+              (ly:make-pitch -1 2 0)
+              'duration
+              (ly:make-duration 2 0 1)))))
 
-maps to xml:
+and maps to XML (using \displayLilyXML):
 
-<music name="RelativeOctaveMusic">
-  <element>
-    <music name="SequentialMusic">
-      <elements>
-        <music name="NoteEvent">
-          <pitch octave="-1" step="0" alter="0"/>
-          <duration log="2" dots="0" num="1" den="1"/>
-        </music>
-        <music name="NoteEvent">
-          <pitch octave="-1" step="1" alter="0"/>
-          <duration log="2" dots="0" num="1" den="1"/>
-        </music>
-        <music name="NoteEvent">
-          <pitch octave="-1" step="2" alter="0"/>
-          <duration log="2" dots="0" num="1" den="1"/>
-        </music>
-      </elements>
-    </music>
-  </element>
-</music>
-
-We can also access the origin of each music object:
-
-<music name="NoteEvent>
-  <origin file="/bla.ly" line="1" char="3" column="4"/>
+  <music name="RelativeOctaveMusic">
+    <origin filename="/home/wilbert/dev/python-ly/ly/xml/xml-export.ily" line="244" char="17"/>
+    <element>
+      <music name="SequentialMusic">
+        <origin filename="/home/wilbert/dev/python-ly/ly/xml/xml-export.ily" line="244" char="27"/>
+        <elements>
+          <music name="NoteEvent">
+            <origin filename="/home/wilbert/dev/python-ly/ly/xml/xml-export.ily" line="245" char="4"/>
+            <pitch octave="-1" notename="0" alteration="0"/>
+            <duration log="2" dots="0" numer="1" denom="1"/>
+          </music>
+          <music name="NoteEvent">
+            <origin filename="/home/wilbert/dev/python-ly/ly/xml/xml-export.ily" line="245" char="6"/>
+            <pitch octave="-1" notename="1" alteration="0"/>
+            <duration log="2" dots="0" numer="1" denom="1"/>
+          </music>
+          <music name="NoteEvent">
+            <origin filename="/home/wilbert/dev/python-ly/ly/xml/xml-export.ily" line="245" char="8"/>
+            <pitch octave="-1" notename="2" alteration="0"/>
+            <duration log="2" dots="0" numer="1" denom="1"/>
+          </music>
+        </elements>
+      </music>
+    </element>
+  </music>
 
 
 %}
@@ -213,8 +237,8 @@ We can also access the origin of each music object:
   
   o)
 
+
 displayLilyXML = #
 (define-music-function (parser location music) (ly:music?)
   (obj->lily-xml music 0))
 
-% \displayLilyXML { c d-\tweak color #red -. e }
