@@ -70,9 +70,15 @@ We can also access the origin of each music object:
 #(define indent-width 2)
 
 % convert a name value pair to an xml attribute
-% name is a symbol, value should be a string
+% name is a symbol, value can be a symbol, string, or number
 #(define (attr->string name value)
-   (string-append (symbol->string name) "=\"" value "\""))
+   (string-append (symbol->string name)
+     "=\""
+     (cond 
+      ((string? value) (attribute-escape value))
+      ((number? value) (number->string value))
+      ((symbol? value) (symbol->string value)))
+     "\""))
 
 
 % convert an assoc list to an xml attribute string (joined with a space in between)
@@ -132,14 +138,27 @@ We can also access the origin of each music object:
             (as (ly:music-property o 'articulations))
             (tw (ly:music-property o 'tweaks))
             (location (ly:music-property o 'origin))
+            (pitch (ly:music-property o 'pitch))
+            (duration (ly:music-property o 'duration))
             )
-        (open-tag 'music indent (acons 'name (symbol->string name) '()))
+        (open-tag 'music indent (acons 'name name '()))
         (if (ly:input-location? location)
             (let ((origin (ly:input-file-line-char-column location)))
-              (self-close-tag 'origin (+ indent 1) (list
-                 `(filename . ,(attribute-escape (car origin)))
-                 `(line     . ,(number->string (cadr origin)))
-                 `(char     . ,(number->string (caddr origin)))))))
+              (self-close-tag 'origin (+ indent 1)
+                `((filename . ,(car origin))
+                  (line     . ,(cadr origin))
+                  (char     . ,(caddr origin))))))
+        (if (ly:pitch? pitch)
+            (self-close-tag 'pitch (+ indent 1)
+              `((octave . ,(ly:pitch-octave pitch))
+                (notename . ,(ly:pitch-notename pitch))
+                (alteration . ,(ly:pitch-alteration pitch)))))
+        (if (ly:duration? duration)
+            (self-close-tag 'duration (+ indent 1)
+              `((log . ,(ly:duration-log duration))
+                   (dots . ,(ly:duration-dot-count duration))
+                   (numer . ,(car (ly:duration-factor duration)))
+                   (denom . ,(cdr (ly:duration-factor duration))))))
         (if (ly:music? e)
             (begin 
               (open-tag 'element (+ indent 1) '())
@@ -166,13 +185,15 @@ We can also access the origin of each music object:
         (close-tag 'music indent)))
     
     ((number? o)
-     (self-close-tag 'number indent (acons 'value (number->string o) '())))
+     (self-close-tag 'number indent `((value . ,o))))
     ((string? o)
-     (self-close-tag 'string indent (acons 'value (attribute-escape o) '())))
+     (self-close-tag 'string indent `((value  . ,o))))
+    ((char? o)
+     (self-close-tag 'char indent `((value . ,(string o)))))
     ((boolean? o)
-     (self-close-tag 'boolean indent (acons 'value (if o "true" "false") '())))
+     (self-close-tag 'boolean indent `((value . ,(if o 'true 'false)))))
     ((symbol? o)
-     (self-close-tag 'symbol indent (acons 'value (symbol->string o) '())))
+     (self-close-tag 'symbol indent `((value . ,o))))
     ((list? o)
      (if (null? o)
          (self-close-tag 'null indent '()) ; or <list/> ??
