@@ -136,19 +136,21 @@ class IterateXmlObjs():
 
     def before_note(self, obj):
         """Xml-nodes before note."""
-        if obj.dynamic['before']:
-            if obj.dynamic['before']['mark']:
-                self.musxml.add_dynamic_mark(obj.dynamic['before']['mark'])
-            if obj.dynamic['before']['wedge']:
-                self.musxml.add_dynamic_wedge(obj.dynamic['before']['wedge'])
+        for d in obj.dynamic:
+            if d.before:
+                if d.is_mark:
+                    self.musxml.add_dynamic_mark(d.sign)
+                else:
+                    self.musxml.add_dynamic_wedge(d.sign)
 
     def after_note(self, obj):
         """Xml-nodes after note."""
-        if obj.dynamic['after']:
-            if obj.dynamic['after']['mark']:
-                self.musxml.add_dynamic_mark(obj.dynamic['after']['mark'])
-            if obj.dynamic['after']['wedge']:
-                self.musxml.add_dynamic_wedge(obj.dynamic['after']['wedge'])
+        for d in obj.dynamic:
+            if not d.before:
+                if d.is_mark:
+                    self.musxml.add_dynamic_mark(d.sign)
+                else:
+                    self.musxml.add_dynamic_wedge(d.sign)
         if obj.oct_shift:
             self.musxml.add_octave_shift(obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
 
@@ -439,10 +441,7 @@ class BarMus():
         self.staff = 0
         self.chord = False
         self.other_notation = None
-        self.dynamic = {
-        'before': {'mark': None, 'wedge': None },
-        'after': {'mark': None, 'wedge': None }
-        }
+        self.dynamic = []
         self.oct_shift = None
 
     def __repr__(self):
@@ -461,17 +460,14 @@ class BarMus():
     def add_other_notation(self, other):
         self.other_notation = other
 
-    def set_dynamics_before(self, mark=None, wedge=None):
+    def set_dynamics(self, mark=None, wedge=None, before=True):
         if mark:
-            self.dynamic['before']['mark'] = mark
+            sign = mark
+            is_mark = True
         if wedge:
-            self.dynamic['before']['wedge'] = wedge
-
-    def set_dynamics_after(self, mark=None, wedge=None):
-        if mark:
-            self.dynamic['after']['mark'] = mark
-        if wedge:
-            self.dynamic['after']['wedge'] = wedge
+            sign = wedge
+            is_mark = False
+        self.dynamic.append(Dynamics(sign, before, is_mark))
 
     def set_oct_shift(self, plac, octdir, size):
         self.oct_shift = OctaveShift(plac, octdir, size)
@@ -491,6 +487,14 @@ class OctaveShift():
         self.plac = plac
         self.octdir = octdir
         self.size = size
+
+
+class Dynamics():
+    """Stores information about dynamics. """
+    def __init__(self, sign, before=True, is_mark=False, ):
+        self.before = before
+        self.is_mark = is_mark
+        self.sign = sign
 
 
 ##
