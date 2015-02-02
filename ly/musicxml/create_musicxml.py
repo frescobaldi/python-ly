@@ -165,26 +165,20 @@ class CreateMusicXML():
         self.add_notations()
         self.add_tied(tie_type)
 
-    def new_rest(self, base_scaling, durtype, divs, pos, dot, voice):
+    def new_rest(self, duration, durtype, pos, dot, voice):
         """Create all nodes needed for a rest. """
         self.create_note()
         if pos:
             self.add_rest_w_pos(pos[0], pos[1])
         else:
             self.add_rest()
-        self.add_div_duration(self.count_duration(base_scaling, divs))
+        self.add_div_duration(duration)
         self.add_voice(voice)
         if durtype:
             self.add_duration_type(durtype)
         if dot:
             for i in range(dot):
                 self.add_dot()
-
-    def new_skip(self, base_scaling, divs):
-        base = base_scaling[0]
-        scaling = base_scaling[1]
-        duration = divs*4*base*scaling
-        self.add_skip(duration)
 
     def new_articulation(self, artic):
         """Add specified articulation. """

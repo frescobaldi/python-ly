@@ -192,10 +192,11 @@ class IterateXmlObjs():
 
     def new_xml_rest(self, obj):
         """Create rest specific xml-nodes."""
+        divdur = self.count_duration(obj.duration, self.divisions)
         if obj.skip:
-            self.musxml.new_skip(obj.duration, self.divisions)
+            self.musxml.add_skip(divdur)
         else:
-            self.musxml.new_rest(obj.duration, obj.type, self.divisions, obj.pos,
+            self.musxml.new_rest(divdur, obj.type, obj.pos,
             obj.dot, obj.voice)
 
     def count_duration(self, base_scaling, divs):
