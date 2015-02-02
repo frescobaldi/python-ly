@@ -69,6 +69,13 @@ We can also access the origin of each music object:
 
 #(define indent-width 2)
 
+% convert an assoc list to an xml attribute string (joined with a space in between)
+#(define (attrs->string attrs)
+   (string-join
+     (map (lambda (e)
+            (attr->string (car e) (cdr e))) attrs)
+     " " 'prefix))
+  
 % convert a name value pair to an xml attribute
 % name is a symbol, value can be a symbol, string, or number
 #(define (attr->string name value)
@@ -80,24 +87,16 @@ We can also access the origin of each music object:
       ((symbol? value) (symbol->string value)))
      "\""))
 
-
-% convert an assoc list to an xml attribute string (joined with a space in between)
-#(define (attrs->string attrs)
-   (string-join
-     (map (lambda (e)
-            (attr->string (car e) (cdr e))) attrs)
-     " " 'prefix))
-  
-% escape string for xml attribute
-#(define (attribute-escape s)
-   (ly:string-substitute "\"" "&quot;" (ly:string-substitute "&" "&amp;" s)))
-
 % escape string for xml body
 #(define (xml-escape s)
    (ly:string-substitute "<" "&lt;" 
      (ly:string-substitute ">" "&gt;" 
-       (ly:string-substitute "\"" "&quot;" 
-         (ly:string-substitute "&" "&amp;" s)))))
+       (attribute-escape s))))
+
+% escape string for xml attribute
+#(define (attribute-escape s)
+   (ly:string-substitute "\"" "&quot;"
+     (ly:string-substitute "&" "&amp;" s)))
 
 
 % show a tag
