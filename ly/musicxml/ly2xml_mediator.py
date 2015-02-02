@@ -605,18 +605,19 @@ class Mediator():
             self.current_note.set_oct_shift(plac, octdir, size)
         self.octdiff = octdiff
 
-    def new_tempo(self, dur_tokens, tempo, string):
-        unit, dots, rs = self.duration_from_tokens(dur_tokens)
-        beats = tempo[0]
-        try:
-            text = string.value()
-        except AttributeError:
-            text = None
-        tempo = xml_objs.BarAttr()
-        tempo.set_tempo(unit, beats, dots, text)
-        if self.bar is None:
-            self.new_bar()
-        self.bar.add(tempo)
+    def new_tempo(self, unit, dur_tokens, tempo, string):
+        dots, rs = self.duration_from_tokens(dur_tokens)
+        if tempo:
+            beats = tempo[0]
+            try:
+                text = string.value()
+            except AttributeError:
+                text = None
+            tempo = xml_objs.BarAttr()
+            tempo.set_tempo(unit, beats, dots, text)
+            if self.bar is None:
+                self.new_bar()
+            self.bar.add(tempo)
 
     def set_by_property(self, prprty, value, group=False):
         """Generic setter for different properties."""

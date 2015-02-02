@@ -76,6 +76,7 @@ class ParseSource():
         self.ottava = False
         self.with_contxt = None
         self.schm_assignm = None
+        self.tempo = ()
 
     def parse_tree(self, mustree):
         # print(mustree.dump())
@@ -235,11 +236,18 @@ class ParseSource():
 
     def Duration(self, duration):
         """A written duration"""
-        self.mediator.new_duration_token(duration.token, duration.tokens)
+        if self.tempo:
+            self.mediator.new_tempo(duration.token, duration.tokens, *self.tempo)
+            self.tempo = ()
+        else:
+            self.mediator.new_duration_token(duration.token, duration.tokens)
 
     def Tempo(self, tempo):
         """ Tempo direction, e g '4 = 80' """
-        self.mediator.new_tempo(tempo.duration.tokens, tempo.tempo(), tempo.text())
+        if self.look_ahead(tempo, ly.music.items.Duration):
+            self.tempo = (tempo.tempo(), tempo.text())
+        else:
+            self.mediator.new_tempo(0, (), tempo.tempo(), tempo.text())
 
     def Tie(self, tie):
         """ tie ~ """
