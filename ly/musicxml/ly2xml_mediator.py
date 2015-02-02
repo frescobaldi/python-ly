@@ -58,6 +58,7 @@ class Mediator():
         self.group = None
         self.group_num = 0
         self.current_chord = []
+        self.q_chord = []
         self.prev_pitch = None
         self.prev_chord_pitch = None
         self.store_voicenr = 0
@@ -441,8 +442,11 @@ class Mediator():
         return chord_note
 
     def copy_prev_chord(self, duration):
-        prev_chord = self.current_chord
-        self.clear_chord()
+        if self.current_chord:
+            prev_chord = self.current_chord
+            self.clear_chord()
+        else:
+            prev_chord = self.q_chord
         for i, pc in enumerate(prev_chord):
             cn = self.copy_barnote_basics(pc)
             cn.set_duration(duration)
@@ -456,6 +460,7 @@ class Mediator():
         self.tied = False
 
     def clear_chord(self):
+        self.q_chord = self.current_chord
         self.current_chord = []
         self.prev_chord_pitch = None
 
