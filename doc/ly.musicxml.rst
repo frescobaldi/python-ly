@@ -20,14 +20,6 @@ ly.musicxml.create_musicxml module
     :undoc-members:
     :show-inheritance:
 
-ly.musicxml.iter_mediator module
---------------------------------
-
-.. automodule:: ly.musicxml.iter_mediator
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ly.musicxml.ly2xml_mediator module
 ----------------------------------
 
