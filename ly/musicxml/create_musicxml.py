@@ -213,9 +213,6 @@ class CreateMusicXML():
             sign, line, octch = clef
             self.add_clef(sign, line, oct_ch=octch)
 
-    def new_backup(self, base_scaling, divs):
-        self.add_backup(self.count_duration(base_scaling, divs))
-
     def create_tempo(self, words, metronome, sound, dots):
         self.add_direction()
         if words:

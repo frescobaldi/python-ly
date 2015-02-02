@@ -115,7 +115,8 @@ class IterateXmlObjs():
                 self.gener_xml_mus(obj)
                 self.after_note(obj)
             elif isinstance(obj, BarBackup):
-                self.musxml.new_backup(obj.duration, self.divisions)
+                divdur = self.count_duration(obj.duration, self.divisions)
+                self.musxml.add_backup(divdur)
 
     def new_xml_bar_attr(self, obj):
         """Create bar attribute xml-nodes."""
