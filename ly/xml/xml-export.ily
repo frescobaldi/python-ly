@@ -123,36 +123,70 @@ and maps to XML (using \displayLilyXML):
      (ly:string-substitute "&" "&amp;" s)))
 
 
-% show a tag
-#(define (xml-tag name indent attrs close-tag)
+% output an XML tag
+% indent: number of spaces
+% tag-name: symbol
+% attrs: assoc list
+% how can be:
+%   'open-tag:		write an open-tag with attributes <element bla="blabla">
+%   'close-tag:		write a close-tag (attrs are ignored) </element>
+%   'open-close-tag:   write a self-closing tag <element bla="blabla"/>
+% port: the output port (#f selects the current output port)
+#(define (output-xml-tag indent tag-name attrs how port)
    (let ((s (string-append
-             (make-string (* indent-width indent) #\space)
+             (make-string (* indent) #\space)
              "<"
-             (if (eq? close-tag 'close) "/" "")
-             (symbol->string name)
-             (attrs->string attrs)
-             (if (eq? close-tag 'self-close) "/" "")
-             ">\n")))
-     (display s)))
-   
-% show an open tag
-#(define (open-tag name indent attrs)
-   (xml-tag name indent attrs #f))
+             (if (eq? how 'close-tag) "/" "")
+             (symbol->string tag-name)
+             (if (eq? how 'close-tag) "" (attrs->string attrs))
+             (if (eq? how 'open-close-tag) "/" "")
+             ">\n"))
+         (port (if (port? port) port (current-output-port))))
+     (display s port)))
+  
 
-% show a close tag
-#(define (close-tag name indent)
-   (xml-tag name indent '() 'close))
+% a nice class that outputs an XML document
+% (define x (XML))
+% (x 'open-tag 'name attrs)
+% (x 'open-close-tag 'name attrs)
+% (x 'close-tag)
+#(define XML
+  (lambda ()
+    (define indent-width 2)
+    (define pending #f)
+    (define tags '())
+    
+    (define (output-last-tag how)
+      (let* ((indent (* (length tags) indent-width))
+             (tag-name (caar tags))
+             (attrs (cadar tags)))
+        (output-xml-tag indent tag-name attrs how #f)))
+    
+    (define (open-tag args)
+      (if pending
+          (output-last-tag 'open-tag))
+      (set! tags (cons args tags))
+      (set! pending #t))
+    
+    (define (close-tag)
+      (if pending
+          (output-last-tag 'open-close-tag)
+          (output-last-tag 'close-tag))
+      (set! pending #f)
+      (set! tags (cdr tags)))
 
-% show a self-closing tag
-#(define (self-close-tag name indent attrs)
-   (xml-tag name indent attrs 'self-close))
-
+    (lambda (method-name . args)
+      (case method-name
+        ((open-tag) (open-tag args))
+        ((close-tag) (close-tag))
+        ((open-close-tag) (open-tag args) (close-tag))))))
 
 
 % convert any object to XML
 % currently the xml is just (display)ed but later it will be written to a file or string.
 % the object is always returned
-#(define (obj->lily-xml o indent)
+% xml is an XML instance
+#(define (obj->lily-xml o xml)
    (cond
     ((ly:music? o)
       (let ((name (ly:music-property o 'name))
@@ -164,73 +198,73 @@ and maps to XML (using \displayLilyXML):
             (pitch (ly:music-property o 'pitch))
             (duration (ly:music-property o 'duration))
             )
-        (open-tag 'music indent (acons 'name name '()))
+        (xml 'open-tag 'music (acons 'name name '()))
         (if (ly:input-location? location)
             (let ((origin (ly:input-file-line-char-column location)))
-              (self-close-tag 'origin (+ indent 1)
+              (xml 'open-close-tag 'origin
                 `((filename . ,(car origin))
                   (line     . ,(cadr origin))
                   (char     . ,(caddr origin))))))
         (if (ly:pitch? pitch)
-            (self-close-tag 'pitch (+ indent 1)
+            (xml 'open-close-tag 'pitch
               `((octave . ,(ly:pitch-octave pitch))
                 (notename . ,(ly:pitch-notename pitch))
                 (alteration . ,(ly:pitch-alteration pitch)))))
         (if (ly:duration? duration)
-            (self-close-tag 'duration (+ indent 1)
+            (xml 'open-close-tag 'duration
               `((log . ,(ly:duration-log duration))
                    (dots . ,(ly:duration-dot-count duration))
                    (numer . ,(car (ly:duration-factor duration)))
                    (denom . ,(cdr (ly:duration-factor duration))))))
         (if (ly:music? e)
             (begin 
-              (open-tag 'element (+ indent 1) '())
-              (obj->lily-xml e (+ indent 2))
-              (close-tag 'element (+ indent 1))))
+              (xml 'open-tag 'element '())
+              (obj->lily-xml e xml)
+              (xml 'close-tag)))
         (if (and (list? es) (not (null? es)))
             (begin 
-              (open-tag 'elements (+ indent 1) '())
+              (xml 'open-tag 'elements '())
               (for-each (lambda (e)
-                          (obj->lily-xml e (+ indent 2))) es)
-              (close-tag 'elements (+ indent 1))))
+                          (obj->lily-xml e xml)) es)
+              (xml 'close-tag 'elements)))
         (if (and (list? as) (not (null? as)))
             (begin 
-              (open-tag 'articulations (+ indent 1) '())
+              (xml 'open-tag 'articulations '())
               (for-each (lambda (e)
-                          (obj->lily-xml e (+ indent 2))) as)
-              (close-tag 'articulations (+ indent 1))))
+                          (obj->lily-xml e xml)) as)
+              (xml 'close-tag 'articulations )))
         (if (and (list? tw) (not (null? tw)))
             (begin 
-              (open-tag 'tweaks (+ indent 1) '())
+              (xml 'open-tag 'tweaks '())
               (for-each (lambda (e)
-                          (obj->lily-xml e (+ indent 2))) tw)
-              (close-tag 'tweaks (+ indent 1))))
-        (close-tag 'music indent)))
+                          (obj->lily-xml e xml)) tw)
+              (xml 'close-tag 'tweaks)))
+        (xml 'close-tag)))
     
     ((number? o)
-     (self-close-tag 'number indent `((value . ,o))))
+     (xml 'open-close-tag 'number `((value . ,o))))
     ((string? o)
-     (self-close-tag 'string indent `((value  . ,o))))
+     (xml 'open-close-tag 'string `((value  . ,o))))
     ((char? o)
-     (self-close-tag 'char indent `((value . ,(string o)))))
+     (xml 'open-close-tag 'char `((value . ,(string o)))))
     ((boolean? o)
-     (self-close-tag 'boolean indent `((value . ,(if o 'true 'false)))))
+     (xml 'open-close-tag 'boolean `((value . ,(if o 'true 'false)))))
     ((symbol? o)
-     (self-close-tag 'symbol indent `((value . ,o))))
+     (xml 'open-close-tag 'symbol `((value . ,o))))
     ((null? o)
-     (self-close-tag 'null indent '())) ; or <list/> ??
+     (xml 'open-close-tag 'null '())) ; or <list/> ??
     ((list? o)
      (begin
-       (open-tag 'list indent '())
+       (xml 'open-tag 'list '())
        (for-each (lambda (e)
-                   (obj->lily-xml e (+ indent 1))) o)
-       (close-tag 'list indent)))
+                   (obj->lily-xml e xml)) o)
+       (xml 'close-tag)))
     ((pair? o)
      (begin
-       (open-tag 'pair indent '())
-       (obj->lily-xml (car o) (+ indent 1))
-       (obj->lily-xml (cdr o) (+ indent 1))
-       (close-tag 'pair indent)))
+       (xml 'open-tag 'pair '())
+       (obj->lily-xml (car o) xml)
+       (obj->lily-xml (cdr o) xml)
+       (xml 'close-tag)))
       
     )
   
@@ -240,5 +274,6 @@ and maps to XML (using \displayLilyXML):
 
 displayLilyXML = #
 (define-music-function (parser location music) (ly:music?)
-  (obj->lily-xml music 0))
+  (let ((xml (XML)))
+    (obj->lily-xml music xml)))
 
