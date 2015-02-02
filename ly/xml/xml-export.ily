@@ -148,6 +148,8 @@ and maps to XML (using \displayLilyXML):
 % (x 'open-tag 'name attrs)
 % (x 'open-close-tag 'name attrs)
 % (x 'close-tag)
+% when an open tag is closed and it has no child tags, it is automatically
+% written to output as an open-close tag.
 #(define XML
   (lambda ()
     (define indent-width 2)
