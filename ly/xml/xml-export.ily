@@ -194,14 +194,14 @@ We can also access the origin of each music object:
      (self-close-tag 'boolean indent `((value . ,(if o 'true 'false)))))
     ((symbol? o)
      (self-close-tag 'symbol indent `((value . ,o))))
+    ((null? o)
+     (self-close-tag 'null indent '())) ; or <list/> ??
     ((list? o)
-     (if (null? o)
-         (self-close-tag 'null indent '()) ; or <list/> ??
-         (begin
-          (open-tag 'list indent '())
-          (for-each (lambda (e)
-                 (obj->lily-xml e (+ indent 1))) o)
-          (close-tag 'list indent))))
+     (begin
+       (open-tag 'list indent '())
+       (for-each (lambda (e)
+                   (obj->lily-xml e (+ indent 1))) o)
+       (close-tag 'list indent)))
     ((pair? o)
      (begin
        (open-tag 'pair indent '())
