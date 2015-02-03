@@ -183,8 +183,34 @@ and maps to XML (using \displayLilyXML):
 
 
 % convert a markup object to XML
-#(define (markup->lily-xml o xml)
+#(define (markup->lily-xml mkup xml)
+   
+   (define (cmd-name proc)
+     ;; return the name of the markup procedure (without the "-markup" suffix)
+     (let* ((name (symbol->string (procedure-name proc)))
+            (len (- (string-length name) (string-length "-markup"))))
+       (substring name 0 len)))
+   
+   (define (mkup->xml mkup)
+     ;; convert a markup object to xml
+     (if (string? mkup)
+         (xml 'open-close-tag 'm `((name . simple) (value . ,mkup)))
+         (begin
+          (xml 'open-tag 'm `((name . ,(cmd-name (car mkup)))))
+          ;; inner markups
+          (for-each (lambda (arg)
+                      (cond
+                       ((and (pair? arg) (markup? (car arg))) ;; markup list
+                         (for-each mkup->xml arg))
+                       ((markup? arg) ;; markup
+                         (mkup->xml arg))
+                       (else ;; can be another scheme object
+                        (obj->lily-xml arg xml)))) (cdr mkup))
+          (xml 'close-tag))))
+   
+   ;; wrap markup in a toplevel <markup> tag
    (xml 'open-tag 'markup '())
+   (mkup->xml mkup)
    (xml 'close-tag))
 
 
