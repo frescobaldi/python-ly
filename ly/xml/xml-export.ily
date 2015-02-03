@@ -1,8 +1,13 @@
 \version "2.18.2"
 %{
 
-This module defines a music function that dumps a music expression to XML
 
+xml-export.ily
+
+Written by Wilbert Berendsen, jan-feb 2015
+
+
+This module defines a music function that dumps a music expression to XML
 
 Usage e.g.:
 
@@ -14,15 +19,29 @@ All (make-music 'MusicName ...) objects translate to a <music type="MusicName">
 tag. The music in the 'element and 'elements properties is put in the <element>
 and <elements> tags. (LilyPond uses 'element when there is a single music
 argument, and 'elements for a list of music arguments, but for example \repeat
-uses both: 'element for the repeated music and 'elements for the \alternatives.
+uses both: 'element for the repeated music and 'elements for the \alternatives.)
 
 Thus <element>, if there, always has one <music> child. <elements>, if there,
 can have more than one <music> child.
 
-Each <music> element has an <origin> child element describing the source
-location.
+Besides 'element and 'elements, the following properties of music objects are
+handled specially:
 
+- 'origin => <origin> element with filename, line and char attributes
+- 'pitch => <pitch> element with octave, notename and alteration attributes
+- 'duration => <duration> element with log, dots, numer and denom attributes
+- 'articulations => <articulations> element containing <music> elements
 
+All other properties a music object may have, are translated to a <property>
+element with a name attribute. The value is the child element and can be any
+object (string, list, pair, symbol, number etc.). (Note that the LilyPond
+command \displayMusic does not display all properties.)
+
+Markup objects are also converted to XML, where a toplevel <markup> element
+is used. The individual markup commands are converted to an <m> element, with
+the name in the name attribute (e.g. <m name="italic"><string value="Hi
+there!"/></m>). Arguments to markup commands may be other commands, or other
+objects (markup \score even has a score argument, which is also supported).
 
 
 Example:
@@ -216,7 +235,6 @@ and maps to XML (using \displayLilyXML):
 
 % convert any object to XML
 % currently the xml is just (display)ed but later it will be written to a file or string.
-% the object is always returned
 % xml is an XML instance
 #(define (obj->lily-xml o xml)
    (cond
@@ -331,14 +349,18 @@ and maps to XML (using \displayLilyXML):
       (obj->lily-xml (ly:score-music o) xml)
       (xml 'close-tag)))
       
-    )
-  
-  
-  o)
+    ))
+
+
+#(define-public (xml-export obj)
+   "Dump an XML representation of the specified object to the current output port."
+  (let ((xml (XML)))
+    (obj->lily-xml obj xml)))
 
 
 displayLilyXML = #
 (define-music-function (parser location music) (ly:music?)
-  (let ((xml (XML)))
-    (obj->lily-xml music xml)))
+  "Dump an XML representation of the music to the current output port."
+  (xml-export music)
+  music)
 
