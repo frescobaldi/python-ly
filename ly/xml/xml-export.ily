@@ -182,6 +182,12 @@ and maps to XML (using \displayLilyXML):
         ((open-close-tag) (open-tag args) (close-tag))))))
 
 
+% convert a markup object to XML
+#(define (markup->lily-xml o xml)
+   (xml 'open-tag 'markup '())
+   (xml 'close-tag))
+
+
 % convert any object to XML
 % currently the xml is just (display)ed but later it will be written to a file or string.
 % the object is always returned
@@ -197,6 +203,12 @@ and maps to XML (using \displayLilyXML):
             (location (ly:music-property o 'origin))
             (pitch (ly:music-property o 'pitch))
             (duration (ly:music-property o 'duration))
+            (properties
+             (filter
+              (lambda (prop)
+                (not (memq (car prop)
+                       '(name element elements articulations tweaks origin pitch duration))))
+              (ly:music-mutable-properties o)))
             )
         (xml 'open-tag 'music (acons 'name name '()))
         (if (ly:input-location? location)
@@ -239,8 +251,14 @@ and maps to XML (using \displayLilyXML):
               (for-each (lambda (e)
                           (obj->lily-xml e xml)) tw)
               (xml 'close-tag 'tweaks)))
+        (for-each (lambda (prop)
+                    (xml 'open-tag 'property `((name . ,(car prop))))
+                    (obj->lily-xml (cdr prop) xml)
+                    (xml 'close-tag)) properties)
         (xml 'close-tag)))
     
+    ((and (markup? o) (not (string? o)))
+     (markup->lily-xml o xml))
     ((number? o)
      (xml 'open-close-tag 'number `((value . ,o))))
     ((string? o)
