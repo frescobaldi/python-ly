@@ -7,7 +7,9 @@ xml-export.ily
 Written by Wilbert Berendsen, jan-feb 2015
 
 
-This module defines a music function that dumps a music expression to XML
+This LilyPond module defines a function (xml-export) that converts LilyPond
+datastructures to XML. For convenience, a \displayLilyXML music function is
+added that converts a music expression to XML.
 
 Usage e.g.:
 
