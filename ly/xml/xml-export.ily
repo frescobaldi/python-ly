@@ -283,6 +283,10 @@ and maps to XML (using \displayLilyXML):
        (obj->lily-xml (car o) xml)
        (obj->lily-xml (cdr o) xml)
        (xml 'close-tag)))
+    ((procedure? o)
+     (xml 'open-close-tag 'procedure `((name . ,(procedure-name o)))))
+    ((ly:stencil? o)
+     (xml 'open-close-tag 'stencil '()))
       
     )
   
