@@ -338,6 +338,7 @@ class ParseSource():
 
     def Command(self, command):
         """ \\bar, \\rest etc """
+        excls = ['\\major', '\\minor', '\\bar']
         if command.token == '\\rest':
             self.mediator.note2rest()
         elif command.token == '\\numericTimeSignature':
@@ -358,7 +359,8 @@ class ParseSource():
         elif command.token == '\\ottava':
             self.ottava = True
         else:
-            print("Unknown command:", command.token)
+            if command.token not in excls:
+                print("Unknown command:", command.token)
 
     def String(self, string):
         prev = self.get_previous_node(string)
