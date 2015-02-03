@@ -283,6 +283,12 @@ and maps to XML (using \displayLilyXML):
                     (xml 'close-tag)) properties)
         (xml 'close-tag)))
     
+    ((ly:moment? o)
+     (xml 'open-close-tag 'moment
+       `((main-numer . ,(ly:moment-main-numerator o))
+         (main-denum . ,(ly:moment-main-denominator o))
+         (grace-numer . ,(ly:moment-grace-numerator o))
+         (grace-denum . ,(ly:moment-grace-denominator o)))))
     ((and (markup? o) (not (string? o)))
      (markup->lily-xml o xml))
     ((number? o)
