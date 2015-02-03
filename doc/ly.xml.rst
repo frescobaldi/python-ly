@@ -47,6 +47,7 @@ added that converts a music expression to XML.
 
 Usage e.g.::
 
+    \include "/path/to/xml-export.ily"
     \displayLilyXML { c d e f }
 
 The XML closely follows the LilyPond music structure.
