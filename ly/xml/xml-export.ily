@@ -194,7 +194,7 @@ and maps to XML (using \displayLilyXML):
    (define (mkup->xml mkup)
      ;; convert a markup object to xml
      (if (string? mkup)
-         (xml 'open-close-tag 'm `((name . simple) (value . ,mkup)))
+         (xml 'open-close-tag 'string `((value . ,mkup)))
          (begin
           (xml 'open-tag 'm `((name . ,(cmd-name (car mkup)))))
           ;; inner markups
