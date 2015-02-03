@@ -157,7 +157,7 @@ and maps to XML (using \displayLilyXML):
     (define tags '())
     
     (define (output-last-tag how)
-      (let* ((indent (* (length tags) indent-width))
+      (let* ((indent (* (- (length tags) 1) indent-width))
              (tag-name (caar tags))
              (attrs (cadar tags)))
         (output-xml-tag indent tag-name attrs how #f)))
