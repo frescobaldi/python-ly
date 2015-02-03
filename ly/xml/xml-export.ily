@@ -313,6 +313,11 @@ and maps to XML (using \displayLilyXML):
      (xml 'open-close-tag 'procedure `((name . ,(procedure-name o)))))
     ((ly:stencil? o)
      (xml 'open-close-tag 'stencil '()))
+    ((ly:score? o)
+     (begin
+      (xml 'open-tag 'score '())
+      (obj->lily-xml (ly:score-music o) xml)
+      (xml 'close-tag)))
       
     )
   
