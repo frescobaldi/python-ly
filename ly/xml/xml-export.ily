@@ -34,6 +34,7 @@ handled specially:
 - 'pitch => <pitch> element with octave, notename and alteration attributes
 - 'duration => <duration> element with log, dots, numer and denom attributes
 - 'articulations => <articulations> element containing <music> elements
+- 'tweaks => <tweaks> element containing pairs (symbol . value)
 
 All other properties a music object may have, are translated to a <property>
 element with a name attribute. The value is the child element and can be any
