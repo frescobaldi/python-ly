@@ -186,10 +186,12 @@ and maps to XML (using \displayLilyXML):
         (output-xml-tag indent tag-name attrs how #f)))
     
     (define (open-tag args)
-      (if pending
-          (output-last-tag 'open-tag))
-      (set! tags (cons args tags))
-      (set! pending #t))
+      (let ((tag-name (car args))
+            (attrs (if (null? (cdr args)) '() (cadr args))))
+        (if pending
+            (output-last-tag 'open-tag))
+        (set! tags (cons (cons tag-name (list attrs)) tags))
+        (set! pending #t)))
     
     (define (close-tag)
       (if pending
@@ -232,7 +234,7 @@ and maps to XML (using \displayLilyXML):
           (xml 'close-tag))))
    
    ;; wrap markup in a toplevel <markup> tag
-   (xml 'open-tag 'markup '())
+   (xml 'open-tag 'markup)
    (mkup->xml mkup)
    (xml 'close-tag))
 
@@ -267,24 +269,24 @@ and maps to XML (using \displayLilyXML):
             (obj->lily-xml duration xml))
         (if (ly:music? e)
             (begin 
-              (xml 'open-tag 'element '())
+              (xml 'open-tag 'element)
               (obj->lily-xml e xml)
               (xml 'close-tag)))
         (if (and (list? es) (not (null? es)))
             (begin 
-              (xml 'open-tag 'elements '())
+              (xml 'open-tag 'elements)
               (for-each (lambda (e)
                           (obj->lily-xml e xml)) es)
               (xml 'close-tag 'elements)))
         (if (and (list? as) (not (null? as)))
             (begin 
-              (xml 'open-tag 'articulations '())
+              (xml 'open-tag 'articulations)
               (for-each (lambda (e)
                           (obj->lily-xml e xml)) as)
               (xml 'close-tag 'articulations )))
         (if (and (list? tw) (not (null? tw)))
             (begin 
-              (xml 'open-tag 'tweaks '())
+              (xml 'open-tag 'tweaks)
               (for-each (lambda (e)
                           (obj->lily-xml e xml)) tw)
               (xml 'close-tag 'tweaks)))
@@ -330,16 +332,16 @@ and maps to XML (using \displayLilyXML):
     ((symbol? o)
      (xml 'open-close-tag 'symbol `((value . ,o))))
     ((null? o)
-     (xml 'open-close-tag 'null '())) ; or <list/> ??
+     (xml 'open-close-tag 'null)) ; or <list/> ??
     ((list? o)
      (begin
-       (xml 'open-tag 'list '())
+       (xml 'open-tag 'list)
        (for-each (lambda (e)
                    (obj->lily-xml e xml)) o)
        (xml 'close-tag)))
     ((pair? o)
      (begin
-       (xml 'open-tag 'pair '())
+       (xml 'open-tag 'pair)
        (obj->lily-xml (car o) xml)
        (obj->lily-xml (cdr o) xml)
        (xml 'close-tag)))
@@ -356,7 +358,7 @@ and maps to XML (using \displayLilyXML):
       (xml 'close-tag)))
     ((ly:score? o)
      (begin
-      (xml 'open-tag 'score '())
+      (xml 'open-tag 'score)
       (obj->lily-xml (ly:score-music o) xml)
       (xml 'close-tag)))
       
