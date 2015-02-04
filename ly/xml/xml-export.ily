@@ -345,7 +345,14 @@ and maps to XML (using \displayLilyXML):
     ((procedure? o)
      (xml 'open-close-tag 'procedure `((name . ,(procedure-name o)))))
     ((ly:stencil? o)
-     (xml 'open-close-tag 'stencil '()))
+     (begin
+      (xml 'open-tag 'stencil
+        `((x-min . ,(car (ly:stencil-extent o X)))
+          (x-max . ,(cdr (ly:stencil-extent o X)))
+          (y-min . ,(car (ly:stencil-extent o Y)))
+          (y-max . ,(cdr (ly:stencil-extent o Y)))))
+      (obj->lily-xml (ly:stencil-expr o) xml)
+      (xml 'close-tag)))
     ((ly:score? o)
      (begin
       (xml 'open-tag 'score '())
