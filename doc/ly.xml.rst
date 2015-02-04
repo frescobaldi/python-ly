@@ -53,14 +53,14 @@ Usage e.g.::
 The XML closely follows the LilyPond music structure.
 
 All ``(make-music 'MusicName ...)`` objects translate to a
-``<music type="MusicName">`` tag. The music in the 'element and 'elements
+``<music type="MusicName">`` tag. The music in the ``'element`` and ``'elements``
 properties is put in the ``<element>`` and ``<elements>`` tags. (LilyPond uses
 ``'element`` when there is a single music argument, and ``'elements`` for a list
 of music arguments, but for example ``\repeat`` uses both: ``'element`` for the
 repeated music and ``'elements`` for the ``\alternatives``.)
 
 Thus ``<element>``, if there, always has one ``<music>`` child. ``<elements>``,
-if there, can have more than one <music> child.
+if there, can have more than one ``<music>`` child.
 
 Besides ``'element`` and ``'elements``, the following properties of music
 objects are handled specially:
