@@ -260,7 +260,7 @@ and maps to XML (using \displayLilyXML):
                        '(name element elements articulations tweaks origin pitch duration))))
               (ly:music-mutable-properties o)))
             )
-        (xml 'open-tag 'music (acons 'name name '()))
+        (xml 'open-tag 'music `((name . ,name)))
         (if (ly:input-location? location)
             (obj->lily-xml location xml))
         (if (ly:pitch? pitch)
