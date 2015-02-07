@@ -26,6 +26,10 @@ py_modules = []
 with open('README.rst', 'rb') as f:
     long_description = f.read().decode('utf-8')
 
+package_data = {
+    'ly.xml': ['*.ily'],
+}
+
 #data_files = [
 #    ('share/man/man1', ['ly.1']),
 #]
@@ -55,6 +59,7 @@ setup(
     
     scripts = scripts,
     packages = packages,
+    package_data = package_data,
     py_modules = py_modules,
     classifiers = classifiers,
     #data_files = data_files,
