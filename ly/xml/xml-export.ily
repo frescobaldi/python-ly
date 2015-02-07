@@ -239,6 +239,22 @@ and maps to XML (using \displayLilyXML):
    (xml 'close-tag))
 
 
+% convert a header to XML
+#(define (header->lily-xml header xml)
+   (if (module? header)
+       (let ((variables
+              (filter (lambda (v)
+                        (not (eq? (car v) '%module-public-interface))) (ly:module->alist header))))
+         (if (pair? variables)
+             (begin
+              (xml 'open-tag 'header)
+              (for-each (lambda (v)
+                          (xml 'open-tag 'variable `((name . ,(car v))))
+                          (obj->lily-xml (cdr v) xml)
+                          (xml 'close-tag)) variables)
+              (xml 'close-tag))))))
+
+
 % convert any object to XML
 % currently the xml is just (display)ed but later it will be written to a file or string.
 % xml is an XML instance
@@ -368,6 +384,7 @@ and maps to XML (using \displayLilyXML):
     ((ly:score? o)
      (begin
       (xml 'open-tag 'score)
+      (header->lily-xml (ly:score-header o) xml)
       (obj->lily-xml (ly:score-music o) xml)
       (xml 'close-tag)))
       
