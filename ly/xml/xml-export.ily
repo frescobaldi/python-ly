@@ -346,7 +346,16 @@ and maps to XML (using \displayLilyXML):
        (obj->lily-xml (cdr o) xml)
        (xml 'close-tag)))
     ((procedure? o)
-     (xml 'open-close-tag 'procedure `((name . ,(procedure-name o)))))
+     (let* ((name (procedure-name o))
+            (attrs (if name `((name . ,name)) '()))
+            (source (procedure-source o)))
+       (xml 'open-tag 'procedure attrs)
+       (if source
+           (begin
+            (xml 'open-tag 'procedure-source)
+            (obj->lily-xml source xml)
+            (xml 'close-tag)))
+       (xml 'close-tag)))
     ((ly:stencil? o)
      (begin
       (xml 'open-tag 'stencil
