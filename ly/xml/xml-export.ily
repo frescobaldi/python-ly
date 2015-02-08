@@ -129,7 +129,7 @@ and maps to XML (using \displayLilyXML):
      (cond 
       ((string? value) (attribute-escape value))
       ((number? value) (number->string value))
-      ((symbol? value) (symbol->string value)))
+      ((symbol? value) (attribute-escape (symbol->string value))))
      "\""))
 
 % escape string for xml body
