@@ -417,6 +417,7 @@ and maps to XML (using \displayLilyXML):
 #(define (make-toplevel-book-handler->xml xml)
    "Return a book handler that dumps a book to specified XML instance"
    (lambda (parser book)
+     (xml 'declaration)
      (obj->lily-xml book xml)))
 
 
@@ -438,7 +439,6 @@ displayLilyXML = #
                         (current-output-port)
                         (open-output-file xml-file)))
               (xml (XML port)))
-         (xml 'declaration)
          (set! toplevel-book-handler (make-toplevel-book-handler->xml xml)))))
 
 
