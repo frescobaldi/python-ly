@@ -186,6 +186,9 @@ and maps to XML (using \displayLilyXML):
              (attrs (cadar tags)))
         (output-xml-tag indent tag-name attrs how port)))
     
+    (define (declaration)
+      (display "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" port))
+    
     (define (open-tag args)
       (let ((tag-name (car args))
             (attrs (if (null? (cdr args)) '() (cadr args))))
@@ -203,6 +206,7 @@ and maps to XML (using \displayLilyXML):
 
     (lambda (method-name . args)
       (case method-name
+        ((declaration) (declaration))
         ((open-tag) (open-tag args))
         ((close-tag) (close-tag))
         ((open-close-tag) (open-tag args) (close-tag))))))
@@ -406,6 +410,7 @@ and maps to XML (using \displayLilyXML):
 #(define-public (xml-export obj)
    "Dump an XML representation of the specified object to the current output port."
   (let ((xml (XML)))
+    (xml 'declaration)
     (obj->lily-xml obj xml)))
 
 
@@ -427,6 +432,7 @@ displayLilyXML = #
 #(let ((i (ly:get-option 'include-settings)))
    (if (and i (string=? (basename (symbol->string i)) "xml-export.ily"))
        (let ((xml (XML)))
+         (xml 'declaration)
          (set! toplevel-book-handler (make-toplevel-book-handler->xml xml)))))
 
 
