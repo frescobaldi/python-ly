@@ -408,9 +408,9 @@ and maps to XML (using \displayLilyXML):
     (obj->lily-xml obj xml)))
 
 
-#(define (toplevel-book->xml parser book)
-   "Book handler that dumps a book to XML"
-   (let ((xml (XML)))
+#(define (make-toplevel-book-handler->xml xml)
+   "Return a book handler that dumps a book to specified XML instance"
+   (lambda (parser book)
      (obj->lily-xml book xml)))
 
 
@@ -424,7 +424,8 @@ displayLilyXML = #
 %% when we are included using the include-settings option, install
 %% toplevel book handler for automatic display of XML
 #(let ((i (ly:get-option 'include-settings)))
-   (if (and (symbol? i) (string=? (basename (symbol->string i)) "xml-export.ily"))
-       (set! toplevel-book-handler toplevel-book->xml)))
+   (if (and i (string=? (basename (symbol->string i)) "xml-export.ily"))
+       (let ((xml (XML)))
+         (set! toplevel-book-handler (make-toplevel-book-handler->xml xml)))))
 
 
