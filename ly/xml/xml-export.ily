@@ -167,23 +167,24 @@ and maps to XML (using \displayLilyXML):
   
 
 % a nice class that outputs an XML document
-% (define x (XML))
+% (define x (XML port)  ;; port is optional
 % (x 'open-tag 'name attrs)
 % (x 'open-close-tag 'name attrs)
 % (x 'close-tag)
 % when an open tag is closed and it has no child tags, it is automatically
 % written to output as an open-close tag.
 #(define XML
-  (lambda ()
+  (lambda args
     (define indent-width 2)
     (define pending #f)
     (define tags '())
+    (define port (if (pair? args) (car args) (current-output-port)))
     
     (define (output-last-tag how)
       (let* ((indent (* (- (length tags) 1) indent-width))
              (tag-name (caar tags))
              (attrs (cadar tags)))
-        (output-xml-tag indent tag-name attrs how #f)))
+        (output-xml-tag indent tag-name attrs how port)))
     
     (define (open-tag args)
       (let ((tag-name (car args))
