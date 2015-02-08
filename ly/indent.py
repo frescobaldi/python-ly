@@ -58,7 +58,7 @@ class Indenter(object):
                 
                 # handle indents of prev line
                 if pline:
-                    if pline.indent != False:
+                    if pline.indent is not False:
                         prev_indent = pline.indent
                     if pline.indenters:
                         current_indent = indents[-1]
@@ -174,10 +174,10 @@ class Indenter(object):
         
         # here we arrive after 'break'
         i = line.indent
-        if i == False:
+        if i is False:
             for b in blocks:
                 i = Line(document, b).indent
-                if i != False:
+                if i is not False:
                     break
             else:
                 i = ""
