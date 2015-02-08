@@ -387,6 +387,17 @@ and maps to XML (using \displayLilyXML):
       (header->lily-xml (ly:score-header o) xml)
       (obj->lily-xml (ly:score-music o) xml)
       (xml 'close-tag)))
+    ((ly:book? o)
+     (begin
+      (xml 'open-tag 'book)
+      (header->lily-xml (ly:book-header o) xml)
+      (for-each (lambda (book)
+                  (obj->lily-xml book xml))
+        (reverse (ly:book-book-parts o)))
+      (for-each (lambda (score)
+                  (obj->lily-xml score xml))
+        (reverse (ly:book-scores o)))
+      (xml 'close-tag)))
       
     ))
 
@@ -397,9 +408,23 @@ and maps to XML (using \displayLilyXML):
     (obj->lily-xml obj xml)))
 
 
+#(define (toplevel-book->xml parser book)
+   "Book handler that dumps a book to XML"
+   (let ((xml (XML)))
+     (obj->lily-xml book xml)))
+
+
 displayLilyXML = #
 (define-music-function (parser location music) (ly:music?)
   "Dump an XML representation of the music to the current output port."
   (xml-export music)
   music)
+
+
+%% when we are included using the include-settings option, install
+%% toplevel book handler for automatic display of XML
+#(let ((i (ly:get-option 'include-settings)))
+   (if (and (symbol? i) (string=? (basename (symbol->string i)) "xml-export.ily"))
+       (set! toplevel-book-handler toplevel-book->xml)))
+
 
