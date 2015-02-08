@@ -428,10 +428,16 @@ displayLilyXML = #
 
 
 %% when we are included using the include-settings option, install
-%% toplevel book handler for automatic display of XML
+%% toplevel book handler for automatic display of XML, and allow
+%% for setting the file name using the xml-export option.
 #(let ((i (ly:get-option 'include-settings)))
    (if (and i (string=? (basename (symbol->string i)) "xml-export.ily"))
-       (let ((xml (XML)))
+       (let* ((x (ly:get-option 'xml-export))
+              (xml-file (if x (symbol->string x) "-"))
+              (port (if (string=? xml-file "-")
+                        (current-output-port)
+                        (open-output-file xml-file)))
+              (xml (XML port)))
          (xml 'declaration)
          (set! toplevel-book-handler (make-toplevel-book-handler->xml xml)))))
 
