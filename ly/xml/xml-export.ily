@@ -111,6 +111,21 @@ and maps to XML (using \displayLilyXML):
     </element>
   </music>
 
+By default, the XML is written to standard output.
+
+When you include this script via the -dinclude-settings option, it automatically converts
+every \book in the score to an XML document (LilyPond always creates at least one book).
+In this case the XML is also written to standard output, but you can specify another file
+with -dxml-export=<filename>.
+
+So, to convert a LilyPond source file to an XML file containing the LilyPond music
+structure in XML format, use the following command:
+
+  lilypond -dinclude-settings=/path/to/xml-export.ily -dxml-export=song.xml song.ly
+
+Note that it you have multiple books in the source file, that the XML output consists of
+concatenated XML documents. You can split those by searching for the start of the XML
+declaration <?xml ... ?>.
 
 %}
 
