@@ -123,7 +123,7 @@ structure in XML format, use the following command:
 
   lilypond -dinclude-settings=/path/to/xml-export.ily -dxml-export=song.xml song.ly
 
-Note that it you have multiple books in the source file, that the XML output consists of
+Note that it you have multiple books in the source file, the XML output consists of
 concatenated XML documents. You can split those by searching for the start of the XML
 declaration <?xml ... ?>.
 
