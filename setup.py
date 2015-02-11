@@ -27,7 +27,7 @@ with open('README.rst', 'rb') as f:
     long_description = f.read().decode('utf-8')
 
 package_data = {
-    'ly.xml': ['*.ily'],
+    'ly.xml': ['*.ily', '*.ly'],
 }
 
 #data_files = [
