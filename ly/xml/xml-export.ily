@@ -222,31 +222,31 @@ at the toplevel.)
 #(define (markup->lily-xml mkup xml)
    
    (define (cmd-name proc)
-     ;; return the name of the markup procedure (without the "-markup" suffix)
-     (let* ((name (symbol->string (procedure-name proc)))
-            (len (- (string-length name) (string-length "-markup"))))
-       (substring name 0 len)))
+     "return the name of the markup procedure"
+     (symbol->string (procedure-name proc)))
    
+   (define (mkuparg->xml arg)
+     "convert markup arguments to xml"
+     (cond
+      ((markup-list? arg) ;; markup list
+        (for-each mkup->xml arg))
+      ((markup? arg) ;; markup
+        (mkup->xml arg))
+      (else ;; can be another scheme object
+        (obj->lily-xml arg xml))))
+
    (define (mkup->xml mkup)
-     ;; convert a markup object to xml
+     "convert a markup object to xml"
      (if (string? mkup)
          (xml 'open-close-tag 'string `((value . ,mkup)))
          (begin
           (xml 'open-tag 'm `((name . ,(cmd-name (car mkup)))))
-          ;; inner markups
-          (for-each (lambda (arg)
-                      (cond
-                       ((and (pair? arg) (markup? (car arg))) ;; markup list
-                         (for-each mkup->xml arg))
-                       ((markup? arg) ;; markup
-                         (mkup->xml arg))
-                       (else ;; can be another scheme object
-                        (obj->lily-xml arg xml)))) (cdr mkup))
+          (for-each mkuparg->xml (cdr mkup))
           (xml 'close-tag))))
    
    ;; wrap markup in a toplevel <markup> tag
    (xml 'open-tag 'markup)
-   (mkup->xml mkup)
+   (mkuparg->xml mkup)
    (xml 'close-tag))
 
 
@@ -346,6 +346,8 @@ at the toplevel.)
          (dots . ,(ly:duration-dot-count o))
          (numer . ,(car (ly:duration-factor o)))
          (denom . ,(cdr (ly:duration-factor o))))))
+    ((markup-list? o)
+     (markup->lily-xml o xml))
     ((and (markup? o) (not (string? o)))
      (markup->lily-xml o xml))
     ((number? o)
