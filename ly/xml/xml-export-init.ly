@@ -36,6 +36,11 @@ in the LilyPond file.
                    (current-output-port)
                    (open-output-file xml-file)))
          (xml (XML port)))
+    (ly:message
+     (format "Writing XML to ~a..."
+       (if (string=? xml-file "-")
+           "standard output"
+           xml-file)))
     (set! xml-outputter xml)))
 
 %% create the output document and run the normal init procedure
@@ -46,3 +51,4 @@ in the LilyPond file.
 #(define print-book-with-defaults (make-toplevel-book-handler->xml xml-outputter))
 \include "init.ly"
 #(xml-outputter 'close-tag)
+#(ly:message "Writing XML completed.")
