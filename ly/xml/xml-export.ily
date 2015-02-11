@@ -111,21 +111,12 @@ and maps to XML (using \displayLilyXML):
     </element>
   </music>
 
-By default, the XML is written to standard output.
-
-When you include this script via the -dinclude-settings option, it automatically converts
-every \book in the score to an XML document (LilyPond always creates at least one book).
-In this case the XML is also written to standard output, but you can specify another file
-with -dxml-export=<filename>.
-
-So, to convert a LilyPond source file to an XML file containing the LilyPond music
-structure in XML format, use the following command:
-
-  lilypond -dinclude-settings=/path/to/xml-export.ily -dxml-export=song.xml song.ly
-
-Note that it you have multiple books in the source file, the XML output consists of
-concatenated XML documents. You can split those by searching for the start of the XML
-declaration <?xml ... ?>.
+To automatically export a full LilyPond document to an XML representation,
+use the xml-export-init.ly script with the --init LilyPond option. That script
+automatically sets up LilyPond to output one XML document with a <document>
+root element, containing a <book> element for every book in the LilyPond file.
+(LilyPond always creates at least one book, collecting all the music or markup
+at the toplevel.)
 
 %}
 
@@ -429,31 +420,10 @@ declaration <?xml ... ?>.
     (obj->lily-xml obj xml)))
 
 
-#(define (make-toplevel-book-handler->xml xml)
-   "Return a book handler that dumps a book to specified XML instance"
-   (lambda (parser book)
-     (xml 'declaration)
-     (obj->lily-xml book xml)))
-
-
 displayLilyXML = #
 (define-music-function (parser location music) (ly:music?)
   "Dump an XML representation of the music to the current output port."
   (xml-export music)
   music)
-
-
-%% when we are included using the include-settings option, install
-%% toplevel book handler for automatic display of XML, and allow
-%% for setting the file name using the xml-export option.
-#(let ((i (ly:get-option 'include-settings)))
-   (if (and i (string=? (basename (symbol->string i)) "xml-export.ily"))
-       (let* ((x (ly:get-option 'xml-export))
-              (xml-file (if x (symbol->string x) "-"))
-              (port (if (string=? xml-file "-")
-                        (current-output-port)
-                        (open-output-file xml-file)))
-              (xml (XML port)))
-         (set! toplevel-book-handler (make-toplevel-book-handler->xml xml)))))
 
 
