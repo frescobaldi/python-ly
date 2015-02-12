@@ -195,13 +195,11 @@ at the toplevel.)
     (define (declaration)
       (display "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" port))
     
-    (define (open-tag args)
-      (let ((tag-name (car args))
-            (attrs (if (null? (cdr args)) '() (cadr args))))
-        (if pending
-            (output-last-tag 'open-tag))
-        (set! tags (cons (cons tag-name (list attrs)) tags))
-        (set! pending #t)))
+    (define (open-tag tag-name attrs)
+      (if pending
+          (output-last-tag 'open-tag))
+      (set! tags (cons (cons tag-name (list attrs)) tags))
+      (set! pending #t))
     
     (define (close-tag)
       (if pending
@@ -211,11 +209,23 @@ at the toplevel.)
       (set! tags (cdr tags)))
 
     (lambda (method-name . args)
-      (case method-name
-        ((declaration) (declaration))
-        ((open-tag) (open-tag args))
-        ((close-tag) (close-tag))
-        ((open-close-tag) (open-tag args) (close-tag))))))
+      "call a method. 
+          'declaration
+          'open-tag tag-name [attrs]
+          'close-tag
+          'open-close-tag tag-name [attrs]
+          'text-tag tag-name text [attrs]
+      "
+      (let* ((l (length args))
+             (tag-name (if (> l 0) (list-ref args 0)))
+             (text (if (and (> l 1) (string? (list-ref args 1))) (list-ref args 1) ""))
+             (attrs (if (and (> l 1) (list? (list-ref args (1- l)))) (list-ref args (1- l)) '())))
+        (case method-name
+          ((declaration) (declaration))
+          ((open-tag) (open-tag tag-name attrs))
+          ((close-tag) (close-tag))
+          ((open-close-tag) (open-tag tag-name attrs) (close-tag))
+          ((text-tag) (text-tag tag-name text attrs)))))))
 
 
 % convert a markup object to XML
