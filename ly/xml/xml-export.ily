@@ -154,12 +154,14 @@ at the toplevel.)
 % indent: number of spaces
 % tag-name: symbol
 % attrs: assoc list
+% text: text between open and close tag (how must be 'text-tag)
 % how can be:
-%   'open-tag:		write an open-tag with attributes <element bla="blabla">
-%   'close-tag:		write a close-tag (attrs are ignored) </element>
-%   'open-close-tag:   write a self-closing tag <element bla="blabla"/>
-% port: the output port (#f selects the current output port)
-#(define (output-xml-tag indent tag-name attrs how port)
+%   'open-tag:       write an open-tag with attributes <element bla="blabla">
+%   'close-tag:      write a close-tag (attrs are ignored) </element>
+%   'open-close-tag: write a self-closing tag <element bla="blabla"/>
+%   'text-tag:       write a open and close tag with text <el bla="blabla>text</el>
+% port: the output port
+#(define (output-xml-tag indent tag-name attrs text how port)
    (let ((s (string-append
              (make-string (* indent) #\space)
              "<"
@@ -167,8 +169,11 @@ at the toplevel.)
              (symbol->string tag-name)
              (if (eq? how 'close-tag) "" (attrs->string attrs))
              (if (eq? how 'open-close-tag) "/" "")
-             ">\n"))
-         (port (if (port? port) port (current-output-port))))
+             ">"
+             (if (eq? how 'text-tag)
+                 (string-append (xml-escape text) "</" (symbol->string tag-name) ">")
+                 "")
+             "\n")))
      (display s port)))
   
 
@@ -187,10 +192,11 @@ at the toplevel.)
     (define port (if (pair? args) (car args) (current-output-port)))
     
     (define (output-last-tag how)
-      (let* ((indent (* (- (length tags) 1) indent-width))
-             (tag-name (caar tags))
-             (attrs (cadar tags)))
-        (output-xml-tag indent tag-name attrs how port)))
+      (let ((indent (* (- (length tags) 1) indent-width))
+            (args (car tags)))
+        (apply (lambda (tag-name attrs text)
+                 (output-xml-tag indent tag-name attrs text how port))
+          args)))
     
     (define (declaration)
       (display "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" port))
@@ -198,7 +204,7 @@ at the toplevel.)
     (define (open-tag tag-name attrs)
       (if pending
           (output-last-tag 'open-tag))
-      (set! tags (cons (cons tag-name (list attrs)) tags))
+      (set! tags (cons (list tag-name attrs "") tags))
       (set! pending #t))
     
     (define (close-tag)
@@ -208,6 +214,14 @@ at the toplevel.)
       (set! pending #f)
       (set! tags (cdr tags)))
 
+(define (text-tag tag-name text attrs)
+      (if pending
+          (output-last-tag 'open-tag))
+      (set! tags (cons (list tag-name attrs text) tags))
+      (output-last-tag 'text-tag)
+      (set! pending #f)
+      (set! tags (cdr tags)))
+    
     (lambda (method-name . args)
       "call a method. 
           'declaration
@@ -248,7 +262,7 @@ at the toplevel.)
    (define (mkup->xml mkup)
      "convert a markup object to xml"
      (if (string? mkup)
-         (xml 'open-close-tag 'string `((value . ,mkup)))
+         (xml 'text-tag 'string mkup)
          (begin
           (xml 'open-tag 'm `((name . ,(cmd-name (car mkup)))))
           (for-each mkuparg->xml (cdr mkup))
@@ -361,15 +375,15 @@ at the toplevel.)
     ((and (markup? o) (not (string? o)))
      (markup->lily-xml o xml))
     ((number? o)
-     (xml 'open-close-tag 'number `((value . ,o))))
+     (xml 'text-tag 'number (number->string o)))
     ((string? o)
-     (xml 'open-close-tag 'string `((value  . ,o))))
+     (xml 'text-tag 'string o))
     ((char? o)
-     (xml 'open-close-tag 'char `((value . ,(string o)))))
+     (xml 'text-tag 'char (string o)))
     ((boolean? o)
-     (xml 'open-close-tag 'boolean `((value . ,(if o 'true 'false)))))
+     (xml 'text-tag 'boolean (if o "true" "false")))
     ((symbol? o)
-     (xml 'open-close-tag 'symbol `((value . ,o))))
+     (xml 'text-tag 'symbol (symbol->string o)))
     ((null? o)
      (xml 'open-close-tag 'null)) ; or <list/> ??
     ((list? o)
