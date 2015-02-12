@@ -123,16 +123,16 @@ at the toplevel.)
 % convert an assoc list to an xml attribute string (joined with a space in between)
 #(define (attrs->string attrs)
    (string-join
-     (map (lambda (e)
-            (attr->string (car e) (cdr e))) attrs)
-     " " 'prefix))
-  
+    (map (lambda (e)
+           (attr->string (car e) (cdr e))) attrs)
+    " " 'prefix))
+
 % convert a name value pair to an xml attribute
 % name is a symbol, value can be a symbol, string, or number
 #(define (attr->string name value)
    (string-append (symbol->string name)
      "=\""
-     (cond 
+     (cond
       ((string? value) (attribute-escape value))
       ((number? value) (number->string value))
       ((symbol? value) (attribute-escape (symbol->string value))))
@@ -140,8 +140,8 @@ at the toplevel.)
 
 % escape string for xml body
 #(define (xml-escape s)
-   (ly:string-substitute "<" "&lt;" 
-     (ly:string-substitute ">" "&gt;" 
+   (ly:string-substitute "<" "&lt;"
+     (ly:string-substitute ">" "&gt;"
        (attribute-escape s))))
 
 % escape string for xml attribute
@@ -149,33 +149,6 @@ at the toplevel.)
    (ly:string-substitute "\"" "&quot;"
      (ly:string-substitute "&" "&amp;" s)))
 
-
-% output an XML tag
-% indent: number of spaces
-% tag-name: symbol
-% attrs: assoc list
-% text: text between open and close tag (how must be 'text-tag)
-% how can be:
-%   'open-tag:       write an open-tag with attributes <element bla="blabla">
-%   'close-tag:      write a close-tag (attrs are ignored) </element>
-%   'open-close-tag: write a self-closing tag <element bla="blabla"/>
-%   'text-tag:       write a open and close tag with text <el bla="blabla>text</el>
-% port: the output port
-#(define (output-xml-tag indent tag-name attrs text how port)
-   (let ((s (string-append
-             (make-string (* indent) #\space)
-             "<"
-             (if (eq? how 'close-tag) "/" "")
-             (symbol->string tag-name)
-             (if (eq? how 'close-tag) "" (attrs->string attrs))
-             (if (eq? how 'open-close-tag) "/" "")
-             ">"
-             (if (eq? how 'text-tag)
-                 (string-append (xml-escape text) "</" (symbol->string tag-name) ">")
-                 "")
-             "\n")))
-     (display s port)))
-  
 
 % a nice class that outputs an XML document
 % (define x (XML port)  ;; port is optional
@@ -185,70 +158,99 @@ at the toplevel.)
 % when an open tag is closed and it has no child tags, it is automatically
 % written to output as an open-close tag.
 #(define XML
-  (lambda args
-    (define indent-width 2)
-    (define pending #f)
-    (define tags '())
-    (define port (if (pair? args) (car args) (current-output-port)))
-    
-    (define (output-last-tag how)
-      (let ((indent (* (- (length tags) 1) indent-width))
-            (args (car tags)))
-        (apply (lambda (tag-name attrs text)
-                 (output-xml-tag indent tag-name attrs text how port))
-          args)))
-    
-    (define (declaration)
-      (display "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" port))
-    
-    (define (open-tag tag-name attrs)
-      (if pending
-          (output-last-tag 'open-tag))
-      (set! tags (cons (list tag-name attrs "") tags))
-      (set! pending #t))
-    
-    (define (close-tag)
-      (if pending
-          (output-last-tag 'open-close-tag)
-          (output-last-tag 'close-tag))
-      (set! pending #f)
-      (set! tags (cdr tags)))
+   (lambda args
+     (define indent-width 2)
+     (define pending #f)
+     (define tags '())
+     (define port (if (pair? args) (car args) (current-output-port)))
 
-(define (text-tag tag-name text attrs)
-      (if pending
-          (output-last-tag 'open-tag))
-      (set! tags (cons (list tag-name attrs text) tags))
-      (output-last-tag 'text-tag)
-      (set! pending #f)
-      (set! tags (cdr tags)))
-    
-    (lambda (method-name . args)
-      "call a method. 
+     (define (output-xml-tag indent tag-name attrs text how)
+       "output an XML tag.
+           indent: number of spaces before it
+           tag-name: symbol
+           attrs: assoc list
+           text: text between open and close tag (how must be 'text-tag)
+           how can be:
+            'open-tag:       write an open-tag with attributes <element bla=\"blabla\">
+            'close-tag:      write a close-tag (attrs are ignored) </element>
+            'open-close-tag: write a self-closing tag <element bla=\"blabla\"/>
+            'text-tag:       write a open and close tag with text <el bla=\"blabla\">text</el>
+       "
+       (let ((s (string-append
+                 (make-string (* indent indent-width) #\space)
+                 "<"
+                 (if (eq? how 'close-tag) "/" "")
+                 (symbol->string tag-name)
+                 (if (eq? how 'close-tag) "" (attrs->string attrs))
+                 (if (eq? how 'open-close-tag) "/" "")
+                 ">"
+                 (if (eq? how 'text-tag)
+                     (string-append (xml-escape text) "</" (symbol->string tag-name) ">")
+                     "")
+                 "\n")))
+         (display s port)))
+     
+     (define (output-last-tag how)
+       "output the last tag on the tags stack."
+       (let ((indent (1- (length tags)))
+             (args (car tags)))
+         (apply (lambda (tag-name attrs)
+                  (output-xml-tag indent tag-name attrs "" how))
+           args)))
+
+     (define (declaration)
+       "output an XML declaration."
+       (display "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" port))
+
+     (define (open-tag tag-name attrs)
+       "implementation of open-tag method."
+       (if pending
+           (output-last-tag 'open-tag))
+       (set! tags (cons (list tag-name attrs) tags))
+       (set! pending #t))
+
+     (define (close-tag)
+       "implementation of close-tag method."
+       (if pending
+           (output-last-tag 'open-close-tag)
+           (output-last-tag 'close-tag))
+       (set! pending #f)
+       (set! tags (cdr tags)))
+
+     (define (text-tag tag-name text attrs)
+       "implementation of text-tag method."
+       (if pending
+           (output-last-tag 'open-tag))
+       (output-xml-tag (length tags) tag-name attrs text 'text-tag)
+       (set! pending #f))
+
+     (lambda (method-name . args)
+       "call a method. 
           'declaration
           'open-tag tag-name [attrs]
           'close-tag
           'open-close-tag tag-name [attrs]
           'text-tag tag-name text [attrs]
       "
-      (let* ((l (length args))
-             (tag-name (if (> l 0) (list-ref args 0)))
-             (text (if (and (> l 1) (string? (list-ref args 1))) (list-ref args 1) ""))
-             (attrs (if (and (> l 1) (list? (list-ref args (1- l)))) (list-ref args (1- l)) '())))
-        (case method-name
-          ((declaration) (declaration))
-          ((open-tag) (open-tag tag-name attrs))
-          ((close-tag) (close-tag))
-          ((open-close-tag) (open-tag tag-name attrs) (close-tag))
-          ((text-tag) (text-tag tag-name text attrs)))))))
+       (let* ((l (length args))
+              (tag-name (if (> l 0) (list-ref args 0)))
+              (text (if (and (> l 1) (string? (list-ref args 1))) (list-ref args 1) ""))
+              (attrs (if (and (> l 1) (list? (list-ref args (1- l)))) (list-ref args (1- l)) '())))
+         (case method-name
+           ((declaration) (declaration))
+           ((open-tag) (open-tag tag-name attrs))
+           ((close-tag) (close-tag))
+           ((open-close-tag) (open-tag tag-name attrs) (close-tag))
+           ((text-tag) (text-tag tag-name text attrs)))))))
 
 
 % convert a markup object to XML
 #(define (markup->lily-xml mkup xml)
-   
+
    (define (cmd-name proc)
      "return the name of the markup procedure"
      (symbol->string (procedure-name proc)))
-   
+
    (define (mkuparg->xml arg)
      "convert markup arguments to xml"
      (cond
@@ -267,7 +269,7 @@ at the toplevel.)
           (xml 'open-tag 'm `((name . ,(cmd-name (car mkup)))))
           (for-each mkuparg->xml (cdr mkup))
           (xml 'close-tag))))
-   
+
    ;; wrap markup in a toplevel <markup> tag
    (xml 'open-tag 'markup)
    (mkuparg->xml mkup)
@@ -296,57 +298,57 @@ at the toplevel.)
 #(define (obj->lily-xml o xml)
    (cond
     ((ly:music? o)
-      (let ((name (ly:music-property o 'name))
-            (e (ly:music-property o 'element))
-            (es (ly:music-property o 'elements))
-            (as (ly:music-property o 'articulations))
-            (tw (ly:music-property o 'tweaks))
-            (location (ly:music-property o 'origin))
-            (pitch (ly:music-property o 'pitch))
-            (duration (ly:music-property o 'duration))
-            (properties
-             (filter
-              (lambda (prop)
-                (not (memq (car prop)
-                       '(name element elements articulations tweaks origin pitch duration))))
-              (ly:music-mutable-properties o)))
-            )
-        (xml 'open-tag 'music `((name . ,name)))
-        (if (ly:input-location? location)
-            (obj->lily-xml location xml))
-        (if (ly:pitch? pitch)
-            (obj->lily-xml pitch xml))
-        (if (ly:duration? duration)
-            (obj->lily-xml duration xml))
-        (if (ly:music? e)
-            (begin 
-              (xml 'open-tag 'element)
-              (obj->lily-xml e xml)
-              (xml 'close-tag)))
-        (if (and (list? es) (not (null? es)))
-            (begin 
-              (xml 'open-tag 'elements)
-              (for-each (lambda (e)
-                          (obj->lily-xml e xml)) es)
-              (xml 'close-tag 'elements)))
-        (if (and (list? as) (not (null? as)))
-            (begin 
-              (xml 'open-tag 'articulations)
-              (for-each (lambda (e)
-                          (obj->lily-xml e xml)) as)
-              (xml 'close-tag 'articulations )))
-        (if (and (list? tw) (not (null? tw)))
-            (begin 
-              (xml 'open-tag 'tweaks)
-              (for-each (lambda (e)
-                          (obj->lily-xml e xml)) tw)
-              (xml 'close-tag 'tweaks)))
-        (for-each (lambda (prop)
-                    (xml 'open-tag 'property `((name . ,(car prop))))
-                    (obj->lily-xml (cdr prop) xml)
-                    (xml 'close-tag)) properties)
-        (xml 'close-tag)))
-    
+     (let ((name (ly:music-property o 'name))
+           (e (ly:music-property o 'element))
+           (es (ly:music-property o 'elements))
+           (as (ly:music-property o 'articulations))
+           (tw (ly:music-property o 'tweaks))
+           (location (ly:music-property o 'origin))
+           (pitch (ly:music-property o 'pitch))
+           (duration (ly:music-property o 'duration))
+           (properties
+            (filter
+             (lambda (prop)
+               (not (memq (car prop)
+                      '(name element elements articulations tweaks origin pitch duration))))
+             (ly:music-mutable-properties o)))
+           )
+       (xml 'open-tag 'music `((name . ,name)))
+       (if (ly:input-location? location)
+           (obj->lily-xml location xml))
+       (if (ly:pitch? pitch)
+           (obj->lily-xml pitch xml))
+       (if (ly:duration? duration)
+           (obj->lily-xml duration xml))
+       (if (ly:music? e)
+           (begin
+            (xml 'open-tag 'element)
+            (obj->lily-xml e xml)
+            (xml 'close-tag)))
+       (if (and (list? es) (not (null? es)))
+           (begin
+            (xml 'open-tag 'elements)
+            (for-each (lambda (e)
+                        (obj->lily-xml e xml)) es)
+            (xml 'close-tag 'elements)))
+       (if (and (list? as) (not (null? as)))
+           (begin
+            (xml 'open-tag 'articulations)
+            (for-each (lambda (e)
+                        (obj->lily-xml e xml)) as)
+            (xml 'close-tag 'articulations )))
+       (if (and (list? tw) (not (null? tw)))
+           (begin
+            (xml 'open-tag 'tweaks)
+            (for-each (lambda (e)
+                        (obj->lily-xml e xml)) tw)
+            (xml 'close-tag 'tweaks)))
+       (for-each (lambda (prop)
+                   (xml 'open-tag 'property `((name . ,(car prop))))
+                   (obj->lily-xml (cdr prop) xml)
+                   (xml 'close-tag)) properties)
+       (xml 'close-tag)))
+
     ((ly:moment? o)
      (xml 'open-close-tag 'moment
        `((main-numer . ,(ly:moment-main-numerator o))
@@ -388,16 +390,16 @@ at the toplevel.)
      (xml 'open-close-tag 'null)) ; or <list/> ??
     ((list? o)
      (begin
-       (xml 'open-tag 'list)
-       (for-each (lambda (e)
-                   (obj->lily-xml e xml)) o)
-       (xml 'close-tag)))
+      (xml 'open-tag 'list)
+      (for-each (lambda (e)
+                  (obj->lily-xml e xml)) o)
+      (xml 'close-tag)))
     ((pair? o)
      (begin
-       (xml 'open-tag 'pair)
-       (obj->lily-xml (car o) xml)
-       (obj->lily-xml (cdr o) xml)
-       (xml 'close-tag)))
+      (xml 'open-tag 'pair)
+      (obj->lily-xml (car o) xml)
+      (obj->lily-xml (cdr o) xml)
+      (xml 'close-tag)))
     ((procedure? o)
      (let* ((name (procedure-name o))
             (attrs (if name `((name . ,name)) '()))
@@ -435,15 +437,15 @@ at the toplevel.)
                   (obj->lily-xml score xml))
         (reverse (ly:book-scores o)))
       (xml 'close-tag)))
-      
+
     ))
 
 
 #(define-public (xml-export obj)
    "Dump an XML representation of the specified object to the current output port."
-  (let ((xml (XML)))
-    (xml 'declaration)
-    (obj->lily-xml obj xml)))
+   (let ((xml (XML)))
+     (xml 'declaration)
+     (obj->lily-xml obj xml)))
 
 
 displayLilyXML = #
