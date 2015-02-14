@@ -142,12 +142,16 @@ at the toplevel.)
 #(define (xml-escape s)
    (ly:string-substitute "<" "&lt;"
      (ly:string-substitute ">" "&gt;"
-       (attribute-escape s))))
+       (ly:string-substitute "\"" "&quot;"
+         (ly:string-substitute "&" "&amp;"
+           s)))))
 
 % escape string for xml attribute
 #(define (attribute-escape s)
-   (ly:string-substitute "\"" "&quot;"
-     (ly:string-substitute "&" "&amp;" s)))
+   (ly:string-substitute "\n" "&#10;"
+     (ly:string-substitute "\"" "&quot;"
+       (ly:string-substitute "&" "&amp;"
+         s))))
 
 
 % a nice class that outputs an XML document
