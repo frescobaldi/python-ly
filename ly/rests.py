@@ -46,3 +46,17 @@ def spacer2fmrest(cursor):
         for token in source:
             if isinstance(token, ly.lex.lilypond.Spacer):
                 d[token.pos:token.end] = 'R'
+
+def restcomm2rest(cursor):
+    """Replace rests by rest comman (\\rest) with plain rests (r). """
+    prev_note = None
+    source = ly.document.Source(cursor, True, tokens_with_position=True)
+    with cursor.document as d:
+        for token in source:
+            if isinstance(token, ly.lex.lilypond.Note):
+                prev_note = token
+                continue
+            if isinstance(token, ly.lex.lilypond.Command):
+                if token == '\\rest' and prev_note:
+                    d[prev_note.pos:prev_note.end] = 'r'
+                    del d[token.pos:token.end]
