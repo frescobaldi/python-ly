@@ -90,6 +90,7 @@ _start = (
     ly.lex.lilypond.OctaveCheck,
     ly.lex.lilypond.Duration,
     ly.lex.lilypond.Tie,
+    ly.lex.lilypond.Tempo
 )
 
 _stay = _start[4:]
@@ -197,7 +198,7 @@ def rhythm_remove(cursor):
 def rhythm_implicit(cursor):
     """Remove reoccurring durations."""
     source = ly.document.Source(cursor, True, tokens_with_position=True)
-    dtokens = duration_tokens(source, ly.lex.lilypond.Duration)
+    dtokens = duration_tokens(source, ly.lex.lilypond.Duration, ly.lex.lilypond.Tempo)
     for tokens in dtokens:
         break
     else:
@@ -213,7 +214,7 @@ def rhythm_implicit(cursor):
 def rhythm_implicit_per_line(cursor):
     """Remove reoccurring durations, but always write one on a new line."""
     source = ly.document.Source(cursor, True, tokens_with_position=True)
-    dtokens = duration_tokens_pos(source, ly.lex.lilypond.Duration)
+    dtokens = duration_tokens_pos(source, ly.lex.lilypond.Duration, ly.lex.lilypond.Tempo)
     for pos, tokens in dtokens:
         break
     else:
