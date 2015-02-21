@@ -48,15 +48,32 @@ def spacer2fmrest(cursor):
                 d[token.pos:token.end] = 'R'
 
 def restcomm2rest(cursor):
-    """Replace rests by rest comman (\\rest) with plain rests (r). """
-    prev_note = None
-    source = ly.document.Source(cursor, True, tokens_with_position=True)
-    with cursor.document as d:
+    """Replace rests by rest command (\\rest) with plain rests (r). """
+
+    def get_comm_rests(source):
+        """Catch all rests by rest command (\\rest) from source."""
+        rest_tokens = None
         for token in source:
             if isinstance(token, ly.lex.lilypond.Note):
-                prev_note = token
+                rest_tokens = [token]
                 continue
-            if isinstance(token, ly.lex.lilypond.Command):
-                if token == '\\rest' and prev_note:
-                    d[prev_note.pos:prev_note.end] = 'r'
-                    del d[token.pos:token.end]
+            if rest_tokens and isinstance(token, ly.lex.Space):
+                rest_tokens.append(token)
+                continue
+            if rest_tokens and isinstance(token, ly.lex.lilypond.Command):
+                if token == '\\rest':
+                    rest_tokens.append(token)
+                    yield rest_tokens
+                    rest_tokens = None
+                    
+    source = ly.document.Source(cursor, True, tokens_with_position=True)
+    with cursor.document as d:
+        for rt in get_comm_rests(source):
+            note = rt[0]
+            space = rt[-2]
+            comm = rt[-1]
+            d[note.pos:note.end] = 'r'
+            del d[space.pos:space.end]
+            del d[comm.pos:comm.end]
+
+    
