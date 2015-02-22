@@ -30,25 +30,25 @@ import ly.document
 import ly.lex.lilypond
 
 
-def fmrest2spacer(cursor):
-    """Replace full measusure rests (R) with spacer rests (s). """
+def replace_fmrest(cursor, replace_token):
+    """Replace full measusure rests (R) with optional token. """
     source = ly.document.Source(cursor, True, tokens_with_position=True)
     with cursor.document as d:
         for token in source:
             if isinstance(token, ly.lex.lilypond.Rest):
                 if token == 'R':
-                    d[token.pos:token.end] = 's'
+                    d[token.pos:token.end] = replace_token
 
-def spacer2fmrest(cursor):
-    """Replace spacer rests (s) with full measusure rests (R). """
+def replace_spacer(cursor, replace_token):
+    """Replace spacer rests (s) with optional token. """
     source = ly.document.Source(cursor, True, tokens_with_position=True)
     with cursor.document as d:
         for token in source:
             if isinstance(token, ly.lex.lilypond.Spacer):
-                d[token.pos:token.end] = 'R'
+                d[token.pos:token.end] = replace_token
 
-def restcomm2rest(cursor):
-    """Replace rests by rest command (\\rest) with plain rests (r). """
+def replace_restcomm(cursor, replace_token):
+    """Replace rests by rest command (\\rest) with optional token. """
 
     def get_comm_rests(source):
         """Catch all rests by rest command (\\rest) from source."""
@@ -72,8 +72,7 @@ def restcomm2rest(cursor):
             note = rt[0]
             space = rt[-2]
             comm = rt[-1]
-            d[note.pos:note.end] = 'r'
+            d[note.pos:note.end] = replace_token
             del d[space.pos:space.end]
             del d[comm.pos:comm.end]
 
-    
