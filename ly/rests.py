@@ -29,6 +29,14 @@ from __future__ import unicode_literals
 import ly.document
 import ly.lex.lilypond
 
+def replace_rest(cursor, replace_token):
+    """Replace full rests (r) with optional token. """
+    source = ly.document.Source(cursor, True, tokens_with_position=True)
+    with cursor.document as d:
+        for token in source:
+            if isinstance(token, ly.lex.lilypond.Rest):
+                if token == 'r':
+                    d[token.pos:token.end] = replace_token
 
 def replace_fmrest(cursor, replace_token):
     """Replace full measusure rests (R) with optional token. """
