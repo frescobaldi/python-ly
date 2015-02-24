@@ -42,10 +42,10 @@ re_dot = r"\."
 re_scaling = r"\*[\t ]*\d+(/\d+)?"
 
 # an identifier allowing letters and single hyphens inbetween
-re_identifier = r"[^\W\d_]+(-[^\W\d_]+)*"
+re_identifier = r"[^\W\d_]+([_-][^\W\d_]+)*"
 
 # the lookahead pattern for the end of an identifier (ref)
-re_identifier_end = r"(?!-?[^\W\d])"
+re_identifier_end = r"(?![_-]?[^\W\d])"
 
 
 class Identifier(_token.Token):
