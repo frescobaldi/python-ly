@@ -39,7 +39,7 @@ def replace_rest(cursor, replace_token):
                     d[token.pos:token.end] = replace_token
 
 def replace_fmrest(cursor, replace_token):
-    """Replace full measusure rests (R) with optional token. """
+    """Replace full measure rests (R) with optional token. """
     source = ly.document.Source(cursor, True, tokens_with_position=True)
     with cursor.document as d:
         for token in source:

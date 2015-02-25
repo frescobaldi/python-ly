@@ -165,7 +165,7 @@ If there is a default value, it is written between brackets:
 
   ``inline-style`` [``false``]
          whether to use inline style attributes for syntax-highlighted HTML.
-         By default a css shylesheet is embedded.
+         By default a css stylesheet is embedded.
 
   ``number-lines`` [``false``]
          whether to add line numbers when creating syntax-highlighted HTML.

@@ -72,7 +72,7 @@ lilypond_music_commands = (
     'addlyrics',
     'addQuote',
     'afterGrace',
-    #'afterGraceFraction', # this is a parser variabl
+    #'afterGraceFraction', # this is a parser variable
     'aikenHeads',
     'aikenHeadsMinor',
     'allowPageTurn',

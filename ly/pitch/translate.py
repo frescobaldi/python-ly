@@ -35,7 +35,7 @@ def translate(cursor, language):
     
     Returns True if there also was a \language or \include language command 
     that was changed. If not and the cursor specified only a part of the 
-    document, you could warn the user that a langauge or include command 
+    document, you could warn the user that a language or include command
     should be added to the document. Or you could call insert_language to 
     add a language command to the top of the document.
     

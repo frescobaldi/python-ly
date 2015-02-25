@@ -42,12 +42,12 @@ also test for the type of the token (e.g. if isinstance(token, Number)...).
 The tokens also carry a 'pos' and an 'end' attribute, specifying their position
 in the parsed text string.
 
-A token may cause a different Parser to be enterend, of the current Parser to be
+A token may cause a different Parser to be entered, of the current Parser to be
 left, etc. This is done by implementing the update_state() method of the Token
 subclass. This method is called automatically when the Token is instantiated.
 
 The State maintains the parsing state (the list of active Parser instances).
-A State can be frozen to be thawn later to resume parsing text starting in a
+A State can be frozen to be thawed later to resume parsing text starting in a
 particular context. A Fridge can be used to store and recover a state under a
 simple integer number.
 
@@ -226,7 +226,7 @@ class State(object):
         self.state[-1] = parser
     
     def depth(self):
-        """Return the number of parsers currenly active (1 or more).
+        """Return the number of parsers currently active (1 or more).
         
         You can use this e.g. to keep parsing until some context ends::
         

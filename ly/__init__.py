@@ -30,7 +30,7 @@ of some modules:
   * ly.lex: a parser for LilyPond, Scheme, and other formats, using slexer
   * ly.music: a tree structure of the contents of a document
   * ly.pitch: functions for translating, transposing etc
-  * ly.rhythm: functions dealing with rhyhtm
+  * ly.rhythm: functions dealing with rhythm
   * ly.indent: indent LilyPond text
   * ly.reformat: format LilyPond text
   * ly.dom: (deprecated) tree structure to build LilyPond text from

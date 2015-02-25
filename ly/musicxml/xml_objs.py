@@ -101,7 +101,7 @@ class IterateXmlObjs():
             print("Warning: empty part:", part.name)
 
     def iterate_bar(self, bar):
-        """The objects in the bar is outputed to the xml-file."""
+        """The objects in the bar are output to the xml-file."""
         self.musxml.create_measure()
         for obj in bar.obj_list:
             if isinstance(obj, BarAttr):
@@ -353,7 +353,7 @@ class ScoreSection():
 
 
 class Snippet(ScoreSection):
-    """ Short section indended to be merged.
+    """ Short section intended to be merged.
     Holds reference to the barlist to be merged into."""
     def __init__(self, name, merge_into):
         ScoreSection.__init__(self, name)

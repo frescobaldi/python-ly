@@ -458,7 +458,7 @@ class Document(DocumentBase):
                 s.text = s.text[:start - s.position]
                 del self._blocks[s.index+1:]
             else:
-                # remove til end position
+                # remove until the end position
                 e = self.block(end)
                 s.text = s.text[:start - s.position] + e.text[end - e.position:]
                 del self._blocks[s.index+1:e.index+1]
