@@ -85,6 +85,7 @@ _start = (
     ly.lex.lilypond.Skip,
     ly.lex.lilypond.Note,
     ly.lex.lilypond.ChordEnd,
+    ly.lex.lilypond.Q,
     ly.lex.lilypond.Octave,
     ly.lex.lilypond.Accidental,
     ly.lex.lilypond.OctaveCheck,
@@ -93,7 +94,7 @@ _start = (
     ly.lex.lilypond.Tempo
 )
 
-_stay = _start[4:]
+_stay = _start[5:]
 
 
 def duration_tokens(source, *classes):
