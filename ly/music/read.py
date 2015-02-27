@@ -111,7 +111,7 @@ class dispatcher_class(dispatcher):
 
 
 class Reader(object):
-    """Reads tokens from a Source and builds a meaningful tree stucture."""
+    """Reads tokens from a Source and builds a meaningful tree structure."""
     
     _commands = dispatcher()
     _keywords = dispatcher()
@@ -133,7 +133,7 @@ class Reader(object):
     def set_language(self, lang):
         """Changes the pitch name language to use.
         
-        Called internally when \language or \include tokens are encoutered
+        Called internally when \language or \include tokens are encountered
         with a valid language name/file.
         
         Sets the language attribute to the language name.

@@ -214,7 +214,7 @@ _pitchWriters = {}
 
 
 def pitchReader(language):
-    """Returns a PitchReader for the speficied language."""
+    """Returns a PitchReader for the specified language."""
     try:
         return _pitchReaders[language]
     except KeyError:
@@ -223,7 +223,7 @@ def pitchReader(language):
 
 
 def pitchWriter(language):
-    """Returns a PitchWriter for the speficied language."""
+    """Returns a PitchWriter for the specified language."""
     try:
         return _pitchWriters[language]
     except KeyError:
@@ -247,7 +247,7 @@ class PitchIterator(object):
     def setLanguage(self, lang):
         """Changes the pitch name language to use.
         
-        Called internally when \language or \include tokens are encoutered
+        Called internally when \language or \include tokens are encountered
         with a valid language name/file.
         
         Sets the language attribute to the language name and the read attribute
@@ -279,7 +279,7 @@ class PitchIterator(object):
     def pitches(self):
         """Yields all tokens, but collects Note and Octave tokens.
         
-        When a Note is encoutered, also reads octave and octave check and then
+        When a Note is encountered, also reads octave and octave check and then
         a Pitch is yielded instead of the tokens.
         
         """
