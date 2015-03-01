@@ -71,6 +71,7 @@ class Mediator():
         self.lyric_nr = 1
         self.ongoing_wedge = False
         self.octdiff = 0
+        self.prev_tremolo = 8
 
     def new_header_assignment(self, name, value):
         """Distributing header information."""
@@ -575,11 +576,15 @@ class Mediator():
         if self.current_note.tremolo[1]: #tremolo already set
             self.current_note.set_tremolo(trem_type)
         else:
-            if not duration:
+            if repeats:
                 duration = int(self.dur_token)
                 bs, durtype = calc_trem_dur(repeats, self.current_note.duration, duration)
                 self.current_note.duration = bs
                 self.current_note.type = durtype
+            elif not duration:
+                duration = self.prev_tremolo
+            else:
+                self.prev_tremolo = duration
             self.current_note.set_tremolo(trem_type, duration)
 
     def new_trill_spanner(self, end=None):
@@ -833,7 +838,7 @@ def calc_trem_dur(repeats, base_scaling, duration):
     base = base_scaling[0]
     scale = base_scaling[1]
     new_base = base * repeats
-    new_type = xml_objs.durval2type(str(duration/repeats))
+    new_type = xml_objs.durval2type(str(duration // repeats))
     return (new_base, scale), new_type
 
 def get_line_style(style):
