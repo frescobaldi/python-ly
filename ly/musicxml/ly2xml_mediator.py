@@ -838,7 +838,12 @@ def calc_trem_dur(repeats, base_scaling, duration):
     base = base_scaling[0]
     scale = base_scaling[1]
     new_base = base * repeats
-    new_type = xml_objs.durval2type(str(duration // repeats))
+    if repeats > duration:
+        import ly.duration
+        trem_length = ly.duration.tostring(int((repeats // duration) * -0.5))
+    else:
+        trem_length = str(duration // repeats)
+    new_type = xml_objs.durval2type(trem_length)
     return (new_base, scale), new_type
 
 def get_line_style(style):
