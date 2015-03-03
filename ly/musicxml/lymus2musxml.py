@@ -77,6 +77,7 @@ class ParseSource():
         self.with_contxt = None
         self.schm_assignm = None
         self.tempo = ()
+        self.tremolo = False
 
     def parse_tree(self, mustree):
         # print(mustree.dump())
@@ -222,7 +223,7 @@ class ParseSource():
                 self.ttype = ""
             if self.grace_seq:
                 self.mediator.new_grace()
-            if self.trem_rep:
+            if self.trem_rep and not self.look_ahead(note, ly.music.items.Duration):
                 self.mediator.set_tremolo(trem_type='start', repeats=self.trem_rep)
         else:
             if isinstance(note.parent(), ly.music.items.Relative):
@@ -239,8 +240,13 @@ class ParseSource():
         if self.tempo:
             self.mediator.new_tempo(duration.token, duration.tokens, *self.tempo)
             self.tempo = ()
+        elif self.tremolo:
+            self.mediator.set_tremolo(duration=int(duration.token))
+            self.tremolo = False
         else:
             self.mediator.new_duration_token(duration.token, duration.tokens)
+            if self.trem_rep:
+                self.mediator.set_tremolo(trem_type='start', repeats=self.trem_rep)
 
     def Tempo(self, tempo):
         """ Tempo direction, e g '4 = 80' """
@@ -319,7 +325,11 @@ class ParseSource():
             self.trem_rep = repeat.repeat_count()
 
     def Tremolo(self, tremolo):
-        self.mediator.set_tremolo(duration=int(tremolo.duration.token))
+        """A tremolo item ":"."""
+        if self.look_ahead(tremolo, ly.music.items.Duration):
+            self.tremolo = True
+        else:
+            self.mediator.set_tremolo()
 
     def With(self, cont_with):
         """A \\with ... construct."""
@@ -426,9 +436,9 @@ class ParseSource():
                 self.mediator.new_repeat('backward')
             elif end.node.specifier() == 'tremolo':
                 if self.look_ahead(end.node, ly.music.items.MusicList):
-                    self.mediator.set_tremolo(trem_type="stop", repeats=self.trem_rep)
+                    self.mediator.set_tremolo(trem_type="stop")
                 else:
-                    self.mediator.set_tremolo(trem_type="single", repeats=self.trem_rep)
+                    self.mediator.set_tremolo(trem_type="single")
                 self.trem_rep = 0
         elif isinstance(end.node, ly.music.items.Context):
             self.in_context = False

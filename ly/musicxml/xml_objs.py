@@ -692,7 +692,11 @@ def durval2type(durval):
         "16th", "32nd", "64th",
         "128th", "256th", "512th", "1024th", "2048th"
     ] # Note: 2048 is supported by ly but not by MusicXML!
-    return xml_types[ly.duration.durations.index(str(durval))]
+    try:
+        type_index = ly.duration.durations.index(str(durval))
+    except ValueError:
+        type_index = 5
+    return xml_types[type_index]
 
 def dur2lines(dur):
     if dur == 8:
