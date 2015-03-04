@@ -79,6 +79,7 @@ class ParseSource():
         self.tempo = ()
         self.tremolo = False
         self.tupl_span = False
+        self.unset_tuplspan = False
 
     def parse_tree(self, mustree):
         # print(mustree.dump())
@@ -292,6 +293,7 @@ class ParseSource():
             self.fraction = (scaler.numerator, scaler.denominator)
         if self.look_ahead(scaler, ly.music.items.Duration):
             self.tupl_span = True
+            self.unset_tuplspan = True
         self.tuplet = True
 
     def Number(self, number):
@@ -374,9 +376,17 @@ class ParseSource():
             self.mediator.new_trill_spanner("stop")
         elif command.token == '\\ottava':
             self.ottava = True
+        elif command.token == '\\default':
+            if self.tupl_span:
+                self.mediator.unset_tuplspan_dur()
+                self.tupl_span = False
         else:
             if command.token not in excls:
                 print("Unknown command:", command.token)
+
+    def UserCommand(self, usercommand):
+        """Music variables are substituted so this must be something else."""
+        self.tupl_span = True
 
     def String(self, string):
         prev = self.get_previous_node(string)
@@ -429,11 +439,13 @@ class ParseSource():
 
     def End(self, end):
         if isinstance(end.node, ly.music.items.Scaler):
-            self.mediator.unset_tuplspan_dur()
+            if self.unset_tuplspan:
+                self.mediator.unset_tuplspan_dur()
+                self.unset_tuplspan = False
             if end.node.token == '\\scaleDurations':
                 self.mediator.change_to_tuplet(self.fraction, "")
             else:
-                self.mediator.change_to_tuplet(self.fraction, "stop")
+                self.mediator.change_to_tuplet(self.fraction, "stop", check_dur=False)
             self.tuplet = False
             self.fraction = None
         elif isinstance(end.node, ly.music.items.Grace): #Grace

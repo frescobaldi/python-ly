@@ -505,10 +505,10 @@ class Mediator():
             rest_copy = xml_objs.BarRest(dur, voice=voc, show_type=st, skip=sk)
             self.add_to_bar(rest_copy)
 
-    def change_to_tuplet(self, tfraction, ttype):
+    def change_to_tuplet(self, tfraction, ttype, check_dur=True):
         """Change the current note into a tuplet note."""
         tuplscaling = Fraction(tfraction[0], tfraction[1])
-        if self.tupl_dur:
+        if check_dur and self.tupl_dur:
             if self.tupl_sum == 0:
                 ttype = "start"
             base, scaling = self.current_lynote.duration
@@ -525,7 +525,7 @@ class Mediator():
         self.tupl_dur = base * scaling
 
     def unset_tuplspan_dur(self):
-        """Reset after use."""
+        """Reset tuplet duration sum and tuplet spanner duration."""
         self.tupl_sum = 0
         self.tupl_dur = 0
 
