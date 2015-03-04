@@ -1240,6 +1240,13 @@ class Scheme(Item):
         """A basic way to get a quoted string value (without the quotes)."""
         return ''.join(i.value() for i in self.find(String))
 
+    def get_ly_make_moment(self):
+        """A basic way to get a ly:make-moment fraction."""
+        tokens = [i.token for i in self.find(SchemeItem)]
+        if len(tokens) == 3 and tokens[0] == 'ly:make-moment':
+            if tokens[1].isdigit() and tokens[2].isdigit():
+                return Fraction(int(tokens[1]), int(tokens[2]))
+
 
 class SchemeItem(Item):
     """Any scheme token."""
