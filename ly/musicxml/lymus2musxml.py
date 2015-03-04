@@ -78,6 +78,7 @@ class ParseSource():
         self.schm_assignm = None
         self.tempo = ()
         self.tremolo = False
+        self.tupl_span = False
 
     def parse_tree(self, mustree):
         # print(mustree.dump())
@@ -243,6 +244,9 @@ class ParseSource():
         elif self.tremolo:
             self.mediator.set_tremolo(duration=int(duration.token))
             self.tremolo = False
+        elif self.tupl_span:
+            self.mediator.set_tuplspan_dur(duration.token, duration.tokens)
+            self.tupl_span = False
         else:
             self.mediator.new_duration_token(duration.token, duration.tokens)
             if self.trem_rep:
@@ -286,6 +290,8 @@ class ParseSource():
         elif scaler.token == '\\tuplet':
             self.ttype = "start"
             self.fraction = (scaler.numerator, scaler.denominator)
+        if self.look_ahead(scaler, ly.music.items.Duration):
+            self.tupl_span = True
         self.tuplet = True
 
     def Number(self, number):
@@ -423,6 +429,7 @@ class ParseSource():
 
     def End(self, end):
         if isinstance(end.node, ly.music.items.Scaler):
+            self.mediator.unset_tuplspan_dur()
             if end.node.token == '\scaleDurations':
                 self.mediator.change_to_tuplet(self.fraction, "")
             else:

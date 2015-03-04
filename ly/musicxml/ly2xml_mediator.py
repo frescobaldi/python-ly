@@ -72,6 +72,8 @@ class Mediator():
         self.ongoing_wedge = False
         self.octdiff = 0
         self.prev_tremolo = 8
+        self.tupl_dur = 0
+        self.tupl_sum = 0
 
     def new_header_assignment(self, name, value):
         """Distributing header information."""
@@ -504,8 +506,28 @@ class Mediator():
             self.add_to_bar(rest_copy)
 
     def change_to_tuplet(self, tfraction, ttype):
+        """Change the current note into a tuplet note."""
+        tuplscaling = Fraction(tfraction[0], tfraction[1])
+        if self.tupl_dur:
+            if self.tupl_sum == 0:
+                ttype = "start"
+            base, scaling = self.current_lynote.duration
+            self.tupl_sum += (1 / tuplscaling) * base * scaling
+            if self.tupl_sum == self.tupl_dur:
+                ttype = "stop"
+                self.tupl_sum = 0
         self.current_note.set_tuplet(tfraction, ttype)
-        self.check_divs(Fraction(tfraction[0], tfraction[1]))
+        self.check_divs(tuplscaling)
+
+    def set_tuplspan_dur(self, token, tokens):
+        """Catch duration set by the tupletSpannerDuration property."""
+        base, scaling = ly.duration.base_scaling((token,) + tokens)
+        self.tupl_dur = base * scaling
+
+    def unset_tuplspan_dur(self):
+        """Reset after use."""
+        self.tupl_sum = 0
+        self.tupl_dur = 0
 
     def tie_to_next(self):
         tie_type = 'start'
