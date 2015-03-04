@@ -225,7 +225,7 @@ def transpose(cursor, transposer):
                     absolute(context())
                 elif isinstance(t, ly.lex.lilypond.ChordMode):
                     chordmode()
-                elif isinstance(t, ly.lex.lilypond.Command) and t == '\stringTuning':
+                elif isinstance(t, ly.lex.lilypond.Command) and t == '\\stringTuning':
                     string_tuning()
                 elif isinstance(t, ly.lex.lilypond.PitchCommand):
                     if t == "\\transposition":

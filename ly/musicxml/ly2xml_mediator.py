@@ -480,7 +480,7 @@ class Mediator():
             self.current_note = xml_objs.BarRest(dur, self.voice)
         elif rtype == 'R':
             self.current_note = xml_objs.BarRest(dur, self.voice, show_type=False)
-        elif rtype == 's' or rtype == '\skip':
+        elif rtype == 's' or rtype == '\\skip':
             self.current_note = xml_objs.BarRest(dur, self.voice, skip=True)
         self.check_current_note(rest=True)
 

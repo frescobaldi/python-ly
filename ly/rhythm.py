@@ -66,6 +66,17 @@ def music_tokens(source, command=False, chord=False):
     for token in source:
         if isinstance(source.state.parser(), skip_parsers):
             continue
+        # make sure to skip the duration tokens in a \tuplet command
+        if token == '\\tuplet':
+            for token in source:
+                if isinstance(token, ly.lex.lilypond.Duration):
+                    for token in source:
+                        if not isinstance(token, ly.lex.lilypond.Duration):
+                            break
+                    break
+                elif not isinstance(token, (ly.lex.Space, ly.lex.Numeric)):
+                    break
+        
         while isinstance(token, _start):
             l = [token]
             for token in source:

@@ -5,6 +5,8 @@ Changes for python-ly
 - added ly.rests containing various rest manipulations
 - robust Python 3 support, Python 3 is now recommended, although 2.7 will
   still be supported for the foreseeable future.
+- don't yield the duration in a \tuplet command as a music token (issue
+  wbsoft/frescobaldi#631)
 - a script `xml-export.ily` has been included to dump the music structure
   inside LilyPond to an XML file. This is not used yet, but could be used in the
   future to use LilyPond to parse files and build music, and then export it

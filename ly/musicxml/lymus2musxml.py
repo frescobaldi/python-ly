@@ -430,7 +430,7 @@ class ParseSource():
     def End(self, end):
         if isinstance(end.node, ly.music.items.Scaler):
             self.mediator.unset_tuplspan_dur()
-            if end.node.token == '\scaleDurations':
+            if end.node.token == '\\scaleDurations':
                 self.mediator.change_to_tuplet(self.fraction, "")
             else:
                 self.mediator.change_to_tuplet(self.fraction, "stop")
