@@ -279,24 +279,24 @@ def transpose(cursor, transposer):
             pitches.write(p)
 
     def chordmode():
-        """Called inside \\chordmode or \\chords."""
+        r"""Called inside \chordmode or \chords."""
         for p in getpitches(context()):
             transpose(p, 0)
             
     def string_tuning():
-        """Called after \\stringTuning. Ignores the following chord expression."""
+        r"""Called after \stringTuning. Ignores the following chord expression."""
         for t in tsource:
             if isinstance(t, ly.lex.lilypond.ChordStart):
                 consume()
             break
     
     def absolute(tokens):
-        """Called when outside a possible \\relative environment."""
+        r"""Called when outside a possible \relative environment."""
         for p in getpitches(tokens):
             transpose(p)
     
     def relative():
-        """Called when \\relative is encountered."""
+        r"""Called when \relative is encountered."""
         def transposeRelative(p, lastPitch):
             """Transposes a relative pitch; returns the pitch in absolute form."""
             # absolute pitch determined from untransposed pitch of lastPitch

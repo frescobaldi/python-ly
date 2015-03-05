@@ -73,12 +73,12 @@ def translate(cursor, language):
 
 
 def insert_language(document, language, version=None):
-    """Inserts a language command in the document.
+    r"""Inserts a language command in the document.
     
     The command is inserted at the top or just below the version line.
     
-    If the LilyPond version specified < (2, 13, 38), the \\include command 
-    is used, otherwise the newer \\language command.
+    If the LilyPond version specified < (2, 13, 38), the \include command
+    is used, otherwise the newer \language command.
     
     """
     # maybe TODO: determine version automatically from document

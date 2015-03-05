@@ -435,17 +435,17 @@ class Reader(object):
                 return
     
     def test_music_list(self, t):
-        """Test whether a music list ({ ... }, << ... >>, starts here.
+        r"""Test whether a music list ({ ... }, << ... >>, starts here.
         
-        Also handles \\simultaneous { ... } and \\sequential { ... } 
+        Also handles \simultaneous { ... } and \sequential { ... }
         correctly. These obscure commands are not even highlighted by 
-        lex, but they exist in LilyPond... \\simultaneous { ... } is
-        like << ... >> but \\sequential << ... >> just behaves like << ... >>
+        lex, but they exist in LilyPond... \simultaneous { ... } is
+        like << ... >> but \sequential << ... >> just behaves like << ... >>
 
         Returns a two-tuple(item; iterable), both may be None. If 
         item is not None, it can be either a UserCommand or a MusicList.  If 
-        iterable is None, the item is a UserCommand (namely \\simultaneous 
-        or \\sequential, but not followed by a { or <<); else the item is a 
+        iterable is None, the item is a UserCommand (namely \simultaneous
+        or \sequential, but not followed by a { or <<); else the item is a
         MusicList, and the iterable should be read fully to get all the 
         tokens inside the MusicList. If item is None, there is no MusicList 
         and no token is read.

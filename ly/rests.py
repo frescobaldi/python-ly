@@ -56,10 +56,10 @@ def replace_spacer(cursor, replace_token):
                 d[token.pos:token.end] = replace_token
 
 def replace_restcomm(cursor, replace_token):
-    """Replace rests by rest command (\\rest) with optional token. """
+    r"""Replace rests by rest command (\rest) with optional token. """
 
     def get_comm_rests(source):
-        """Catch all rests by rest command (\\rest) from source."""
+        r"""Catch all rests by rest command (\rest) from source."""
         rest_tokens = None
         for token in source:
             if isinstance(token, ly.lex.lilypond.Note):

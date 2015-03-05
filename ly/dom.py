@@ -193,8 +193,8 @@ class Reference(object):
 
 
 class Named(object):
-    """
-    Mixin to print a \\name before the contents of the container.
+    r"""
+    Mixin to print a \name before the contents of the container.
     format() is called on the self.name attribute, so it may also
     be a Reference.
     """
@@ -375,7 +375,7 @@ class Version(Line):
 
 
 class Include(Line):
-    """ a LilyPond \\include statement """
+    r""" a LilyPond \include statement """
     def ly(self, printer):
         return r'\include "{0}"'.format(self.text)
 
@@ -557,8 +557,8 @@ class ContextName(Text):
 
 
 class Context(HandleVars, Section):
-    """
-    A \\context section for use inside Layout or Midi sections.
+    r"""
+    A \context section for use inside Layout or Midi sections.
     """
     name = 'context'
     
@@ -569,12 +569,12 @@ class Context(HandleVars, Section):
             
 
 class ContextType(Container):
-    """
-    \\new or \\context Staff = 'bla' \\with { } << music >>
+    r"""
+    \new or \context Staff = 'bla' \with { } << music >>
 
-    A \\with (With) element is added automatically as the first child as soon
+    A \with (With) element is added automatically as the first child as soon
     as you use our convenience methods that manipulate the variables
-    in \\with. If the \\with element is empty, it does not print anything.
+    in \with. If the \with element is empty, it does not print anything.
     You should add one other music object to this.
     """
     before, after = 1, 1
@@ -638,12 +638,12 @@ class NoteNames(ContextType): pass
 class PianoStaff(ContextType): pass
 class RhythmicStaff(ContextType): pass
 class ScoreContext(ContextType):
-    """
+    r"""
     Represents the Score context in LilyPond, but the name would
-    collide with the Score class that represents \\score { } constructs.
+    collide with the Score class that represents \score { } constructs.
 
     Because the latter is used more often, use ScoreContext to get
-    \\new Score etc.
+    \new Score etc.
     """
     ctype = 'Score'
 
@@ -657,9 +657,9 @@ class Voice(ContextType): pass
 
 
 class UserContext(ContextType):
-    """
+    r"""
     Represents a context the user creates.
-    e.g. \\new MyStaff = cid << music >>
+    e.g. \new MyStaff = cid << music >>
     """
     def __init__(self, ctype, cid=None, new=True, parent=None):
         super(UserContext, self).__init__(cid, new, parent)
@@ -756,9 +756,9 @@ class Pitch(Leaf):
 
 
 class Duration(Leaf):
-    """
+    r"""
     A duration with duration (in logarithmical form): (-2 ... 8),
-    where -2 = \\longa, -1 = \\breve, 0 = 1, 1 = 2, 2 = 4, 3 = 8, 4 = 16, etc,
+    where -2 = \longa, -1 = \breve, 0 = 1, 1 = 2, 2 = 4, 3 = 8, 4 = 16, etc,
     dots (number of dots),
     factor (Fraction giving the scaling of the duration).
     """
@@ -790,8 +790,8 @@ class Chord(Container):
 
 
 class Relative(Statement):
-    """
-    \\relative <pitch> music
+    r"""
+    \relative <pitch> music
 
     You should add a Pitch (optionally) and another music object,
     e.g. Sim or Seq, etc.
@@ -800,18 +800,18 @@ class Relative(Statement):
 
 
 class Transposition(Statement):
-    """
-    \\transposition <pitch>
+    r"""
+    \transposition <pitch>
     You should add a Pitch.
     """
     name = 'transposition'
 
 
 class KeySignature(Leaf):
-    """
+    r"""
     A key signature expression, like:
 
-    \\key c \\major
+    \key c \major
     The pitch should be given in the arguments note and alter and is written
     out in the document's language.
     """
@@ -827,8 +827,8 @@ class KeySignature(Leaf):
 
 
 class TimeSignature(Leaf):
-    """
-    A time signature, like: \\time 4/4
+    r"""
+    A time signature, like: \time 4/4
     """
     def __init__(self, num, beat, parent=None):
         super(TimeSignature, self).__init__(parent)
@@ -840,8 +840,8 @@ class TimeSignature(Leaf):
 
 
 class Partial(Named, Duration):
-    """
-    \\partial <duration>
+    r"""
+    \partial <duration>
     You should add a Duration element
     """
     name = "partial"
@@ -849,8 +849,8 @@ class Partial(Named, Duration):
     
     
 class Tempo(Container):
-    """
-    A tempo setting, like: \\tempo 4 = 100
+    r"""
+    A tempo setting, like: \tempo 4 = 100
     May have a child markup or quoted string.
     """
     before, after = 1, 1
@@ -883,23 +883,23 @@ class Clef(Leaf):
 
 
 class VoiceSeparator(Leaf):
-    """
-    A Voice Separator: \\\\
+    r"""
+    A Voice Separator: \\
     """
     def ly(self, printer):
         return r'\\'
 
 
 class Mark(Statement):
-    """
-    The \\mark command.
+    r"""
+    The \mark command.
     """
     name = 'mark'
 
 
 class Markup(StatementEnclosed):
-    """
-    The \\markup command.
+    r"""
+    The \markup command.
     You can add many children, in that case Markup automatically prints
     { and } around them.
     """

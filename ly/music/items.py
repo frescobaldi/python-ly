@@ -140,7 +140,7 @@ class Item(ly.node.WeakNode):
                 break
                 
     def iter_toplevel_items_include(self):
-        """Same as iter_toplevel_items(), but follows \\include commands."""
+        r"""Same as iter_toplevel_items(), but follows \include commands."""
         def follow(it):
             for i in it:
                 if isinstance(i, Include):
@@ -546,7 +546,7 @@ class MusicList(Music):
 
 
 class Tag(Music):
-    """A \\tag, \\keepWithTag or \\removeWithTag command."""
+    r"""A \tag, \keepWithTag or \removeWithTag command."""
     
     def events(self, e, time, scaling):
         """Let the event.Events instance handle the events. Return the time."""
@@ -568,12 +568,12 @@ class Tag(Music):
 
 
 class Scaler(Music):
-    """A music construct that scales the duration of its contents.
+    r"""A music construct that scales the duration of its contents.
     
     In the numerator and denominator attributes the values specified for
-    LilyPond are stored, e.g. with \\times 3/2 { c d e }, the numerator is
-    integer 3 and the denominator is integer 2. Note that for \\tuplet and
-    \\times the meaning of these numbers is reversed.    
+    LilyPond are stored, e.g. with \times 3/2 { c d e }, the numerator is
+    integer 3 and the denominator is integer 2. Note that for \tuplet and
+    \times the meaning of these numbers is reversed.
     
     The algebraic scaling is stored in the scaling attribute.
     
@@ -623,7 +623,7 @@ class Grace(Music):
 
 
 class AfterGrace(Music):
-    """The \\afterGrace function with its two arguments.
+    r"""The \afterGrace function with its two arguments.
     
     Only the duration of the first is counted.
     
@@ -631,7 +631,7 @@ class AfterGrace(Music):
 
 
 class PartCombine(Music):
-    """The \\partcombine command with 2 music arguments."""
+    r"""The \partcombine command with 2 music arguments."""
     def events(self, e, time, scaling):
         """Let the event.Events instance handle the events. Return the time."""
         if len(self):
@@ -652,21 +652,21 @@ class PartCombine(Music):
 
 
 class Relative(Music):
-    """A \\relative music expression. Has one or two children (Note, Music)."""
+    r"""A \relative music expression. Has one or two children (Note, Music)."""
     pass
 
 
 class Absolute(Music):
-    """An \\absolute music expression. Has one child (normally Music)."""
+    r"""An \absolute music expression. Has one child (normally Music)."""
     pass
 
 
 class Transpose(Music):
-    """A \\transpose music expression. Has normally three children (Note, Note, Music)."""
+    r"""A \transpose music expression. Has normally three children (Note, Note, Music)."""
 
 
 class Repeat(Music):
-    """A \\repeat expression."""
+    r"""A \repeat expression."""
     def specifier(self):
         if isinstance(self._specifier, Scheme):
             return self._specifier.get_string()
@@ -710,7 +710,7 @@ class Repeat(Music):
 
 
 class Alternative(Music):
-    """An \\alternative expression."""
+    r"""An \alternative expression."""
 
 
 class InputMode(Music):
@@ -718,27 +718,27 @@ class InputMode(Music):
 
 
 class NoteMode(InputMode):
-    """A \\notemode or \\notes expression."""
+    r"""A \notemode or \notes expression."""
 
 
 class ChordMode(InputMode):
-    """A \\chordmode or \\chords expression."""
+    r"""A \chordmode or \chords expression."""
 
 
 class DrumMode(InputMode):
-    """A \\drummode or \\drums expression."""
+    r"""A \drummode or \drums expression."""
 
 
 class FigureMode(InputMode):
-    """A \\figuremode or \\figures expression."""
+    r"""A \figuremode or \figures expression."""
 
 
 class LyricMode(InputMode):
-    """A \\lyricmode, \\lyrics or \\addlyrics expression."""
+    r"""A \lyricmode, \lyrics or \addlyrics expression."""
 
 
 class LyricsTo(InputMode):
-    """A \\lyricsto expression."""
+    r"""A \lyricsto expression."""
     _context_id = None
     
     def context_id(self):
@@ -775,7 +775,7 @@ class Tremolo(Item):
 
 
 class Translator(Item):
-    """Base class for a \\change, \\new, or \\context music expression."""
+    r"""Base class for a \change, \new, or \context music expression."""
     _context = None
     _context_id = None
     
@@ -790,11 +790,11 @@ class Translator(Item):
 
 
 class Context(Translator, Music):
-    """A \\new or \\context music expression."""
+    r"""A \new or \context music expression."""
 
 
 class Change(Translator):
-    """A \\change music expression."""
+    r"""A \change music expression."""
 
 
 class Tempo(Item):
@@ -829,7 +829,7 @@ class Tempo(Item):
 
 
 class TimeSignature(Item):
-    """A \\time command."""
+    r"""A \time command."""
     _num = 4
     _fraction = Fraction(1, 4)
     _beatstructure = None
@@ -852,7 +852,7 @@ class TimeSignature(Item):
 
 
 class Partial(Item):
-    """A \\partial command."""
+    r"""A \partial command."""
     duration = 0, 1
 
     def partial_length(self):
@@ -862,7 +862,7 @@ class Partial(Item):
 
 
 class Clef(Item):
-    r"""A \\clef item."""
+    r"""A \clef item."""
     _specifier = None
     
     def specifier(self):
@@ -872,7 +872,7 @@ class Clef(Item):
 
         
 class KeySignature(Item):
-    r"""A \\key pitch \\mode command."""
+    r"""A \key pitch \mode command."""
     def pitch(self):
         """The ly.pitch.Pitch that denotes the pitch."""
         for i in self.find(Note):
@@ -885,11 +885,11 @@ class KeySignature(Item):
 
 
 class PipeSymbol(Item):
-    """A \\|."""
+    r"""A pipe symbol: |"""
 
 
 class VoiceSeparator(Item):
-    r"""A \\\\."""
+    r"""A voice separator: \\"""
 
 
 class Postfix(Item):
@@ -906,7 +906,7 @@ class Slur(Item):
 
 
 class PhrasingSlur(Item):
-    r"""A \\( or \\)."""
+    r"""A \( or \)."""
     event = None
 
 
@@ -924,7 +924,7 @@ class Articulation(Item):
 
 
 class StringTuning(Item):
-    """A \\stringTuning command (with a chord as argument)."""
+    r"""A \stringTuning command (with a chord as argument)."""
 
 
 class Keyword(Item):
@@ -938,7 +938,7 @@ class Command(Item):
 class UserCommand(Music):
     """A user command, most probably referring to music."""
     def name(self):
-        """Return the name of this user command (without the \\)."""
+        """Return the name of this user command (without the leading backslash)."""
         return self.token[1:]
     
     def value(self):
@@ -956,7 +956,7 @@ class UserCommand(Music):
 
 
 class Version(Item):
-    """A \\version command."""
+    r"""A \version command."""
     def version_string(self):
         """The version as a string."""
         for i in self:
@@ -972,7 +972,7 @@ class Version(Item):
 
 
 class Include(Item):
-    """An \\include command (not changing the language)."""
+    r"""An \include command (not changing the language)."""
     def filename(self):
         """Returns the filename."""
         for i in self:
@@ -983,7 +983,7 @@ class Include(Item):
 
 
 class Language(Item):
-    """A command (\\language or certain \\include commands) that changes the pitch language."""
+    r"""A command (\language or certain \include commands) that changes the pitch language."""
     language = None
 
 
@@ -1014,7 +1014,7 @@ class MarkupCommand(Item):
 class MarkupUserCommand(Item):
     """A user-defined markup command"""
     def name(self):
-        """Return the name of this user command (without the \\)."""
+        """Return the name of this user command (without the leading backslash)."""
         return self.token[1:]
     
     def value(self):
@@ -1039,7 +1039,7 @@ class MarkupUserCommand(Item):
 
 
 class MarkupScore(Item):
-    """A \\score inside Markup."""
+    r"""A \score inside Markup."""
 
 
 class MarkupList(Item):
@@ -1068,43 +1068,43 @@ class Assignment(Item):
 
 
 class Book(Container):
-    """A \\book { ... } construct."""
+    r"""A \book { ... } construct."""
 
 
 class BookPart(Container):
-    """A \\bookpart { ... } construct."""
+    r"""A \bookpart { ... } construct."""
 
 
 class Score(Container):
-    """A \\score { ... } construct."""
+    r"""A \score { ... } construct."""
 
 
 class Header(Container):
-    """A \\header { ... } construct."""
+    r"""A \header { ... } construct."""
 
 
 class Paper(Container):
-    """A \\paper { ... } construct."""
+    r"""A \paper { ... } construct."""
 
 
 class Layout(Container):
-    """A \\layout { ... } construct."""
+    r"""A \layout { ... } construct."""
 
 
 class Midi(Container):
-    """A \\midi { ... } construct."""
+    r"""A \midi { ... } construct."""
 
 
 class LayoutContext(Container):
-    """A \\context { ... } construct within Layout or Midi."""
+    r"""A \context { ... } construct within Layout or Midi."""
 
 
 class With(Container):
-    """A \\with ... construct."""
+    r"""A \with ... construct."""
 
 
 class Set(Item):
-    """A \\set command."""
+    r"""A \set command."""
     def context(self):
         """The context, if specified."""
         for t in self.tokens:
@@ -1145,7 +1145,7 @@ class Unset(Item):
 
 
 class Override(Item):
-    """An \\override command."""
+    r"""An \override command."""
     def context(self):
         for i in self:
             if isinstance(i.token, lilypond.ContextName):
@@ -1158,7 +1158,7 @@ class Override(Item):
 
 
 class Revert(Item):
-    """A \\revert command."""
+    r"""A \revert command."""
     def context(self):
         for i in self:
             if isinstance(i.token, lilypond.ContextName):
@@ -1171,11 +1171,11 @@ class Revert(Item):
 
 
 class Tweak(Item):
-    """A \\tweak command."""
+    r"""A \tweak command."""
 
 
 class PathItem(Item):
-    """An item in the path of an \\override or \\revert command."""
+    r"""An item in the path of an \override or \revert command."""
 
 
 class String(Item):

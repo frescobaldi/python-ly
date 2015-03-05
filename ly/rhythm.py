@@ -109,12 +109,12 @@ _stay = _start[5:]
 
 
 def duration_tokens(source, *classes):
-    """Yield lists of tokens where tokens in list are instance of \\*classes."""
+    r"""Yield lists of tokens where tokens in list are instance of \*classes."""
     for tokens in music_tokens(source):
         yield [token for token in tokens if isinstance(token, classes)]
 
 def duration_tokens_pos(source, *classes):
-    """Yield tuples(pos, list of tokens) where tokens in list are instance of \\*classes.
+    r"""Yield tuples(pos, list of tokens) where tokens in list are instance of \*classes.
     
     The list of tokens can be empty, the pos points to where a duration could be
     inserted.

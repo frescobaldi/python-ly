@@ -34,10 +34,10 @@ durations = [
 
 
 def tostring(dur, dots=0, factor=1):
-    """Returns the LilyPond string representation of a given logarithmic duration.
+    r"""Returns the LilyPond string representation of a given logarithmic duration.
     
     Supports values from -3 upto and including 11.
-    -2 = '\\longa', 0  = '1' (whole note), etc.
+    -2 = '\longa', 0  = '1' (whole note), etc.
     
     Adds the number of dots (defaults to 0) and the fraction factor if given.
     

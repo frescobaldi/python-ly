@@ -197,7 +197,7 @@ class ParseSource():
         self.mediator.set_voicenr(add=True)
 
     def Change(self, change):
-        """ A \\change music expression. Changes the staff number. """
+        r""" A \change music expression. Changes the staff number. """
         if change.context() == 'Staff':
             self.mediator.set_staffnr(0, staff_id=change.context_id())
 
@@ -265,7 +265,7 @@ class ParseSource():
         self.mediator.tie_to_next()
 
     def Rest(self, rest):
-        """ rest, r or R. Note: NOT by command, i.e. \rest """
+        r""" rest, r or R. Note: NOT by command, i.e. \rest """
         if rest.token == 'R':
             self.scale = 'R'
         self.mediator.new_rest(rest)
@@ -340,11 +340,11 @@ class ParseSource():
             self.mediator.set_tremolo()
 
     def With(self, cont_with):
-        """A \\with ... construct."""
+        r"""A \with ... construct."""
         self.with_contxt = cont_with.parent().context()
 
     def Set(self, cont_set):
-        """A \\set command."""
+        r"""A \set command."""
         if isinstance(cont_set.value(), ly.music.items.Scheme):
             if cont_set.property() == 'tupletSpannerDuration':
                 moment = cont_set.value().get_ly_make_moment()
@@ -362,7 +362,7 @@ class ParseSource():
             self.mediator.set_by_property(cont_set.property(), val, group=True)
 
     def Command(self, command):
-        """ \\bar, \\rest etc """
+        r""" \bar, \rest etc """
         excls = ['\\major', '\\minor', '\\bar']
         if command.token == '\\rest':
             self.mediator.note2rest()
@@ -402,7 +402,7 @@ class ParseSource():
             self.mediator.create_barline(string.value())
 
     def LyricsTo(self, lyrics_to):
-        """A \\lyricsto expression. """
+        r"""A \lyricsto expression. """
         self.mediator.new_lyric_section('lyricsto'+lyrics_to.context_id(), lyrics_to.context_id())
         self.sims_and_seqs.append('lyrics')
 
@@ -415,15 +415,15 @@ class ParseSource():
         self.mediator.new_lyrics_item(lyrics_item.token)
 
     def LyricMode(self, lyric_mode):
-        """A \\lyricmode, \\lyrics or \\addlyrics expression."""
+        r"""A \lyricmode, \lyrics or \addlyrics expression."""
         pass
 
     def Override(self, override):
-        """An \\override command."""
+        r"""An \override command."""
         self.override_key = ''
 
     def PathItem(self, item):
-        """An item in the path of an \\override or \\revert command."""
+        r"""An item in the path of an \override or \revert command."""
         self.override_key += item.token
 
     def Scheme(self, scheme):
@@ -541,12 +541,12 @@ class ParseSource():
         return False
 
     def iter_score(self, scorenode, doc):
-        """
+        r"""
         Iter over score.
 
         Similarly to items.Document.iter_music user commands are substituted.
 
-        Furthermore \\repeat unfold expressions are unfolded.
+        Furthermore \repeat unfold expressions are unfolded.
         """
         for s in scorenode:
             if isinstance(s, ly.music.items.Repeat) and s.specifier() == 'unfold':
@@ -561,8 +561,8 @@ class ParseSource():
             yield End(scorenode)
 
     def unfold_repeat(self, repeat_node, repeat_count, doc):
-        """
-        Iter over node which represent a \\repeat unfold expression
+        r"""
+        Iter over node which represent a \repeat unfold expression
         and do the unfolding directly.
         """
         for r in range(repeat_count):

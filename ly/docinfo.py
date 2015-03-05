@@ -169,10 +169,10 @@ class DocInfo(object):
     
     @_cache
     def version_string(self):
-        """Return the version as a string, e.g. "2.19.8".
+        r"""Return the version as a string, e.g. "2.19.8".
         
-        Looks for the \\version LilyPond command. The string is returned 
-        without quotes. Returns None if there was no \\version command found.
+        Looks for the \version LilyPond command. The string is returned
+        without quotes. Returns None if there was no \version command found.
         
         """
         i = self.find("\\version", ly.lex.lilypond.Keyword)
@@ -196,7 +196,7 @@ class DocInfo(object):
 
     @_cache
     def include_args(self):
-        """The list of \\include command arguments."""
+        r"""The list of \include command arguments."""
         result = []
         for i in self.find_all("\\include", ly.lex.lilypond.Keyword):
             tokens = iter(self.tokens[i+1:i+10])
@@ -222,9 +222,9 @@ class DocInfo(object):
     
     @_cache
     def output_args(self):
-        """The list of arguments of constructs defining the name of output documents.
+        r"""The list of arguments of constructs defining the name of output documents.
         
-        This looks at the \\bookOutputName, \\bookOutputSuffix and define 
+        This looks at the \bookOutputName, \bookOutputSuffix and define
         output-suffix commands.
         
         Every argument is a two tuple(type, argument) where type is either 

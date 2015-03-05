@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 # See http://www.gnu.org/licenses/ for more information.
 
-"""
+r"""
 Routines that manipulate an XML mapping very similar to the Scheme music
 structure used by LilyPond itself.
 
@@ -36,8 +36,8 @@ Code will be added to print LilyPond source. When all is finished, `ly.dom`
 is deprecated and `ly.music` will probably use these xml tree for storage.
 
 A single LilyPond file `xml-export.ily` is also included with this module;
-it can be \\\\included in a LilyPond document and exports the
-``\\displayLilyXML`` music function.
+it can be \included in a LilyPond document and exports the
+``\displayLilyXML`` music function.
 
 """
 

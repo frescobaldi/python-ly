@@ -54,7 +54,7 @@ class Identifier(_token.Token):
 
 
 class IdentifierRef(_token.Token):
-    r"""A reference to an identifier, e.g. ``\\some-variable``."""
+    r"""A reference to an identifier, e.g. ``\some-variable``."""
     rx = r"\\" + re_identifier + re_identifier_end
 
 
@@ -139,7 +139,7 @@ class StringQuoteEscape(_token.Character):
 
 
 class MusicItem(_token.Token):
-    r"""A note, rest, spacer, ``\\skip`` or ``q``."""
+    r"""A note, rest, spacer, ``\skip`` or ``q``."""
 
     
 class Skip(MusicItem):
@@ -865,7 +865,7 @@ class ErrorInChord(Error):
     
 
 class Name(UserVariable):
-    """A variable name without \\ prefix."""
+    r"""A variable name without \ prefix."""
     
 
 class EqualSign(_token.Token):
@@ -1449,7 +1449,7 @@ class ParseInputMode(ParseLilyPond):
     
     
 class ParseLyricMode(ParseInputMode):
-    """Parser for ``\\lyrics``, ``\\lyricmode``, ``\\addlyrics``, etc."""
+    r"""Parser for ``\lyrics``, ``\lyricmode``, ``\addlyrics``, etc."""
     items = base_items + (
         CloseBracket,
         CloseSimultaneous,
@@ -1480,7 +1480,7 @@ class ExpectLyricMode(ExpectMusicList):
 
 
 class ParseChordMode(ParseInputMode, ParseMusic):
-    """Parser for ``\\chords`` and ``\\chordmode``."""
+    r"""Parser for ``\chords`` and ``\chordmode``."""
     items = (
         OpenBracket,
         OpenSimultaneous,
@@ -1499,7 +1499,7 @@ class ExpectChordMode(ExpectMusicList):
         
 
 class ParseNoteMode(ParseMusic):
-    """Parser for ``\\notes`` and ``\\notemode``. Same as Music itself."""
+    r"""Parser for ``\notes`` and ``\notemode``. Same as Music itself."""
 
 
 class ExpectNoteMode(ExpectMusicList):
@@ -1507,7 +1507,7 @@ class ExpectNoteMode(ExpectMusicList):
         
 
 class ParseDrumMode(ParseInputMode, ParseMusic):
-    """Parser for ``\\drums`` and ``\\drummode``."""
+    r"""Parser for ``\drums`` and ``\drummode``."""
     # TODO: implement items (see ParseChordMode)
 
 
@@ -1516,7 +1516,7 @@ class ExpectDrumMode(ExpectMusicList):
         
 
 class ParseFigureMode(ParseInputMode, ParseMusic):
-    """Parser for ``\\figures`` and ``\\figuremode``."""
+    r"""Parser for ``\figures`` and ``\figuremode``."""
     items = base_items + (
         CloseBracket,
         CloseSimultaneous,
