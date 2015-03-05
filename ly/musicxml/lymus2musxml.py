@@ -386,7 +386,8 @@ class ParseSource():
 
     def UserCommand(self, usercommand):
         """Music variables are substituted so this must be something else."""
-        self.tupl_span = True
+        if usercommand.name() == 'tupletSpan':
+            self.tupl_span = True
 
     def String(self, string):
         prev = self.get_previous_node(string)
