@@ -346,6 +346,13 @@ class ParseSource():
     def Set(self, cont_set):
         """A \\set command."""
         if isinstance(cont_set.value(), ly.music.items.Scheme):
+            if cont_set.property() == 'tupletSpannerDuration':
+                moment = cont_set.value().get_ly_make_moment()
+                if moment:
+                    self.mediator.set_tuplspan_dur(fraction=moment)
+                else:
+                    self.mediator.unset_tuplspan_dur()
+                return
             val = cont_set.value().get_string()
         else:
             val = cont_set.value().value()

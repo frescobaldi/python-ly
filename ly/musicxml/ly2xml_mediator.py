@@ -519,10 +519,17 @@ class Mediator():
         self.current_note.set_tuplet(tfraction, ttype)
         self.check_divs(tuplscaling)
 
-    def set_tuplspan_dur(self, token, tokens):
-        """Catch duration set by the tupletSpannerDuration property."""
-        base, scaling = ly.duration.base_scaling((token,) + tokens)
-        self.tupl_dur = base * scaling
+    def set_tuplspan_dur(self, token=None, tokens=None, fraction=None):
+        """
+        Catch duration set by the tupletSpannerDuration property.
+
+        Set the fraction directly or calculate it from tokens.
+        """
+        if fraction:
+            self.tupl_dur = fraction
+        else:
+            base, scaling = ly.duration.base_scaling((token,) + tokens)
+            self.tupl_dur = base * scaling
 
     def unset_tuplspan_dur(self):
         """Reset tuplet duration sum and tuplet spanner duration."""
