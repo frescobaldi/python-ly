@@ -164,7 +164,7 @@ class ParseSource():
         self.mediator.copy_prev_chord(q.duration)
 
     def Context(self, context):
-        """ \context """
+        r""" \context """
         self.in_context = True
         if context.context() in pno_contexts:
             self.mediator.new_part(piano=True)
@@ -206,7 +206,7 @@ class ParseSource():
         self.mediator.new_bar()
 
     def Clef(self, clef):
-        """ Clef \clef"""
+        r""" Clef \clef"""
         self.mediator.new_clef(clef.specifier())
 
     def KeySignature(self, key):
@@ -271,14 +271,14 @@ class ParseSource():
         self.mediator.new_rest(rest)
 
     def Skip(self, skip):
-        """ invisible rest/spacer rest (s or command \skip)"""
+        r""" invisible rest/spacer rest (s or command \skip)"""
         if 'lyrics' in self.sims_and_seqs:
             self.mediator.new_lyrics_item(skip.token)
         else:
             self.mediator.new_rest(skip)
 
     def Scaler(self, scaler):
-        """
+        r"""
         \times \tuplet \scaleDurations
 
         """

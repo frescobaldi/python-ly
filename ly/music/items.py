@@ -988,14 +988,14 @@ class Language(Item):
 
 
 class Markup(Item):
-    """A command starting markup (\markup, -lines and -list)."""
+    r"""A command starting markup (\markup, -lines and -list)."""
     def plaintext(self):
         """Return the plain text value of this node."""
         return ' '.join(n.plaintext() for n in self)
 
 
 class MarkupCommand(Item):
-    """A markup command, such as \italic etc."""
+    r"""A markup command, such as \italic etc."""
     def plaintext(self):
         """Return the plain text value of this node."""
         if self.token == '\\concat':
@@ -1043,7 +1043,7 @@ class MarkupScore(Item):
 
 
 class MarkupList(Item):
-    """The group of markup items inside { and }. NOTE: *not* a \markuplist."""
+    r"""The group of markup items inside { and }. NOTE: *not* a \markuplist."""
     def plaintext(self):
         """Return the plain text value of this node."""
         return ' '.join(n.plaintext() for n in self)

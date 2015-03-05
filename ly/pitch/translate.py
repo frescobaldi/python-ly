@@ -28,7 +28,7 @@ import ly.pitch
 
 
 def translate(cursor, language):
-    """Changes the language of the pitch names.
+    r"""Changes the language of the pitch names.
     
     May raise ly.pitch.PitchNameNotAvailable if the current pitch language
     has no quarter tones.

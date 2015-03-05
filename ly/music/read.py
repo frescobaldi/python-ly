@@ -131,7 +131,7 @@ class Reader(object):
         self.prev_duration = Fraction(1, 4), 1
     
     def set_language(self, lang):
-        """Changes the pitch name language to use.
+        r"""Changes the pitch name language to use.
         
         Called internally when \language or \include tokens are encountered
         with a valid language name/file.
@@ -439,7 +439,7 @@ class Reader(object):
         
         Also handles \\simultaneous { ... } and \\sequential { ... } 
         correctly. These obscure commands are not even highlighted by 
-        lex, but they exist in LilyPond... \\\simultaneous { ... } is 
+        lex, but they exist in LilyPond... \\simultaneous { ... } is
         like << ... >> but \\sequential << ... >> just behaves like << ... >>
 
         Returns a two-tuple(item; iterable), both may be None. If 
@@ -474,7 +474,7 @@ class Reader(object):
         return None, None
                     
     def read_music_item(self, t, source):
-        """Read one music item (note, rest, s, \skip, or q) from t and source."""
+        r"""Read one music item (note, rest, s, \skip, or q) from t and source."""
         item = None
         in_pitch_command = isinstance(self.source.state.parser(), lilypond.ParsePitchCommand)
         if t.__class__ == lilypond.Note:

@@ -245,7 +245,7 @@ class PitchIterator(object):
         self.setLanguage("nederlands")
     
     def setLanguage(self, lang):
-        """Changes the pitch name language to use.
+        r"""Changes the pitch name language to use.
         
         Called internally when \language or \include tokens are encountered
         with a valid language name/file.
