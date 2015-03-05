@@ -92,7 +92,7 @@ def abs2rel(cursor):
         return t
     
     def relative():
-        """Consume the whole \relative expression without doing anything. """
+        r"""Consume the whole \relative expression without doing anything. """
         # skip pitch argument
         t = next(tsource)
         if isinstance(t, ly.pitch.Pitch):
