@@ -167,9 +167,13 @@ class IterateXmlObjs():
     def new_xml_note(self, obj):
         """Create note specific xml-nodes."""
         divdur = self.count_duration(obj.duration, self.divisions)
-        self.musxml.new_note(obj.base_note, obj.octave, obj.type, divdur,
-            obj.alter, obj.accidental_token, obj.voice, obj.dot, obj.chord,
-            obj.grace)
+        if isinstance(obj, Unpitched):
+            self.musxml.new_unpitched_note(obj.base_note, obj.octave, obj.type, divdur,
+                obj.voice, obj.dot, obj.chord, obj.grace)
+        else:
+            self.musxml.new_note(obj.base_note, obj.octave, obj.type, divdur,
+                obj.alter, obj.accidental_token, obj.voice, obj.dot, obj.chord,
+                obj.grace)
         for t in obj.tie:
             self.musxml.tie_note(t)
         for s in obj.slur:
@@ -577,6 +581,15 @@ class BarNote(BarMus):
 
     def change_lyric_nr(self, index, nr):
         self.lyric[index][2] = nr
+
+
+class Unpitched(BarNote):
+    """Object to keep track of unpitched notes."""
+    def __init__(self, duration, step=None, voice=1):
+        BarNote.__init__(self, 'B', 0, "", duration, voice=1)
+        self.octave = 4
+        if step:
+           self.base_note = step.upper()
 
 
 class BarRest(BarMus):

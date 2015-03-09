@@ -220,13 +220,7 @@ class ParseSource():
         #print(note.token)
         if note.length():
             self.mediator.new_note(note, self.relative)
-            if self.tuplet:
-                self.mediator.change_to_tuplet(self.fraction, self.ttype)
-                self.ttype = ""
-            if self.grace_seq:
-                self.mediator.new_grace()
-            if self.trem_rep and not self.look_ahead(note, ly.music.items.Duration):
-                self.mediator.set_tremolo(trem_type='start', repeats=self.trem_rep)
+            self.check_note(note)
         else:
             if isinstance(note.parent(), ly.music.items.Relative):
                 self.mediator.set_relative(note)
@@ -236,6 +230,22 @@ class ParseSource():
                 # chord as grace note
                 if self.grace_seq:
                     self.mediator.new_chord_grace()
+
+    def Unpitched(self, unpitched):
+        """A note without pitch."""
+        if unpitched.length():
+            self.mediator.new_note(unpitched, is_unpitched=True)
+            self.check_note(unpitched)
+
+    def check_note(self, note):
+        """Generic check for all notes, both pitched and unpitched."""
+        if self.tuplet:
+            self.mediator.change_to_tuplet(self.fraction, self.ttype)
+            self.ttype = ""
+        if self.grace_seq:
+            self.mediator.new_grace()
+        if self.trem_rep and not self.look_ahead(note, ly.music.items.Duration):
+            self.mediator.set_tremolo(trem_type='start', repeats=self.trem_rep)
 
     def Duration(self, duration):
         """A written duration"""

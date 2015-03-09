@@ -125,7 +125,7 @@ class CreateMusicXML():
 
     def new_note(self, step, octave, durtype, divdur, alter=0,
                  acc_token=0, voice=1, dot=0, chord=0, grace=(0, 0)):
-        """Create all nodes needed for a note. """
+        """Create all nodes needed for a normal note. """
         self.create_note()
         if grace[0]:
             self.add_grace(grace[1])
@@ -146,6 +146,23 @@ class CreateMusicXML():
                 self.add_accidental(alter, parenth=True)
             else:
                 self.add_accidental(alter)
+
+    def new_unpitched_note(self, step, octave, durtype, divdur, voice=1,
+                            dot=0, chord=0, grace=(0, 0)):
+        """Create all nodes needed for an unpitched note. """
+        self.create_note()
+        if grace[0]:
+            self.add_grace(grace[1])
+        if chord:
+            self.add_chord()
+        self.add_unpitched(step, octave)
+        if not grace[0]:
+            self.add_div_duration(divdur)
+        self.add_duration_type(durtype)
+        self.add_voice(voice)
+        if dot:
+            for i in range(dot):
+                self.add_dot()
 
     def tuplet_note(self, fraction, base_scaling, ttype, divs):
         """Convert current note to tuplet """
@@ -262,6 +279,14 @@ class CreateMusicXML():
             altnode = etree.SubElement(pitch, "alter")
             altnode.text = str(alter)
         octnode = etree.SubElement(pitch, "octave")
+        octnode.text = str(octave)
+
+    def add_unpitched(self, step, octave):
+        """Create unpitched."""
+        unpitched = etree.SubElement(self.current_note, "unpitched")
+        stepnode = etree.SubElement(unpitched, "display-step")
+        stepnode.text = str(step)
+        octnode = etree.SubElement(unpitched, "display-octave")
         octnode.text = str(octave)
 
     def add_accidental(self, alter, caut=False, parenth=False):

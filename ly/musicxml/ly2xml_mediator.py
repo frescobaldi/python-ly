@@ -329,14 +329,23 @@ class Mediator():
     def set_relative(self, note):
         self.prev_pitch = note.pitch
 
-    def new_note(self, note, rel=False):
+    def new_note(self, note, rel=False, is_unpitched=False):
         self.current_is_rest = False
         self.clear_chord()
-        self.current_note = self.create_barnote_from_note(note)
-        self.current_lynote = note
-        self.check_current_note(rel)
+        if is_unpitched:
+            self.current_note = self.create_unpitched(note)
+            self.check_current_note(is_unpitched=True)
+        else:
+            self.current_note = self.create_barnote_from_note(note)
+            self.current_lynote = note
+            self.check_current_note(rel)
         self.do_action_onnext(self.current_note)
         self.action_onnext = None
+
+    def create_unpitched(self, unpitched):
+        """Create a xml_objs.Unpitched from ly.music.items.Unpitched."""
+        dura = unpitched.duration
+        return xml_objs.Unpitched(dura)
 
     def create_barnote_from_note(self, note):
         """Create a xml_objs.BarNote from ly.music.items.Note."""
@@ -363,10 +372,11 @@ class Mediator():
         self.dur_tokens = tokens
         self.check_duration(self.current_is_rest)
 
-    def check_current_note(self, rel=False, rest=False):
+    def check_current_note(self, rel=False, rest=False, is_unpitched=False):
         """ Perform checks common for all new notes and rests. """
-        if not rest: #don't do this for rests
+        if not rest and not is_unpitched:
             self.set_octave(rel)
+        if not rest:
             if self.tied:
                 self.current_note.set_tie('stop')
                 self.tied = False
