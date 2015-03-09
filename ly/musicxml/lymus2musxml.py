@@ -80,6 +80,7 @@ class ParseSource():
         self.tremolo = False
         self.tupl_span = False
         self.unset_tuplspan = False
+        self.alt_mode = None
 
     def parse_tree(self, mustree):
         # print(mustree.dump())
@@ -424,9 +425,25 @@ class ParseSource():
         """Another lyric item (skip, extender, hyphen or tie)."""
         self.mediator.new_lyrics_item(lyrics_item.token)
 
-    def LyricMode(self, lyric_mode):
+    def NoteMode(self, notemode):
+        r"""A \notemode or \notes expression."""
+        self.alt_mode = 'note'
+
+    def ChordMode(self, chordmode):
+        r"""A \chordmode or \chords expression."""
+        self.alt_mode = 'chord'
+
+    def DrumMode(self, drummode):
+        r"""A \drummode or \drums expression."""
+        self.alt_mode = 'drum'
+
+    def FigureMode(self, figmode):
+        r"""A \figuremode or \figures expression."""
+        self.alt_mode = 'figure'
+
+    def LyricMode(self, lyricmode):
         r"""A \lyricmode, \lyrics or \addlyrics expression."""
-        pass
+        self.alt_mode = 'lyric'
 
     def Override(self, override):
         r"""An \override command."""
