@@ -501,6 +501,7 @@ class Reader(object):
                 lilypond.Skip: Skip,
                 lilypond.Spacer: Skip,
                 lilypond.Q: Q,
+                lilypond.DrumNote: DrumNote,
             }[t.__class__]
             item = self.factory(cls, t)
         if item:

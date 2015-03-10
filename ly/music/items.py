@@ -490,6 +490,10 @@ class Q(Durable):
     pass
 
 
+class DrumNote(Durable):
+    pass
+
+
 class Music(Container):
     """Any music expression, to be inherited of."""
     def events(self, e, time, scaling):
