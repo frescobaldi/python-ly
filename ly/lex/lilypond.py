@@ -162,6 +162,10 @@ class Q(MusicItem):
     rx = r"q(?![A-Za-z])"
 
 
+class DrumNote(MusicItem):
+    rx = r"[a-z]+(?![A-Za-z])"
+
+
 class Octave(_token.Token):
     rx = r",+|'+"
 
@@ -854,6 +858,15 @@ class ChordEnd(Chord, _token.Leaver):
     rx = r">"
     
 
+class DrumChordStart(ChordStart):
+    def update_state(self, state):
+        state.enter(ParseDrumChord())
+
+    
+class DrumChordEnd(ChordEnd):
+    pass
+    
+
 class ErrorInChord(Error):
     rx = "|".join((
         re_articulation, # articulation
@@ -1506,9 +1519,67 @@ class ExpectNoteMode(ExpectMusicList):
     replace = ParseNoteMode
         
 
+class ParseDrumChord(ParseMusic):
+    """LilyPond inside chords in drummode ``< >``"""
+    items = base_items + (
+        ErrorInChord,
+        DrumChordEnd,
+        Dynamic,
+        Skip,
+        Spacer,
+        Q,
+        Rest,
+        DrumNote,
+        Fraction,
+        Length,
+        PipeSymbol,
+        VoiceSeparator,
+        SequentialStart, SequentialEnd,
+        SimultaneousStart, SimultaneousEnd,
+        ChordStart,
+        ContextName,
+        GrobName,
+        SlurStart, SlurEnd,
+        PhrasingSlurStart, PhrasingSlurEnd,
+        Tie,
+        BeamStart, BeamEnd,
+        LigatureStart, LigatureEnd,
+        Direction,
+        StringNumber,
+        IntegerValue,
+    ) + command_items
+
+
 class ParseDrumMode(ParseInputMode, ParseMusic):
     r"""Parser for ``\drums`` and ``\drummode``."""
-    # TODO: implement items (see ParseChordMode)
+    items = (
+        OpenBracket,
+        OpenSimultaneous,
+    ) + base_items + (
+        Dynamic,
+        Skip,
+        Spacer,
+        Q,
+        Rest,
+        DrumNote,
+        Fraction,
+        Length,
+        PipeSymbol,
+        VoiceSeparator,
+        SequentialStart, SequentialEnd,
+        SimultaneousStart, SimultaneousEnd,
+        DrumChordStart,
+        ContextName,
+        GrobName,
+        SlurStart, SlurEnd,
+        PhrasingSlurStart, PhrasingSlurEnd,
+        Tie,
+        BeamStart, BeamEnd,
+        LigatureStart, LigatureEnd,
+        Direction,
+        StringNumber,
+        IntegerValue,
+    ) + command_items
 
 
 class ExpectDrumMode(ExpectMusicList):
