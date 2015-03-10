@@ -235,12 +235,14 @@ class ParseSource():
     def Unpitched(self, unpitched):
         """A note without pitch, just a standalone duration."""
         if unpitched.length():
-            self.mediator.new_iso_dura(unpitched, self.relative)
+            if self.alt_mode == 'drum':
+                self.mediator.new_iso_dura(unpitched, self.relative, True)
+            else:
+                self.mediator.new_iso_dura(unpitched, self.relative)
             self.check_note(unpitched)
 
     def DrumNote(self, drumnote):
         """A note in DrumMode."""
-        print(drumnote.token)
         if drumnote.length():
             self.mediator.new_note(drumnote, is_unpitched=True)
             self.check_note(drumnote)

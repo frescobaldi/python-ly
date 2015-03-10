@@ -342,7 +342,7 @@ class Mediator():
         self.do_action_onnext(self.current_note)
         self.action_onnext = None
 
-    def new_iso_dura(self, note, rel=False):
+    def new_iso_dura(self, note, rel=False, is_unpitched=False):
         """
         Isolated durations in music sequences.
 
@@ -355,8 +355,9 @@ class Mediator():
         if self.current_chord:
             self.copy_prev_chord(note.duration)
         else:
-            note.pitch = self.current_lynote.pitch
-            self.new_note(note, rel)
+            if not is_unpitched:
+                note.pitch = self.current_lynote.pitch
+            self.new_note(note, rel, is_unpitched)
 
     def create_unpitched(self, unpitched):
         """Create a xml_objs.Unpitched from ly.music.items.Unpitched."""
