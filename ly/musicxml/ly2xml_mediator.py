@@ -342,6 +342,22 @@ class Mediator():
         self.do_action_onnext(self.current_note)
         self.action_onnext = None
 
+    def new_iso_dura(self, note, rel=False):
+        """
+        Isolated durations in music sequences.
+
+        An isolated duration in LilyPond is rendered as a normal note but the
+        pitch information is missing and has to be filled in by some other
+        means, usually by the previous pitch. (RhythmicStaff is an exception
+        since it ignores specified pitches anyway).
+
+        """
+        if self.current_chord:
+            self.copy_prev_chord(note.duration)
+        else:
+            note.pitch = self.current_lynote.pitch
+            self.new_note(note, rel)
+
     def create_unpitched(self, unpitched):
         """Create a xml_objs.Unpitched from ly.music.items.Unpitched."""
         dura = unpitched.duration
@@ -351,12 +367,15 @@ class Mediator():
         """Create a xml_objs.BarNote from ly.music.items.Note."""
         p = getNoteName(note.pitch.note)
         alt = get_xml_alter(note.pitch.alter)
-        acc = note.accidental_token
+        try:
+            acc = note.accidental_token
+        except AttributeError:
+            acc = ""
         dura = note.duration
         return xml_objs.BarNote(p, alt, acc, dura, self.voice)
 
     def copy_barnote_basics(self, bar_note):
-        """Create a xml_objs.BarNote from ly.music.items.Note."""
+        """Create a copy of a xml_objs.BarNote."""
         p = bar_note.base_note
         alt = bar_note.alter
         acc = bar_note.accidental_token

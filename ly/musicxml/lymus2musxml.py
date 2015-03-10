@@ -233,10 +233,17 @@ class ParseSource():
                     self.mediator.new_chord_grace()
 
     def Unpitched(self, unpitched):
-        """A note without pitch."""
+        """A note without pitch, just a standalone duration."""
         if unpitched.length():
-            self.mediator.new_note(unpitched, is_unpitched=True)
+            self.mediator.new_iso_dura(unpitched, self.relative)
             self.check_note(unpitched)
+
+    def DrumNote(self, drumnote):
+        """A note in DrumMode."""
+        print(drumnote.token)
+        if drumnote.length():
+            self.mediator.new_note(drumnote, is_unpitched=True)
+            self.check_note(drumnote)
 
     def check_note(self, note):
         """Generic check for all notes, both pitched and unpitched."""
