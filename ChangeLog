@@ -5,8 +5,11 @@ ChangeLog for python-ly
 2015-??-??: python-ly 0.9.2
 
 - properly support drum notes in ly.lex and ly.music
-- MusicXML export - support for isolated durations (a single duration without
-  explicit pitch)
+- MusicXML export improvements:
+  - support for isolated durations (a single duration without
+    explicit pitch)
+  - support for implicit starting pitch in relative mode
+    (issues #18 and wbsoft/frescobaldi#648)
 
 
 2015-03-08: python-ly 0.9.1
