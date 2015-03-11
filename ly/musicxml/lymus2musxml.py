@@ -81,6 +81,7 @@ class ParseSource():
         self.tupl_span = False
         self.unset_tuplspan = False
         self.alt_mode = None
+        self.rel_pitch_isset = False
 
     def parse_tree(self, mustree):
         # print(mustree.dump())
@@ -218,18 +219,24 @@ class ParseSource():
         self.mediator.new_key(key.pitch().output(), key.mode())
 
     def Relative(self, relative):
-        pass
+        r"""A \relative music expression."""
+        self.relative = True
 
     def Note(self, note):
         """ notename, e.g. c, cis, a bes ... """
         #print(note.token)
         if note.length():
-            self.mediator.new_note(note, self.relative)
+            if self.relative and not self.rel_pitch_isset:
+                self.mediator.new_note(note, False)
+                self.mediator.set_relative(note)
+                self.rel_pitch_isset = True
+            else:
+                self.mediator.new_note(note, self.relative)
             self.check_note(note)
         else:
             if isinstance(note.parent(), ly.music.items.Relative):
                 self.mediator.set_relative(note)
-                self.relative = True
+                self.rel_pitch_isset = True
             elif isinstance(note.parent(), ly.music.items.Chord):
                 self.mediator.new_chord(note, note.parent().duration, self.relative)
                 # chord as grace note
@@ -550,6 +557,9 @@ class ParseSource():
             self.with_contxt = None
         elif end.node.token == '\\drums':
             self.mediator.check_part()
+        elif isinstance(end.node, ly.music.items.Relative):
+            self.relative = False
+            self.rel_pitch_isset = False
         else:
             # print("end:", end.node.token)
             pass
