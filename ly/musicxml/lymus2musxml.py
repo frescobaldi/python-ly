@@ -167,12 +167,16 @@ class ParseSource():
     def Context(self, context):
         r""" \context """
         self.in_context = True
-        if context.context() in pno_contexts:
+        self.check_context(context.context(), context.context_id(), context.token)
+
+    def check_context(self, context, context_id=None, token=""):
+        """Check context and do appropriate action (e.g. create new part)."""
+        if context in pno_contexts:
             self.mediator.new_part(piano=True)
             self.piano_staff = 1
-        elif context.context() in group_contexts:
+        elif context in group_contexts:
             self.mediator.new_group()
-        elif context.context() in staff_contexts:
+        elif context in staff_contexts:
             if self.piano_staff:
                 if self.piano_staff > 1:
                     self.mediator.set_voicenr(nr=self.piano_staff+3)
@@ -181,17 +185,17 @@ class ParseSource():
                 self.piano_staff += 1
             else:
                 # Check first if part already exists
-                if context.token != '\\context' or self.mediator.part_not_empty():
+                if token != '\\context' or self.mediator.part_not_empty():
                     self.mediator.new_part()
-            self.mediator.add_staff_id(context.context_id())
-        elif context.context() == 'Voice':
+            self.mediator.add_staff_id(context_id)
+        elif context == 'Voice':
             self.sims_and_seqs.append('voice')
-            if context.context_id():
-                self.mediator.new_section(context.context_id())
+            if context_id:
+                self.mediator.new_section(context_id)
             else:
                 self.mediator.new_section('voice')
         else:
-            print("Context not implemented:", context.context())
+            print("Context not implemented:", context)
 
     def VoiceSeparator(self, voice_sep):
         self.mediator.new_snippet('sim')
@@ -443,7 +447,13 @@ class ParseSource():
         self.alt_mode = 'chord'
 
     def DrumMode(self, drummode):
-        r"""A \drummode or \drums expression."""
+        r"""A \drummode or \drums expression.
+
+        If the shorhand form \drums is found a DrumStaff is implicit.
+
+        """
+        if drummode.token == '\\drums':
+            self.check_context('DrumStaff')
         self.alt_mode = 'drum'
 
     def FigureMode(self, figmode):
@@ -538,6 +548,8 @@ class ParseSource():
             self.sims_and_seqs.pop()
         elif end.node.token == '\\with':
             self.with_contxt = None
+        elif end.node.token == '\\drums':
+            self.mediator.check_part()
         else:
             # print("end:", end.node.token)
             pass
