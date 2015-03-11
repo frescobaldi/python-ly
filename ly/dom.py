@@ -757,7 +757,7 @@ class Pitch(Leaf):
 
 class Duration(Leaf):
     r"""
-    A duration with duration (in logarithmical form): (-2 ... 8),
+    A duration with duration (in logarithmic form): (-2 ... 8),
     where -2 = \longa, -1 = \breve, 0 = 1, 1 = 2, 2 = 4, 3 = 8, 4 = 16, etc,
     dots (number of dots),
     factor (Fraction giving the scaling of the duration).

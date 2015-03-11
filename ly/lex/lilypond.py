@@ -41,7 +41,7 @@ re_duration = r"(\\(maxima|longa|breve)\b|(1|2|4|8|16|32|64|128|256|512|1024|204
 re_dot = r"\."
 re_scaling = r"\*[\t ]*\d+(/\d+)?"
 
-# an identifier allowing letters and single hyphens inbetween
+# an identifier allowing letters and single hyphens in between
 re_identifier = r"[^\W\d_]+([_-][^\W\d_]+)*"
 
 # the lookahead pattern for the end of an identifier (ref)
