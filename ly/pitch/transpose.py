@@ -148,6 +148,8 @@ class ModeShifter(Transposer):
             self.octave = -1
         elif self.steps < -3:
             self.octave = 1
+        else:
+            self.octave = 0
         self.alter = (self.scale[clp.note] + clp.alter -
                       self.scale[pitch.note] - pitch.alter)
         super(ModeShifter, self).transpose(pitch)
