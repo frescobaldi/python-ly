@@ -1,4 +1,4 @@
-#! python
+#!/usr/bin/env python
 import sys
 from ly.cli.main import main
 sys.exit(main())
