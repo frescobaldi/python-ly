@@ -30,10 +30,10 @@ except:
     from urllib import urlopen
 
 
-VERSION = "2.17"
+VERSION = "2.18"
 GUILE_URL = "https://www.gnu.org/software/guile/docs/docs-1.8/guile-ref/Procedure-Index.html#Procedure-Index"
-LY_FUNCTION_URL = "http://lilypond.org/doc/v2.17/Documentation/internals/scheme-functions"
-SCM_PATH = os.path.join(os.environ['HOME'], 'lilypond/usr/share/lilypond/current/scm')
+LY_FUNCTION_URL = "http://lilypond.org/doc/v2.18/Documentation/internals/scheme-functions"
+SCM_PATH = os.path.join(os.environ['HOME'], 'lilypond_bin/2.18.2-1/lilypond/usr/share/lilypond/current/scm')
 
 GUILE_IGNONED_TYPE = (
     'Apply Traps',
