@@ -186,11 +186,10 @@ class ModalTransposer(object):
         # Look for an exact match: otherwise,
         # look for the letter name and save the accidental
         for i in range(len(self.notes)):
-            if pitch.note == self.notes[i] and \
-               pitch.alter == self.alter:
-                    fromScaleDeg = i
-                    accidental = 0
-                    break;
+            if pitch.note == self.notes[i] and pitch.alter == self.alter:
+                fromScaleDeg = i
+                accidental = 0
+                break
         else:
             fromScaleDeg = self.notes.index(pitch.note)
             accidental = pitch.alter - self.alter[fromScaleDeg]

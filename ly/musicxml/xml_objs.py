@@ -193,7 +193,7 @@ class IterateXmlObjs():
         if obj.lyric:
             for l in obj.lyric:
                 try:
-                   self.musxml.add_lyric(l[0], l[1], l[2], l[3])
+                    self.musxml.add_lyric(l[0], l[1], l[2], l[3])
                 except IndexError:
                     self.musxml.add_lyric(l[0], l[1], l[2])
 
@@ -426,7 +426,7 @@ class Bar():
             new_voice.obj_list.pop(0)
         try:
             if self.obj_list[-1].barline and new_voice.obj_list[-1].barline:
-               self.obj_list.pop()
+                self.obj_list.pop()
         except AttributeError:
             pass
         if not new_voice.is_skip():
@@ -540,7 +540,7 @@ class BarNote(BarMus):
         self.octave = octave
 
     def set_tie(self, tie_type):
-        self.tie.append(tie_type);
+        self.tie.append(tie_type)
 
     def set_slur(self, slur_type):
         self.slur.append(slur_type)
@@ -589,7 +589,7 @@ class Unpitched(BarNote):
         BarNote.__init__(self, 'B', 0, "", duration, voice=1)
         self.octave = 4
         if step:
-           self.base_note = step.upper()
+            self.base_note = step.upper()
 
 
 class BarRest(BarMus):
