@@ -131,7 +131,7 @@ class translate(_edit_command):
     def run(self, opts, cursor, output):
         import ly.pitch.translate
         try:
-            changed = ly.pitch.translate.translate(cursor, self.language)
+            changed = ly.pitch.translate.translate(cursor, self.language, opts.default_language)
         except ly.pitch.PitchNameNotAvailable:
             sys.stderr.write(
                 "warning: transate: pitch names not available in \"{0}\"\n"
@@ -156,9 +156,9 @@ class transpose(_edit_command):
         import ly.pitch.transpose
         transposer = ly.pitch.transpose.Transposer(self.from_pitch, self.to_pitch)
         try:
-            ly.pitch.transpose.transpose(cursor, transposer)
+            ly.pitch.transpose.transpose(cursor, transposer, opts.default_language)
         except ly.pitch.PitchNameNotAvailable:
-            language = ly.docinfo.DocInfo(cursor.document).language() or "nederlands"
+            language = ly.docinfo.DocInfo(cursor.document).language() or opts.default_language
             sys.stderr.write(
                 "warning: transpose: pitch names not available in \"{0}\"\n"
                 "  skipping file: {1}\n".format(language, cursor.document.filename))
@@ -168,14 +168,14 @@ class rel2abs(_edit_command):
     """convert relative music to absolute"""
     def run(self, opts, cursor, output):
         import ly.pitch.rel2abs
-        ly.pitch.rel2abs.rel2abs(cursor)
+        ly.pitch.rel2abs.rel2abs(cursor, opts.default_language)
 
 
 class abs2rel(_edit_command):
     """convert absolute music to relative"""
     def run(self, opts, cursor, output):
         import ly.pitch.abs2rel
-        ly.pitch.abs2rel.abs2rel(cursor)
+        ly.pitch.abs2rel.abs2rel(cursor, opts.default_language)
 
 
 class _export_command(_command):

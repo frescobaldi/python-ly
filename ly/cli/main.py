@@ -70,6 +70,7 @@ class Options(object):
         self.replace_pattern = True
         self.backup_suffix = '~'
         self.with_filename = None
+        self.default_language = "nederlands"
         
         self.indent_width = 2
         self.indent_tabs = False

@@ -138,6 +138,10 @@ If there is a default value, it is written between brackets:
   ``encoding`` [UTF-8]
          encoding to read (also set by -e argument)
 
+  ``default-language`` [nederlands]
+         the pitch names language to use by default, when not specified
+         otherwise in the document
+
   ``output-encoding``
          encoding to write (defaults to ``encoding``, also
          set by the ``--output-encoding`` argument)
