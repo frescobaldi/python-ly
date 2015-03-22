@@ -200,14 +200,14 @@ class ModalTransposer(object):
         pitch.octave += toOctaveMod
 
 
-def transpose(cursor, transposer):
+def transpose(cursor, transposer, language="nederlands"):
     """Transpose pitches using the specified transposer."""
     start = cursor.start
     cursor.start = 0
     
     source = ly.document.Source(cursor, True, tokens_with_position=True)
 
-    pitches = ly.pitch.PitchIterator(source)
+    pitches = ly.pitch.PitchIterator(source, language)
     psource = pitches.pitches()
 
     class gen(object):

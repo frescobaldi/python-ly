@@ -235,14 +235,14 @@ def pitchWriter(language):
 class PitchIterator(object):
     """Iterate over notes or pitches in a source."""
     
-    def __init__(self, source):
+    def __init__(self, source, language="nederlands"):
         """Initialize with a ly.document.Source.
         
-        The language is set to "nederlands".
+        The language is by default set to "nederlands".
         
         """
         self.source = source
-        self.setLanguage("nederlands")
+        self.setLanguage(language)
     
     def setLanguage(self, lang):
         r"""Changes the pitch name language to use.

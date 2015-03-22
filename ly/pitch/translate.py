@@ -27,7 +27,7 @@ import ly.document
 import ly.pitch
 
 
-def translate(cursor, language):
+def translate(cursor, language, default_language="nederlands"):
     r"""Changes the language of the pitch names.
     
     May raise ly.pitch.PitchNameNotAvailable if the current pitch language
@@ -45,7 +45,7 @@ def translate(cursor, language):
     
     source = ly.document.Source(cursor, tokens_with_position=True)
 
-    pitches = ly.pitch.PitchIterator(source)
+    pitches = ly.pitch.PitchIterator(source, default_language)
     tokens = pitches.tokens()
     writer = ly.pitch.pitchWriter(language)
     

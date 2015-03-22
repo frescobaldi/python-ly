@@ -28,14 +28,14 @@ import itertools
 import ly.lex.lilypond
 
 
-def rel2abs(cursor):
+def rel2abs(cursor, language="nederlands"):
     """Converts pitches from relative to absolute."""
     start = cursor.start
     cursor.start = 0
     
     source = ly.document.Source(cursor, True, tokens_with_position=True)
 
-    pitches = ly.pitch.PitchIterator(source)
+    pitches = ly.pitch.PitchIterator(source, language)
     psource = pitches.pitches()
     
     if start > 0:
