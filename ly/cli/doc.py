@@ -36,7 +36,7 @@ Options
   -o, --output NAME      output file name
   -e, --encoding ENC     (input) encoding (default UTF-8)
   --output-encoding ENC  output encoding (default to input encoding)
-  -l, --language NAME    pitch name language (default to "nederlands")
+  -l, --language NAME    default pitch name language (default to "nederlands")
   -d <variable=value>    set a variable
 
 The special option ``--`` considers the remaining arguments to be file names.
