@@ -347,7 +347,8 @@ class QuotedString(Text):
     """ A string that is output inside double quotes. """
     isAtom = True
     def ly(self, printer):
-        return printer.quoteString(self.text)
+        # we call format(), since self.text MIGHT be a Reference...
+        return printer.quoteString(format(self.text))
     
 
 class Newline(LyNode):
