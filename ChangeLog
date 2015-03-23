@@ -7,6 +7,7 @@ ChangeLog for python-ly
 - add the default-language variable to the ly command; this can be set to a
   language in case a LilyPond document uses a language different than
   "nederlands" but does not specify it (issue #20).
+- add the -l, --language option as shorthand for setting the default language
 - properly support drum notes in ly.lex and ly.music
 - updated scheme variables in ly.data.scheme* functions for LilyPond 2.18
 - MusicXML export improvements:

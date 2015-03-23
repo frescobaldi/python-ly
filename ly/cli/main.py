@@ -204,6 +204,9 @@ def parse_command_line():
             opts.encoding = next_arg("missing encoding name")
         elif arg == '--output-encoding':
             opts.output_encoding = next_arg("missing output encoding name")
+        elif arg in ('-l', '--language'):
+            s = next_arg("missing language name")
+            opts.set_variable("default-language", s)
         elif arg == '--':
             files.extend(args)
         elif arg.startswith('-'):
