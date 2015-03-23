@@ -31,6 +31,7 @@ import shutil
 import sys
 
 import ly.pkginfo
+from . import setvar
 
 
 def usage():
@@ -82,12 +83,14 @@ class Options(object):
     
     def set_variable(self, name, value):
         name = name.replace('-', '_')
-        if value.lower() in ('yes', 'on', 'true'):
-            value = True
-        elif value.lower() in ('no', 'off', 'false'):
-            value = False
-        elif value.isdigit():
-            value = int(value)
+        try:
+            func = getattr(setvar, name)
+        except AttributeError:
+            die("unknown variable: {name}".format(name=name))
+        try:
+            value = func(value)
+        except ValueError as e:
+            die(format(e))
         setattr(self, name, value)
     
 class Output(object):
