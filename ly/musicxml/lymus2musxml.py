@@ -456,7 +456,7 @@ class ParseSource():
     def DrumMode(self, drummode):
         r"""A \drummode or \drums expression.
 
-        If the shorhand form \drums is found a DrumStaff is implicit.
+        If the shorthand form \drums is found, DrumStaff is implicit.
 
         """
         if drummode.token == '\\drums':
