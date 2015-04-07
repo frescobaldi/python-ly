@@ -10,6 +10,7 @@ ChangeLog for python-ly
 - add the -l, --language option as shorthand for setting the default language
 - properly support drum notes in ly.lex and ly.music
 - updated scheme variables in ly.data.scheme* functions for LilyPond 2.18
+- Fix issue #16: Duration after `\skip` may not be removed
 - MusicXML export improvements:
   - support for isolated durations (a single duration without
     explicit pitch)
