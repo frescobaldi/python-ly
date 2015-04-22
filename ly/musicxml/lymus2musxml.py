@@ -56,6 +56,9 @@ class End():
     def __init__(self, node):
         self.node = node
 
+    def __repr__(self):
+        return '<{0} {1}>'.format(self.__class__.__name__, self.node)
+
 
 class ParseSource():
     """ creates the XML-file from the source code according to the Music XML standard """
@@ -101,7 +104,7 @@ class ParseSource():
         same name as the nodes class."""
         if nodes:
             for m in nodes:
-                # print(m)
+                print(m)
                 func_name = m.__class__.__name__ #get instance name
                 if func_name not in excl_list:
                     try:
