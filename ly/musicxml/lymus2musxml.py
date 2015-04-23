@@ -124,7 +124,7 @@ class ParseSource():
         same name as the nodes class."""
         if nodes:
             for m in nodes:
-                print(m)
+                # print(m)
                 func_name = m.__class__.__name__ #get instance name
                 if func_name not in excl_list:
                     try:
@@ -638,8 +638,8 @@ class ParseSource():
                 yield n
                 for c in self.iter_score(n, doc):
                     yield c
-        if isinstance(scorenode, ly.music.items.Container):
-            yield End(scorenode)
+                if isinstance(s, ly.music.items.Container):
+                    yield End(s)
 
     def unfold_repeat(self, repeat_node, repeat_count, doc):
         r"""
