@@ -29,6 +29,7 @@ is captured.
 from __future__ import unicode_literals
 from __future__ import print_function
 
+import ly.document
 import ly.music
 
 from . import create_musicxml
@@ -85,6 +86,24 @@ class ParseSource():
         self.unset_tuplspan = False
         self.alt_mode = None
         self.rel_pitch_isset = False
+
+    def parse_text(self, ly_text):
+        """Parse the LilyPond source as text."""
+        doc = ly.document.Document(ly_text)
+        self.parse_document(doc)
+
+    def parse_document(self, ly_doc):
+        """Parse the LilyPond source as a ly.document document.
+
+        The document is converted to absolute mode to facilitate the export.
+        Use parse_text instead if you want the document to be unaffected.
+
+        """
+        import ly.pitch.rel2abs
+        cursor = ly.document.Cursor(ly_doc)
+        ly.pitch.rel2abs.rel2abs(cursor)
+        mustree = ly.music.document(ly_doc)
+        self.parse_tree(mustree)
 
     def parse_tree(self, mustree):
         # print(mustree.dump())
