@@ -106,6 +106,7 @@ class ParseSource():
         self.parse_tree(mustree)
 
     def parse_tree(self, mustree):
+        """Parse the LilyPond source as a ly.music node tree."""
         # print(mustree.dump())
         header_nodes = self.iter_header(mustree)
         if header_nodes:
