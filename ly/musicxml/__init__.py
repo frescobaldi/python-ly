@@ -34,7 +34,7 @@ def writer():
 
         import ly.musicxml
         e = ly.musicxml.writer()
-        e.parse_text(lilypond_text) # or: e.parse_tokens(tokens)
+        e.parse_text(lilypond_text)
         xml = e.musicxml()
         xml.write(filename)         # or: xml.tostring()
         # xml.tree is the ElementTree xml tree.

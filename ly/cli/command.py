@@ -34,15 +34,15 @@ import ly.reformat
 
 class _command(object):
     """Base class for commands.
-    
+
     If the __init__() fails with TypeError or ValueError, the command is
     considered invalid and an error message will be written to the console
     in the parse_command() function in main.py.
-    
+
     By default, __init__() expects no arguments. If your command does accept
     arguments, they are provided in a single argument that you should parse
     yourself.
-    
+
     """
     def __init__(self):
         pass
@@ -58,7 +58,7 @@ class set_variable(_command):
 
     def run(self, opts, cursor, output):
         opts.set_variable(self.name, self.value)
-    
+
 
 class _info_command(_command):
     """base class for commands that print some output to stdout."""
@@ -69,12 +69,12 @@ class _info_command(_command):
             if opts.with_filename:
                 text = cursor.document.filename + ":" + text
             sys.stdout.write(text + '\n')
-    
+
     def get_info(self, info):
         """Should return the desired information from the docinfo object.
-        
+
         If it returns None or an empty string, nothing is printed.
-        
+
         """
         raise NotImplementedError()
 
@@ -110,7 +110,7 @@ class indent(_edit_command):
         i.indent_tabs = opts.indent_tabs
         i.indent_width = opts.indent_width
         return i
-    
+
     def run(self, opts, cursor, output):
         self.indenter(opts).indent(cursor)
 
@@ -127,7 +127,7 @@ class translate(_edit_command):
         if language not in ly.pitch.pitchInfo:
             raise ValueError()
         self.language = language
-    
+
     def run(self, opts, cursor, output):
         import ly.pitch.translate
         try:
@@ -151,7 +151,7 @@ class transpose(_edit_command):
             if r:
                 result.append(ly.pitch.Pitch(*r, octave=ly.pitch.octaveToNum(octave)))
         self.from_pitch, self.to_pitch = result
-    
+
     def run(self, opts, cursor, output):
         import ly.pitch.transpose
         transposer = ly.pitch.transpose.Transposer(self.from_pitch, self.to_pitch)
@@ -188,7 +188,7 @@ class musicxml(_export_command):
     def run(self, opts, cursor, output):
         import ly.musicxml
         writer = ly.musicxml.writer()
-        writer.parse_tree(ly.music.document(cursor.document))
+        writer.parse_text(cursor.document.plaintext())
         xml = writer.musicxml()
         if self.output:
             filename = self.output
@@ -203,7 +203,7 @@ class write(_command):
     """write the source file."""
     def __init__(self, output=None):
         self.output = output
-    
+
     def run(self, opts, cursor, output):
         # determine the real output filename to use
         encoding = opts.output_encoding or opts.encoding
@@ -224,13 +224,13 @@ class highlight(_export_command):
     def run(self, opts, cursor, output):
         import ly.colorize
         w = ly.colorize.HtmlWriter()
-        
+
         w.inline_style = opts.inline_style
         w.stylesheet_ref = opts.stylesheet
         w.number_lines = opts.number_lines
         w.title = cursor.document.filename
         w.encoding = opts.output_encoding or "utf-8"
-        
+
         doc = w.html(cursor)
         if self.output:
             filename = self.output

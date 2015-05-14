@@ -29,6 +29,7 @@ is captured.
 from __future__ import unicode_literals
 from __future__ import print_function
 
+import ly.document
 import ly.music
 
 from . import create_musicxml
@@ -55,6 +56,9 @@ class End():
     elements in the node list. """
     def __init__(self, node):
         self.node = node
+
+    def __repr__(self):
+        return '<{0} {1}>'.format(self.__class__.__name__, self.node)
 
 
 class ParseSource():
@@ -83,7 +87,26 @@ class ParseSource():
         self.alt_mode = None
         self.rel_pitch_isset = False
 
+    def parse_text(self, ly_text):
+        """Parse the LilyPond source as text."""
+        doc = ly.document.Document(ly_text)
+        self.parse_document(doc)
+
+    def parse_document(self, ly_doc):
+        """Parse the LilyPond source as a ly.document document.
+
+        The document is converted to absolute mode to facilitate the export.
+        Use parse_text instead if you want the document to be unaffected.
+
+        """
+        import ly.pitch.rel2abs
+        cursor = ly.document.Cursor(ly_doc)
+        ly.pitch.rel2abs.rel2abs(cursor)
+        mustree = ly.music.document(ly_doc)
+        self.parse_tree(mustree)
+
     def parse_tree(self, mustree):
+        """Parse the LilyPond source as a ly.music node tree."""
         # print(mustree.dump())
         header_nodes = self.iter_header(mustree)
         if header_nodes:
@@ -615,8 +638,8 @@ class ParseSource():
                 yield n
                 for c in self.iter_score(n, doc):
                     yield c
-        if isinstance(scorenode, ly.music.items.Container):
-            yield End(scorenode)
+                if isinstance(s, ly.music.items.Container):
+                    yield End(s)
 
     def unfold_repeat(self, repeat_node, repeat_count, doc):
         r"""

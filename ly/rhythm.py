@@ -125,6 +125,36 @@ def duration_tokens_pos(source, *classes):
         pos = dur_tokens[0].pos if dur_tokens else tokens[-1].end
         yield pos, dur_tokens
 
+def duration_tokens_with_removability(source, *classes):
+    r"""Yield tuples(may_remove, tokens).
+    
+    Where tokens is a list of tokens that are instance of \*classes, and
+    may_remove indicates if a duration may be removed when making
+    durations implicit.
+    
+    """
+    for tokens in music_tokens(source):
+        may_remove = '\\skip' not in tokens
+        tokens = [token for token in tokens if isinstance(token, classes)]
+        yield may_remove, tokens
+
+def duration_tokens_pos_with_removability(source, *classes):
+    r"""Yield tuples(may_remove, pos, tokens).
+    
+    Where tokens is a list of tokens that are instance of \*classes, and
+    may_remove indicates if a duration may be removed when making
+    durations implicit.
+    
+    The list of tokens can be empty, the pos points to where a duration could be
+    inserted.
+    
+    """
+    for tokens in music_tokens(source):
+        may_remove = '\\skip' not in tokens
+        dur_tokens = [token for token in tokens if isinstance(token, classes)]
+        pos = dur_tokens[0].pos if dur_tokens else tokens[-1].end
+        yield may_remove, pos, dur_tokens
+
 def preceding_duration(cursor):
     """Return a preceding duration before the cursor, or an empty list."""
     tokens = ly.document.Runner.at(cursor).backward()
@@ -203,38 +233,38 @@ def rhythm_remove(cursor):
     """Remove all durations."""
     source = ly.document.Source(cursor, True, tokens_with_position=True)
     with cursor.document as d:
-        for tokens in duration_tokens(source, ly.lex.lilypond.Duration):
-            if tokens:
+        for may_remove, tokens in duration_tokens_with_removability(source, ly.lex.lilypond.Duration):
+            if may_remove and tokens:
                 del d[tokens[0].pos:tokens[-1].end]
 
 def rhythm_implicit(cursor):
     """Remove reoccurring durations."""
     source = ly.document.Source(cursor, True, tokens_with_position=True)
-    dtokens = duration_tokens(source, ly.lex.lilypond.Duration, ly.lex.lilypond.Tempo)
-    for tokens in dtokens:
+    dtokens = duration_tokens_with_removability(source, ly.lex.lilypond.Duration, ly.lex.lilypond.Tempo)
+    for may_remove, tokens in dtokens:
         break
     else:
         return
     prev = tokens or preceding_duration(cursor)
     with cursor.document as d:
-        for tokens in dtokens:
+        for may_remove, tokens in dtokens:
             if tokens:
-                if tokens == prev:
+                if tokens == prev and may_remove:
                     del d[tokens[0].pos:tokens[-1].end]
                 prev = tokens
 
 def rhythm_implicit_per_line(cursor):
     """Remove reoccurring durations, but always write one on a new line."""
     source = ly.document.Source(cursor, True, tokens_with_position=True)
-    dtokens = duration_tokens_pos(source, ly.lex.lilypond.Duration, ly.lex.lilypond.Tempo)
-    for pos, tokens in dtokens:
+    dtokens = duration_tokens_pos_with_removability(source, ly.lex.lilypond.Duration, ly.lex.lilypond.Tempo)
+    for may_remove, pos, tokens in dtokens:
         break
     else:
         return
     previous_block = source.block
     prev = tokens or preceding_duration(cursor)
     with cursor.document as d:
-        for pos, tokens in dtokens:
+        for may_remove, pos, tokens in dtokens:
             block = d.block(pos)
             if block != previous_block:
                 if not tokens:
@@ -243,7 +273,7 @@ def rhythm_implicit_per_line(cursor):
                     prev = tokens
                 previous_block = block
             elif tokens:
-                if tokens == prev:
+                if tokens == prev and may_remove:
                     del d[tokens[0].pos:tokens[-1].end]
                 prev = tokens
 
