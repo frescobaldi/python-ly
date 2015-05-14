@@ -2,7 +2,7 @@ ChangeLog for python-ly
 =======================
 
 
-2015-??-??: python-ly 0.9.2
+2015-05-14: python-ly 0.9.2
 
 - add the default-language variable to the ly command; this can be set to a
   language in case a LilyPond document uses a language different than
@@ -10,6 +10,8 @@ ChangeLog for python-ly
 - add the -l, --language option as shorthand for setting the default language
 - properly support drum notes in ly.lex and ly.music
 - updated scheme variables in ly.data.scheme* functions for LilyPond 2.18
+- fix TypeError: expected string or buffer in dom.ly when string was a
+  dom.Reference (issue wbsoft/frescobaldi#667)
 - MusicXML export improvements:
   - support for isolated durations (a single duration without
     explicit pitch)
