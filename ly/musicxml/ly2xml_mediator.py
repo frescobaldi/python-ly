@@ -535,10 +535,10 @@ class Mediator():
             rest_copy = xml_objs.BarRest(dur, voice=voc, show_type=st, skip=sk)
             self.add_to_bar(rest_copy)
 
-    def change_to_tuplet(self, tfraction, ttype, check_dur=True):
+    def change_to_tuplet(self, tfraction, ttype, nr):
         """Change the current note into a tuplet note."""
         tuplscaling = Fraction(tfraction[0], tfraction[1])
-        if check_dur and self.tupl_dur:
+        if self.tupl_dur:
             if self.tupl_sum == 0:
                 ttype = "start"
             base, scaling = self.current_lynote.duration
@@ -547,7 +547,9 @@ class Mediator():
                 ttype = "stop"
                 self.tupl_sum = 0
         self.current_note.set_tuplet(tfraction, ttype, nr)
-        self.check_divs(tuplscaling)
+
+    def change_tuplet_type(self, newtype):
+        self.current_note.tuplet[-1].ttype = newtype
 
     def set_tuplspan_dur(self, token=None, tokens=None, fraction=None):
         """
@@ -771,14 +773,13 @@ class Mediator():
                 rs = int(t[1:])
         return (dots, rs)
 
-    def check_divs(self, tfraction=0):
+    def check_divs(self):
         """ The new duration is checked against current divisions """
         base = self.current_note.duration[0]
         scaling = self.current_note.duration[1]
         divs = self.divisions
-        if scaling != 1:
-            tfraction = 1/scaling
-        if(not tfraction):
+        tupl = self.current_note.tuplet
+        if not tupl:
             a = 4
             if base:
                 b = 1/base
@@ -786,11 +787,14 @@ class Mediator():
                 b = 1
                 print("Warning problem checking duration!")
         else:
-            num = tfraction.numerator
-            den = tfraction.denominator
+            num = 1
+            den = 1
+            for t in tupl:
+                num *= t.fraction[0]
+                den *= t.fraction[1]
             a = 4*den
             b = (1/base)*num
-        c = a*divs
+        c = a * divs * scaling
         predur, mod = divmod(c, b)
         if mod > 0:
             mult = get_mult(a, b)
@@ -857,7 +861,6 @@ def clefname2clef(clefname):
     return clef
 
 def get_mult(num, den):
-    from fractions import Fraction
     simple = Fraction(num, den)
     return simple.denominator
 

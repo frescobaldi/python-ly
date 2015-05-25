@@ -164,15 +164,22 @@ class CreateMusicXML():
             for i in range(dot):
                 self.add_dot()
 
-    def tuplet_note(self, fraction, base_scaling, ttype, nr, divs):
+    def tuplet_note(self, fraction, bs, ttype, nr, divs):
         """Convert current note to tuplet """
-        base = base_scaling[0]
-        scaling = base_scaling[1]
+        base = self.mult * bs[0]
+        scaling = bs[1]
         a = divs*4*fraction[1]
         b = (1/base)*fraction[0]
         duration = (a/b)*scaling
         self.change_div_duration(duration)
-        self.add_time_modify(fraction)
+        timemod_node = self.get_time_modify()
+        self.divdur = ((b/a), scaling)
+        from fractions import Fraction
+        self.mult = Fraction(fraction[1], fraction[0])
+        if timemod_node:
+            self.adjust_time_modify(timemod_node, fraction)
+        else:
+            self.add_time_modify(fraction)
         if ttype:
             self.add_notations()
             self.add_tuplet_type(nr, ttype)
@@ -330,6 +337,7 @@ class CreateMusicXML():
         """Create new duration """
         self.duration = etree.SubElement(self.current_note, "duration")
         self.duration.text = str(divdur)
+        self.mult = 1
 
     def change_div_duration(self, newdura):
         """Set new duration when tuplet """
@@ -375,6 +383,19 @@ class CreateMusicXML():
         actual_notes.text = str(fraction[0])
         norm_notes = etree.SubElement(timemod_node, "normal-notes")
         norm_notes.text = str(fraction[1])
+
+    def get_time_modify(self):
+        """Check if time-modification node already exists."""
+        return self.current_note.find("time-modification")
+
+    def adjust_time_modify(self, timemod_node, fraction):
+        """Adjust existing time-modification node."""
+        actual_notes = timemod_node.find("actual-notes")
+        an = int(actual_notes.text) * fraction[0]
+        actual_notes.text = str(an)
+        norm_notes = timemod_node.find("normal-notes")
+        nn = int(norm_notes.text) * fraction[1]
+        norm_notes.text = str(nn)
 
     def add_tuplet_type(self, nr, ttype):
         """Create tuplet with type attribute """

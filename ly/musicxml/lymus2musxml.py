@@ -68,7 +68,7 @@ class ParseSource():
         self.musxml = create_musicxml.CreateMusicXML()
         self.mediator = ly2xml_mediator.Mediator()
         self.relative = False
-        self.tuplet = False
+        self.tuplet = []
         self.scale = ''
         self.grace_seq = False
         self.trem_rep = 0
@@ -284,8 +284,10 @@ class ParseSource():
     def check_note(self, note):
         """Generic check for all notes, both pitched and unpitched."""
         if self.tuplet:
-            self.mediator.change_to_tuplet(self.fraction, self.ttype)
-            self.ttype = ""
+            for td in self.tuplet:
+                self.mediator.change_to_tuplet(td['fraction'], td['ttype'], td['nr'])
+                td['ttype'] = ""
+            self.mediator.check_divs()
         if self.grace_seq:
             self.mediator.new_grace()
         if self.trem_rep and not self.look_ahead(note, ly.music.items.Duration):
@@ -337,18 +339,22 @@ class ParseSource():
 
         """
         if scaler.token == '\\scaleDurations':
-            self.ttype = ""
-            self.fraction = (scaler.denominator, scaler.numerator)
+            ttype = ""
+            fraction = (scaler.denominator, scaler.numerator)
         elif scaler.token == '\\times':
-            self.ttype = "start"
-            self.fraction = (scaler.denominator, scaler.numerator)
+            ttype = "start"
+            fraction = (scaler.denominator, scaler.numerator)
         elif scaler.token == '\\tuplet':
-            self.ttype = "start"
-            self.fraction = (scaler.numerator, scaler.denominator)
+            ttype = "start"
+            fraction = (scaler.numerator, scaler.denominator)
+        nr = len(self.tuplet) + 1
+        self.tuplet.append({'set': False,
+                            'fraction': fraction,
+                            'ttype': ttype,
+                            'nr': nr})
         if self.look_ahead(scaler, ly.music.items.Duration):
             self.tupl_span = True
             self.unset_tuplspan = True
-        self.tuplet = True
 
     def Number(self, number):
         pass
@@ -526,11 +532,9 @@ class ParseSource():
             if self.unset_tuplspan:
                 self.mediator.unset_tuplspan_dur()
                 self.unset_tuplspan = False
-            if end.node.token == '\\scaleDurations':
-                self.mediator.change_to_tuplet(self.fraction, "")
-            else:
-                self.mediator.change_to_tuplet(self.fraction, "stop", check_dur=False)
-            self.tuplet = False
+            if end.node.token != '\\scaleDurations':
+                self.mediator.change_tuplet_type("stop")
+            self.tuplet.pop()
             self.fraction = None
         elif isinstance(end.node, ly.music.items.Grace): #Grace
             self.grace_seq = False
