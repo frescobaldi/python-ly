@@ -164,7 +164,7 @@ class CreateMusicXML():
             for i in range(dot):
                 self.add_dot()
 
-    def tuplet_note(self, fraction, base_scaling, ttype, divs):
+    def tuplet_note(self, fraction, base_scaling, ttype, nr, divs):
         """Convert current note to tuplet """
         base = base_scaling[0]
         scaling = base_scaling[1]
@@ -175,7 +175,7 @@ class CreateMusicXML():
         self.add_time_modify(fraction)
         if ttype:
             self.add_notations()
-            self.add_tuplet_type(ttype)
+            self.add_tuplet_type(nr, ttype)
 
     def tie_note(self, tie_type):
         self.add_tie(tie_type)
@@ -376,9 +376,9 @@ class CreateMusicXML():
         norm_notes = etree.SubElement(timemod_node, "normal-notes")
         norm_notes.text = str(fraction[1])
 
-    def add_tuplet_type(self, ttype):
+    def add_tuplet_type(self, nr, ttype):
         """Create tuplet with type attribute """
-        etree.SubElement(self.current_notation, "tuplet", type=ttype)
+        etree.SubElement(self.current_notation, "tuplet", {'number': str(nr), 'type': ttype })
 
     def add_slur(self, nr, sl_type):
         """Add slur. """

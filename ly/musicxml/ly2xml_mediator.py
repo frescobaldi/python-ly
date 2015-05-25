@@ -546,7 +546,7 @@ class Mediator():
             if self.tupl_sum == self.tupl_dur:
                 ttype = "stop"
                 self.tupl_sum = 0
-        self.current_note.set_tuplet(tfraction, ttype)
+        self.current_note.set_tuplet(tfraction, ttype, nr)
         self.check_divs(tuplscaling)
 
     def set_tuplspan_dur(self, token=None, tokens=None, fraction=None):
