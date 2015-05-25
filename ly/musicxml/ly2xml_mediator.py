@@ -535,7 +535,7 @@ class Mediator():
             rest_copy = xml_objs.BarRest(dur, voice=voc, show_type=st, skip=sk)
             self.add_to_bar(rest_copy)
 
-    def change_to_tuplet(self, tfraction, ttype, nr):
+    def change_to_tuplet(self, tfraction, ttype, nr, nested=False):
         """Change the current note into a tuplet note."""
         tuplscaling = Fraction(tfraction[0], tfraction[1])
         if self.tupl_dur:
@@ -546,7 +546,7 @@ class Mediator():
             if self.tupl_sum == self.tupl_dur:
                 ttype = "stop"
                 self.tupl_sum = 0
-        self.current_note.set_tuplet(tfraction, ttype, nr)
+        self.current_note.set_tuplet(tfraction, ttype, nr, nested)
 
     def change_tuplet_type(self, newtype):
         self.current_note.tuplet[-1].ttype = newtype

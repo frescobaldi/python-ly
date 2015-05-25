@@ -164,7 +164,7 @@ class CreateMusicXML():
             for i in range(dot):
                 self.add_dot()
 
-    def tuplet_note(self, fraction, bs, ttype, nr, divs):
+    def tuplet_note(self, fraction, bs, ttype, nr, divs, advnot=False):
         """Convert current note to tuplet """
         base = self.mult * bs[0]
         scaling = bs[1]
@@ -172,17 +172,19 @@ class CreateMusicXML():
         b = (1/base)*fraction[0]
         duration = (a/b)*scaling
         self.change_div_duration(duration)
-        timemod_node = self.get_time_modify()
-        self.divdur = ((b/a), scaling)
         from fractions import Fraction
         self.mult = Fraction(fraction[1], fraction[0])
+        timemod_node = self.get_time_modify()
         if timemod_node:
             self.adjust_time_modify(timemod_node, fraction)
         else:
             self.add_time_modify(fraction)
         if ttype:
             self.add_notations()
-            self.add_tuplet_type(nr, ttype)
+            if advnot and ttype != "stop":
+                self.add_tuplet_type(nr, ttype, actnr=fraction[0], normnr=fraction[1])
+            else:
+                self.add_tuplet_type(nr, ttype)
 
     def tie_note(self, tie_type):
         self.add_tie(tie_type)
@@ -397,9 +399,26 @@ class CreateMusicXML():
         nn = int(norm_notes.text) * fraction[1]
         norm_notes.text = str(nn)
 
-    def add_tuplet_type(self, nr, ttype):
+    def add_tuplet_type(self, nr, ttype, actnr=0, acttype='', normnr=0, normtype=''):
         """Create tuplet with type attribute """
-        etree.SubElement(self.current_notation, "tuplet", {'number': str(nr), 'type': ttype })
+        tuplnode = etree.SubElement(self.current_notation, "tuplet",
+                                    {'number': str(nr), 'type': ttype })
+        if actnr:
+            actnode = etree.SubElement(tuplnode, "tuplet-actual")
+            atn = etree.SubElement(actnode, "tuplet-number")
+            atn.text = str(actnr)
+            att = etree.SubElement(actnode, "tuplet-type")
+            if not acttype:
+                acttype = self.current_note.find("type").text
+            att.text = acttype
+        if normnr:
+            normnode = etree.SubElement(tuplnode, "tuplet-normal")
+            ntn = etree.SubElement(normnode, "tuplet-number")
+            ntn.text = str(normnr)
+            ntt = etree.SubElement(normnode, "tuplet-type")
+            if not normtype:
+                normtype = self.current_note.find("type").text
+            ntt.text = normtype
 
     def add_slur(self, nr, sl_type):
         """Add slur. """

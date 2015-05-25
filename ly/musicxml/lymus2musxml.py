@@ -284,8 +284,11 @@ class ParseSource():
     def check_note(self, note):
         """Generic check for all notes, both pitched and unpitched."""
         if self.tuplet:
+            tlevels = len(self.tuplet)
+            nested = True if tlevels > 1 else False
             for td in self.tuplet:
-                self.mediator.change_to_tuplet(td['fraction'], td['ttype'], td['nr'])
+                self.mediator.change_to_tuplet(td['fraction'], td['ttype'],
+                                                td['nr'], nested)
                 td['ttype'] = ""
             self.mediator.check_divs()
         if self.grace_seq:
