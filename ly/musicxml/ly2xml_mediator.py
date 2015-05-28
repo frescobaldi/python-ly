@@ -138,11 +138,11 @@ class Mediator():
     def change_group_bracket(self, system_start):
         self.group.set_bracket(get_group_symbol(system_start))
 
-    def new_part(self, piano=False):
+    def new_part(self, pid=None, piano=False):
         if piano:
-            self.part = xml_objs.ScorePart(2)
+            self.part = xml_objs.ScorePart(staves=2, part_id=pid)
         else:
-            self.part = xml_objs.ScorePart()
+            self.part = xml_objs.ScorePart(part_id=pid)
         if self.group:
             self.group.partlist.append(self.part)
         else:
@@ -152,6 +152,18 @@ class Mediator():
 
     def part_not_empty(self):
         return self.part and self.part.barlist
+
+    def get_part_by_id(self, pid, partholder=None):
+        if not partholder:
+            partholder = self.score
+        ret = False
+        for part in partholder.partlist:
+            if isinstance(part, xml_objs.ScorePartGroup):
+                ret = self.get_part_by_id(pid, part)
+            else:
+                if part.part_id == pid:
+                    ret = part
+        return ret
 
     def set_voicenr(self, command=None, add=False, nr=0, piano=0):
         if add:

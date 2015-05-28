@@ -196,7 +196,7 @@ class ParseSource():
     def check_context(self, context, context_id=None, token=""):
         """Check context and do appropriate action (e.g. create new part)."""
         if context in pno_contexts:
-            self.mediator.new_part(piano=True)
+            self.mediator.new_part(context_id, piano=True)
             self.piano_staff = 1
         elif context in group_contexts:
             self.mediator.new_group()
@@ -210,7 +210,7 @@ class ParseSource():
             else:
                 # Check first if part already exists
                 if token != '\\context' or self.mediator.part_not_empty():
-                    self.mediator.new_part()
+                    self.mediator.new_part(context_id)
             self.mediator.add_staff_id(context_id)
         elif context == 'Voice':
             self.sims_and_seqs.append('voice')
