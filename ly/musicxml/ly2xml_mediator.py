@@ -567,8 +567,8 @@ class Mediator():
                 self.tupl_sum = 0
         self.current_note.set_tuplet(tfraction, ttype, nr, nested)
 
-    def change_tuplet_type(self, newtype):
-        self.current_note.tuplet[-1].ttype = newtype
+    def change_tuplet_type(self, index, newtype):
+        self.current_note.tuplet[index].ttype = newtype
 
     def set_tuplspan_dur(self, token=None, tokens=None, fraction=None):
         """

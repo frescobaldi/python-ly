@@ -541,7 +541,7 @@ class ParseSource():
                 self.mediator.unset_tuplspan_dur()
                 self.unset_tuplspan = False
             if end.node.token != '\\scaleDurations':
-                self.mediator.change_tuplet_type("stop")
+                self.mediator.change_tuplet_type(len(self.tuplet) - 1, "stop")
             self.tuplet.pop()
             self.fraction = None
         elif isinstance(end.node, ly.music.items.Grace): #Grace
