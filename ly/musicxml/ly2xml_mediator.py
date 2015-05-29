@@ -858,17 +858,39 @@ def clefname2clef(clefname):
     Add it to the python dictionary below.
     """
     clef_dict = {
-    "treble": ('G', 2, 0), "violin": ('G', 2, 0), "G": ('G', 2, 0),
-    "bass": ('F', 4, 0), "F": ('F', 4, 0),
-    "alto": ('C', 3, 0), "C": ('C', 3, 0),
-    "tenor": ('C', 4, 0), "treble_8": ('G', 2, -1),
-    "bass_8": ('F', 4, -1), "treble^8": ('G', 2, 1),
-    "bass^8": ('F', 4, 1), "percussion": ('percussion', 0, 0),
-    "tab": ('TAB', 5, 0), "soprano": ('C', 1, 0),
+    "treble": ('G', 2, 0),
+    "violin": ('G', 2, 0),
+    "G": ('G', 2, 0),
+    "bass": ('F', 4, 0),
+    "F": ('F', 4, 0),
+    "alto": ('C', 3, 0),
+    "C": ('C', 3, 0),
+    "tenor": ('C', 4, 0),
+    "treble_8": ('G', 2, -1),
+    "treble_15": ('G', 2, -2),
+    "bass_8": ('F', 4, -1),
+    "bass_15": ('F', 4, -2),
+    "treble^8": ('G', 2, 1),
+    "treble^15": ('G', 2, 2),
+    "bass^8": ('F', 4, 1),
+    "bass^15": ('F', 4, 2),
+    "percussion": ('percussion', 0, 0),
+    "tab": ('TAB', 5, 0),
+    "soprano": ('C', 1, 0),
     "mezzosoprano": ('C', 2, 0),
     "baritone": ('C', 5, 0),
     "varbaritone": ('F', 3, 0),
-    "french": ('G', 1, 0)
+    "baritonevarF": ('F', 3, 0),
+    "french": ('G', 1, 0),
+    "subbass": ('F', 5, 0),
+    # From here on the clefs will end up with wrong symbols
+    "GG": ('G', 2, -1),
+    "tenorG": ('G', 2, -1),
+    "varC": ('C', 3, 0),
+    "altovarC": ('C', 3, 0),
+    "tenorvarC": ('C', 4, 0),
+    "baritonevarC": ('C', 5, 0),
+
     }
     try:
         clef = clef_dict[clefname]
