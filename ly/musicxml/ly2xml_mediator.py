@@ -880,7 +880,17 @@ def clefname2clef(clefname):
     "mezzosoprano": ('C', 2, 0),
     "baritone": ('C', 5, 0),
     "varbaritone": ('F', 3, 0),
-    "french": ('G', 1, 0)
+    "baritonevarF": ('F', 3, 0),
+    "french": ('G', 1, 0),
+    "subbass": ('F', 5, 0),
+    # From here on the clefs will end up with wrong symbols
+    "GG": ('G', 2, -1),
+    "tenorG": ('G', 2, -1),
+    "varC": ('C', 3, 0),
+    "altovarC": ('C', 3, 0),
+    "tenorvarC": ('C', 4, 0),
+    "baritonevarC": ('C', 5, 0),
+
     }
     try:
         clef = clef_dict[clefname]
