@@ -195,7 +195,10 @@ class Mediator():
     def add_staff_id(self, staff_id):
         self.store_unset_staff = False
         if staff_id:
-            self.staff_id_dict[staff_id] = self.staff
+            if staff_id in self.staff_id_dict:
+                self.staff = self.staff_id_dict[staff_id]
+            else:
+                self.staff_id_dict[staff_id] = self.staff
             if staff_id in self.staff_unset_notes:
                 for n in self.staff_unset_notes[staff_id]:
                     n.staff = self.staff
