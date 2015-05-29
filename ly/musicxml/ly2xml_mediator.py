@@ -138,15 +138,16 @@ class Mediator():
     def change_group_bracket(self, system_start):
         self.group.set_bracket(get_group_symbol(system_start))
 
-    def new_part(self, pid=None, piano=False):
+    def new_part(self, pid=None, to_part=None, piano=False):
         if piano:
-            self.part = xml_objs.ScorePart(staves=2, part_id=pid)
+            self.part = xml_objs.ScorePart(2, pid, to_part)
         else:
-            self.part = xml_objs.ScorePart(part_id=pid)
-        if self.group:
-            self.group.partlist.append(self.part)
-        else:
-            self.score.partlist.append(self.part)
+            self.part = xml_objs.ScorePart(part_id=pid, to_part=to_part)
+        if not to_part:
+            if self.group:
+                self.group.partlist.append(self.part)
+            else:
+                self.score.partlist.append(self.part)
         self.insert_into = self.part
         self.bar = None
 
@@ -265,6 +266,9 @@ class Mediator():
                 self.new_part()
             self.part.barlist.extend(self.sections[-1].barlist)
             self.sections.pop()
+        if self.part and self.part.to_part:
+            self.part.merge_part_to_part()
+            self.part = None
 
     def check_score(self):
         """

@@ -281,9 +281,10 @@ class ScorePartGroup():
 
 class ScorePart():
     """ object to keep track of part """
-    def __init__(self, staves=0, part_id=None):
+    def __init__(self, staves=0, part_id=None, to_part=None):
         self.name = ''
         self.part_id = part_id
+        self.to_part = to_part
         self.abbr = ''
         self.midi = ''
         self.barlist = []
@@ -323,9 +324,13 @@ class ScorePart():
         if self.staves:
             self.barlist[0].obj_list[0].staves = self.staves
 
-    def merge_part(self, part):
-        for org_v, add_v in zip(self.barlist, part.barlist):
-            org_v.inject_voice(add_v)
+    def merge_part_to_part(self):
+        """Merge the part with the one indicated."""
+        if self.to_part.barlist:
+            for org_v, add_v in zip(self.to_part.barlist, self.barlist):
+                org_v.inject_voice(add_v)
+        else:
+            self.to_part.barlist.extend(self.barlist)
 
 
 class ScoreSection():

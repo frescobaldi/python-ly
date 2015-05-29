@@ -195,6 +195,12 @@ class ParseSource():
 
     def check_context(self, context, context_id=None, token=""):
         """Check context and do appropriate action (e.g. create new part)."""
+        # Check first if part already exists
+        if context_id:
+            match = self.mediator.get_part_by_id(context_id)
+            if match:
+                self.mediator.new_part(to_part=match)
+                return
         if context in pno_contexts:
             self.mediator.new_part(context_id, piano=True)
             self.piano_staff = 1
@@ -208,7 +214,6 @@ class ParseSource():
                 self.mediator.set_staffnr(self.piano_staff)
                 self.piano_staff += 1
             else:
-                # Check first if part already exists
                 if token != '\\context' or self.mediator.part_not_empty():
                     self.mediator.new_part(context_id)
             self.mediator.add_staff_id(context_id)
