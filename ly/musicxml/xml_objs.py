@@ -464,8 +464,8 @@ class BarMus():
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.duration)
 
-    def set_tuplet(self, fraction, ttype, nr, actdur='', normdur=''):
-        self.tuplet.append(Tuplet(fraction, ttype, nr, actdur, normdur))
+    def set_tuplet(self, fraction, ttype, nr, acttype='', normtype=''):
+        self.tuplet.append(Tuplet(fraction, ttype, nr, acttype, normtype))
 
     def set_staff(self, staff):
         self.staff = staff
@@ -515,12 +515,12 @@ class Dynamics():
 
 class Tuplet():
     """Stores information about tuplet."""
-    def __init__(self, fraction, ttype, nr, actdur, normdur):
+    def __init__(self, fraction, ttype, nr, acttype, normtype):
         self.fraction = fraction
         self.ttype = ttype
         self.nr = nr
-        self.acttype = durval2type(actdur)
-        self.normtype = durval2type(normdur)
+        self.acttype = acttype
+        self.normtype = normtype
 
 
 ##
@@ -548,14 +548,14 @@ class BarNote(BarMus):
         self.fingering = None
         self.lyric = None
 
-    def set_duration(self, duration, durval=0):
+    def set_duration(self, duration, durtype=''):
         self.duration = duration
         self.dot = 0
-        if durval:
-            self.type = durval2type(durval)
+        if durtype:
+            self.type = durtype
 
-    def set_durtype(self, durval):
-        self.type = durval2type(durval)
+    def set_durtype(self, durtype):
+        self.type = durtype
 
     def set_octave(self, octave):
         self.octave = octave
@@ -622,17 +622,17 @@ class BarRest(BarMus):
         self.skip = skip
         self.pos = pos
 
-    def set_duration(self, duration, durval=0, durtype=None):
+    def set_duration(self, duration, durtype=''):
         self.duration = duration
-        if durval:
+        if durtype:
             if self.show_type:
-                self.type = durval2type(durval)
+                self.type = durtype
             else:
                 self.type = None
 
-    def set_durtype(self, durval):
+    def set_durtype(self, durtype):
         if self.show_type:
-            self.type = durval2type(durval)
+            self.type = durtype
 
 
 class BarAttr():
@@ -667,8 +667,8 @@ class BarAttr():
     def set_barline(self, bl):
         self.barline = convert_barl(bl)
 
-    def set_tempo(self, unit=0, beats=0, dots=0, text=""):
-        self.tempo = TempoDir(unit, beats, dots, text)
+    def set_tempo(self, unit=0, unittype='', beats=0, dots=0, text=""):
+        self.tempo = TempoDir(unit, unittype, beats, dots, text)
 
     def has_attr(self):
         check = False
@@ -693,9 +693,9 @@ class BarBackup():
 
 class TempoDir():
     """ Object that stores tempo direction information """
-    def __init__(self, unit, beats, dots, text):
-        if unit:
-            self.metr = durval2type(unit), beats
+    def __init__(self, unit, unittype, beats, dots, text):
+        if unittype:
+            self.metr = unittype, beats
             self.midi = self.set_midi_tempo(unit, beats, dots)
         else:
             self.metr = 0
@@ -717,20 +717,6 @@ class TempoDir():
 ##
 # Translation functions
 ##
-
-def durval2type(durval):
-    import ly.duration
-    xml_types = [
-        "maxima", "long", "breve", "whole",
-        "half", "quarter", "eighth",
-        "16th", "32nd", "64th",
-        "128th", "256th", "512th", "1024th", "2048th"
-    ] # Note: 2048 is supported by ly but not by MusicXML!
-    try:
-        type_index = ly.duration.durations.index(str(durval))
-    except ValueError:
-        type_index = 5
-    return xml_types[type_index]
 
 def dur2lines(dur):
     if dur == 8:

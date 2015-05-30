@@ -457,10 +457,10 @@ class Mediator():
                     return
         self.current_note.dot = dots
         self.dots = dots
-        self.current_note.set_durtype(self.dur_token)
+        self.current_note.set_durtype(durval2type(self.dur_token))
         if self.current_chord:
             for c in self.current_chord:
-                c.set_durtype(self.dur_token)
+                c.set_durtype(durval2type(self.dur_token))
 
     def new_chord(self, note, duration, rel=False):
         if not self.current_chord:
@@ -479,7 +479,7 @@ class Mediator():
     def new_chordnote(self, note, rel):
         chord_note = self.create_barnote_from_note(note)
         chord_note.set_duration(self.current_note.duration)
-        chord_note.set_durtype(self.dur_token)
+        chord_note.set_durtype(durval2type(self.dur_token))
         chord_note.dots = self.dots
         chord_note.tie = self.current_note.tie
         if not self.prev_chord_pitch:
@@ -502,7 +502,7 @@ class Mediator():
         for i, pc in enumerate(prev_chord):
             cn = self.copy_barnote_basics(pc)
             cn.set_duration(duration)
-            cn.set_durtype(self.dur_token)
+            cn.set_durtype(durval2type(self.dur_token))
             if i == 0:
                 self.current_note = cn
             self.current_chord.append(cn)
@@ -566,8 +566,8 @@ class Mediator():
                 ttype = "stop"
                 self.tupl_sum = 0
         if length:
-            actdur = normdur = self.calc_tupl_den(tfraction, length)
-            self.current_note.set_tuplet(tfraction, ttype, nr, actdur, normdur)
+            acttype = normtype = durval2type(self.calc_tupl_den(tfraction, length))
+            self.current_note.set_tuplet(tfraction, ttype, nr, acttype, normtype)
         else:
             self.current_note.set_tuplet(tfraction, ttype, nr)
 
@@ -715,7 +715,7 @@ class Mediator():
         except AttributeError:
             text = None
         tempo = xml_objs.BarAttr()
-        tempo.set_tempo(unit, beats, dots, text)
+        tempo.set_tempo(unit, durval2type(unit), beats, dots, text)
         if self.bar is None:
             self.new_bar()
         self.bar.add(tempo)
@@ -847,6 +847,20 @@ def get_xml_alter(alter):
         return alter
     else:
         return float(alter)
+
+def durval2type(durval):
+    """Convert LilyPond duration to MusicXML duration type."""
+    xml_types = [
+        "maxima", "long", "breve", "whole",
+        "half", "quarter", "eighth",
+        "16th", "32nd", "64th",
+        "128th", "256th", "512th", "1024th", "2048th"
+    ] # Note: 2048 is supported by ly but not by MusicXML!
+    try:
+        type_index = ly.duration.durations.index(str(durval))
+    except ValueError:
+        type_index = 5
+    return xml_types[type_index]
 
 def get_fifths(key, mode):
     fifths = 0
