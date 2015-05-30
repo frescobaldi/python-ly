@@ -164,7 +164,7 @@ class CreateMusicXML():
             for i in range(dot):
                 self.add_dot()
 
-    def tuplet_note(self, fraction, bs, ttype, nr, divs, advnot=False):
+    def tuplet_note(self, fraction, bs, ttype, nr, divs, atyp='', ntyp=''):
         """Convert current note to tuplet """
         base = self.mult * bs[0]
         scaling = bs[1]
@@ -181,8 +181,8 @@ class CreateMusicXML():
             self.add_time_modify(fraction)
         if ttype:
             self.add_notations()
-            if advnot and ttype != "stop":
-                self.add_tuplet_type(nr, ttype, actnr=fraction[0], normnr=fraction[1])
+            if atyp and ttype != "stop":
+                self.add_tuplet_type(nr, ttype, fraction[0], atyp, fraction[1], ntyp)
             else:
                 self.add_tuplet_type(nr, ttype)
 

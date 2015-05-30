@@ -554,7 +554,7 @@ class Mediator():
             rest_copy = xml_objs.BarRest(dur, voice=voc, show_type=st, skip=sk)
             self.add_to_bar(rest_copy)
 
-    def change_to_tuplet(self, tfraction, ttype, nr, nested=False):
+    def change_to_tuplet(self, tfraction, ttype, nr, length=None):
         """Change the current note into a tuplet note."""
         tuplscaling = Fraction(tfraction[0], tfraction[1])
         if self.tupl_dur:
@@ -565,7 +565,11 @@ class Mediator():
             if self.tupl_sum == self.tupl_dur:
                 ttype = "stop"
                 self.tupl_sum = 0
-        self.current_note.set_tuplet(tfraction, ttype, nr, nested)
+        if length:
+            actdur = normdur = self.calc_tupl_den(tfraction, length)
+            self.current_note.set_tuplet(tfraction, ttype, nr, actdur, normdur)
+        else:
+            self.current_note.set_tuplet(tfraction, ttype, nr)
 
     def change_tuplet_type(self, index, newtype):
         self.current_note.tuplet[index].ttype = newtype
@@ -586,6 +590,11 @@ class Mediator():
         """Reset tuplet duration sum and tuplet spanner duration."""
         self.tupl_sum = 0
         self.tupl_dur = 0
+
+    def calc_tupl_den(self, tfraction, length):
+        """Calculate the tuplet denominator from
+        fraction and duration of tuplet."""
+        return tfraction[1] / length
 
     def tie_to_next(self):
         tie_type = 'start'

@@ -292,8 +292,12 @@ class ParseSource():
             tlevels = len(self.tuplet)
             nested = True if tlevels > 1 else False
             for td in self.tuplet:
-                self.mediator.change_to_tuplet(td['fraction'], td['ttype'],
-                                                td['nr'], nested)
+                if nested:
+                    self.mediator.change_to_tuplet(td['fraction'], td['ttype'],
+                                                td['nr'], td['length'])
+                else:
+                    self.mediator.change_to_tuplet(td['fraction'], td['ttype'],
+                                                td['nr'])
                 td['ttype'] = ""
             self.mediator.check_divs()
         if self.grace_seq:
@@ -359,6 +363,7 @@ class ParseSource():
         self.tuplet.append({'set': False,
                             'fraction': fraction,
                             'ttype': ttype,
+                            'length': scaler.length(),
                             'nr': nr})
         if self.look_ahead(scaler, ly.music.items.Duration):
             self.tupl_span = True

@@ -160,7 +160,7 @@ class IterateXmlObjs():
         if obj.tuplet:
             for t in obj.tuplet:
                 self.musxml.tuplet_note(t.fraction, obj.duration, t.ttype, t.nr,
-                                        self.divisions, t.nested)
+                                        self.divisions, t.acttype, t.normtype)
         if obj.staff and not obj.skip:
             self.musxml.add_staff(obj.staff)
         if obj.other_notation:
@@ -464,8 +464,8 @@ class BarMus():
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.duration)
 
-    def set_tuplet(self, fraction, ttype, nr, nested=False):
-        self.tuplet.append(Tuplet(fraction, ttype, nr, nested))
+    def set_tuplet(self, fraction, ttype, nr, actdur='', normdur=''):
+        self.tuplet.append(Tuplet(fraction, ttype, nr, actdur, normdur))
 
     def set_staff(self, staff):
         self.staff = staff
@@ -515,11 +515,12 @@ class Dynamics():
 
 class Tuplet():
     """Stores information about tuplet."""
-    def __init__(self, fraction, ttype, nr, nested=False):
+    def __init__(self, fraction, ttype, nr, actdur, normdur):
         self.fraction = fraction
         self.ttype = ttype
         self.nr = nr
-        self.nested = nested
+        self.acttype = durval2type(actdur)
+        self.normtype = durval2type(normdur)
 
 
 ##
