@@ -391,6 +391,9 @@ class Bar():
         self.obj_list = []
         self.list_full = False
 
+    def __repr__(self):
+        return '<{0} {1}>'.format(self.__class__.__name__, self.obj_list)
+
     def add(self, obj):
         self.obj_list.append(obj)
 
