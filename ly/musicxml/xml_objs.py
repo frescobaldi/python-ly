@@ -279,60 +279,6 @@ class ScorePartGroup():
         self.bracket = bracket
 
 
-class ScorePart():
-    """ object to keep track of part """
-    def __init__(self, staves=0, part_id=None, to_part=None):
-        self.name = ''
-        self.part_id = part_id
-        self.to_part = to_part
-        self.abbr = ''
-        self.midi = ''
-        self.barlist = []
-        self.staves = staves
-
-    def set_first_bar(self, divisions):
-        initime = [4, 4]
-        iniclef = ('G', 2, 0)
-
-        def check_time(bar):
-            for obj in bar.obj_list:
-                if isinstance(obj, BarAttr):
-                    if obj.time:
-                        return True
-                if isinstance(obj, BarMus):
-                    return False
-
-        def check_clef(bar):
-            for obj in bar.obj_list:
-                if isinstance(obj, BarAttr):
-                    if obj.clef or obj.multiclef:
-                        return True
-                if isinstance(obj, BarMus):
-                    return False
-
-        if not check_time(self.barlist[0]):
-            try:
-                self.barlist[0].obj_list[0].set_time(initime, False)
-            except AttributeError:
-                print("Warning can't set initial time sign!")
-        if not check_clef(self.barlist[0]):
-            try:
-                self.barlist[0].obj_list[0].set_clef(iniclef)
-            except AttributeError:
-                print("Warning can't set initial clef sign!")
-        self.barlist[0].obj_list[0].divs = divisions
-        if self.staves:
-            self.barlist[0].obj_list[0].staves = self.staves
-
-    def merge_part_to_part(self):
-        """Merge the part with the one indicated."""
-        if self.to_part.barlist:
-            for org_v, add_v in zip(self.to_part.barlist, self.barlist):
-                org_v.inject_voice(add_v)
-        else:
-            self.to_part.barlist.extend(self.barlist)
-
-
 class ScoreSection():
     """ object to keep track of music section """
     def __init__(self, name):
@@ -382,6 +328,59 @@ class LyricsSection(ScoreSection):
     def __init__(self, name, voice_id):
         ScoreSection.__init__(self, name)
         self.voice_id = voice_id
+
+
+class ScorePart(ScoreSection):
+    """ object to keep track of part """
+    def __init__(self, staves=0, part_id=None, to_part=None, name=''):
+        ScoreSection.__init__(self, name)
+        self.part_id = part_id
+        self.to_part = to_part
+        self.abbr = ''
+        self.midi = ''
+        self.staves = staves
+
+    def set_first_bar(self, divisions):
+        initime = [4, 4]
+        iniclef = ('G', 2, 0)
+
+        def check_time(bar):
+            for obj in bar.obj_list:
+                if isinstance(obj, BarAttr):
+                    if obj.time:
+                        return True
+                if isinstance(obj, BarMus):
+                    return False
+
+        def check_clef(bar):
+            for obj in bar.obj_list:
+                if isinstance(obj, BarAttr):
+                    if obj.clef or obj.multiclef:
+                        return True
+                if isinstance(obj, BarMus):
+                    return False
+
+        if not check_time(self.barlist[0]):
+            try:
+                self.barlist[0].obj_list[0].set_time(initime, False)
+            except AttributeError:
+                print("Warning can't set initial time sign!")
+        if not check_clef(self.barlist[0]):
+            try:
+                self.barlist[0].obj_list[0].set_clef(iniclef)
+            except AttributeError:
+                print("Warning can't set initial clef sign!")
+        self.barlist[0].obj_list[0].divs = divisions
+        if self.staves:
+            self.barlist[0].obj_list[0].staves = self.staves
+
+    def merge_part_to_part(self):
+        """Merge the part with the one indicated."""
+        if self.to_part.barlist:
+            for org_v, add_v in zip(self.to_part.barlist, self.barlist):
+                org_v.inject_voice(add_v)
+        else:
+            self.to_part.barlist.extend(self.barlist)
 
 
 class Bar():
