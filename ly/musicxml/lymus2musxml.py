@@ -223,6 +223,8 @@ class ParseSource():
                 self.mediator.new_section(context_id)
             else:
                 self.mediator.new_section('voice')
+        elif context == 'Devnull':
+            self.mediator.new_section('devnull')
         else:
             print("Context not implemented:", context)
 
@@ -575,6 +577,8 @@ class ParseSource():
                 self.mediator.check_part()
                 self.piano_staff = 0
                 self.mediator.set_voicenr(nr=1)
+            elif end.node.context() == 'Devnull':
+                self.mediator.check_voices()
         elif end.node.token == '<<':
             if self.voice_sep:
                 self.mediator.check_voices_by_nr()

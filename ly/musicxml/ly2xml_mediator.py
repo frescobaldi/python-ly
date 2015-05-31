@@ -267,8 +267,11 @@ class Mediator():
         if len(self.sections)>1:
             if self.score.is_empty():
                 self.new_part()
-            self.part.barlist.extend(self.sections[-1].barlist)
-            self.sections.pop()
+            if self.sections[-1].name == 'simultan':
+                self.part.merge_voice(self.sections[-1])
+            else:
+                self.part.barlist.extend(self.sections[-1].barlist)
+                self.sections.pop()
         if self.part and self.part.to_part:
             self.part.merge_part_to_part()
             self.part = None
