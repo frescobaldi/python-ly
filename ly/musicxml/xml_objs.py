@@ -416,9 +416,11 @@ class Bar():
                 break
         self.add(BarBackup((b, s)))
 
-    def is_skip(self):
+    def is_skip(self, obj_list=None):
         """ Check if bar has nothing but skips. """
-        for obj in self.obj_list:
+        if not obj_list:
+            obj_list = self.obj_list
+        for obj in obj_list:
             if obj.has_attr():
                 return False
             if isinstance(obj, BarNote):
@@ -437,16 +439,18 @@ class Bar():
                 self.obj_list[0].merge_attr(new_voice.obj_list[0])
             else:
                 self.obj_list.insert(0, new_voice.obj_list[0])
-            new_voice.obj_list.pop(0)
+            backup_list = new_voice.obj_list[1:]
+        else:
+            backup_list = new_voice.obj_list
         try:
             if self.obj_list[-1].barline and new_voice.obj_list[-1].barline:
                 self.obj_list.pop()
         except AttributeError:
             pass
-        if not new_voice.is_skip():
+        if not self.is_skip(backup_list):
             self.create_backup()
-            for nv in new_voice.obj_list:
-                self.add(nv)
+            for bl in backup_list:
+                self.add(bl)
 
 
 class BarMus():
