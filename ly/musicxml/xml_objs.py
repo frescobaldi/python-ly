@@ -286,8 +286,12 @@ class ScoreSection():
         self.barlist = []
 
     def merge_voice(self, voice):
+        """Merge in other ScoreSection."""
         for org_v, add_v in zip(self.barlist, voice.barlist):
             org_v.inject_voice(add_v)
+        bl_len = len(self.barlist)
+        if len(voice.barlist) > bl_len:
+            self.barlist += voice.barlist[bl_len:]
 
     def merge_lyrics(self, lyrics):
         """Merge in lyrics in music section."""
