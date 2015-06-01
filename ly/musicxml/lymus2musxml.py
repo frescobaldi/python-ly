@@ -175,12 +175,10 @@ class ParseSource():
                 self.mediator.new_snippet('sim-snip')
                 self.voice_sep = True
             else:
+                self.mediator.new_section('simultan', True)
                 self.sims_and_seqs.append('sim')
         elif musicList.token == '{':
-            if self.sims_and_seqs and self.sims_and_seqs[-1] == 'sim':
-                self.mediator.new_section('simultan', True)
             self.sims_and_seqs.append('seq')
-            # print(self.sims_and_seqs)
 
     def Chord(self, chord):
         self.mediator.clear_chord()
@@ -224,7 +222,7 @@ class ParseSource():
             else:
                 self.mediator.new_section('voice')
         elif context == 'Devnull':
-            self.mediator.new_section('devnull')
+            self.mediator.new_section('devnull', True)
         else:
             print("Context not implemented:", context)
 
@@ -585,8 +583,7 @@ class ParseSource():
                 self.mediator.revert_voicenr()
                 self.voice_sep = False
             elif not self.piano_staff:
-                self.mediator.check_voices()
-                self.mediator.check_part()
+                self.mediator.check_simultan()
                 if self.sims_and_seqs:
                     self.sims_and_seqs.pop()
         elif end.node.token == '{':

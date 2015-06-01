@@ -287,7 +287,7 @@ class ScoreSection():
         self.simultan = sim
 
     def __repr__(self):
-        return '<{0} {1}>'.format(elf.__class__.__name__, self.name)
+        return '<{0} {1}>'.format(self.__class__.__name__, self.name)
 
     def merge_voice(self, voice):
         """Merge in other ScoreSection."""

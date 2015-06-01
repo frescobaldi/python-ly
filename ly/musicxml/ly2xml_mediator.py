@@ -43,6 +43,7 @@ class Mediator():
         self.score = xml_objs.Score()
         self.sections = []
         """ default and initial values """
+        self.insert_into = None
         self.current_note = None
         self.current_lynote = None
         self.current_is_rest = False
@@ -274,7 +275,16 @@ class Mediator():
                 self.sections.pop()
         if self.part and self.part.to_part:
             self.part.merge_part_to_part()
-            self.part = None
+        self.part = None
+
+    def check_simultan(self):
+        """Check done after simultanoues (<< >>) section."""
+        if self.sections[-1].simultan:
+            if self.part:
+                self.part.merge_voice(self.sections[-1])
+            elif len(self.sections)>1:
+                 self.sections[-2].merge_voice(self.sections[-1])
+            self.sections.pop()
 
     def check_score(self):
         """
