@@ -433,10 +433,10 @@ class Bar():
         Omitting double or conflicting bar attributes.
         Omitting also bars with only skips."""
         if new_voice.obj_list[0].has_attr():
-            if not self.obj_list[0].has_attr():
+            if self.obj_list[0].has_attr():
+                self.obj_list[0].merge_attr(new_voice.obj_list[0])
+            else:
                 self.obj_list.insert(0, new_voice.obj_list[0])
-            if new_voice.obj_list[0].multiclef:
-                self.obj_list[0].multiclef += new_voice.obj_list[0].multiclef
             new_voice.obj_list.pop(0)
         try:
             if self.obj_list[-1].barline and new_voice.obj_list[-1].barline:
@@ -685,6 +685,20 @@ class BarAttr():
         elif self.divs != 0:
             check = True
         return check
+
+    def merge_attr(self, barattr):
+        """Merge in attributes (from another bar)."""
+        if self.key is None and barattr.key is not None:
+            self.key = barattr.key
+            self.mode = barattr.mode
+        if self.time == 0 and barattr.time != 0:
+            self.time = barattr.time
+        if self.clef == 0 and barattr.clef != 0:
+            self.clef = barattr.clef
+        if barattr.multiclef:
+            self.multiclef += barattr.multiclef
+        if self.tempo is None and barattr.tempo is not None:
+            self.tempo = barattr.tempo
 
 
 class BarBackup():
