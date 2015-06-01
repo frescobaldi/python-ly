@@ -286,6 +286,9 @@ class ScoreSection():
         self.barlist = []
         self.simultan = sim
 
+    def __repr__(self):
+        return '<{0} {1}>'.format(elf.__class__.__name__, self.name)
+
     def merge_voice(self, voice):
         """Merge in other ScoreSection."""
         for org_v, add_v in zip(self.barlist, voice.barlist):
@@ -344,6 +347,10 @@ class ScorePart(ScoreSection):
         self.abbr = ''
         self.midi = ''
         self.staves = staves
+
+    def __repr__(self):
+        return '<{0} {1} {2}>'.format(
+            self.__class__.__name__, self.name, self.part_id)
 
     def set_first_bar(self, divisions):
         initime = [4, 4]
