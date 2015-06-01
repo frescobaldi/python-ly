@@ -87,9 +87,9 @@ class Mediator():
         else:
             self.score.info[name] = value
 
-    def new_section(self, name):
+    def new_section(self, name, sim=False):
         name = self.check_name(name)
-        section = xml_objs.ScoreSection(name)
+        section = xml_objs.ScoreSection(name, sim)
         self.insert_into = section
         self.sections.append(section)
         self.bar = None
@@ -267,7 +267,7 @@ class Mediator():
         if len(self.sections)>1:
             if self.score.is_empty():
                 self.new_part()
-            if self.sections[-1].name == 'simultan':
+            if self.sections[-1].simultan:
                 self.part.merge_voice(self.sections[-1])
             else:
                 self.part.barlist.extend(self.sections[-1].barlist)

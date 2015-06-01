@@ -178,7 +178,7 @@ class ParseSource():
                 self.sims_and_seqs.append('sim')
         elif musicList.token == '{':
             if self.sims_and_seqs and self.sims_and_seqs[-1] == 'sim':
-                self.mediator.new_section('simultan')
+                self.mediator.new_section('simultan', True)
             self.sims_and_seqs.append('seq')
             # print(self.sims_and_seqs)
 

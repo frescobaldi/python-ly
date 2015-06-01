@@ -281,9 +281,10 @@ class ScorePartGroup():
 
 class ScoreSection():
     """ object to keep track of music section """
-    def __init__(self, name):
+    def __init__(self, name, sim=False):
         self.name = name
         self.barlist = []
+        self.simultan = sim
 
     def merge_voice(self, voice):
         """Merge in other ScoreSection."""
