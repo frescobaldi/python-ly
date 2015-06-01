@@ -377,8 +377,7 @@ class ScorePart(ScoreSection):
     def merge_part_to_part(self):
         """Merge the part with the one indicated."""
         if self.to_part.barlist:
-            for org_v, add_v in zip(self.to_part.barlist, self.barlist):
-                org_v.inject_voice(add_v)
+            self.to_part.merge_voice(self)
         else:
             self.to_part.barlist.extend(self.barlist)
 
