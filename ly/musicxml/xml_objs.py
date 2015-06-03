@@ -158,7 +158,9 @@ class IterateXmlObjs():
     def gener_xml_mus(self, obj):
         """Nodes generic for both notes and rests."""
         if obj.tuplet:
-            self.musxml.tuplet_note(obj.tuplet, obj.duration, obj.ttype, self.divisions)
+            for t in obj.tuplet:
+                self.musxml.tuplet_note(t.fraction, obj.duration, t.ttype, t.nr,
+                                        self.divisions, t.acttype, t.normtype)
         if obj.staff and not obj.skip:
             self.musxml.add_staff(obj.staff)
         if obj.other_notation:
@@ -277,59 +279,23 @@ class ScorePartGroup():
         self.bracket = bracket
 
 
-class ScorePart():
-    """ object to keep track of part """
-    def __init__(self, staves=0):
-        self.name = ''
-        self.abbr = ''
-        self.midi = ''
-        self.barlist = []
-        self.staves = staves
-
-    def set_first_bar(self, divisions):
-        initime = [4, 4]
-        iniclef = ('G', 2, 0)
-
-        def check_time(bar):
-            for obj in bar.obj_list:
-                if isinstance(obj, BarAttr):
-                    if obj.time:
-                        return True
-                if isinstance(obj, BarMus):
-                    return False
-
-        def check_clef(bar):
-            for obj in bar.obj_list:
-                if isinstance(obj, BarAttr):
-                    if obj.clef or obj.multiclef:
-                        return True
-                if isinstance(obj, BarMus):
-                    return False
-
-        if not check_time(self.barlist[0]):
-            try:
-                self.barlist[0].obj_list[0].set_time(initime, False)
-            except AttributeError:
-                print("Warning can't set initial time sign!")
-        if not check_clef(self.barlist[0]):
-            try:
-                self.barlist[0].obj_list[0].set_clef(iniclef)
-            except AttributeError:
-                print("Warning can't set initial clef sign!")
-        self.barlist[0].obj_list[0].divs = divisions
-        if self.staves:
-            self.barlist[0].obj_list[0].staves = self.staves
-
-
 class ScoreSection():
     """ object to keep track of music section """
-    def __init__(self, name):
+    def __init__(self, name, sim=False):
         self.name = name
         self.barlist = []
+        self.simultan = sim
+
+    def __repr__(self):
+        return '<{0} {1}>'.format(self.__class__.__name__, self.name)
 
     def merge_voice(self, voice):
+        """Merge in other ScoreSection."""
         for org_v, add_v in zip(self.barlist, voice.barlist):
             org_v.inject_voice(add_v)
+        bl_len = len(self.barlist)
+        if len(voice.barlist) > bl_len:
+            self.barlist += voice.barlist[bl_len:]
 
     def merge_lyrics(self, lyrics):
         """Merge in lyrics in music section."""
@@ -372,12 +338,71 @@ class LyricsSection(ScoreSection):
         self.voice_id = voice_id
 
 
+class ScorePart(ScoreSection):
+    """ object to keep track of part """
+    def __init__(self, staves=0, part_id=None, to_part=None, name=''):
+        ScoreSection.__init__(self, name)
+        self.part_id = part_id
+        self.to_part = to_part
+        self.abbr = ''
+        self.midi = ''
+        self.staves = staves
+
+    def __repr__(self):
+        return '<{0} {1} {2}>'.format(
+            self.__class__.__name__, self.name, self.part_id)
+
+    def set_first_bar(self, divisions):
+        initime = [4, 4]
+        iniclef = ('G', 2, 0)
+
+        def check_time(bar):
+            for obj in bar.obj_list:
+                if isinstance(obj, BarAttr):
+                    if obj.time:
+                        return True
+                if isinstance(obj, BarMus):
+                    return False
+
+        def check_clef(bar):
+            for obj in bar.obj_list:
+                if isinstance(obj, BarAttr):
+                    if obj.clef or obj.multiclef:
+                        return True
+                if isinstance(obj, BarMus):
+                    return False
+
+        if not check_time(self.barlist[0]):
+            try:
+                self.barlist[0].obj_list[0].set_time(initime, False)
+            except AttributeError:
+                print("Warning can't set initial time sign!")
+        if not check_clef(self.barlist[0]):
+            try:
+                self.barlist[0].obj_list[0].set_clef(iniclef)
+            except AttributeError:
+                print("Warning can't set initial clef sign!")
+        self.barlist[0].obj_list[0].divs = divisions
+        if self.staves:
+            self.barlist[0].obj_list[0].staves = self.staves
+
+    def merge_part_to_part(self):
+        """Merge the part with the one indicated."""
+        if self.to_part.barlist:
+            self.to_part.merge_voice(self)
+        else:
+            self.to_part.barlist.extend(self.barlist)
+
+
 class Bar():
     """ Representing the bar/measure.
     Contains also information about how complete it is."""
     def __init__(self):
         self.obj_list = []
         self.list_full = False
+
+    def __repr__(self):
+        return '<{0} {1}>'.format(self.__class__.__name__, self.obj_list)
 
     def add(self, obj):
         self.obj_list.append(obj)
@@ -402,9 +427,11 @@ class Bar():
                 break
         self.add(BarBackup((b, s)))
 
-    def is_skip(self):
+    def is_skip(self, obj_list=None):
         """ Check if bar has nothing but skips. """
-        for obj in self.obj_list:
+        if not obj_list:
+            obj_list = self.obj_list
+        for obj in obj_list:
             if obj.has_attr():
                 return False
             if isinstance(obj, BarNote):
@@ -419,20 +446,22 @@ class Bar():
         Omitting double or conflicting bar attributes.
         Omitting also bars with only skips."""
         if new_voice.obj_list[0].has_attr():
-            if not self.obj_list[0].has_attr():
+            if self.obj_list[0].has_attr():
+                self.obj_list[0].merge_attr(new_voice.obj_list[0])
+            else:
                 self.obj_list.insert(0, new_voice.obj_list[0])
-            if new_voice.obj_list[0].multiclef:
-                self.obj_list[0].multiclef += new_voice.obj_list[0].multiclef
-            new_voice.obj_list.pop(0)
+            backup_list = new_voice.obj_list[1:]
+        else:
+            backup_list = new_voice.obj_list
         try:
             if self.obj_list[-1].barline and new_voice.obj_list[-1].barline:
                 self.obj_list.pop()
         except AttributeError:
             pass
-        if not new_voice.is_skip():
+        if not self.is_skip(backup_list):
             self.create_backup()
-            for nv in new_voice.obj_list:
-                self.add(nv)
+            for bl in backup_list:
+                self.add(bl)
 
 
 class BarMus():
@@ -440,7 +469,7 @@ class BarMus():
     def __init__(self, duration, voice=1):
         self.duration = duration
         self.type = None
-        self.tuplet = 0
+        self.tuplet = []
         self.dot = 0
         self.voice = voice
         self.staff = 0
@@ -452,9 +481,8 @@ class BarMus():
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.duration)
 
-    def set_tuplet(self, fraction, ttype):
-        self.tuplet = fraction
-        self.ttype = ttype
+    def set_tuplet(self, fraction, ttype, nr, acttype='', normtype=''):
+        self.tuplet.append(Tuplet(fraction, ttype, nr, acttype, normtype))
 
     def set_staff(self, staff):
         self.staff = staff
@@ -502,6 +530,16 @@ class Dynamics():
         self.sign = sign
 
 
+class Tuplet():
+    """Stores information about tuplet."""
+    def __init__(self, fraction, ttype, nr, acttype, normtype):
+        self.fraction = fraction
+        self.ttype = ttype
+        self.nr = nr
+        self.acttype = acttype
+        self.normtype = normtype
+
+
 ##
 # Subclasses of BarMus
 ##
@@ -527,14 +565,14 @@ class BarNote(BarMus):
         self.fingering = None
         self.lyric = None
 
-    def set_duration(self, duration, durval=0):
+    def set_duration(self, duration, durtype=''):
         self.duration = duration
         self.dot = 0
-        if durval:
-            self.type = durval2type(durval)
+        if durtype:
+            self.type = durtype
 
-    def set_durtype(self, durval):
-        self.type = durval2type(durval)
+    def set_durtype(self, durtype):
+        self.type = durtype
 
     def set_octave(self, octave):
         self.octave = octave
@@ -601,17 +639,17 @@ class BarRest(BarMus):
         self.skip = skip
         self.pos = pos
 
-    def set_duration(self, duration, durval=0, durtype=None):
+    def set_duration(self, duration, durtype=''):
         self.duration = duration
-        if durval:
+        if durtype:
             if self.show_type:
-                self.type = durval2type(durval)
+                self.type = durtype
             else:
                 self.type = None
 
-    def set_durtype(self, durval):
+    def set_durtype(self, durtype):
         if self.show_type:
-            self.type = durval2type(durval)
+            self.type = durtype
 
 
 class BarAttr():
@@ -646,8 +684,8 @@ class BarAttr():
     def set_barline(self, bl):
         self.barline = convert_barl(bl)
 
-    def set_tempo(self, unit=0, beats=0, dots=0, text=""):
-        self.tempo = TempoDir(unit, beats, dots, text)
+    def set_tempo(self, unit=0, unittype='', beats=0, dots=0, text=""):
+        self.tempo = TempoDir(unit, unittype, beats, dots, text)
 
     def has_attr(self):
         check = False
@@ -663,6 +701,20 @@ class BarAttr():
             check = True
         return check
 
+    def merge_attr(self, barattr):
+        """Merge in attributes (from another bar)."""
+        if self.key is None and barattr.key is not None:
+            self.key = barattr.key
+            self.mode = barattr.mode
+        if self.time == 0 and barattr.time != 0:
+            self.time = barattr.time
+        if self.clef == 0 and barattr.clef != 0:
+            self.clef = barattr.clef
+        if barattr.multiclef:
+            self.multiclef += barattr.multiclef
+        if self.tempo is None and barattr.tempo is not None:
+            self.tempo = barattr.tempo
+
 
 class BarBackup():
     """ Object that stores duration for backup """
@@ -672,9 +724,9 @@ class BarBackup():
 
 class TempoDir():
     """ Object that stores tempo direction information """
-    def __init__(self, unit, beats, dots, text):
-        if unit:
-            self.metr = durval2type(unit), beats
+    def __init__(self, unit, unittype, beats, dots, text):
+        if unittype:
+            self.metr = unittype, beats
             self.midi = self.set_midi_tempo(unit, beats, dots)
         else:
             self.metr = 0
@@ -696,20 +748,6 @@ class TempoDir():
 ##
 # Translation functions
 ##
-
-def durval2type(durval):
-    import ly.duration
-    xml_types = [
-        "maxima", "long", "breve", "whole",
-        "half", "quarter", "eighth",
-        "16th", "32nd", "64th",
-        "128th", "256th", "512th", "1024th", "2048th"
-    ] # Note: 2048 is supported by ly but not by MusicXML!
-    try:
-        type_index = ly.duration.durations.index(str(durval))
-    except ValueError:
-        type_index = 5
-    return xml_types[type_index]
 
 def dur2lines(dur):
     if dur == 8:

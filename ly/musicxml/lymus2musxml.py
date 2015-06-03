@@ -68,7 +68,7 @@ class ParseSource():
         self.musxml = create_musicxml.CreateMusicXML()
         self.mediator = ly2xml_mediator.Mediator()
         self.relative = False
-        self.tuplet = False
+        self.tuplet = []
         self.scale = ''
         self.grace_seq = False
         self.trem_rep = 0
@@ -175,12 +175,10 @@ class ParseSource():
                 self.mediator.new_snippet('sim-snip')
                 self.voice_sep = True
             else:
+                self.mediator.new_section('simultan', True)
                 self.sims_and_seqs.append('sim')
         elif musicList.token == '{':
-            if self.sims_and_seqs and self.sims_and_seqs[-1] == 'sim':
-                self.mediator.new_section('simultan')
             self.sims_and_seqs.append('seq')
-            # print(self.sims_and_seqs)
 
     def Chord(self, chord):
         self.mediator.clear_chord()
@@ -195,8 +193,14 @@ class ParseSource():
 
     def check_context(self, context, context_id=None, token=""):
         """Check context and do appropriate action (e.g. create new part)."""
+        # Check first if part already exists
+        if context_id:
+            match = self.mediator.get_part_by_id(context_id)
+            if match:
+                self.mediator.new_part(to_part=match)
+                return
         if context in pno_contexts:
-            self.mediator.new_part(piano=True)
+            self.mediator.new_part(context_id, piano=True)
             self.piano_staff = 1
         elif context in group_contexts:
             self.mediator.new_group()
@@ -208,9 +212,8 @@ class ParseSource():
                 self.mediator.set_staffnr(self.piano_staff)
                 self.piano_staff += 1
             else:
-                # Check first if part already exists
                 if token != '\\context' or self.mediator.part_not_empty():
-                    self.mediator.new_part()
+                    self.mediator.new_part(context_id)
             self.mediator.add_staff_id(context_id)
         elif context == 'Voice':
             self.sims_and_seqs.append('voice')
@@ -218,6 +221,8 @@ class ParseSource():
                 self.mediator.new_section(context_id)
             else:
                 self.mediator.new_section('voice')
+        elif context == 'Devnull':
+            self.mediator.new_section('devnull', True)
         else:
             print("Context not implemented:", context)
 
@@ -284,8 +289,17 @@ class ParseSource():
     def check_note(self, note):
         """Generic check for all notes, both pitched and unpitched."""
         if self.tuplet:
-            self.mediator.change_to_tuplet(self.fraction, self.ttype)
-            self.ttype = ""
+            tlevels = len(self.tuplet)
+            nested = True if tlevels > 1 else False
+            for td in self.tuplet:
+                if nested:
+                    self.mediator.change_to_tuplet(td['fraction'], td['ttype'],
+                                                td['nr'], td['length'])
+                else:
+                    self.mediator.change_to_tuplet(td['fraction'], td['ttype'],
+                                                td['nr'])
+                td['ttype'] = ""
+            self.mediator.check_divs()
         if self.grace_seq:
             self.mediator.new_grace()
         if self.trem_rep and not self.look_ahead(note, ly.music.items.Duration):
@@ -337,18 +351,23 @@ class ParseSource():
 
         """
         if scaler.token == '\\scaleDurations':
-            self.ttype = ""
-            self.fraction = (scaler.denominator, scaler.numerator)
+            ttype = ""
+            fraction = (scaler.denominator, scaler.numerator)
         elif scaler.token == '\\times':
-            self.ttype = "start"
-            self.fraction = (scaler.denominator, scaler.numerator)
+            ttype = "start"
+            fraction = (scaler.denominator, scaler.numerator)
         elif scaler.token == '\\tuplet':
-            self.ttype = "start"
-            self.fraction = (scaler.numerator, scaler.denominator)
+            ttype = "start"
+            fraction = (scaler.numerator, scaler.denominator)
+        nr = len(self.tuplet) + 1
+        self.tuplet.append({'set': False,
+                            'fraction': fraction,
+                            'ttype': ttype,
+                            'length': scaler.length(),
+                            'nr': nr})
         if self.look_ahead(scaler, ly.music.items.Duration):
             self.tupl_span = True
             self.unset_tuplspan = True
-        self.tuplet = True
 
     def Number(self, number):
         pass
@@ -526,11 +545,9 @@ class ParseSource():
             if self.unset_tuplspan:
                 self.mediator.unset_tuplspan_dur()
                 self.unset_tuplspan = False
-            if end.node.token == '\\scaleDurations':
-                self.mediator.change_to_tuplet(self.fraction, "")
-            else:
-                self.mediator.change_to_tuplet(self.fraction, "stop", check_dur=False)
-            self.tuplet = False
+            if end.node.token != '\\scaleDurations':
+                self.mediator.change_tuplet_type(len(self.tuplet) - 1, "stop")
+            self.tuplet.pop()
             self.fraction = None
         elif isinstance(end.node, ly.music.items.Grace): #Grace
             self.grace_seq = False
@@ -558,14 +575,15 @@ class ParseSource():
                 self.mediator.check_part()
                 self.piano_staff = 0
                 self.mediator.set_voicenr(nr=1)
+            elif end.node.context() == 'Devnull':
+                self.mediator.check_voices()
         elif end.node.token == '<<':
             if self.voice_sep:
                 self.mediator.check_voices_by_nr()
                 self.mediator.revert_voicenr()
                 self.voice_sep = False
             elif not self.piano_staff:
-                self.mediator.check_voices()
-                self.mediator.check_part()
+                self.mediator.check_simultan()
                 if self.sims_and_seqs:
                     self.sims_and_seqs.pop()
         elif end.node.token == '{':

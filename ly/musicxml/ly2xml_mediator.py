@@ -43,6 +43,7 @@ class Mediator():
         self.score = xml_objs.Score()
         self.sections = []
         """ default and initial values """
+        self.insert_into = None
         self.current_note = None
         self.current_lynote = None
         self.current_is_rest = False
@@ -87,9 +88,9 @@ class Mediator():
         else:
             self.score.info[name] = value
 
-    def new_section(self, name):
+    def new_section(self, name, sim=False):
         name = self.check_name(name)
-        section = xml_objs.ScoreSection(name)
+        section = xml_objs.ScoreSection(name, sim)
         self.insert_into = section
         self.sections.append(section)
         self.bar = None
@@ -138,20 +139,33 @@ class Mediator():
     def change_group_bracket(self, system_start):
         self.group.set_bracket(get_group_symbol(system_start))
 
-    def new_part(self, piano=False):
+    def new_part(self, pid=None, to_part=None, piano=False):
         if piano:
-            self.part = xml_objs.ScorePart(2)
+            self.part = xml_objs.ScorePart(2, pid, to_part)
         else:
-            self.part = xml_objs.ScorePart()
-        if self.group:
-            self.group.partlist.append(self.part)
-        else:
-            self.score.partlist.append(self.part)
+            self.part = xml_objs.ScorePart(part_id=pid, to_part=to_part)
+        if not to_part:
+            if self.group:
+                self.group.partlist.append(self.part)
+            else:
+                self.score.partlist.append(self.part)
         self.insert_into = self.part
         self.bar = None
 
     def part_not_empty(self):
         return self.part and self.part.barlist
+
+    def get_part_by_id(self, pid, partholder=None):
+        if not partholder:
+            partholder = self.score
+        ret = False
+        for part in partholder.partlist:
+            if isinstance(part, xml_objs.ScorePartGroup):
+                ret = self.get_part_by_id(pid, part)
+            else:
+                if part.part_id == pid:
+                    ret = part
+        return ret
 
     def set_voicenr(self, command=None, add=False, nr=0, piano=0):
         if add:
@@ -182,7 +196,10 @@ class Mediator():
     def add_staff_id(self, staff_id):
         self.store_unset_staff = False
         if staff_id:
-            self.staff_id_dict[staff_id] = self.staff
+            if staff_id in self.staff_id_dict:
+                self.staff = self.staff_id_dict[staff_id]
+            else:
+                self.staff_id_dict[staff_id] = self.staff
             if staff_id in self.staff_unset_notes:
                 for n in self.staff_unset_notes[staff_id]:
                     n.staff = self.staff
@@ -251,7 +268,22 @@ class Mediator():
         if len(self.sections)>1:
             if self.score.is_empty():
                 self.new_part()
-            self.part.barlist.extend(self.sections[-1].barlist)
+            if self.sections[-1].simultan:
+                self.part.merge_voice(self.sections[-1])
+            else:
+                self.part.barlist.extend(self.sections[-1].barlist)
+                self.sections.pop()
+        if self.part and self.part.to_part:
+            self.part.merge_part_to_part()
+        self.part = None
+
+    def check_simultan(self):
+        """Check done after simultanoues (<< >>) section."""
+        if self.sections[-1].simultan:
+            if self.part:
+                self.part.merge_voice(self.sections[-1])
+            elif len(self.sections)>1:
+                 self.sections[-2].merge_voice(self.sections[-1])
             self.sections.pop()
 
     def check_score(self):
@@ -438,10 +470,10 @@ class Mediator():
                     return
         self.current_note.dot = dots
         self.dots = dots
-        self.current_note.set_durtype(self.dur_token)
+        self.current_note.set_durtype(durval2type(self.dur_token))
         if self.current_chord:
             for c in self.current_chord:
-                c.set_durtype(self.dur_token)
+                c.set_durtype(durval2type(self.dur_token))
 
     def new_chord(self, note, duration, rel=False):
         if not self.current_chord:
@@ -460,7 +492,7 @@ class Mediator():
     def new_chordnote(self, note, rel):
         chord_note = self.create_barnote_from_note(note)
         chord_note.set_duration(self.current_note.duration)
-        chord_note.set_durtype(self.dur_token)
+        chord_note.set_durtype(durval2type(self.dur_token))
         chord_note.dots = self.dots
         chord_note.tie = self.current_note.tie
         if not self.prev_chord_pitch:
@@ -483,7 +515,7 @@ class Mediator():
         for i, pc in enumerate(prev_chord):
             cn = self.copy_barnote_basics(pc)
             cn.set_duration(duration)
-            cn.set_durtype(self.dur_token)
+            cn.set_durtype(durval2type(self.dur_token))
             if i == 0:
                 self.current_note = cn
             self.current_chord.append(cn)
@@ -535,10 +567,10 @@ class Mediator():
             rest_copy = xml_objs.BarRest(dur, voice=voc, show_type=st, skip=sk)
             self.add_to_bar(rest_copy)
 
-    def change_to_tuplet(self, tfraction, ttype, check_dur=True):
+    def change_to_tuplet(self, tfraction, ttype, nr, length=None):
         """Change the current note into a tuplet note."""
         tuplscaling = Fraction(tfraction[0], tfraction[1])
-        if check_dur and self.tupl_dur:
+        if self.tupl_dur:
             if self.tupl_sum == 0:
                 ttype = "start"
             base, scaling = self.current_lynote.duration
@@ -546,8 +578,14 @@ class Mediator():
             if self.tupl_sum == self.tupl_dur:
                 ttype = "stop"
                 self.tupl_sum = 0
-        self.current_note.set_tuplet(tfraction, ttype)
-        self.check_divs(tuplscaling)
+        if length:
+            acttype = normtype = durval2type(self.calc_tupl_den(tfraction, length))
+            self.current_note.set_tuplet(tfraction, ttype, nr, acttype, normtype)
+        else:
+            self.current_note.set_tuplet(tfraction, ttype, nr)
+
+    def change_tuplet_type(self, index, newtype):
+        self.current_note.tuplet[index].ttype = newtype
 
     def set_tuplspan_dur(self, token=None, tokens=None, fraction=None):
         """
@@ -565,6 +603,11 @@ class Mediator():
         """Reset tuplet duration sum and tuplet spanner duration."""
         self.tupl_sum = 0
         self.tupl_dur = 0
+
+    def calc_tupl_den(self, tfraction, length):
+        """Calculate the tuplet denominator from
+        fraction and duration of tuplet."""
+        return tfraction[1] / length
 
     def tie_to_next(self):
         tie_type = 'start'
@@ -685,7 +728,7 @@ class Mediator():
         except AttributeError:
             text = None
         tempo = xml_objs.BarAttr()
-        tempo.set_tempo(unit, beats, dots, text)
+        tempo.set_tempo(unit, durval2type(unit), beats, dots, text)
         if self.bar is None:
             self.new_bar()
         self.bar.add(tempo)
@@ -771,14 +814,13 @@ class Mediator():
                 rs = int(t[1:])
         return (dots, rs)
 
-    def check_divs(self, tfraction=0):
+    def check_divs(self):
         """ The new duration is checked against current divisions """
         base = self.current_note.duration[0]
         scaling = self.current_note.duration[1]
         divs = self.divisions
-        if scaling != 1:
-            tfraction = 1/scaling
-        if(not tfraction):
+        tupl = self.current_note.tuplet
+        if not tupl:
             a = 4
             if base:
                 b = 1/base
@@ -786,11 +828,14 @@ class Mediator():
                 b = 1
                 print("Warning problem checking duration!")
         else:
-            num = tfraction.numerator
-            den = tfraction.denominator
+            num = 1
+            den = 1
+            for t in tupl:
+                num *= t.fraction[0]
+                den *= t.fraction[1]
             a = 4*den
             b = (1/base)*num
-        c = a*divs
+        c = a * divs * scaling
         predur, mod = divmod(c, b)
         if mod > 0:
             mult = get_mult(a, b)
@@ -816,6 +861,20 @@ def get_xml_alter(alter):
     else:
         return float(alter)
 
+def durval2type(durval):
+    """Convert LilyPond duration to MusicXML duration type."""
+    xml_types = [
+        "maxima", "long", "breve", "whole",
+        "half", "quarter", "eighth",
+        "16th", "32nd", "64th",
+        "128th", "256th", "512th", "1024th", "2048th"
+    ] # Note: 2048 is supported by ly but not by MusicXML!
+    try:
+        type_index = ly.duration.durations.index(str(durval))
+    except ValueError:
+        type_index = 5
+    return xml_types[type_index]
+
 def get_fifths(key, mode):
     fifths = 0
     sharpkeys = ['c', 'g', 'd', 'a', 'e', 'b', 'fis', 'cis', 'gis',
@@ -838,17 +897,39 @@ def clefname2clef(clefname):
     Add it to the python dictionary below.
     """
     clef_dict = {
-    "treble": ('G', 2, 0), "violin": ('G', 2, 0), "G": ('G', 2, 0),
-    "bass": ('F', 4, 0), "F": ('F', 4, 0),
-    "alto": ('C', 3, 0), "C": ('C', 3, 0),
-    "tenor": ('C', 4, 0), "treble_8": ('G', 2, -1),
-    "bass_8": ('F', 4, -1), "treble^8": ('G', 2, 1),
-    "bass^8": ('F', 4, 1), "percussion": ('percussion', 0, 0),
-    "tab": ('TAB', 5, 0), "soprano": ('C', 1, 0),
+    "treble": ('G', 2, 0),
+    "violin": ('G', 2, 0),
+    "G": ('G', 2, 0),
+    "bass": ('F', 4, 0),
+    "F": ('F', 4, 0),
+    "alto": ('C', 3, 0),
+    "C": ('C', 3, 0),
+    "tenor": ('C', 4, 0),
+    "treble_8": ('G', 2, -1),
+    "treble_15": ('G', 2, -2),
+    "bass_8": ('F', 4, -1),
+    "bass_15": ('F', 4, -2),
+    "treble^8": ('G', 2, 1),
+    "treble^15": ('G', 2, 2),
+    "bass^8": ('F', 4, 1),
+    "bass^15": ('F', 4, 2),
+    "percussion": ('percussion', 0, 0),
+    "tab": ('TAB', 5, 0),
+    "soprano": ('C', 1, 0),
     "mezzosoprano": ('C', 2, 0),
     "baritone": ('C', 5, 0),
     "varbaritone": ('F', 3, 0),
-    "french": ('G', 1, 0)
+    "baritonevarF": ('F', 3, 0),
+    "french": ('G', 1, 0),
+    "subbass": ('F', 5, 0),
+    # From here on the clefs will end up with wrong symbols
+    "GG": ('G', 2, -1),
+    "tenorG": ('G', 2, -1),
+    "varC": ('C', 3, 0),
+    "altovarC": ('C', 3, 0),
+    "tenorvarC": ('C', 4, 0),
+    "baritonevarC": ('C', 5, 0),
+
     }
     try:
         clef = clef_dict[clefname]
@@ -857,7 +938,6 @@ def clefname2clef(clefname):
     return clef
 
 def get_mult(num, den):
-    from fractions import Fraction
     simple = Fraction(num, den)
     return simple.denominator
 
