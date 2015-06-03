@@ -1110,22 +1110,26 @@ accidentalstyles = (
 
 
 clefs_plain = (
-    'treble',
-    'violin',
-    'G',
     'alto',
-    'C',
-    'tenor',
+    'baritone',
     'bass',
-    'subbass',
+    'C',
     'F',
     'french',
+    'G',
+    'GG',               # since 2.19
     'mezzosoprano',
-    'soprano',
-    'varbaritone',
-    'baritone',
     'percussion',
+    'soprano',
+    'subbass',
     'tab',
+    'tenor',
+    'tenorG',           # since 2.19
+    'treble',
+    'varbaritone',
+    'varC',             # since 2.19
+    'varpercussion',    # since 2.19
+    'violin',
 )
     
 
