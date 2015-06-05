@@ -5,6 +5,7 @@ ChangeLog for python-ly
 ????-??-??: python-ly 0.9.3
 
 - Fix issue #35: do not insert duration after a tie
+- MusicXML export various improvements and bug fixes.
 
 
 2015-05-14: python-ly 0.9.2
