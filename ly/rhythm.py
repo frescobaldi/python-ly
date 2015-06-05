@@ -101,11 +101,17 @@ _start = (
     ly.lex.lilypond.Accidental,
     ly.lex.lilypond.OctaveCheck,
     ly.lex.lilypond.Duration,
-    ly.lex.lilypond.Tie,
     ly.lex.lilypond.Tempo
 )
 
-_stay = _start[5:]
+_stay = (
+    ly.lex.lilypond.Octave,
+    ly.lex.lilypond.Accidental,
+    ly.lex.lilypond.OctaveCheck,
+    ly.lex.lilypond.Duration,
+    ly.lex.lilypond.Tie,
+    ly.lex.lilypond.Tempo
+)
 
 
 def duration_tokens(source, *classes):
