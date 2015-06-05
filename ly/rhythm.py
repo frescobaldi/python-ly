@@ -113,6 +113,16 @@ def duration_tokens(source, *classes):
     for tokens in music_tokens(source):
         yield [token for token in tokens if isinstance(token, classes)]
 
+def insert_pos(tokens, dur_tokens):
+    """Return the position where a duration could be inserted."""
+    if dur_tokens:
+        return dur_tokens[0].pos
+    else:
+        for t in reversed(tokens):
+            if not isinstance(t, ly.lex.lilypond.Tie):
+                break
+        return t.end
+
 def duration_tokens_pos(source, *classes):
     r"""Yield tuples(pos, list of tokens) where tokens in list are instance of \*classes.
     
@@ -122,7 +132,7 @@ def duration_tokens_pos(source, *classes):
     """
     for tokens in music_tokens(source):
         dur_tokens = [token for token in tokens if isinstance(token, classes)]
-        pos = dur_tokens[0].pos if dur_tokens else tokens[-1].end
+        pos = insert_pos(tokens, dur_tokens)
         yield pos, dur_tokens
 
 def duration_tokens_with_removability(source, *classes):
@@ -152,7 +162,7 @@ def duration_tokens_pos_with_removability(source, *classes):
     for tokens in music_tokens(source):
         may_remove = '\\skip' not in tokens
         dur_tokens = [token for token in tokens if isinstance(token, classes)]
-        pos = dur_tokens[0].pos if dur_tokens else tokens[-1].end
+        pos = insert_pos(tokens, dur_tokens)
         yield may_remove, pos, dur_tokens
 
 def preceding_duration(cursor):
@@ -302,7 +312,7 @@ def rhythm_overwrite(cursor, durations):
     durations_source = remove_dups(itertools.cycle(durations))
     source = ly.document.Source(cursor, True, tokens_with_position=True)
     with cursor.document as d:
-        for pos, tokens in duration_tokens_pos(source, ly.lex.lilypond.Duration, ly.lex.lilypond.Tie):
+        for pos, tokens in duration_tokens_pos(source, ly.lex.lilypond.Duration):
             end = tokens[-1].end if tokens else pos
             d[pos:end] = next(durations_source)
 
