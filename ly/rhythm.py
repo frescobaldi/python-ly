@@ -28,6 +28,7 @@ All functions except a ly.document.Cursor with the selected range.
 
 from __future__ import unicode_literals
 
+import collections
 import itertools
 
 import ly.document
@@ -45,7 +46,76 @@ def remove_dups(iterable):
         yield '' if i == old else i
         old = i
 
+music_item = collections.namedtuple('music_item', (
+    'tokens',
+    'dur_tokens',
+    'may_remove',
+))
 
+def music_items(cursor, command=False, chord=False):
+    r"""Yield music_item instances describing rests, skips or pitches.
+    
+    cursor is a ly.document.Cursor instance.
+    
+    The following keyword arguments can be used:
+    
+    - command: whether to allow pitches in \\relative, \\transpose, etc.
+    - chord: whether to allow pitches inside chords.
+    
+    """
+    skip_parsers = ()
+    if not command:
+        skip_parsers += (ly.lex.lilypond.ParsePitchCommand,)
+    if not chord:
+        skip_parsers += (ly.lex.lilypond.ParseChord,)
+    
+    source = ly.document.Source(cursor, True, tokens_with_position=True)
+    
+    def mk_item(l):
+        """Convert a list of tokens to a music_item instance."""
+        tokens = []
+        dur_tokens = []
+        for t in l:
+            if isinstance(t, ly.lex.Duration):
+                dur_tokens.append(t)
+            else:
+                tokens.append(t)
+        may_remove = '\\skip' not in tokens and '\\tempo' not in tokens
+        return music_item(tokens, dur_tokens, may_remove)
+        
+    for token in source:
+        if isinstance(source.state.parser(), skip_parsers):
+            continue
+        # make sure to skip the duration tokens in a \tuplet command
+        if token == '\\tuplet':
+            l = [token]
+            for token in source:
+                if isinstance(token, ly.lex.lilypond.Duration):
+                    dur = [token]
+                    for token in source:
+                        if not isinstance(token, ly.lex.lilypond.Duration):
+                            break
+                        dur.append(token)
+                    break
+                elif isinstance(token, ly.lex.Numeric):
+                    l.append(token)
+                elif not isinstance(token, ly.lex.Space):
+                    break
+            yield music_item(l, dur, False)
+        
+        while isinstance(token, _start):
+            l = [token]
+            for token in source:
+                if isinstance(token, ly.lex.Space):
+                    continue
+                if not isinstance(token, _stay):
+                    yield mk_item(l)
+                    break
+                l.append(token)
+            else:
+                yield mk_item(l)
+                break
+    
 def music_tokens(source, command=False, chord=False):
     r"""Yield lists of tokens describing rests, skips or pitches.
     
