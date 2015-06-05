@@ -110,7 +110,6 @@ _stay = (
     ly.lex.lilypond.OctaveCheck,
     ly.lex.lilypond.Duration,
     ly.lex.lilypond.Tie,
-    ly.lex.lilypond.Tempo
 )
 
 
@@ -150,7 +149,7 @@ def duration_tokens_with_removability(source, *classes):
     
     """
     for tokens in music_tokens(source):
-        may_remove = '\\skip' not in tokens
+        may_remove = '\\skip' not in tokens and '\\tempo' not in tokens
         tokens = [token for token in tokens if isinstance(token, classes)]
         yield may_remove, tokens
 
@@ -166,7 +165,7 @@ def duration_tokens_pos_with_removability(source, *classes):
     
     """
     for tokens in music_tokens(source):
-        may_remove = '\\skip' not in tokens
+        may_remove = '\\skip' not in tokens and '\\tempo' not in tokens
         dur_tokens = [token for token in tokens if isinstance(token, classes)]
         pos = insert_pos(tokens, dur_tokens)
         yield may_remove, pos, dur_tokens
@@ -256,7 +255,7 @@ def rhythm_remove(cursor):
 def rhythm_implicit(cursor):
     """Remove reoccurring durations."""
     source = ly.document.Source(cursor, True, tokens_with_position=True)
-    dtokens = duration_tokens_with_removability(source, ly.lex.lilypond.Duration, ly.lex.lilypond.Tempo)
+    dtokens = duration_tokens_with_removability(source, ly.lex.lilypond.Duration)
     for may_remove, tokens in dtokens:
         break
     else:
@@ -272,7 +271,7 @@ def rhythm_implicit(cursor):
 def rhythm_implicit_per_line(cursor):
     """Remove reoccurring durations, but always write one on a new line."""
     source = ly.document.Source(cursor, True, tokens_with_position=True)
-    dtokens = duration_tokens_pos_with_removability(source, ly.lex.lilypond.Duration, ly.lex.lilypond.Tempo)
+    dtokens = duration_tokens_pos_with_removability(source, ly.lex.lilypond.Duration)
     for may_remove, pos, tokens in dtokens:
         break
     else:
