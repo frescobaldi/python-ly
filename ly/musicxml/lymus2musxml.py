@@ -86,6 +86,9 @@ class ParseSource():
         self.unset_tuplspan = False
         self.alt_mode = None
         self.rel_pitch_isset = False
+        self.slurcount = 0
+        self.slurnr = 0
+        self.phrslurnr = 0
 
     def parse_text(self, ly_text):
         """Parse the LilyPond source as text."""
@@ -385,9 +388,22 @@ class ParseSource():
     def Slur(self, slur):
         """ Slur, '(' = start, ')' = stop. """
         if slur.token == '(':
-            self.mediator.set_slur("start")
+            self.slurcount += 1
+            self.slurnr = self.slurcount
+            self.mediator.set_slur(self.slurnr, "start")
         elif slur.token == ')':
-            self.mediator.set_slur("stop")
+            self.mediator.set_slur(self.slurnr, "stop")
+            self.slurcount -= 1
+
+    def PhrasingSlur(self, phrslur):
+        r"""A \( or \)."""
+        if phrslur.token == '\(':
+            self.slurcount += 1
+            self.phrslurnr = self.slurcount
+            self.mediator.set_slur(self.phrslurnr, "start")
+        elif phrslur.token == '\)':
+            self.mediator.set_slur(self.phrslurnr, "stop")
+            self.slurcount -= 1
 
     def Dynamic(self, dynamic):
         """Any dynamic symbol."""

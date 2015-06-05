@@ -179,7 +179,7 @@ class IterateXmlObjs():
         for t in obj.tie:
             self.musxml.tie_note(t)
         for s in obj.slur:
-            self.musxml.add_slur(1, s) #LilyPond doesn't allow nested slurs so the number can be 1
+            self.musxml.add_slur(s.nr, s.slurtype)
         for a in obj.artic:
             self.musxml.new_articulation(a)
         if obj.ornament:
@@ -539,6 +539,12 @@ class Tuplet():
         self.acttype = acttype
         self.normtype = normtype
 
+class Slur():
+    """Stores information about slur."""
+    def __init__(self, nr, slurtype):
+        self.nr = nr
+        self.slurtype = slurtype
+
 
 ##
 # Subclasses of BarMus
@@ -580,8 +586,8 @@ class BarNote(BarMus):
     def set_tie(self, tie_type):
         self.tie.append(tie_type)
 
-    def set_slur(self, slur_type):
-        self.slur.append(slur_type)
+    def set_slur(self, nr, slur_type):
+        self.slur.append(Slur(nr, slur_type))
 
     def add_articulation(self, art_name):
         self.artic.append(art_name)
