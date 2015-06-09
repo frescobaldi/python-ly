@@ -284,7 +284,6 @@ def rhythm_explicit(cursor):
     prev = item.dur_tokens or preceding_duration(cursor)
     with cursor.document as d:
         for item in items:
-            print (item)
             if '\\tempo' not in item.tokens and '\\tuplet' not in item.tokens:
                 if item.dur_tokens:
                     prev = item.dur_tokens
