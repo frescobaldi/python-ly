@@ -89,13 +89,12 @@ class CreateMusicXML():
             group_symbol = etree.SubElement(partgroup, "group-symbol")
             group_symbol.text = symbol
 
-    def create_part(self, name=False, abbr=False, midi=False):
+    def create_part(self, name="unnamed", abbr=False, midi=False):
         """Create a new part """
         strnr = str(self.part_count)
         part = etree.SubElement(self.partlist, "score-part", id="P"+strnr)
-        if name:
-            partname = etree.SubElement(part, "part-name")
-            partname.text = name
+        partname = etree.SubElement(part, "part-name")
+        partname.text = name
         if abbr:
             partabbr = etree.SubElement(part, "part-abbreviation")
             partabbr.text = abbr
@@ -134,8 +133,8 @@ class CreateMusicXML():
         self.add_pitch(step, alter, octave)
         if not grace[0]:
             self.add_div_duration(divdur)
-        self.add_duration_type(durtype)
         self.add_voice(voice)
+        self.add_duration_type(durtype)
         if dot:
             for i in range(dot):
                 self.add_dot()
