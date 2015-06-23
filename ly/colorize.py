@@ -533,7 +533,7 @@ class HtmlWriter(object):
     def use_id_or_class(self, selector):
         """Export the <pre> tag as class or id"""
         if not selector in ["id", "class"]:
-            print "Slector has to be 'id' or 'class'."
+            print "Selector has to be 'id' or 'class'."
             print "Falling back to default 'id'."
             self.id_or_class = 'id'
         self.id_or_class = selector
