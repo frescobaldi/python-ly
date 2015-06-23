@@ -517,7 +517,8 @@ class HtmlWriter(object):
     
     inline_style = False
     number_lines = False
-    
+
+    id_or_class = "id"
     document_id = "document"
     linenumbers_id = "linenumbers"
     
@@ -528,7 +529,15 @@ class HtmlWriter(object):
     
     stylesheet_ref = None
     full_html = True
-    
+
+    def use_id_or_class(self, selector):
+        """Export the <pre> tag as class or id"""
+        if not selector in ["id", "class"]:
+            print "Slector has to be 'id' or 'class'."
+            print "Falling back to default 'id'."
+            self.id_or_class = 'id'
+        self.id_or_class = selector
+
     def html(self, cursor):
         """Return the output HTML."""
         doc_style = {}
@@ -543,8 +552,8 @@ class HtmlWriter(object):
         if self.linenumbers_bgcolor:
             num_style['background'] = self.linenumbers_bgcolor
         
-        num_attrs = {'id': self.linenumbers_id}
-        doc_attrs = {'id': self.document_id}
+        num_attrs = {self.id_or_class: self.linenumbers_id}
+        doc_attrs = {self.id_or_class: self.document_id}
         
         css = []
         if self.inline_style:
