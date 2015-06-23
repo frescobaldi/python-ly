@@ -518,6 +518,7 @@ class HtmlWriter(object):
     inline_style = False
     number_lines = False
 
+    wrapper_tag = "pre"
     wrapper_attribute = "id"
     document_id = "document"
     linenumbers_id = "linenumbers"
@@ -531,12 +532,20 @@ class HtmlWriter(object):
     full_html = True
 
     def set_wrapper_attribute(self, attr):
-        """Export the <pre> tag as class or id"""
+        """Choose attribute name for wrapper tag"""
         valid_attrs = ["id", "class"]
         if attr in valid_attrs:
             self.wrapper_attribute = attr
         else:
             print "Invalid attribute, has to be one of {}".format(valid_attrs)
+
+    def set_wrapper_tag(self, tag):
+        """Define the tag to be used for wrapping the content"""
+        valid_tags = ['pre', 'code', 'div']
+        if tag in valid_tags:
+            self.wrapper_tag = tag
+        else:
+            print "Invalid tag, has to be one of {}".format(valid_tags)
 
     def html(self, cursor):
         """Return the output HTML."""
@@ -572,7 +581,9 @@ class HtmlWriter(object):
         if self.number_lines:
             body = add_line_numbers(cursor, body, num_attrs, doc_attrs)
         else:
-            body = '<pre{0}>{1}</pre>'.format(html_format_attrs(doc_attrs), body)
+            body = '<{0}{1}>{2}</pre>'.format(self.wrapper_tag,
+                                              html_format_attrs(doc_attrs),
+                                              body)
 
         if not self.full_html:
             return body
