@@ -25,7 +25,7 @@ object can map a token's class to any object or value.
 
 The Mapping object normally maps a token's class basically to a CSS class and
 possibly a base CSS class. This way you can define base styles (e.g. string,
-comment, etc) and have specific classes (e.g. LilyPond string, Scheme 
+comment, etc) and have specific classes (e.g. LilyPond string, Scheme
 comment) inherit from that base style. This CSS class is described by the
 css_class named tuple, with its three fields: mode, name, base. E.g.
 ('lilypond', 'articulation', 'keyword'). The base field may be None.
@@ -58,15 +58,15 @@ css_class = collections.namedtuple("css_class", "mode name base")
 
 class Mapper(dict):
     """Maps token classes to arbitrary values, which can be highlighting styles.
-    
+
     Mapper behaves like a dict, you set items with a token class as key to an
     arbitrary value.
-    
-    But getting items can be done using a token. The token class's method 
-    resolution order is walked up and the value for the first available 
-    class found in the keys is returned. The class is also cached to speed 
+
+    But getting items can be done using a token. The token class's method
+    resolution order is walked up and the value for the first available
+    class found in the keys is returned. The class is also cached to speed
     up requests for other tokens.
-    
+
     """
     def __getitem__(self, token):
         cls = type(token)
@@ -93,7 +93,7 @@ def default_mapping():
     from ly.lex import texinfo
     #from ly.lex import latex
     #from ly.lex import docbook
-    
+
     return (
         ('lilypond', (
             style('keyword', 'keyword', (lilypond.Keyword,)),
@@ -244,12 +244,12 @@ default_scheme = {
 
 def get_tokens(cursor):
     """Return the list of tokens for the cursor.
-    
+
     Tokens that are partially inside the cursor's selection are re-created
     so that they fall exactly within the selection.
-    
+
     This can be used to convert a highlighted part of a document to e.g. HTML.
-    
+
     """
     tokens = list(ly.document.Source(cursor, None, ly.document.PARTIAL, True))
     if tokens:
@@ -264,10 +264,10 @@ def get_tokens(cursor):
 
 def map_tokens(cursor, mapper):
     """Yield a two-tuple(token, style) for every token.
-    
+
     The style is what mapper[token] returns.
     Style may be None, which also happens with unparsed (not-tokenized) text.
-    
+
     """
     text = cursor.document.plaintext()
     start = cursor.start
@@ -300,9 +300,9 @@ def melt_mapped_tokens(mapped_tokens):
 
 def css_mapper(mapping=None):
     """Return a Mapper dict, mapping token classes to two CSS classes.
-    
+
     By default the mapping returned by default_mapping() is used.
-    
+
     """
     if mapping is None:
         mapping = default_mapping()
@@ -314,9 +314,9 @@ def css_mapper(mapping=None):
 
 def css_dict(css_style, scheme=default_scheme):
     """Return the css properties dict for the style, taken from the scheme.
-    
+
     This can be used for inline style attributes.
-    
+
     """
     d = {}
     try:
@@ -337,10 +337,10 @@ def css_item(i):
 
 def css_attr(d):
     """Return a dictionary with a 'style' key.
-    
-    The value is the style items in d formatted with css_item() joined with 
+
+    The value is the style items in d formatted with css_item() joined with
     spaces. If d is empty, an empty dictionary is returned.
-    
+
     """
     if d:
         return {'style': ' '.join(map(css_item, sorted(d.items())))}
@@ -365,7 +365,7 @@ class css_style_attribute_formatter(object):
     """Return the inline style attribute for a specified style."""
     def __init__(self, scheme=default_scheme):
         self.scheme = scheme
-    
+
     def __call__(self, css_style):
         d = css_dict(css_style, self.scheme)
         if d:
@@ -401,10 +401,10 @@ def html_escape_attr(text):
 
 def html_format_attrs(d):
     """Format the attributes dict as a string.
-    
-    The attributes are escaped correctly. A space is prepended for every 
+
+    The attributes are escaped correctly. A space is prepended for every
     assignment.
-    
+
     """
     return ''.join(' {0}="{1}"'.format(
             k, html_escape_attr(format(v))) for k, v in d.items())
@@ -412,12 +412,12 @@ def html_format_attrs(d):
 
 def html(cursor, mapper, span=format_css_span_class):
     """Return a HTML string with the tokens wrapped in <span class=> elements.
-    
-    The span argument is a function returning an attribute for the <span> 
-    tag for the specified style. By default the format_css_span_class() 
-    function is used, that returns a 'class="group style base"' string. 
+
+    The span argument is a function returning an attribute for the <span>
+    tag for the specified style. By default the format_css_span_class()
+    function is used, that returns a 'class="group style base"' string.
     You'll want to wrap the HTML inside <pre> tokens and add a CSS stylesheet.
-    
+
     """
     result = []
     for t, style in melt_mapped_tokens(map_tokens(cursor, mapper)):
@@ -433,14 +433,14 @@ def html(cursor, mapper, span=format_css_span_class):
 
 def add_line_numbers(cursor, html, linenum_attrs=None, document_attrs=None):
     """Combines the html (returned by html()) with the line numbers in a HTML table.
-    
-    The linenum_attrs are put in the <td> tag for the line numbers. The 
-    default value is: {"style": "background: #eeeeee;"}. The document_attrs 
+
+    The linenum_attrs are put in the <td> tag for the line numbers. The
+    default value is: {"style": "background: #eeeeee;"}. The document_attrs
     are put in the <td> tag for the document. The default is empty.
-    
-    By default, the id for the linenumbers <td> is set to "linenumbers", 
+
+    By default, the id for the linenumbers <td> is set to "linenumbers",
     and the id for the document <td> is set to "document".
-    
+
     """
     linenum_attrs = dict(linenum_attrs) if linenum_attrs else {"style": "background: #eeeeee;"}
     document_attrs = dict(document_attrs) if document_attrs else {}
@@ -451,7 +451,7 @@ def add_line_numbers(cursor, html, linenum_attrs=None, document_attrs=None):
     linenum_attrs['style'] = linenum_attrs.get('style', '') + 'vertical-align: top; text-align: right;'
     document_attrs['valign'] = 'top'
     document_attrs['style'] = document_attrs.get('style', '') + 'vertical-align: top;'
-    
+
     start_num = cursor.document.index(cursor.start_block()) + 1
     end_num = cursor.document.index(cursor.end_block()) + 1
     linenumbers = '<pre>{0}</pre>'.format('\n'.join(map(format, range(start_num, end_num))))
@@ -471,15 +471,15 @@ def add_line_numbers(cursor, html, linenum_attrs=None, document_attrs=None):
 
 def format_html_document(body, title="", stylesheet=None, stylesheet_ref=None, encoding='UTF-8'):
     """Return a complete HTML document.
-    
-    The body is put inside body tags unchanged.  The title is html-escaped. 
-    If stylesheet_ref is given, it is put as a <link> reference in the HTML; 
-    if stylesheet is given, it is put verbatim in a <style> section in the 
-    HTML. The encoding is set in the meta http-equiv field, but the returned 
-    HTML is in normal Python unicode (python2) or str (python3) format, you 
-    should encode it yourself in the same encoding (by default utf-8) when 
+
+    The body is put inside body tags unchanged.  The title is html-escaped.
+    If stylesheet_ref is given, it is put as a <link> reference in the HTML;
+    if stylesheet is given, it is put verbatim in a <style> section in the
+    HTML. The encoding is set in the meta http-equiv field, but the returned
+    HTML is in normal Python unicode (python2) or str (python3) format, you
+    should encode it yourself in the same encoding (by default utf-8) when
     writing it to a file.
-    
+
     """
     css = ""
     if stylesheet_ref:
@@ -503,30 +503,30 @@ def format_html_document(body, title="", stylesheet=None, stylesheet_ref=None, e
 
 class HtmlWriter(object):
     """A do-it-all object to create syntax highlighted HTML.
-    
+
     You can set the instance attributes to configure the behaviour in all
     details. Then call the html(cursor) method to get the HTML.
-    
+
     """
-    
+
     fgcolor = None
     bgcolor = None
-    
+
     linenumbers_fgcolor = None
     linenumbers_bgcolor = "#eeeeee"
-    
+
     inline_style = False
     number_lines = False
 
     id_or_class = "id"
     document_id = "document"
     linenumbers_id = "linenumbers"
-    
+
     title = ""
     css_scheme = default_scheme
     css_mapper = None
     encoding = 'UTF-8'
-    
+
     stylesheet_ref = None
     full_html = True
 
@@ -545,16 +545,16 @@ class HtmlWriter(object):
             doc_style['color'] = self.fgcolor
         if self.bgcolor:
             doc_style['background'] = self.bgcolor
-        
+
         num_style = {}
         if self.linenumbers_fgcolor:
             num_style['color'] = self.linenumbers_fgcolor
         if self.linenumbers_bgcolor:
             num_style['background'] = self.linenumbers_bgcolor
-        
+
         num_attrs = {self.id_or_class: self.linenumbers_id}
         doc_attrs = {self.id_or_class: self.document_id}
-        
+
         css = []
         if self.inline_style:
             formatter = css_style_attribute_formatter(self.css_scheme)
@@ -566,21 +566,19 @@ class HtmlWriter(object):
             if self.number_lines:
                 css.append(css_group('#' + self.linenumbers_id, num_style))
             css.append(format_stylesheet(self.css_scheme))
-        
+
         body = html(cursor, self.css_mapper or css_mapper(), formatter)
-        
+
         if self.number_lines:
             body = add_line_numbers(cursor, body, num_attrs, doc_attrs)
         else:
             body = '<pre{0}>{1}</pre>'.format(html_format_attrs(doc_attrs), body)
-        
+
         if not self.full_html:
             return body
-        
+
         if self.stylesheet_ref:
             css = None
         else:
             css = '\n'.join(css)
         return format_html_document(body, self.title, css, self.stylesheet_ref, self.encoding)
-
-
