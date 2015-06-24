@@ -42,6 +42,7 @@ scheme dictionary.
 
 from __future__ import unicode_literals
 from __future__ import absolute_import
+from __future__ import print_function
 
 import collections
 
@@ -537,7 +538,7 @@ class HtmlWriter(object):
         if attr in valid_attrs:
             self.wrapper_attribute = attr
         else:
-            print "Invalid attribute, has to be one of {}".format(valid_attrs)
+            print("Invalid attribute, has to be one of {}".format(valid_attrs))
 
     def set_wrapper_tag(self, tag):
         """Define the tag to be used for wrapping the content"""
@@ -545,7 +546,7 @@ class HtmlWriter(object):
         if tag in valid_tags:
             self.wrapper_tag = tag
         else:
-            print "Invalid tag, has to be one of {}".format(valid_tags)
+            print("Invalid tag, has to be one of {}".format(valid_tags))
 
     def html(self, cursor):
         """Return the output HTML."""
