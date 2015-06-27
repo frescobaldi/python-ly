@@ -582,7 +582,7 @@ class HtmlWriter(object):
         if self.number_lines:
             body = add_line_numbers(cursor, body, num_attrs, doc_attrs)
         else:
-            body = '<{0}{1}>{2}</pre>'.format(self.wrapper_tag,
+            body = '<{0}{1}>{2}</{0}>'.format(self.wrapper_tag,
                                               html_format_attrs(doc_attrs),
                                               body)
 
