@@ -572,9 +572,10 @@ class HtmlWriter(object):
             doc_attrs.update(css_attr(doc_style))
         else:
             formatter = format_css_span_class
-            css.append(css_group('#' + self.document_id, doc_style))
+            wrap_type = '#' if self.wrapper_attribute == 'id' else '.'
+            css.append(css_group(wrap_type + self.document_id, doc_style))
             if self.number_lines:
-                css.append(css_group('#' + self.linenumbers_id, num_style))
+                css.append(css_group(wrap_type + self.linenumbers_id, num_style))
             css.append(format_stylesheet(self.css_scheme))
 
         body = html(cursor, self.css_mapper or css_mapper(), formatter)
