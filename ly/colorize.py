@@ -288,11 +288,15 @@ def melt_mapped_tokens(mapped_tokens):
     prev_tokens = []
     prev_style = None
     for t, s in mapped_tokens:
-        if s == prev_style:
+        if s == prev_style or t == ' ':
             prev_tokens.append(t)
         else:
             if prev_tokens:
-                yield ''.join(prev_tokens), prev_style
+                if prev_tokens[-1] == ' ':
+                    yield ''.join(prev_tokens[:-1]), prev_style
+                    yield ' ', None
+                else:
+                    yield ''.join(prev_tokens), prev_style
             prev_tokens = [t]
             prev_style = s
     if prev_tokens:
