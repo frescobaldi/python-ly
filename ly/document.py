@@ -832,14 +832,20 @@ class Source(object):
         """Initialize the iterator.
         
         cursor is a Cursor instance, describing a Document and a selected range
+        state is, if given, a ly.lex.State instance or True (in which case the
+            state is taken from the document).
+        
+        The following keyword arguments can be used:
+        
         partial is either OUTSIDE, PARTIAL, or INSIDE:
             OUTSIDE: tokens that touch the selected range are also yielded
             PARTIAL: tokens that overlap the start or end positions are yielded
             INSIDE:  (default) yield only tokens fully contained in the range
         The partial argument only makes sense if start or end are specified.
         
-        If tokens_with_position is True, uses the tokens_with_position() 
-        method to get the tokens, else (by default), the tokens() method is 
+        If tokens_with_position is True, uses the
+        document.tokens_with_position() method to get the tokens from the
+        cursor's document, else (by default), the document.tokens() method is
         used.
         
         """
