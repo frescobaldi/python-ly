@@ -77,6 +77,53 @@ _stay = (
     ly.lex.lilypond.Tie,
 )
 
+def music_tokens(source, command=False, chord=False):
+    r"""DEPRECATED. Yield lists of tokens describing rests, skips or pitches.
+    
+    source is a ly.document.Source instance following the state.
+    
+    The following keyword arguments can be used:
+    
+    - command: whether to allow pitches in \\relative, \\transpose, etc.
+    - chord: whether to allow pitches inside chords.
+    
+    This function is deprecated and will be removed.
+    You should use music_items() instead.
+    
+    """
+    skip_parsers = ()
+    if not command:
+        skip_parsers += (ly.lex.lilypond.ParsePitchCommand,)
+    if not chord:
+        skip_parsers += (ly.lex.lilypond.ParseChord,)
+
+    for token in source:
+        if isinstance(source.state.parser(), skip_parsers):
+            continue
+        # make sure to skip the duration tokens in a \tuplet command
+        if token == '\\tuplet':
+            for token in source:
+                if isinstance(token, ly.lex.lilypond.Duration):
+                    for token in source:
+                        if not isinstance(token, ly.lex.lilypond.Duration):
+                            break
+                    break
+                elif not isinstance(token, (ly.lex.Space, ly.lex.Numeric)):
+                    break
+        
+        while isinstance(token, _start):
+            l = [token]
+            for token in source:
+                if isinstance(token, ly.lex.Space):
+                    continue
+                if not isinstance(token, _stay):
+                    yield l
+                    break
+                l.append(token)
+            else:
+                yield l
+                break
+
 def music_items(cursor, command=False, chord=False, partial=ly.document.INSIDE):
     r"""Yield music_item instances describing rests, skips or pitches.
     
