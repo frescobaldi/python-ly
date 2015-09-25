@@ -75,7 +75,7 @@ _stay = (
     ly.lex.lilypond.Tie,
 )
 
-def music_items(cursor, command=False, chord=False, source=None):
+def music_items(cursor, command=False, chord=False, partial=ly.document.INSIDE):
     r"""Yield music_item instances describing rests, skips or pitches.
     
     cursor is a ly.document.Cursor instance.
@@ -84,9 +84,8 @@ def music_items(cursor, command=False, chord=False, source=None):
     
     - command: whether to allow pitches in \\relative, \\transpose, etc.
     - chord: whether to allow pitches inside chords.
-    - source: a ly.document.Source instance. If not given, a default instance
-      is created and used. If you specify a Source instance, make sure you
-      created it with tokens_with_position set to True.
+    - partial: ly.document.INSIDE (default), PARTIAL or OUTSIDE.
+      See the documentation of ly.document.Source.__init__().
     
     """
     skip_parsers = ()
@@ -95,8 +94,7 @@ def music_items(cursor, command=False, chord=False, source=None):
     if not chord:
         skip_parsers += (ly.lex.lilypond.ParseChord,)
     
-    if source is None:
-        source = ly.document.Source(cursor, True, tokens_with_position=True)
+    source = ly.document.Source(cursor, True, partial=partial, tokens_with_position=True)
     
     def mk_item(l):
         """Convert a list of tokens to a music_item instance."""
