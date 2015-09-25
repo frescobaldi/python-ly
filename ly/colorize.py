@@ -288,7 +288,7 @@ def melt_mapped_tokens(mapped_tokens):
     prev_tokens = []
     prev_style = None
     for t, s in mapped_tokens:
-        if s == prev_style or t == ' ':
+        if s == prev_style or t.isspace():
             prev_tokens.append(t)
         else:
             if prev_tokens:
