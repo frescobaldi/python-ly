@@ -22,7 +22,7 @@ Implementation of the tools to edit durations of selected music.
 
 Durations are represented simply by lists of ly.lex.lilypond.Duration tokens.
 
-All functions except a ly.document.Cursor with the selected range.
+All functions expect a ly.document.Cursor with the selected range.
 
 """
 
