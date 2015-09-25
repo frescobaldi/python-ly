@@ -52,6 +52,8 @@ music_item = collections.namedtuple('music_item', (
     'dur_tokens',   # Duration tokens of the item
     'may_remove',   # whether the duration may be removed
     'insert_pos',   # where a Duration could be inserted
+    'pos',          # position of the first token
+    'end',          # end position of the last token
 ))
 
 _start = (
@@ -100,6 +102,8 @@ def music_items(cursor, command=False, chord=False, partial=ly.document.INSIDE):
         """Convert a list of tokens to a music_item instance."""
         tokens = []
         dur_tokens = []
+        pos = l[0].pos
+        end = l[-1].end
         for t in l:
             if isinstance(t, ly.lex.lilypond.Duration):
                 dur_tokens.append(t)
@@ -107,13 +111,13 @@ def music_items(cursor, command=False, chord=False, partial=ly.document.INSIDE):
                 tokens.append(t)
         may_remove = '\\skip' not in tokens and '\\tempo' not in tokens
         if dur_tokens:
-            pos = dur_tokens[0].pos
+            insert_pos = dur_tokens[0].pos
         else:
             for t in reversed(tokens):
                 if not isinstance(t, ly.lex.lilypond.Tie):
                     break
-            pos = t.end
-        return music_item(tokens, dur_tokens, may_remove, pos)
+            insert_pos = t.end
+        return music_item(tokens, dur_tokens, may_remove, insert_pos, pos, end)
         
     for token in source:
         if isinstance(source.state.parser(), skip_parsers):
