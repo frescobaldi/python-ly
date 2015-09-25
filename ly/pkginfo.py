@@ -31,7 +31,7 @@ from __future__ import unicode_literals
 name = "python-ly"
 
 #: the current version
-version = "0.9.2"
+version = "0.9.3"
 
 #: short description
 description = "Tool and library for manipulating LilyPond files"

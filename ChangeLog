@@ -2,10 +2,14 @@ ChangeLog for python-ly
 =======================
 
 
-????-??-??: python-ly 0.9.3
+2015-09-26: python-ly 0.9.3
 
 - Fix issue #35: do not insert duration after a tie
-- MusicXML export various improvements and bug fixes.
+- Added ly.rhythm.music_items() for a more robust way of iterating through
+  chords and notes (awaiting fully fledged editing support through ly.music or
+  ly.xml)
+- More configurability in ly.colorize, thanks to Urs Liska
+- MusicXML export various improvements and bug fixes, contributed by Peter Bjuhr
 
 
 2015-05-14: python-ly 0.9.2
