@@ -186,7 +186,7 @@ def music_items(cursor, command=False, chord=False, partial=ly.document.INSIDE):
                 elif not isinstance(token, ly.lex.Space):
                     break
             if dur:
-                yield music_item(l, dur, False, dur[0].pos)
+                yield music_item(l, dur, False, dur[0].pos, l[0].pos, max(l[-1].end, dur[-1].end))
         
         while isinstance(token, _start):
             l = [token]
