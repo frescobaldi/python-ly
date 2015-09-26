@@ -156,7 +156,7 @@ def music_items(cursor, command=False, chord=False, partial=ly.document.INSIDE):
                 dur_tokens.append(t)
             else:
                 tokens.append(t)
-        may_remove = '\\skip' not in tokens and '\\tempo' not in tokens
+        may_remove = not any(map(('\\skip', '\\tempo', '\\tuplet').__contains__, tokens))
         if dur_tokens:
             insert_pos = dur_tokens[0].pos
         else:
@@ -172,21 +172,19 @@ def music_items(cursor, command=False, chord=False, partial=ly.document.INSIDE):
         # make sure to skip the duration tokens in a \tuplet command
         if token == '\\tuplet':
             l = [token]
-            dur = []
             for token in source:
                 if isinstance(token, ly.lex.lilypond.Duration):
-                    dur = [token]
+                    l.append(token)
                     for token in source:
                         if not isinstance(token, ly.lex.lilypond.Duration):
                             break
-                        dur.append(token)
+                        l.append(token)
                     break
                 elif isinstance(token, ly.lex.Numeric):
                     l.append(token)
                 elif not isinstance(token, ly.lex.Space):
                     break
-            if dur:
-                yield music_item(l, dur, False, dur[0].pos, l[0].pos, max(l[-1].end, dur[-1].end))
+            yield mk_item(l)
         
         while isinstance(token, _start):
             l = [token]
