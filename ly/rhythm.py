@@ -186,12 +186,22 @@ def music_items(cursor, command=False, chord=False, partial=ly.document.INSIDE):
                     break
             yield mk_item(l)
         
+        length_seen = False
         while isinstance(token, _start):
             l = [token]
+            if isinstance(token, ly.lex.lilypond.Length):
+                length_seen = True
             for token in source:
-                if isinstance(token, ly.lex.Space):
+                if isinstance(token, ly.lex.lilypond.Length):
+                    if length_seen is True:
+                        yield mk_item(l)
+                        length_seen = False
+                        break
+                    else:
+                        length_seen = True
+                elif isinstance(token, ly.lex.Space):
                     continue
-                if not isinstance(token, _stay):
+                elif not isinstance(token, _stay):
                     yield mk_item(l)
                     break
                 l.append(token)
