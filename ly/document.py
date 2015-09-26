@@ -27,7 +27,7 @@ The Document implementation keeps the document in a (unicode) text string,
 but you can inherit from the DocumentBase class to support other 
 representations of the text content.
 
-Modifying is done inside a context (the with statement), e.g.:
+Modifying is preferably done inside a context (the with statement), e.g.:
 
 .. code-block:: python
 
@@ -38,6 +38,10 @@ Modifying is done inside a context (the with statement), e.g.:
 
 Changes are applied when the context is exited, also the modified part of the
 document is re-tokenized. Changes may not overlap.
+
+You may modify the document outside a context, in which case the document is
+re-tokenized immediately. This is much slower however when performing multiple
+changes after each other.
 
 The tokens(block) method returns a tuple of tokens for the specified block. 
 Depending on the implementation, a block describes a line in the LilyPond 
@@ -221,11 +225,7 @@ class DocumentBase(object):
             self._changes.clear()
         elif self._writing == 1:
             if self._changes:
-                self._changes_list = [(start, end, text)
-                    for start, items in sorted(self._changes.items(), reverse=True)
-                    for end, text in reversed(sorted(items,
-                        key=lambda i: (i[0] is None, i[0])))]
-                self._changes.clear()
+                self._sort_changes()
                 self.update_cursors()
                 self.apply_changes()
                 del self._changes_list
@@ -251,6 +251,14 @@ class DocumentBase(object):
                     text = text[:10] + '...'
                 raise ValueError("overlapping edit: {0}-{1}: {2}".format(start, end, text))
             pos = start
+    
+    def _sort_changes(self):
+        """Sort all the changes and put them in the _changes_list."""
+        self._changes_list = [(start, end, text)
+            for start, items in sorted(self._changes.items(), reverse=True)
+            for end, text in reversed(sorted(items,
+                key=lambda i: (i[0] is None, i[0])))]
+        self._changes.clear()
     
     def update_cursors(self):
         """Updates the position of the registered Cursor instances."""
@@ -326,6 +334,13 @@ class DocumentBase(object):
         text = text.replace('\r', '')
         if text or start != end:
             self._changes[start].append((end, text))
+            # when a change is made outside context manager, apply immediately
+            if self._writing == 0:
+                self._sort_changes()
+                self.update_cursors()
+                self.apply_changes()
+                del self._changes_list
+
 
     def __delitem__(self, key):
         """Remove the range of text."""
