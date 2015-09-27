@@ -341,7 +341,6 @@ class DocumentBase(object):
                 self.apply_changes()
                 del self._changes_list
 
-
     def __delitem__(self, key):
         """Remove the range of text."""
         self[key] = ""
