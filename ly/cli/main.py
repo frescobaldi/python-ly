@@ -169,7 +169,8 @@ def parse_command_line():
         args = iter(sys.argv[1:])
     else:
         # python 2 - arguments are bytes, decode them
-        args = (a.decode(sys.stdin.encoding) for a in sys.argv[1:])
+        fsenc = sys.getfilesystemencoding() or 'latin1'
+        args = (a.decode(fsenc) for a in sys.argv[1:])
     
     opts = Options()
     commands = []
