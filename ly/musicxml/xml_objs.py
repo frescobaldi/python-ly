@@ -143,6 +143,8 @@ class IterateXmlObjs():
                     self.musxml.add_dynamic_mark(d.sign)
                 else:
                     self.musxml.add_dynamic_wedge(d.sign)
+        if obj.oct_shift:
+            self.musxml.add_octave_shift(obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
 
     def after_note(self, obj):
         """Xml-nodes after note."""
@@ -152,8 +154,6 @@ class IterateXmlObjs():
                     self.musxml.add_dynamic_mark(d.sign)
                 else:
                     self.musxml.add_dynamic_wedge(d.sign)
-        if obj.oct_shift:
-            self.musxml.add_octave_shift(obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
 
     def gener_xml_mus(self, obj):
         """Nodes generic for both notes and rests."""
