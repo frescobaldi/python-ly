@@ -47,7 +47,7 @@ class Mediator():
         self.current_note = None
         self.current_lynote = None
         self.current_is_rest = False
-        self.action_onnext = None
+        self.action_onnext = []
         self.divisions = 1
         self.dur_token = "4"
         self.dur_tokens = ()
@@ -372,7 +372,7 @@ class Mediator():
             self.current_lynote = note
             self.check_current_note(rel)
         self.do_action_onnext(self.current_note)
-        self.action_onnext = None
+        self.action_onnext = []
 
     def new_iso_dura(self, note, rel=False, is_unpitched=False):
         """
@@ -453,9 +453,9 @@ class Mediator():
 
     def do_action_onnext(self, note):
         """Perform the stored action on the next note."""
-        if self.action_onnext:
-            func_call = getattr(self, self.action_onnext[0])
-            func_call(note, *self.action_onnext[1])
+        for action in self.action_onnext:
+            func_call = getattr(self, action[0])
+            func_call(note, *action[1])
 
     def check_duration(self, rest):
         """Check the duration for the current note."""
@@ -531,7 +531,7 @@ class Mediator():
 
     def chord_end(self):
         """Actions when chord is parsed."""
-        self.action_onnext = None
+        self.action_onnext = []
 
     def new_rest(self, rest):
         self.current_is_rest = True
@@ -665,7 +665,7 @@ class Mediator():
                 c.set_gliss(line, nr=n+1)
         else:
             self.current_note.set_gliss(line)
-        self.action_onnext = ("end_gliss", line)
+        self.action_onnext.append(("end_gliss", line))
 
     def end_gliss(self, note, line):
         if self.current_chord:
@@ -699,14 +699,14 @@ class Mediator():
         octdiff = int(octdiff)
         if self.octdiff == octdiff:
             return
-        if octdiff == 0:
+        if self.octdiff:
             if self.octdiff < 0:
                 plac = "below"
             else:
                 plac = "above"
             size = abs(self.octdiff) * 7 + 1
-            self.action_onnext = ("set_ottava", (plac, "stop", size))
-        else:
+            self.action_onnext.append(("set_ottava", (plac, "stop", size)))
+        if octdiff:
             if octdiff < 0:
                 plac = "below"
                 octdir = "up"
@@ -714,7 +714,7 @@ class Mediator():
                 plac = "above"
                 octdir = "down"
             size = abs(octdiff) * 7 + 1
-            self.action_onnext = ("set_ottava", (plac, octdir, size))
+            self.action_onnext.append(("set_ottava", (plac, octdir, size)))
         self.octdiff = octdiff
 
     def set_ottava(self, note, plac, octdir, size):
