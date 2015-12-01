@@ -545,6 +545,7 @@ class ParseSource():
         """Any scheme token."""
         if self.ottava:
             self.mediator.new_ottava(item.token)
+            self.ottava = False
         elif self.look_behind(item, ly.music.items.Override):
             self.override_dict[self.override_key] = item.token
         elif self.schm_assignm:
