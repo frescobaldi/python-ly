@@ -455,7 +455,7 @@ class Mediator():
         """Perform the stored action on the next note."""
         if self.action_onnext:
             func_call = getattr(self, self.action_onnext[0])
-            func_call(note, self.action_onnext[1])
+            func_call(note, *self.action_onnext[1])
 
     def check_duration(self, rest):
         """Check the duration for the current note."""
@@ -705,7 +705,7 @@ class Mediator():
             else:
                 plac = "above"
             size = abs(self.octdiff) * 7 + 1
-            self.current_note.set_oct_shift(plac, "stop", size)
+            self.action_onnext = ("set_ottava", (plac, "stop", size))
         else:
             if octdiff < 0:
                 plac = "below"
@@ -714,8 +714,11 @@ class Mediator():
                 plac = "above"
                 octdir = "down"
             size = abs(octdiff) * 7 + 1
-            self.current_note.set_oct_shift(plac, octdir, size)
+            self.action_onnext = ("set_ottava", (plac, octdir, size))
         self.octdiff = octdiff
+
+    def set_ottava(self, note, plac, octdir, size):
+        note.set_oct_shift(plac, octdir, size)
 
     def new_tempo(self, unit, dur_tokens, tempo, string):
         dots, rs = self.duration_from_tokens(dur_tokens)
