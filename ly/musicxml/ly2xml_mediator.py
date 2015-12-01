@@ -705,7 +705,7 @@ class Mediator():
             else:
                 plac = "above"
             size = abs(self.octdiff) * 7 + 1
-            self.action_onnext.append(("set_ottava", (plac, "stop", size)))
+            self.current_note.set_oct_shift(plac, "stop", size)
         if octdiff:
             if octdiff < 0:
                 plac = "below"
