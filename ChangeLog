@@ -2,7 +2,7 @@ ChangeLog for python-ly
 =======================
 
 
-2015-09-26: python-ly 0.9.3
+2015-12-26: python-ly 0.9.3
 
 - Fix issue #35: do not insert duration after a tie
 - Added ly.rhythm.music_items() for a more robust way of iterating through

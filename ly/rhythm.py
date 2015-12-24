@@ -203,6 +203,7 @@ def music_items(cursor, command=False, chord=False, partial=ly.document.INSIDE):
                     continue
                 elif not isinstance(token, _stay):
                     yield mk_item(l)
+                    length_seen = False
                     break
                 l.append(token)
             else:
