@@ -274,7 +274,7 @@ class DocInfo(object):
                         continue
                     break
         # find #(define-markup-command construction
-        for i in self.find_all('define-markup-command', ly.lex.scheme.Word):
+        for i in self.find_all('define-markup-command', ly.lex.scheme.Function):
             for t in self.tokens[i+1:i+6]:
                 if isinstance(t, ly.lex.scheme.Word):
                     result.append(t)
