@@ -1876,6 +1876,7 @@ contextproperties = [
     "strokeFingerOrientations",
     "subdivideBeams",
     "suggestAccidentals",
+    "supportNonIntegerFret",
     "systemStartDelimiter",
     "systemStartDelimiterHierarchy",
     "tabStaffLineLayoutFunction",
@@ -2607,5 +2608,4 @@ musicglyphs = [
     "z",
     "zero",
 ]
-
 
