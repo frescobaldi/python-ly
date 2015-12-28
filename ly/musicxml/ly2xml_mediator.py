@@ -475,8 +475,8 @@ class Mediator():
             for c in self.current_chord:
                 c.set_durtype(durval2type(self.dur_token))
 
-    def new_chord(self, note, duration, rel=False):
-        if not self.current_chord:
+    def new_chord(self, note, duration=None, rel=False, chord_base=True):
+        if chord_base:
             self.new_chordbase(note, duration, rel)
             self.current_chord.append(self.current_note)
         else:
@@ -495,6 +495,7 @@ class Mediator():
         chord_note.set_durtype(durval2type(self.dur_token))
         chord_note.dots = self.dots
         chord_note.tie = self.current_note.tie
+        chord_note.tuplet = self.current_note.tuplet
         if not self.prev_chord_pitch:
             self.prev_chord_pitch = self.prev_pitch
         p = note.pitch.copy()
