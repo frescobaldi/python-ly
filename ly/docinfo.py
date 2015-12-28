@@ -244,6 +244,8 @@ class DocInfo(object):
                         arg = ''.join(itertools.takewhile(lambda t: t != '"', tokens))
                         result.append((arg_type, arg))
                         break
+                    elif isinstance(t, ly.lex.lilypond.Name):
+                        result.append((arg_type, format(t)))
                     elif isinstance(t, (ly.lex.lilypond.SchemeStart,
                                             ly.lex.Space,
                                             ly.lex.Comment)):
