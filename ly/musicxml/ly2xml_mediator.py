@@ -732,7 +732,8 @@ class Mediator():
         except AttributeError:
             text = None
         tempo = xml_objs.BarAttr()
-        tempo.set_tempo(unit, durval2type(unit), beats, dots, text)
+        unittype = durval2type(unit) if unit else ''
+        tempo.set_tempo(unit, unittype, beats, dots, text)
         if self.bar is None:
             self.new_bar()
         self.bar.add(tempo)
