@@ -786,4 +786,3 @@ def convert_barl(bl):
         return 'light-heavy'
     elif bl == "'":
         return 'tick'
-

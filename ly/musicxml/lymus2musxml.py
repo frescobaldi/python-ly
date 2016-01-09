@@ -730,4 +730,3 @@ class ParseSource():
         """Call any function in the mediator object."""
         func_call = getattr(self.mediator, func_name)
         func_call(*args)
-
