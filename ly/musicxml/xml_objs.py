@@ -234,6 +234,11 @@ class Score():
         else:
             return True
 
+    def merge_globally(self, section):
+        """Merge section to all parts."""
+        for p in self.partlist:
+            p.merge_voice(section)
+
     def debug_score(self, attr=[]):
         """
         Loop through score and print all elements for debugging purposes.
@@ -283,10 +288,10 @@ class ScorePartGroup():
 
 class ScoreSection():
     """ object to keep track of music section """
-    def __init__(self, name, sim=False):
+    def __init__(self, name, glob=False):
         self.name = name
         self.barlist = []
-        self.simultan = sim
+        self.glob = glob
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.name)
