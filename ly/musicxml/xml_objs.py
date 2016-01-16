@@ -675,7 +675,7 @@ class BarAttr():
         self.tempo = None
 
     def __repr__(self):
-        return '<{0}>'.format(self.__class__.__name__)
+        return '<{0} {1}>'.format(self.__class__.__name__, self.time)
 
     def set_key(self, muskey, mode):
         self.key = muskey
