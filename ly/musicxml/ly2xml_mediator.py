@@ -302,7 +302,7 @@ class Mediator():
         if self.score.is_empty():
             self.new_part()
             self.part.barlist.extend(self.get_first_var())
-        self.score.merge_globally(self.score.glob_section)
+        self.score.merge_globally(self.score.glob_section, override=True)
 
     def get_first_var(self):
         if self.sections:
