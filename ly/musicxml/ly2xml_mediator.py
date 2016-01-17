@@ -303,6 +303,8 @@ class Mediator():
             self.new_part()
             self.part.barlist.extend(self.get_first_var())
         self.score.merge_globally(self.score.glob_section, override=True)
+        for p in self.score.partlist:
+            p.restructure_bars()
 
     def get_first_var(self):
         if self.sections:

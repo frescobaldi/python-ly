@@ -329,6 +329,31 @@ class ScoreSection():
                             obj.add_lyric(l)
                         i += 1
 
+    def restructure_bars(self):
+        """Recount and restructure the bars in the section.
+        Should only be done if you are sure the bar information
+        given is inadequate.
+        """
+        time = Fraction(4, 4)
+        dura = 0
+        bl = []
+        for bar in self.barlist:
+            nb = Bar()
+            for obj in bar.obj_list:
+                if isinstance(obj, BarAttr):
+                    if obj.time:
+                        time = Fraction(obj.time[0], obj.time[1])
+                elif isinstance(obj, BarMus):
+                    dura += obj.duration[0] * obj.duration[1]
+                    if dura >= time:
+                        dura = 0
+                        nb.obj_list.append(obj)
+                        bl.append(nb)
+                        nb = Bar()
+                        continue
+                nb.obj_list.append(obj)
+        self.barlist = bl
+
 
 class Snippet(ScoreSection):
     """ Short section intended to be merged.
