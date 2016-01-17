@@ -228,6 +228,7 @@ class Mediator():
         Also checks for empty sections. """
         if self.sections[-1].glob:
             self.score.merge_globally(self.sections[-1])
+            self.score.glob_section.merge_voice(self.section[-1])
         if len(self.sections)>2:
             if not self.sections[-2].barlist:
                 self.sections.pop(-2)
@@ -271,12 +272,15 @@ class Mediator():
             if self.score.is_empty():
                 self.new_part()
             if self.sections[-1].glob:
-                self.score.merge_globally(self.sections[-1])
+                self.part.merge_voice(self.sections[-1])
             else:
                 self.part.barlist.extend(self.sections[-1].barlist)
                 self.sections.pop()
         if self.part and self.part.to_part:
             self.part.merge_part_to_part()
+        self.part.merge_voice(self.score.glob_section)
+        name = self.check_name("glob")
+        self.score.glob_section = self.part.extract_global_to_section(name)
         self.part = None
 
     def check_simultan(self):
@@ -293,11 +297,12 @@ class Mediator():
 
         If no part were created, place first variable (fallback) as part.
 
-        More checks?
+        Apply the latest global section.
         """
         if self.score.is_empty():
             self.new_part()
             self.part.barlist.extend(self.get_first_var())
+        self.score.merge_globally(self.score.glob_section)
 
     def get_first_var(self):
         if self.sections:

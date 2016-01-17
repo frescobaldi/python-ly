@@ -226,6 +226,7 @@ class Score():
         self.creators = {}
         self.info = {}
         self.rights = None
+        self.glob_section = ScoreSection('global', True)
 
     def is_empty(self):
         """Check if score is empty."""
@@ -399,6 +400,24 @@ class ScorePart(ScoreSection):
             self.to_part.merge_voice(self)
         else:
             self.to_part.barlist.extend(self.barlist)
+
+    def extract_global_to_section(self, name):
+        """Extract only elements that is relevant for the score globally into a given section."""
+        section = ScoreSection(name, True)
+        for bar in self.barlist:
+            section_bar = Bar()
+            for obj in bar.obj_list:
+                if isinstance(obj, BarAttr):
+                    glob_barattr = BarAttr()
+                    glob_barattr.key = obj.key
+                    glob_barattr.time = obj.time
+                    glob_barattr.mode = obj.mode
+                    glob_barattr.barline = obj.barline
+                    glob_barattr.repeat = obj.repeat
+                    glob_barattr.tempo = obj.tempo
+                    section_bar.obj_list.append(glob_barattr)
+            section.barlist.append(section_bar)
+        return section
 
 
 class Bar():
