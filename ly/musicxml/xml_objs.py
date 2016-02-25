@@ -226,6 +226,7 @@ class Score():
         self.creators = {}
         self.info = {}
         self.rights = None
+        self.glob_section = ScoreSection('global', True)
 
     def is_empty(self):
         """Check if score is empty."""
@@ -233,6 +234,11 @@ class Score():
             return False
         else:
             return True
+
+    def merge_globally(self, section, override=False):
+        """Merge section to all parts."""
+        for p in self.partlist:
+            p.merge_voice(section, override)
 
     def debug_score(self, attr=[]):
         """
@@ -283,18 +289,18 @@ class ScorePartGroup():
 
 class ScoreSection():
     """ object to keep track of music section """
-    def __init__(self, name, sim=False):
+    def __init__(self, name, glob=False):
         self.name = name
         self.barlist = []
-        self.simultan = sim
+        self.glob = glob
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.name)
 
-    def merge_voice(self, voice):
+    def merge_voice(self, voice, override=False):
         """Merge in other ScoreSection."""
         for org_v, add_v in zip(self.barlist, voice.barlist):
-            org_v.inject_voice(add_v)
+            org_v.inject_voice(add_v, override)
         bl_len = len(self.barlist)
         if len(voice.barlist) > bl_len:
             self.barlist += voice.barlist[bl_len:]
@@ -395,6 +401,24 @@ class ScorePart(ScoreSection):
         else:
             self.to_part.barlist.extend(self.barlist)
 
+    def extract_global_to_section(self, name):
+        """Extract only elements that is relevant for the score globally into a given section."""
+        section = ScoreSection(name, True)
+        for bar in self.barlist:
+            section_bar = Bar()
+            for obj in bar.obj_list:
+                if isinstance(obj, BarAttr):
+                    glob_barattr = BarAttr()
+                    glob_barattr.key = obj.key
+                    glob_barattr.time = obj.time
+                    glob_barattr.mode = obj.mode
+                    glob_barattr.barline = obj.barline
+                    glob_barattr.repeat = obj.repeat
+                    glob_barattr.tempo = obj.tempo
+                    section_bar.obj_list.append(glob_barattr)
+            section.barlist.append(section_bar)
+        return section
+
 
 class Bar():
     """ Representing the bar/measure.
@@ -443,13 +467,13 @@ class Bar():
                     return False
         return True
 
-    def inject_voice(self, new_voice):
+    def inject_voice(self, new_voice, override=False):
         """ Adding new voice to bar.
-        Omitting double or conflicting bar attributes.
+        Omitting double or conflicting bar attributes as long as override is false.
         Omitting also bars with only skips."""
         if new_voice.obj_list[0].has_attr():
             if self.obj_list[0].has_attr():
-                self.obj_list[0].merge_attr(new_voice.obj_list[0])
+                self.obj_list[0].merge_attr(new_voice.obj_list[0], override)
             else:
                 self.obj_list.insert(0, new_voice.obj_list[0])
             backup_list = new_voice.obj_list[1:]
@@ -675,7 +699,7 @@ class BarAttr():
         self.tempo = None
 
     def __repr__(self):
-        return '<{0}>'.format(self.__class__.__name__)
+        return '<{0} {1}>'.format(self.__class__.__name__, self.time)
 
     def set_key(self, muskey, mode):
         self.key = muskey
@@ -709,18 +733,20 @@ class BarAttr():
             check = True
         return check
 
-    def merge_attr(self, barattr):
-        """Merge in attributes (from another bar)."""
-        if self.key is None and barattr.key is not None:
+    def merge_attr(self, barattr, override=False):
+        """Merge in attributes (from another bar).
+        Existing attributes will only be replaced when override is set to true.
+        """
+        if barattr.key is not None and (override or self.key is None):
             self.key = barattr.key
             self.mode = barattr.mode
-        if self.time == 0 and barattr.time != 0:
+        if barattr.time != 0 and (override or self.time == 0):
             self.time = barattr.time
-        if self.clef == 0 and barattr.clef != 0:
+        if barattr.clef != 0 and (override or self.clef == 0):
             self.clef = barattr.clef
         if barattr.multiclef:
             self.multiclef += barattr.multiclef
-        if self.tempo is None and barattr.tempo is not None:
+        if barattr.tempo is not None and (override or self.tempo is None):
             self.tempo = barattr.tempo
 
 
@@ -786,4 +812,3 @@ def convert_barl(bl):
         return 'light-heavy'
     elif bl == "'":
         return 'tick'
-

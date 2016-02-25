@@ -178,7 +178,7 @@ class ParseSource():
                 self.mediator.new_snippet('sim-snip')
                 self.voice_sep = True
             else:
-                self.mediator.new_section('simultan', True)
+                self.mediator.new_section('simultan')
                 self.sims_and_seqs.append('sim')
         elif musicList.token == '{':
             self.sims_and_seqs.append('seq')
@@ -730,4 +730,3 @@ class ParseSource():
         """Call any function in the mediator object."""
         func_call = getattr(self.mediator, func_name)
         func_call(*args)
-

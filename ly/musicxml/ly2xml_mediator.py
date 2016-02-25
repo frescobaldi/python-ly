@@ -88,9 +88,9 @@ class Mediator():
         else:
             self.score.info[name] = value
 
-    def new_section(self, name, sim=False):
+    def new_section(self, name, glob=False):
         name = self.check_name(name)
-        section = xml_objs.ScoreSection(name, sim)
+        section = xml_objs.ScoreSection(name, glob)
         self.insert_into = section
         self.sections.append(section)
         self.bar = None
@@ -226,6 +226,9 @@ class Mediator():
     def check_voices(self):
         """ Checks active sections. The two latest created are merged.
         Also checks for empty sections. """
+        if self.sections[-1].glob:
+            self.score.merge_globally(self.sections[-1])
+            self.score.glob_section.merge_voice(self.section[-1])
         if len(self.sections)>2:
             if not self.sections[-2].barlist:
                 self.sections.pop(-2)
@@ -268,23 +271,25 @@ class Mediator():
         if len(self.sections)>1:
             if self.score.is_empty():
                 self.new_part()
-            if self.sections[-1].simultan:
+            if self.sections[-1].glob:
                 self.part.merge_voice(self.sections[-1])
             else:
                 self.part.barlist.extend(self.sections[-1].barlist)
                 self.sections.pop()
         if self.part and self.part.to_part:
             self.part.merge_part_to_part()
+        self.part.merge_voice(self.score.glob_section)
+        name = self.check_name("glob")
+        self.score.glob_section = self.part.extract_global_to_section(name)
         self.part = None
 
     def check_simultan(self):
         """Check done after simultanoues (<< >>) section."""
-        if self.sections[-1].simultan:
-            if self.part:
-                self.part.merge_voice(self.sections[-1])
-            elif len(self.sections)>1:
-                 self.sections[-2].merge_voice(self.sections[-1])
-            self.sections.pop()
+        if self.part:
+            self.part.merge_voice(self.sections[-1])
+        elif len(self.sections)>1:
+             self.sections[-2].merge_voice(self.sections[-1])
+        self.sections.pop()
 
     def check_score(self):
         """
@@ -292,11 +297,12 @@ class Mediator():
 
         If no part were created, place first variable (fallback) as part.
 
-        More checks?
+        Apply the latest global section.
         """
         if self.score.is_empty():
             self.new_part()
             self.part.barlist.extend(self.get_first_var())
+        self.score.merge_globally(self.score.glob_section, override=True)
 
     def get_first_var(self):
         if self.sections:
