@@ -288,7 +288,7 @@ class ScriptAbbreviation(Articulation, _token.Leaver):
 
 
 class Fingering(Articulation, _token.Leaver):
-    rx = r"\d"
+    rx = r"\d+"
 
 
 class StringNumber(Articulation):
