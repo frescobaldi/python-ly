@@ -6,7 +6,8 @@ ChangeLog for python-ly
 
 - make define-markup-command recognition working again
 - recognize \bookOutputName A (without quotes, although not recommended)
-
+- allow multi-digit fingering, e.g. c-34, LilyPond supports that since at least
+  2.16.
 
 2015-12-24: python-ly 0.9.3
 
