@@ -672,7 +672,7 @@ class Mediator():
                 c.set_gliss(line, nr=n+1)
         else:
             self.current_note.set_gliss(line)
-        self.action_onnext.append(("end_gliss", line))
+        self.action_onnext.append(("end_gliss", (line, )))
 
     def end_gliss(self, note, line):
         if self.current_chord:
