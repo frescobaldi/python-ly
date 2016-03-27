@@ -67,8 +67,9 @@ class CreateMusicXML():
 
     def create_title(self, title):
         """Create score title."""
-        mov_title = etree.SubElement(self.root, "movement-title")
+        mov_title = etree.Element("movement-title")
         mov_title.text = title
+        self.root.insert(0, mov_title)
 
     def create_score_info(self, tag, info, attr={}):
         """Create score info."""
