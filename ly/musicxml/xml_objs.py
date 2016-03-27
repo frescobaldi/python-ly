@@ -286,6 +286,11 @@ class ScorePartGroup():
     def set_bracket(self, bracket):
         self.bracket = bracket
 
+    def merge_voice(self, voice, override=False):
+        """Merge in a ScoreSection into all parts."""
+        for part in self.partlist:
+            part.merge_voice(voice, override)
+
 
 class ScoreSection():
     """ object to keep track of music section """
