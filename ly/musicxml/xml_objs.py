@@ -137,25 +137,23 @@ class IterateXmlObjs():
 
     def before_note(self, obj):
         """Xml-nodes before note."""
-        for d in obj.dynamic:
-            if d.before:
-                if isinstance(d, DynamicsMark):
-                    self.musxml.add_dynamic_mark(d.sign)
-                elif isinstance(d, DynamicsWedge):
-                    self.musxml.add_dynamic_wedge(d.sign)
+        self._add_dynamics([d for d in obj.dynamic if d.before])
         if obj.oct_shift and not obj.oct_shift.octdir == 'stop':
             self.musxml.add_octave_shift(obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
 
     def after_note(self, obj):
         """Xml-nodes after note."""
-        for d in obj.dynamic:
-            if not d.before:
-                if isinstance(d, DynamicsMark):
-                    self.musxml.add_dynamic_mark(d.sign)
-                elif isinstance(d, DynamicsWedge):
-                    self.musxml.add_dynamic_wedge(d.sign)
+        self._add_dynamics([d for d in obj.dynamic if not d.before])
         if obj.oct_shift and obj.oct_shift.octdir == 'stop':
             self.musxml.add_octave_shift(obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
+
+    def _add_dynamics(self, dyns):
+        """Add XML nodes for list of Dynamics objects."""
+        for d in dyns:
+            if isinstance(d, DynamicsMark):
+                self.musxml.add_dynamic_mark(d.sign)
+            elif isinstance(d, DynamicsWedge):
+                self.musxml.add_dynamic_wedge(d.sign)
 
     def gener_xml_mus(self, obj):
         """Nodes generic for both notes and rests."""
