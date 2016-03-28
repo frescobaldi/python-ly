@@ -361,7 +361,10 @@ class CreateMusicXML():
 
     def add_tie(self, tie_type):
         """Create node tie (used for sound of tie) """
-        etree.SubElement(self.current_note, "tie", type=tie_type)
+        # A tie must be directly after a duration
+        insert_at = get_tag_index(self.current_note, "duration") + 1
+        tie_element = etree.Element("tie", type=tie_type)
+        self.current_note.insert(insert_at, tie_element)
 
     def add_grace(self, slash):
         """Create grace node """
@@ -642,6 +645,17 @@ class MusicXML(object):
             # it is not a file object
             with open(file, 'wb') as f:
                 write(f)
+
+
+def get_tag_index(node, tag):
+    """Return the (first) index of tag in node.
+
+    If tag is not found, -1 is returned.
+    """
+    for i, elem in enumerate(list(node)):
+        if elem.tag == tag:
+            return i
+    return -1
 
 
 xml_decl_txt = """<?xml version="1.0" encoding="{encoding}"?>"""
