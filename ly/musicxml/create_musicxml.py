@@ -383,11 +383,17 @@ class CreateMusicXML():
 
     def add_time_modify(self, fraction):
         """Create time modification """
-        timemod_node = etree.SubElement(self.current_note, "time-modification")
+        index = get_tag_index(self.current_note, "accidental")
+        if index == -1:
+            index = get_tag_index(self.current_note, "dot")
+        if index == -1:
+            index = get_tag_index(self.current_note, "type")
+        timemod_node = etree.Element("time-modification")
         actual_notes = etree.SubElement(timemod_node, "actual-notes")
         actual_notes.text = str(fraction[0])
         norm_notes = etree.SubElement(timemod_node, "normal-notes")
         norm_notes.text = str(fraction[1])
+        self.current_note.insert(index + 1, timemod_node)
 
     def get_time_modify(self):
         """Check if time-modification node already exists."""
