@@ -565,6 +565,20 @@ class CreateMusicXML():
         dirtypenode = etree.SubElement(direction, "direction-type")
         dyn_node = etree.SubElement(dirtypenode, "wedge", type=wedge_type)
 
+    def add_dynamic_text(self, text):
+        """Add dynamic text."""
+        direction = etree.SubElement(self.current_bar, "direction", placement='below')
+        dirtypenode = etree.SubElement(direction, "direction-type")
+        dyn_node = etree.SubElement(dirtypenode, "words")
+        dyn_node.attrib['font-style'] = 'italic'
+        dyn_node.text = text
+
+    def add_dynamic_dashes(self, text):
+        """Add dynamics dashes."""
+        direction = etree.SubElement(self.current_bar, "direction", placement='below')
+        dirtypenode = etree.SubElement(direction, "direction-type")
+        dyn_node = etree.SubElement(dirtypenode, "dashes", type=text)
+
     def add_octave_shift(self, plac, octdir, size):
         """Add octave shift."""
         oct_dict = {"type": octdir, "size": str(size) }

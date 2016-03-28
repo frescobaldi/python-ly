@@ -71,6 +71,7 @@ class Mediator():
         self.lyric_syll = False
         self.lyric_nr = 1
         self.ongoing_wedge = False
+        self.ongoing_dashes = False
         self.octdiff = 0
         self.prev_tremolo = 8
         self.tupl_dur = 0
@@ -645,16 +646,30 @@ class Mediator():
 
     def new_dynamics(self, dynamics):
         hairpins = {'<': 'crescendo', '>': 'diminuendo'}
+        text_dyn = {'cresc': 'cresc.', 'decresc': 'descresc.',
+                    'dim': 'dim.'}
         if dynamics == '!':
-            self.current_note.set_dynamics_wedge('stop')
-            self.ongoing_wedge = False
+            if self.ongoing_wedge:
+                self.current_note.set_dynamics_wedge('stop')
+                self.ongoing_wedge = False
+            if self.ongoing_dashes:
+                self.current_note.set_dynamics_dashes('stop')
+                self.ongoing_dashes = False
         elif dynamics in hairpins:
             self.current_note.set_dynamics_wedge(hairpins[dynamics])
             self.ongoing_wedge = True
+        elif dynamics in text_dyn:
+            self.current_note.set_dynamics_text(text_dyn[dynamics])
+            self.current_note.set_dynamics_dashes('start', before=False)
+            self.ongoing_dashes = True
         elif self.ongoing_wedge:
             self.current_note.set_dynamics_wedge('stop')
             self.current_note.set_dynamics_mark(dynamics)
             self.ongoing_wedge = False
+        elif self.ongoing_dashes:
+            self.current_note.set_dynamics_dashes('stop')
+            self.current_note.set_dynamics_mark(dynamics)
+            self.ongoing_dashes = False
         else:
             self.current_note.set_dynamics_mark(dynamics)
 

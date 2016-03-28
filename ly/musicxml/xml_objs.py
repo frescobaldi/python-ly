@@ -154,6 +154,10 @@ class IterateXmlObjs():
                 self.musxml.add_dynamic_mark(d.sign)
             elif isinstance(d, DynamicsWedge):
                 self.musxml.add_dynamic_wedge(d.sign)
+            elif isinstance(d, DynamicsText):
+                self.musxml.add_dynamic_text(d.sign)
+            elif isinstance(d, DynamicsDashes):
+                self.musxml.add_dynamic_dashes(d.sign)
 
     def gener_xml_mus(self, obj):
         """Nodes generic for both notes and rests."""
@@ -528,6 +532,12 @@ class BarMus():
     def set_dynamics_wedge(self, sign, before=True):
         self.dynamic.append(DynamicsWedge(sign, before))
 
+    def set_dynamics_text(self, sign, before=True):
+        self.dynamic.append(DynamicsText(sign, before))
+
+    def set_dynamics_dashes(self, sign, before=True):
+        self.dynamic.append(DynamicsDashes(sign, before))
+
     def set_oct_shift(self, plac, octdir, size):
         self.oct_shift = OctaveShift(plac, octdir, size)
 
@@ -562,6 +572,16 @@ class DynamicsMark(Dynamics):
 
 class DynamicsWedge(Dynamics):
     """A dynamics wedge/hairpin."""
+    pass
+
+
+class DynamicsText(Dynamics):
+    """A dynamics text."""
+    pass
+
+
+class DynamicsDashes(Dynamics):
+    """Dynamics dashes."""
     pass
 
 
