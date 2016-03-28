@@ -67,8 +67,9 @@ class CreateMusicXML():
 
     def create_title(self, title):
         """Create score title."""
-        mov_title = etree.SubElement(self.root, "movement-title")
+        mov_title = etree.Element("movement-title")
         mov_title.text = title
+        self.root.insert(0, mov_title)
 
     def create_score_info(self, tag, info, attr={}):
         """Create score info."""
@@ -360,7 +361,10 @@ class CreateMusicXML():
 
     def add_tie(self, tie_type):
         """Create node tie (used for sound of tie) """
-        etree.SubElement(self.current_note, "tie", type=tie_type)
+        # A tie must be directly after a duration
+        insert_at = get_tag_index(self.current_note, "duration") + 1
+        tie_element = etree.Element("tie", type=tie_type)
+        self.current_note.insert(insert_at, tie_element)
 
     def add_grace(self, slash):
         """Create grace node """
@@ -379,11 +383,17 @@ class CreateMusicXML():
 
     def add_time_modify(self, fraction):
         """Create time modification """
-        timemod_node = etree.SubElement(self.current_note, "time-modification")
+        index = get_tag_index(self.current_note, "accidental")
+        if index == -1:
+            index = get_tag_index(self.current_note, "dot")
+        if index == -1:
+            index = get_tag_index(self.current_note, "type")
+        timemod_node = etree.Element("time-modification")
         actual_notes = etree.SubElement(timemod_node, "actual-notes")
         actual_notes.text = str(fraction[0])
         norm_notes = etree.SubElement(timemod_node, "normal-notes")
         norm_notes.text = str(fraction[1])
+        self.current_note.insert(index + 1, timemod_node)
 
     def get_time_modify(self):
         """Check if time-modification node already exists."""
@@ -526,6 +536,8 @@ class CreateMusicXML():
             repeatnode = etree.SubElement(barnode, "repeat", direction=repeat)
 
     def add_backup(self, duration):
+        if duration <= 0:
+            return
         backupnode = etree.SubElement(self.current_bar, "backup")
         durnode = etree.SubElement(backupnode, "duration")
         durnode.text = str(duration)
@@ -539,8 +551,10 @@ class CreateMusicXML():
         staffnode.text = str(staff)
 
     def add_staves(self, staves):
-        stavesnode = etree.SubElement(self.bar_attr, "staves")
+        index = get_tag_index(self.bar_attr, "time")
+        stavesnode = etree.Element("staves")
         stavesnode.text = str(staves)
+        self.bar_attr.insert(index + 1, stavesnode)
 
     def add_chord(self):
         etree.SubElement(self.current_note, "chord")
@@ -560,6 +574,20 @@ class CreateMusicXML():
         direction = etree.SubElement(self.current_bar, "direction", placement='below')
         dirtypenode = etree.SubElement(direction, "direction-type")
         dyn_node = etree.SubElement(dirtypenode, "wedge", type=wedge_type)
+
+    def add_dynamic_text(self, text):
+        """Add dynamic text."""
+        direction = etree.SubElement(self.current_bar, "direction", placement='below')
+        dirtypenode = etree.SubElement(direction, "direction-type")
+        dyn_node = etree.SubElement(dirtypenode, "words")
+        dyn_node.attrib['font-style'] = 'italic'
+        dyn_node.text = text
+
+    def add_dynamic_dashes(self, text):
+        """Add dynamics dashes."""
+        direction = etree.SubElement(self.current_bar, "direction", placement='below')
+        dirtypenode = etree.SubElement(direction, "direction-type")
+        dyn_node = etree.SubElement(dirtypenode, "dashes", type=text)
 
     def add_octave_shift(self, plac, octdir, size):
         """Add octave shift."""
@@ -641,6 +669,17 @@ class MusicXML(object):
             # it is not a file object
             with open(file, 'wb') as f:
                 write(f)
+
+
+def get_tag_index(node, tag):
+    """Return the (first) index of tag in node.
+
+    If tag is not found, -1 is returned.
+    """
+    for i, elem in enumerate(list(node)):
+        if elem.tag == tag:
+            return i
+    return -1
 
 
 xml_decl_txt = """<?xml version="1.0" encoding="{encoding}"?>"""
