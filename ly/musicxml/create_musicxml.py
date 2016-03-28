@@ -536,6 +536,8 @@ class CreateMusicXML():
             repeatnode = etree.SubElement(barnode, "repeat", direction=repeat)
 
     def add_backup(self, duration):
+        if duration <= 0:
+            return
         backupnode = etree.SubElement(self.current_bar, "backup")
         durnode = etree.SubElement(backupnode, "duration")
         durnode.text = str(duration)
