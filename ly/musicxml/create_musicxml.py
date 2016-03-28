@@ -551,8 +551,10 @@ class CreateMusicXML():
         staffnode.text = str(staff)
 
     def add_staves(self, staves):
-        stavesnode = etree.SubElement(self.bar_attr, "staves")
+        index = get_tag_index(self.bar_attr, "time")
+        stavesnode = etree.Element("staves")
         stavesnode.text = str(staves)
+        self.bar_attr.insert(index + 1, stavesnode)
 
     def add_chord(self):
         etree.SubElement(self.current_note, "chord")
