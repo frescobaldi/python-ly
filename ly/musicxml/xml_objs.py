@@ -139,9 +139,9 @@ class IterateXmlObjs():
         """Xml-nodes before note."""
         for d in obj.dynamic:
             if d.before:
-                if d.is_mark:
+                if isinstance(d, DynamicsMark):
                     self.musxml.add_dynamic_mark(d.sign)
-                else:
+                elif isinstance(d, DynamicsWedge):
                     self.musxml.add_dynamic_wedge(d.sign)
         if obj.oct_shift and not obj.oct_shift.octdir == 'stop':
             self.musxml.add_octave_shift(obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
@@ -150,9 +150,9 @@ class IterateXmlObjs():
         """Xml-nodes after note."""
         for d in obj.dynamic:
             if not d.before:
-                if d.is_mark:
+                if isinstance(d, DynamicsMark):
                     self.musxml.add_dynamic_mark(d.sign)
-                else:
+                elif isinstance(d, DynamicsWedge):
                     self.musxml.add_dynamic_wedge(d.sign)
         if obj.oct_shift and obj.oct_shift.octdir == 'stop':
             self.musxml.add_octave_shift(obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
@@ -524,14 +524,11 @@ class BarMus():
     def add_other_notation(self, other):
         self.other_notation = other
 
-    def set_dynamics(self, mark=None, wedge=None, before=True):
-        if mark:
-            sign = mark
-            is_mark = True
-        if wedge:
-            sign = wedge
-            is_mark = False
-        self.dynamic.append(Dynamics(sign, before, is_mark))
+    def set_dynamics_mark(self, sign, before=True):
+        self.dynamic.append(DynamicsMark(sign, before))
+
+    def set_dynamics_wedge(self, sign, before=True):
+        self.dynamic.append(DynamicsWedge(sign, before))
 
     def set_oct_shift(self, plac, octdir, size):
         self.oct_shift = OctaveShift(plac, octdir, size)
@@ -555,10 +552,19 @@ class OctaveShift():
 
 class Dynamics():
     """Stores information about dynamics. """
-    def __init__(self, sign, before=True, is_mark=False, ):
+    def __init__(self, sign, before=True):
         self.before = before
-        self.is_mark = is_mark
         self.sign = sign
+
+
+class DynamicsMark(Dynamics):
+    """A dynamics mark."""
+    pass
+
+
+class DynamicsWedge(Dynamics):
+    """A dynamics wedge/hairpin."""
+    pass
 
 
 class Tuplet():

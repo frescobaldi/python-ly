@@ -646,17 +646,17 @@ class Mediator():
     def new_dynamics(self, dynamics):
         hairpins = {'<': 'crescendo', '>': 'diminuendo'}
         if dynamics == '!':
-            self.current_note.set_dynamics(wedge='stop')
+            self.current_note.set_dynamics_wedge('stop')
             self.ongoing_wedge = False
         elif dynamics in hairpins:
-            self.current_note.set_dynamics(wedge=hairpins[dynamics])
+            self.current_note.set_dynamics_wedge(hairpins[dynamics])
             self.ongoing_wedge = True
         elif self.ongoing_wedge:
-            self.current_note.set_dynamics(wedge='stop')
-            self.current_note.set_dynamics(mark=dynamics)
+            self.current_note.set_dynamics_wedge('stop')
+            self.current_note.set_dynamics_mark(dynamics)
             self.ongoing_wedge = False
         else:
-            self.current_note.set_dynamics(mark=dynamics)
+            self.current_note.set_dynamics_mark(dynamics)
 
     def new_grace(self, slash=0):
         self.current_note.set_grace(slash)
