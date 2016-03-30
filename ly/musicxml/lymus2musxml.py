@@ -90,9 +90,15 @@ class ParseSource():
         self.slurnr = 0
         self.phrslurnr = 0
 
-    def parse_text(self, ly_text):
-        """Parse the LilyPond source as text."""
+    def parse_text(self, ly_text, filename=None):
+        """Parse the LilyPond source as text.
+        
+        If you specify a filename, it can be used to resolve \\include commands
+        correctly.
+        
+        """
         doc = ly.document.Document(ly_text)
+        doc.filename = filename
         self.parse_document(doc)
 
     def parse_document(self, ly_doc):
