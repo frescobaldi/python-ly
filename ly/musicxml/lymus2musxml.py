@@ -91,7 +91,7 @@ class ParseSource():
         self.phrslurnr = 0
 
     def parse_text(self, ly_text, filename=None):
-        """Parse the LilyPond source as text.
+        """Parse the LilyPond source specified as text.
         
         If you specify a filename, it can be used to resolve \\include commands
         correctly.
@@ -102,12 +102,9 @@ class ParseSource():
         self.parse_document(doc)
 
     def parse_document(self, ly_doc):
-        """Parse the LilyPond source as a ly.document document.
-
-        (The document is copied and the copy is converted to absolute mode to
-        facilitate the export. The original document is unchanged.)
-
-        """
+        """Parse the LilyPond source specified as a ly.document document."""
+        # The document is copied and the copy is converted to absolute mode to
+        # facilitate the export. The original document is unchanged.
         doc = ly_doc.copy()
         import ly.pitch.rel2abs
         cursor = ly.document.Cursor(doc)
