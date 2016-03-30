@@ -137,25 +137,27 @@ class IterateXmlObjs():
 
     def before_note(self, obj):
         """Xml-nodes before note."""
-        for d in obj.dynamic:
-            if d.before:
-                if d.is_mark:
-                    self.musxml.add_dynamic_mark(d.sign)
-                else:
-                    self.musxml.add_dynamic_wedge(d.sign)
+        self._add_dynamics([d for d in obj.dynamic if d.before])
         if obj.oct_shift and not obj.oct_shift.octdir == 'stop':
             self.musxml.add_octave_shift(obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
 
     def after_note(self, obj):
         """Xml-nodes after note."""
-        for d in obj.dynamic:
-            if not d.before:
-                if d.is_mark:
-                    self.musxml.add_dynamic_mark(d.sign)
-                else:
-                    self.musxml.add_dynamic_wedge(d.sign)
+        self._add_dynamics([d for d in obj.dynamic if not d.before])
         if obj.oct_shift and obj.oct_shift.octdir == 'stop':
             self.musxml.add_octave_shift(obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
+
+    def _add_dynamics(self, dyns):
+        """Add XML nodes for list of Dynamics objects."""
+        for d in dyns:
+            if isinstance(d, DynamicsMark):
+                self.musxml.add_dynamic_mark(d.sign)
+            elif isinstance(d, DynamicsWedge):
+                self.musxml.add_dynamic_wedge(d.sign)
+            elif isinstance(d, DynamicsText):
+                self.musxml.add_dynamic_text(d.sign)
+            elif isinstance(d, DynamicsDashes):
+                self.musxml.add_dynamic_dashes(d.sign)
 
     def gener_xml_mus(self, obj):
         """Nodes generic for both notes and rests."""
@@ -285,6 +287,11 @@ class ScorePartGroup():
 
     def set_bracket(self, bracket):
         self.bracket = bracket
+
+    def merge_voice(self, voice, override=False):
+        """Merge in a ScoreSection into all parts."""
+        for part in self.partlist:
+            part.merge_voice(voice, override)
 
 
 class ScoreSection():
@@ -519,14 +526,17 @@ class BarMus():
     def add_other_notation(self, other):
         self.other_notation = other
 
-    def set_dynamics(self, mark=None, wedge=None, before=True):
-        if mark:
-            sign = mark
-            is_mark = True
-        if wedge:
-            sign = wedge
-            is_mark = False
-        self.dynamic.append(Dynamics(sign, before, is_mark))
+    def set_dynamics_mark(self, sign, before=True):
+        self.dynamic.append(DynamicsMark(sign, before))
+
+    def set_dynamics_wedge(self, sign, before=True):
+        self.dynamic.append(DynamicsWedge(sign, before))
+
+    def set_dynamics_text(self, sign, before=True):
+        self.dynamic.append(DynamicsText(sign, before))
+
+    def set_dynamics_dashes(self, sign, before=True):
+        self.dynamic.append(DynamicsDashes(sign, before))
 
     def set_oct_shift(self, plac, octdir, size):
         self.oct_shift = OctaveShift(plac, octdir, size)
@@ -550,10 +560,29 @@ class OctaveShift():
 
 class Dynamics():
     """Stores information about dynamics. """
-    def __init__(self, sign, before=True, is_mark=False, ):
+    def __init__(self, sign, before=True):
         self.before = before
-        self.is_mark = is_mark
         self.sign = sign
+
+
+class DynamicsMark(Dynamics):
+    """A dynamics mark."""
+    pass
+
+
+class DynamicsWedge(Dynamics):
+    """A dynamics wedge/hairpin."""
+    pass
+
+
+class DynamicsText(Dynamics):
+    """A dynamics text."""
+    pass
+
+
+class DynamicsDashes(Dynamics):
+    """Dynamics dashes."""
+    pass
 
 
 class Tuplet():
