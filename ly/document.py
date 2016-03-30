@@ -370,6 +370,14 @@ class Document(DocumentBase):
         doc.filename = filename
         return doc
     
+    def copy(self):
+        """Return a full copy of the document."""
+        doc = Document(self.plaintext(), self.mode())
+        doc.filename = self.filename
+        doc.encoding = self.encoding
+        doc.modified = self.modified
+        return doc
+        
     def __len__(self):
         """Return the number of blocks"""
         return len(self._blocks)
