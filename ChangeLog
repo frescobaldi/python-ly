@@ -8,6 +8,9 @@ ChangeLog for python-ly
 - recognize \bookOutputName A (without quotes, although not recommended)
 - allow multi-digit fingering, e.g. c-34, LilyPond supports that since at least
   2.16.
+- various updates and improvements in MusicXML export contributed by Peter Bjuhr
+- fix issue #59: handle \include commands correctly when exporting to MusicXML
+
 
 2015-12-24: python-ly 0.9.3
 
