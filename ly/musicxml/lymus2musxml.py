@@ -104,14 +104,15 @@ class ParseSource():
     def parse_document(self, ly_doc):
         """Parse the LilyPond source as a ly.document document.
 
-        The document is converted to absolute mode to facilitate the export.
-        Use parse_text instead if you want the document to be unaffected.
+        (The document is copied and the copy is converted to absolute mode to
+        facilitate the export. The original document is unchanged.)
 
         """
+        doc = ly_doc.copy()
         import ly.pitch.rel2abs
-        cursor = ly.document.Cursor(ly_doc)
+        cursor = ly.document.Cursor(doc)
         ly.pitch.rel2abs.rel2abs(cursor)
-        mustree = ly.music.document(ly_doc)
+        mustree = ly.music.document(doc)
         self.parse_tree(mustree)
 
     def parse_tree(self, mustree):
