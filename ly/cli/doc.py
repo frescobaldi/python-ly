@@ -179,6 +179,9 @@ If there is a default value, it is written between brackets:
          which tag syntax highlighted HTML will be wrapped in. Possible values:
          ``div``, ``pre``, ``id`` and ``code``
 
+  ``wrapper-attribute`` [``class``]
+        attribute used for the wrapper tag. Possible values: ``id`` and ``class``.
+
 These variables influence the output of information commands:
 
   ``with-filename``

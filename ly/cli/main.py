@@ -81,6 +81,7 @@ class Options(object):
         self.stylesheet = None
         self.number_lines = False
         self.wrapper_tag = 'pre'
+        self.wrapper_attribute = 'class'
 
     def set_variable(self, name, value):
         name = name.replace('-', '_')

@@ -136,4 +136,8 @@ def wrapper_tag(arg):
             tag=arg))
     return arg
 
-
+def wrapper_attribute(arg):
+    if not arg in ['id', 'class']:
+        raise ValueError("wrapper attribute must be 'id' or 'class', found {attr}".format(
+            attr=arg))
+    return arg
