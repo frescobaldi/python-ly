@@ -232,6 +232,7 @@ class highlight(_export_command):
         w.encoding = opts.output_encoding or "utf-8"
         w.wrapper_tag = opts.wrapper_tag
         w.wrapper_attribute = opts.wrapper_attribute
+        w.document_id = opts.document_id
 
         doc = w.html(cursor)
         if self.output:

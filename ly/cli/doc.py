@@ -182,6 +182,12 @@ If there is a default value, it is written between brackets:
   ``wrapper-attribute`` [``class``]
         attribute used for the wrapper tag. Possible values: ``id`` and ``class``.
 
+  ``document-id`` [``lilypond``]
+        name applied to the wrapper-attribute.
+        If the three last options use their default settings
+        the highlighted HTML elements are wrapped in an element
+        ``<pre class="lilypond"></pre>``
+
 These variables influence the output of information commands:
 
   ``with-filename``

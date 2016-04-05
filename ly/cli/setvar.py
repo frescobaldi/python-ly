@@ -141,3 +141,6 @@ def wrapper_attribute(arg):
         raise ValueError("wrapper attribute must be 'id' or 'class', found {attr}".format(
             attr=arg))
     return arg
+    
+def document_id(arg):
+    return arg or None
