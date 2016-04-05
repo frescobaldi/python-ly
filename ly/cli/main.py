@@ -77,6 +77,7 @@ class Options(object):
         self.indent_tabs = False
         self.tab_width = 8
         
+        self.full_html = True
         self.inline_style = False
         self.stylesheet = None
         self.number_lines = False

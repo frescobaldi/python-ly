@@ -225,6 +225,7 @@ class highlight(_export_command):
         import ly.colorize
         w = ly.colorize.HtmlWriter()
 
+        w.full_html = opts.full_html
         w.inline_style = opts.inline_style
         w.stylesheet_ref = opts.stylesheet
         w.number_lines = opts.number_lines

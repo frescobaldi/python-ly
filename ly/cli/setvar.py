@@ -123,6 +123,9 @@ def inline_style(arg):
     return _check_bool("inline-style", arg)
 
 
+def full_html(arg):
+    return _check_bool("full_html", arg)
+
 def stylesheet(arg):
     return arg or None
 

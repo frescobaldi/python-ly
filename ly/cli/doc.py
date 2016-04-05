@@ -163,6 +163,11 @@ If there is a default value, it is written between brackets:
   ``indent-width`` [2]
          how many spaces for each indent level (if not using tabs)
 
+  ``full-html`` [``True``]
+        if set to True a full document with syntax-highlighted HTML
+        will be exported, otherwise only the bare content wrapped in an
+        element configured by the ``wrapper-`` variables.        
+
   ``stylesheet``
          filename to reference as an external stylesheet for
          syntax-highlighted HTML. This filename is literally used
