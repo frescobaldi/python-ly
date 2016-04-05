@@ -188,6 +188,9 @@ If there is a default value, it is written between brackets:
         the highlighted HTML elements are wrapped in an element
         ``<pre class="lilypond"></pre>``
 
+  ``linenumbers-id`` [``linenumbers``]
+        if linenumbers are exported this is the name used for the ``<td>`` elements
+
 These variables influence the output of information commands:
 
   ``with-filename``

@@ -144,3 +144,6 @@ def wrapper_attribute(arg):
     
 def document_id(arg):
     return arg or None
+
+def linenumbers_id(arg):
+    return arg or None

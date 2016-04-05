@@ -83,6 +83,7 @@ class Options(object):
         self.wrapper_tag = 'pre'
         self.wrapper_attribute = 'class'
         self.document_id = 'lilypond'
+        self.linenumbers_id = 'linenumbers'
 
     def set_variable(self, name, value):
         name = name.replace('-', '_')

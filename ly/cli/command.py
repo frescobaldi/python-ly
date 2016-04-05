@@ -233,6 +233,7 @@ class highlight(_export_command):
         w.wrapper_tag = opts.wrapper_tag
         w.wrapper_attribute = opts.wrapper_attribute
         w.document_id = opts.document_id
+        w.linenumbers_id = opts.linenumbers_id
 
         doc = w.html(cursor)
         if self.output:
