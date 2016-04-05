@@ -230,6 +230,7 @@ class highlight(_export_command):
         w.number_lines = opts.number_lines
         w.title = cursor.document.filename
         w.encoding = opts.output_encoding or "utf-8"
+        w.wrapper_tag = opts.wrapper_tag
 
         doc = w.html(cursor)
         if self.output:

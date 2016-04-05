@@ -80,7 +80,8 @@ class Options(object):
         self.inline_style = False
         self.stylesheet = None
         self.number_lines = False
-    
+        self.wrapper_tag = 'pre'
+
     def set_variable(self, name, value):
         name = name.replace('-', '_')
         try:

@@ -175,6 +175,10 @@ If there is a default value, it is written between brackets:
   ``number-lines`` [``false``]
          whether to add line numbers when creating syntax-highlighted HTML.
 
+  ``wrapper-tag`` [``pre``]
+         which tag syntax highlighted HTML will be wrapped in. Possible values:
+         ``div``, ``pre``, ``id`` and ``code``
+
 These variables influence the output of information commands:
 
   ``with-filename``

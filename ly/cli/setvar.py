@@ -130,4 +130,10 @@ def stylesheet(arg):
 def number_lines(arg):
     return _check_bool("number-lines", arg)
 
+def wrapper_tag(arg):
+    if not arg in ['div', 'pre', 'code', 'id']:
+        raise ValueError("unknown wrapper tag: {tag}".format(
+            tag=arg))
+    return arg
+
 
