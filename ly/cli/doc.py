@@ -163,6 +163,11 @@ If there is a default value, it is written between brackets:
   ``indent-width`` [2]
          how many spaces for each indent level (if not using tabs)
 
+  ``full-html`` [``True``]
+        if set to True a full document with syntax-highlighted HTML
+        will be exported, otherwise only the bare content wrapped in an
+        element configured by the ``wrapper-`` variables.        
+
   ``stylesheet``
          filename to reference as an external stylesheet for
          syntax-highlighted HTML. This filename is literally used
@@ -174,6 +179,22 @@ If there is a default value, it is written between brackets:
 
   ``number-lines`` [``false``]
          whether to add line numbers when creating syntax-highlighted HTML.
+
+  ``wrapper-tag`` [``pre``]
+         which tag syntax highlighted HTML will be wrapped in. Possible values:
+         ``div``, ``pre``, ``id`` and ``code``
+
+  ``wrapper-attribute`` [``class``]
+        attribute used for the wrapper tag. Possible values: ``id`` and ``class``.
+
+  ``document-id`` [``lilypond``]
+        name applied to the wrapper-attribute.
+        If the three last options use their default settings
+        the highlighted HTML elements are wrapped in an element
+        ``<pre class="lilypond"></pre>``
+
+  ``linenumbers-id`` [``linenumbers``]
+        if linenumbers are exported this is the name used for the ``<td>`` elements
 
 These variables influence the output of information commands:
 

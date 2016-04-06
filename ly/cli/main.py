@@ -77,10 +77,15 @@ class Options(object):
         self.indent_tabs = False
         self.tab_width = 8
         
+        self.full_html = True
         self.inline_style = False
         self.stylesheet = None
         self.number_lines = False
-    
+        self.wrapper_tag = 'pre'
+        self.wrapper_attribute = 'class'
+        self.document_id = 'lilypond'
+        self.linenumbers_id = 'linenumbers'
+
     def set_variable(self, name, value):
         name = name.replace('-', '_')
         try:
