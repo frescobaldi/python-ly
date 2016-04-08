@@ -109,7 +109,10 @@ def parse_command_line():
                 name, value = s.split('=', 1)
             except ValueError:
                 die("missing '=' in variable set")
-            opts.set_variable(name, value)
+            try:
+                opts.set_variable(name, value)
+            except Exception as e:
+                die(format(e))
         elif arg in ('-e', '--encoding'):
             opts.encoding = next_arg("missing encoding name")
         elif arg == '--output-encoding':
@@ -161,11 +164,14 @@ def parse_command(arg):
 def load(filename, encoding, mode):
     """Load a file, returning a ly.document.Document"""
     import ly.document
-    if filename == '-':
-        doc = ly.document.Document.load(sys.stdin.fileno(), encoding, mode)
-        doc.filename = '-'
-    else:
-        doc = ly.document.Document.load(filename, encoding, mode)
+    try:
+        if filename == '-':
+            doc = ly.document.Document.load(sys.stdin.fileno(), encoding, mode)
+            doc.filename = '-'
+        else:
+            doc = ly.document.Document.load(filename, encoding, mode)
+    except Exception as e:
+        die(format(e))
     return doc
 
 def main():
