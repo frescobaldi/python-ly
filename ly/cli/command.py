@@ -241,7 +241,7 @@ class highlight(_export_command):
         w.inline_style = opts.inline_style
         w.stylesheet_ref = opts.stylesheet
         w.number_lines = opts.number_lines
-        w.title = cursor.document.filename
+        w.title = cursor.document.filename or ""
         w.encoding = opts.output_encoding or "utf-8"
         w.wrapper_tag = opts.wrapper_tag
         w.wrapper_attribute = opts.wrapper_attribute
