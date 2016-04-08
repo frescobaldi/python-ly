@@ -23,14 +23,12 @@ The entry point for the 'ly' command.
 
 from __future__ import unicode_literals
 
-import contextlib
 import copy
-import io
 import os
-import shutil
 import sys
 
 import ly.pkginfo
+from . import options
 from . import setvar
 
 
@@ -60,100 +58,6 @@ def die(message):
         "See ly -h for a full list of commands and options.\n")
     sys.exit(1)
         
-class Options(object):
-    """Store all the startup options and their defaults."""
-    def __init__(self):
-        self.mode = None
-        self.in_place = False
-        self.encoding = 'UTF-8'
-        self.output_encoding = None
-        self.output = None
-        self.replace_pattern = True
-        self.backup_suffix = '~'
-        self.with_filename = None
-        self.default_language = "nederlands"
-        
-        self.indent_width = 2
-        self.indent_tabs = False
-        self.tab_width = 8
-        
-        self.full_html = True
-        self.inline_style = False
-        self.stylesheet = None
-        self.number_lines = False
-        self.wrapper_tag = 'pre'
-        self.wrapper_attribute = 'class'
-        self.document_id = 'lilypond'
-        self.linenumbers_id = 'linenumbers'
-
-    def set_variable(self, name, value):
-        name = name.replace('-', '_')
-        try:
-            func = getattr(setvar, name)
-        except AttributeError:
-            die("unknown variable: {name}".format(name=name))
-        try:
-            value = func(value)
-        except ValueError as e:
-            die(format(e))
-        setattr(self, name, value)
-    
-class Output(object):
-    """Object living for a whole file/command operation, handling the output.
-    
-    When opening a file it has already opened earlier, the file is appended to
-    (like awk).
-    
-    """
-    def __init__(self):
-        self._seen_filenames = set()
-    
-    def get_filename(self, opts, filename):
-        """Queries the output attribute from the Options and returns it.
-        
-        If replace_pattern is True (by default) and the attribute contains a 
-        '*', it is replaced with the full path of the specified filename, 
-        but without extension. It the attribute contains a '?', it is 
-        replaced with the filename without path and extension.
-        
-        If '-' is returned, it denotes standard output.
-        
-        """
-        if not opts.output:
-            return '-'
-        elif opts.replace_pattern:
-            path, ext = os.path.splitext(filename)
-            directory, name = os.path.split(path)
-            return opts.output.replace('?', name).replace('*', path)
-        else:
-            return opts.output
-    
-    @contextlib.contextmanager
-    def file(self, opts, filename, encoding):
-        """Return a context manager for writing to.
-        
-        If you set encoding to "binary" or False, the file is opened in binary
-        mode and you should encode the data you write yourself.
-        
-        """
-        if not filename or filename == '-':
-            filename, mode = sys.stdout.fileno(), 'w'
-        else:
-            if filename not in self._seen_filenames:
-                self._seen_filenames.add(filename)
-                if opts.backup_suffix and os.path.exists(filename):
-                    shutil.copy(filename, filename + opts.backup_suffix)
-                mode = 'w'
-            else:
-                mode = 'a'
-        if encoding in (False, "binary"):
-            f = io.open(filename, mode + 'b')
-        else:
-            f = io.open(filename, mode, encoding=encoding)
-        try:
-            yield f
-        finally:
-            f.close()
 
 def parse_command_line():
     """Return a three-tuple(options, commands, files).
@@ -177,7 +81,7 @@ def parse_command_line():
         fsenc = sys.getfilesystemencoding() or 'latin1'
         args = (a.decode(fsenc) for a in sys.argv[1:])
     
-    opts = Options()
+    opts = options.Options()
     commands = []
     files = []
     
@@ -267,7 +171,6 @@ def load(filename, encoding, mode):
 def main():
     opts, commands, files = parse_command_line()
     import ly.document
-    output = Output()
     exit_code = 0
     for filename in files:
         options = copy.deepcopy(opts)
