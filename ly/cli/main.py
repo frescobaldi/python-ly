@@ -129,8 +129,23 @@ def parse_command_line():
         else:
             files.append(arg)
     from . import command
-    if not commands or isinstance(commands[-1], command._edit_command):
+    if not commands:
         commands.append(command.write())
+    
+    # check if we have export, edit or info commands
+    write = False
+    write_info = False
+    for c in commands:
+        if (isinstance(c, command._edit_command) or
+            isinstance(c, command._export_command)):
+                write = True
+        if isinstance(c, command._info_command):
+            write_info = True
+    if write_info:
+        commands.append(command.write_info())
+    if write:
+        commands.append(command.write())
+
     if not files:
         files.append('-')
     if opts.with_filename is None:
@@ -186,8 +201,11 @@ def main():
             sys.stderr.write('warning: skipping file "{0}":\n  {1}\n'.format(filename, err))
             exit_code = 1
             continue
-        cursor = ly.document.Cursor(doc)
+        data = {
+            'cursor': ly.document.Cursor(doc),
+            'info': []
+        }
         for c in commands:
-            c.run(options, cursor, output)
+            c.run(options, data)
     return exit_code
 

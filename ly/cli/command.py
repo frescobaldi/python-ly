@@ -47,7 +47,7 @@ class _command(object):
     def __init__(self):
         pass
 
-    def run(self, opts, cursor, output):
+    def run(self, opts, data):
         pass
 
 
@@ -56,19 +56,21 @@ class set_variable(_command):
     def __init__(self, arg):
         self.name, self.value = arg.split('=', 1)
 
-    def run(self, opts, cursor, output):
+    def run(self, opts, data):
         opts.set_variable(self.name, self.value)
 
 
 class _info_command(_command):
-    """base class for commands that print some output to stdout."""
-    def run(self, opts, cursor, output):
+    """base class for commands that print some info about the document."""
+    def run(self, opts, data):
+        cursor = data['cursor']
         info = ly.docinfo.DocInfo(cursor.document)
         text = self.get_info(info)
         if text:
             if opts.with_filename:
                 text = cursor.document.filename + ":" + text
-            sys.stdout.write(text + '\n')
+            data['info'].append(text)
+                    
 
     def get_info(self, info):
         """Should return the desired information from the docinfo object.
@@ -111,13 +113,15 @@ class indent(_edit_command):
         i.indent_width = opts.indent_width
         return i
 
-    def run(self, opts, cursor, output):
+    def run(self, opts, data):
+        cursor = data['cursor']
         self.indenter(opts).indent(cursor)
 
 
 class reformat(indent):
     """reformat the document"""
-    def run(self, opts, cursor, output):
+    def run(self, opts, data):
+        cursor = data['cursor']
         ly.reformat.reformat(cursor, self.indenter(opts))
 
 
@@ -128,7 +132,8 @@ class translate(_edit_command):
             raise ValueError()
         self.language = language
 
-    def run(self, opts, cursor, output):
+    def run(self, opts, data):
+        cursor = data['cursor']
         import ly.pitch.translate
         try:
             changed = ly.pitch.translate.translate(cursor, self.language, opts.default_language)
@@ -152,7 +157,8 @@ class transpose(_edit_command):
                 result.append(ly.pitch.Pitch(*r, octave=ly.pitch.octaveToNum(octave)))
         self.from_pitch, self.to_pitch = result
 
-    def run(self, opts, cursor, output):
+    def run(self, opts, data):
+        cursor = data['cursor']
         import ly.pitch.transpose
         transposer = ly.pitch.transpose.Transposer(self.from_pitch, self.to_pitch)
         try:
@@ -166,37 +172,32 @@ class transpose(_edit_command):
 
 class rel2abs(_edit_command):
     """convert relative music to absolute"""
-    def run(self, opts, cursor, output):
+    def run(self, opts, data):
+        cursor = data['cursor']
         import ly.pitch.rel2abs
         ly.pitch.rel2abs.rel2abs(cursor, opts.default_language)
 
 
 class abs2rel(_edit_command):
     """convert absolute music to relative"""
-    def run(self, opts, cursor, output):
+    def run(self, opts, data):
+        cursor = data['cursor']
         import ly.pitch.abs2rel
         ly.pitch.abs2rel.abs2rel(cursor, opts.default_language)
 
 
 class _export_command(_command):
     """Command that exports to a file."""
-    def __init__(self, output=None):
-        self.output = output
 
 
 class musicxml(_export_command):
-    def run(self, opts, cursor, output):
+    """Convert source to MusicXML"""
+    def run(self, opts, data):
+        cursor = data['cursor']
         import ly.musicxml
         writer = ly.musicxml.writer()
         writer.parse_document(cursor.document)
-        xml = writer.musicxml()
-        if self.output:
-            filename = self.output
-        else:
-            filename = output.get_filename(opts, cursor.document.filename)
-        encoding = opts.output_encoding or "utf-8"
-        with output.file(opts, filename, "binary") as f:
-            xml.write(f, encoding)
+        cursor.document.setplaintext(writer.musicxml().tostring())
 
 
 class write(_command):
@@ -204,8 +205,11 @@ class write(_command):
     def __init__(self, output=None):
         self.output = output
 
-    def run(self, opts, cursor, output):
+    def run(self, opts, data):
+        cursor = data['cursor']
         # determine the real output filename to use
+        from . import output
+        out = output.Output()
         encoding = opts.output_encoding or opts.encoding
         if self.output:
             filename = self.output
@@ -214,14 +218,22 @@ class write(_command):
                 return
             filename = cursor.document.filename
         else:
-            filename = output.get_filename(opts, cursor.document.filename)
-        with output.file(opts, filename, encoding) as f:
+            filename = out.get_filename(opts, cursor.document.filename)
+        with out.file(opts, filename, encoding) as f:
             f.write(cursor.document.plaintext())
+
+
+class write_info(_command):
+    """print info results to stdout"""
+    def run(self, opts, data):
+        for item in data['info']:
+            sys.stdout.write(item + '\n')
 
 
 class highlight(_export_command):
     """write syntax colored HTML."""
-    def run(self, opts, cursor, output):
+    def run(self, opts, data):
+        cursor = data['cursor']
         import ly.colorize
         w = ly.colorize.HtmlWriter()
 
@@ -236,13 +248,7 @@ class highlight(_export_command):
         w.document_id = opts.document_id
         w.linenumbers_id = opts.linenumbers_id
 
-        doc = w.html(cursor)
-        if self.output:
-            filename = self.output
-        else:
-            filename = output.get_filename(opts, cursor.document.filename)
-        with output.file(opts, filename, w.encoding) as f:
-            f.write(doc)
+        cursor.document.setplaintext(w.html(cursor))
 
 
 hl = highlight
