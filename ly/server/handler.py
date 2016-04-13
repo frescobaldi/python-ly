@@ -180,7 +180,10 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
         
         # Send successful response
+        self.send_response(200)
         self.send_header('Content-type', 'application/json')
-        # TODO: Is the encoding properly handled or do we have to consider our options?
-        self.wfile.write(json.dumps(result).encode())
         self.end_headers()
+        res_body = json.dumps(result)
+        if isinstance(res_body, str):
+            res_body = res_body.encode()
+        self.wfile.write(res_body)
