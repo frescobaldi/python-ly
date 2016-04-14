@@ -244,7 +244,7 @@ def parse_command(arg):
         args = c.split(None, 1)
         if args:
             if '=' in args[0]:
-                args = ['set_variable', c]
+                args = ['set_variable', c.strip()]
             cmd = args.pop(0)
             try:
                 result.append(getattr(command, cmd.replace('-', '_'))(*args))
