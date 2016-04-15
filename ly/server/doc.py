@@ -28,7 +28,7 @@ Usage::
 An HTTP server for manipulating LilyPond input code
 
 Server Options
---------------
+==============
 
   -v, --version          show version number and exit
   -h, --help             show this help text and exit
@@ -38,7 +38,7 @@ Server Options
                          NOT IMPLEMENTED YET!
   
 Command Options
----------------
+===============
 
   -e, --encoding ENC     (input) encoding (default UTF-8)
   --output-encoding ENC  output encoding (default to input encoding)
@@ -116,10 +116,10 @@ JSON object with the following elements:
                 A string with the content of the document with all "edit" commands applied
                 consecutively. (If no edit commands have been specified this contains the
                 original input.
-            
-         ``commands'
+         
+         ``commands``
                 An array with the names of the commands that have been applied.
-
+  
   ``exports``
          An array with entries for each applied "export" command.
          Each entry has the following fields:
@@ -134,11 +134,12 @@ Commands
 --------
 
 There are three types of commands whose results are handled independently:
-- "info" commands retrieve metadata from the input document
-- "edit" commands modify the document, subsequent edit commands cascade the
-  modifications
-- "export" commands that convert the input to another format.
-  Subsequent commands are not affected by the result of export commands.
+
+    - "info" commands retrieve metadata from the input document
+    - "edit" commands modify the document, subsequent edit commands cascade the
+      modifications
+    - "export" commands that convert the input to another format.
+      Subsequent commands are not affected by the result of export commands.
 
   
 Informative commands that return information and do not change the file:
@@ -247,7 +248,7 @@ If there is a default value, it is written between brackets:
 
 
 Examples
---------
+========
 
 Here is the basic invocation, listening on port 5432::
 
@@ -289,7 +290,7 @@ And a more complex example. This will first transpose the document and then
 convert the transposed version independently to highlighted HTML and MusicXML.
 Additionally it will retrieve the mode. This time the result will be in all
 three places: the transposed document in ``doc.content``, the mode in 
-``info.info``, and HTML and MusicXML in ``exports[0].doc`` and ``exports[1].doc``.
+``info.info``, and HTML and MusicXML in ``exports[0].doc`` and ``exports[1].doc``.::
 
     {
         'commands': [
