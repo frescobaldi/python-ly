@@ -21,6 +21,7 @@ Subpackages
     ly.xml
     ly.data
     ly.cli
+    ly.server
 
 Submodules
 ----------
