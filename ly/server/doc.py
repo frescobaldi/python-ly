@@ -273,7 +273,7 @@ will be in ``result['doc']['content']``::
         'data' : "\\relative c' { c ( d e f ) }"
     }
 
-Another simple request, this time applying an “info” command. The result will
+Another simple request, this time applying an "info" command. The result will
 be in ``result['info']``, containing ``lilypond`` in the ``info`` field and
 ``mode`` in the ``command`` field::
 
