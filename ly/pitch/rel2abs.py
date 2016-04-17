@@ -28,8 +28,20 @@ import itertools
 import ly.lex.lilypond
 
 
-def rel2abs(cursor, language="nederlands"):
-    """Converts pitches from relative to absolute."""
+def rel2abs(cursor, language="nederlands", first_pitch_absolute=False):
+    """Converts pitches from relative to absolute.
+    
+    language: language to start reading pitch names in
+    
+    first_pitch_absolute: if True, the first pitch of a \\relative expression
+        is regarded as absolute, when no starting pitch was given. This mimics
+        the behaviour of LilyPond >= 2.18.
+        (In fact, the starting pitch is then assumed to be f.)
+        
+        If False, the starting pitch, when not given, is assumed to be c'
+        (LilyPond < 2.18 behaviour).
+        
+    """
     start = cursor.start
     cursor.start = 0
     
@@ -105,6 +117,8 @@ def rel2abs(cursor, language="nederlands"):
         if isinstance(t, ly.pitch.Pitch):
             lastPitch = t
             t = next(tsource)
+        elif first_pitch_absolute:
+            lastPitch = ly.pitch.Pitch.f0()
         else:
             lastPitch = ly.pitch.Pitch.c1()
         
