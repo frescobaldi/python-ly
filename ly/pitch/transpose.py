@@ -98,7 +98,7 @@ class Simplifier(Transposer):
                 pitch.note = note
         elif pitch.alter == Fraction(-1, 2):
             doct, note = divmod(pitch.note - 1, 7)
-            alter = doct * 6 + self.scale[pitch.note] - self.scale[note]
+            alter = doct * -6 + self.scale[pitch.note] - self.scale[note]
             if alter == Fraction(1, 2):
                 pitch.alter = 0
                 pitch.octave += doct
