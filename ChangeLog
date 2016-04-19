@@ -2,13 +2,15 @@ ChangeLog for python-ly
 =======================
 
 
-2015-??-??: python-ly 0.9.4
+2016-??-??: python-ly 0.9.4
 
 - make define-markup-command recognition working again
 - recognize \bookOutputName A (without quotes, although not recommended)
 - allow multi-digit fingering, e.g. c-34, LilyPond supports that since at least
   2.16.
 - various updates and improvements in MusicXML export contributed by Peter Bjuhr
+- added ly-server: an HTTP-server for manipulating LilyPond source, contributed
+  by Urs Liska
 - fix issue #59: handle \include commands correctly when exporting to MusicXML
 
 

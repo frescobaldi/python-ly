@@ -11,6 +11,7 @@ except ImportError:
 ### This setup script packages and/or installs:
 ### - the ly package
 ### - the ly script
+### - the ly-server script
 
 
 from ly import pkginfo
@@ -23,7 +24,7 @@ def packagelist(directory):
         for root, dirs, files in os.walk(directory)
         if '__init__.py' in files))
 
-scripts = ['bin/ly']
+scripts = ['bin/ly', 'bin/ly-server']
 packages = packagelist('./ly')
 py_modules = []
 

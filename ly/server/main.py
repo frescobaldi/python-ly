@@ -57,7 +57,7 @@ See ly-server -h for a full list of commands and options.
 
 def version():
     """Print version info."""
-    sys.stdout.write("ly {0}\n".format(ly.pkginfo.version))
+    sys.stdout.write("ly-server {0}\n".format(ly.pkginfo.version))
 
 
 def die(message):
