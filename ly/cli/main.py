@@ -72,6 +72,8 @@ class Options(object):
         self.backup_suffix = '~'
         self.with_filename = None
         self.default_language = "nederlands"
+        self.rel_startpitch = True
+        self.rel_absolute = None
         
         self.indent_width = 2
         self.indent_tabs = False
@@ -246,10 +248,14 @@ def parse_command(arg):
             if '=' in args[0]:
                 args = ['set_variable', c.strip()]
             cmd = args.pop(0)
+            if not cmd or not cmd[0].isalpha():
+                die("unknown command: " + cmd)
             try:
-                result.append(getattr(command, cmd.replace('-', '_'))(*args))
+                cmd_class = getattr(command, cmd.replace('-', '_'))
             except AttributeError:
                 die("unknown command: " + cmd)
+            try:
+                result.append(cmd_class(*args))
             except (TypeError, ValueError):
                 die("invalid arguments: " + c)
     return result

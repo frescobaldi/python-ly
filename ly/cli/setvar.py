@@ -107,6 +107,14 @@ def default_language(arg):
     return "nederlands"
 
 
+def rel_startpitch(arg):
+    return _check_bool("rel-startpitch", arg)
+
+
+def rel_absolute(arg):
+    return _check_bool("rel-absolute", arg)
+
+
 def indent_width(arg):
     return _check_int("indent-width", arg)
 

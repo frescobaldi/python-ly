@@ -50,6 +50,17 @@ class _command(object):
     def run(self, opts, cursor, output):
         pass
 
+    @staticmethod
+    def get_absolute(opts, cursor):
+        """Utility function to determine whether the first pitch in a relative should
+        be regarded as absolute (LilyPond 2.18+ behaviour).
+        
+        """
+        if opts.rel_absolute is None:
+            return ly.docinfo.DocInfo(cursor.document).version() >= (2, 18)
+        else:
+            return opts.rel_absolute
+
 
 class set_variable(_command):
     """set a variable to a value"""
@@ -153,10 +164,11 @@ class transpose(_edit_command):
         self.from_pitch, self.to_pitch = result
 
     def run(self, opts, cursor, output):
+        absolute = self.get_absolute(opts, cursor)
         import ly.pitch.transpose
         transposer = ly.pitch.transpose.Transposer(self.from_pitch, self.to_pitch)
         try:
-            ly.pitch.transpose.transpose(cursor, transposer, opts.default_language)
+            ly.pitch.transpose.transpose(cursor, transposer, opts.default_language, absolute)
         except ly.pitch.PitchNameNotAvailable:
             language = ly.docinfo.DocInfo(cursor.document).language() or opts.default_language
             sys.stderr.write(
@@ -167,15 +179,17 @@ class transpose(_edit_command):
 class rel2abs(_edit_command):
     """convert relative music to absolute"""
     def run(self, opts, cursor, output):
+        absolute = self.get_absolute(opts, cursor)
         import ly.pitch.rel2abs
-        ly.pitch.rel2abs.rel2abs(cursor, opts.default_language)
+        ly.pitch.rel2abs.rel2abs(cursor, opts.default_language, absolute)
 
 
 class abs2rel(_edit_command):
     """convert absolute music to relative"""
     def run(self, opts, cursor, output):
+        absolute = self.get_absolute(opts, cursor)
         import ly.pitch.abs2rel
-        ly.pitch.abs2rel.abs2rel(cursor, opts.default_language)
+        ly.pitch.abs2rel.abs2rel(cursor, opts.default_language, opts.rel_startpitch, absolute)
 
 
 class _export_command(_command):
@@ -186,9 +200,10 @@ class _export_command(_command):
 
 class musicxml(_export_command):
     def run(self, opts, cursor, output):
+        absolute = self.get_absolute(opts, cursor)
         import ly.musicxml
         writer = ly.musicxml.writer()
-        writer.parse_document(cursor.document)
+        writer.parse_document(cursor.document, absolute)
         xml = writer.musicxml()
         if self.output:
             filename = self.output

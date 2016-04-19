@@ -157,6 +157,16 @@ If there is a default value, it is written between brackets:
   ``replace-pattern`` [``true``]
          whether to replace '*' and '?' in the output filename.
 
+  ``rel-startpitch`` [``true``]
+         whether to write relative music with a startpitch
+  
+  ``rel-absolute``
+         whether to assume that the first pitch in a relative expression without
+         specified startpitch is absolute. If ``false``, it is assumed to be
+         relative to ``c'``. If ``true``, it is assumed to be absolute (in fact
+         relative to ``f``. If not set, this variable defaults to ``true`` only
+         when the LilyPond version in the document >= 2.18.
+
   ``indent-tabs`` [``false``]
          whether to use tabs for indent
 
