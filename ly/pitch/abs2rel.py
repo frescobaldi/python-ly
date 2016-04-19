@@ -28,8 +28,25 @@ import itertools
 import ly.lex.lilypond
 
 
-def abs2rel(cursor, language="nederlands"):
-    """Converts pitches from absolute to relative."""
+def abs2rel(cursor, language="nederlands", startpitch=True, first_pitch_absolute=False):
+    """Converts pitches from absolute to relative.
+    
+    language: language to start reading pitch names in
+    
+    startpitch: if True, write a starting pitch before the opening bracket of
+        a relative expression.
+        
+    first_pitch_absolute: this option only makes sense when startpitch is False.
+        If first_pitch_absolute is True, the first pitch of a \\relative
+        expression is written as absolute. This mimics the behaviour of
+        LilyPond >= 2.18. (In fact, the starting pitch is then assumed to be f.)
+        
+        If False, the first pitch is written as relative to c'
+        (LilyPond < 2.18 behaviour).
+    
+    Existing \\relative expressions are not changed.
+    
+    """
     start = cursor.start
     cursor.start = 0
     
@@ -132,12 +149,19 @@ def abs2rel(cursor, language="nederlands"):
                     elif isinstance(t, ly.pitch.Pitch):
                         # Handle pitch
                         if lastPitch is None:
-                            lastPitch = ly.pitch.Pitch.c1()
-                            lastPitch.octave = t.octave
-                            if t.note > 3:
-                                lastPitch.octave += 1
-                            document[pos:pos] = "\\relative {0} ".format(
-                                    lastPitch.output(pitches.language))
+                            if startpitch:
+                                lastPitch = ly.pitch.Pitch.c1()
+                                lastPitch.octave = t.octave
+                                if t.note > 3:
+                                    lastPitch.octave += 1
+                                document[pos:pos] = "\\relative {0} ".format(
+                                        lastPitch.output(pitches.language))
+                            else:
+                                if first_pitch_absolute:
+                                    lastPitch = ly.pitch.Pitch.f0()
+                                else:
+                                    lastPitch = ly.pitch.Pitch.c1()
+                                document[pos:pos] = "\\relative "
                         p = t.copy()
                         t.makeRelative(lastPitch)
                         pitches.write(t)
