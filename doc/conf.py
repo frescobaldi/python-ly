@@ -233,7 +233,9 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('command', 'ly', u'Manipulate LilyPond source files',
-     [ly.pkginfo.maintainer], 1)
+     [ly.pkginfo.maintainer], 1),
+    ('servercmd', 'ly-server', u'Manipulate LilyPond source files via HTTP',
+     [ly.pkginfo.maintainer], 1),
 ]
 
 # If true, show URL addresses after external links.
