@@ -200,8 +200,20 @@ class ModalTransposer(object):
         pitch.octave += toOctaveMod
 
 
-def transpose(cursor, transposer, language="nederlands"):
-    """Transpose pitches using the specified transposer."""
+def transpose(cursor, transposer, language="nederlands", relative_first_pitch_absolute=False):
+    """Transpose pitches using the specified transposer.
+    
+    If relative_first_pitch_absolute is True, the first pitch in a \\relative
+    expression is considered to be absolute, when a startpitch is not given.
+    This is LilyPond >= 2.18 behaviour.
+    
+    If relative_first_pitch_absolute is False, the first pitch in a \\relative
+    expression is considered to be relative to c', is no startpitch is given.
+    This is LilyPond < 2.18 behaviour.
+    
+    Currently, relative_first_pitch_absolute defaults to False.
+    
+    """
     start = cursor.start
     cursor.start = 0
     
@@ -339,6 +351,8 @@ def transpose(cursor, transposer, language="nederlands"):
             if in_selection(t):
                 relPitch.append(lastPitch)
             t = next(tsource)
+        elif relative_first_pitch_absolute:
+            lastPitch = ly.pitch.Pitch.f0()
         else:
             lastPitch = ly.pitch.Pitch.c1()
         
