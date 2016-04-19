@@ -16,6 +16,7 @@ ChangeLog for python-ly
 - various updates and improvements in MusicXML export contributed by Peter Bjuhr
 - added ly-server: an HTTP-server for manipulating LilyPond source, contributed
   by Urs Liska
+- fix issue #56: do not add durations to bass notes in chordmode
 - fix issue #59: handle \include commands correctly when exporting to MusicXML
 
 

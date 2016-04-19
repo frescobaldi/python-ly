@@ -201,6 +201,12 @@ def music_items(cursor, command=False, chord=False, partial=ly.document.INSIDE):
                         length_seen = True
                 elif isinstance(token, ly.lex.Space):
                     continue
+                elif isinstance(token, ly.lex.lilypond.ChordSeparator):
+                    # prevent seeing the g in e.g. chordmode { c/g }
+                    for token in source:
+                        if not isinstance(token, (ly.lex.Space, ly.lex.lilypond.Note)):
+                            break
+                    continue
                 elif not isinstance(token, _stay):
                     yield mk_item(l)
                     length_seen = False
