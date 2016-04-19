@@ -2,7 +2,7 @@ ChangeLog for python-ly
 =======================
 
 
-2016-??-??: python-ly 0.9.4
+2016-04-20: python-ly 0.9.4
 
 - support LilyPond 2.18+ behaviour on \relative without startpitch in
   the ly.pitch.transpose, ly.pitch.rel2abs and ly.pitch.abs2rel modules.
