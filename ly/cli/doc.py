@@ -96,6 +96,10 @@ Commands that change the file:
   ``rel2abs``
          convert relative music to absolute
 
+  ``simplify-accidentals``
+         replace notes with accidentals as much as possible with their
+         natural neighbors
+
   ``write [filename]``
          write the file to the given filename or the output
          variable. If the last command was an editing command,

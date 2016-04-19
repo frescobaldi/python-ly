@@ -9,6 +9,7 @@ ChangeLog for python-ly
 - support LilyPond 2.18+ behaviour on \relative without startpitch in the
   transpose, rel2abs, abs2rel and musicxml ly commands. Two new variables
   were added to influence the behaviour: rel-absolute and rel-startpitch.
+- add Simplifier transposer and simplify-accidentals ly command (#40)
 - make define-markup-command recognition working again
 - recognize \bookOutputName A (without quotes, although not recommended)
 - allow multi-digit fingering, e.g. c-34, LilyPond supports that since at least

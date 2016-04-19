@@ -192,6 +192,21 @@ class abs2rel(_edit_command):
         ly.pitch.abs2rel.abs2rel(cursor, opts.default_language, opts.rel_startpitch, absolute)
 
 
+class simplify_accidentals(_edit_command):
+    """replace notes with accidentals as much as possible with their natural neighbors"""
+    def run(self, opts, cursor, output):
+        absolute = self.get_absolute(opts, cursor)
+        import ly.pitch.transpose
+        transposer = ly.pitch.transpose.Simplifier()
+        try:
+            ly.pitch.transpose.transpose(cursor, transposer, opts.default_language, absolute)
+        except ly.pitch.PitchNameNotAvailable:
+            language = ly.docinfo.DocInfo(cursor.document).language() or opts.default_language
+            sys.stderr.write(
+                "warning: simplify_accidentals: pitch names not available in \"{0}\"\n"
+                "  skipping file: {1}\n".format(language, cursor.document.filename))
+
+
 class _export_command(_command):
     """Command that exports to a file."""
     def __init__(self, output=None):
