@@ -4,7 +4,7 @@ ChangeLog for python-ly
 
 2016-??-??: python-ly 0.9.4
 
-- support LilyPond 2.18+ behaviour on \\relative without startpitch on
+- support LilyPond 2.18+ behaviour on \relative without startpitch on
   transpose, rel2abs and abs2rel.
 - make define-markup-command recognition working again
 - recognize \bookOutputName A (without quotes, although not recommended)
