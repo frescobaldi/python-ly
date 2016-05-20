@@ -4,7 +4,7 @@ import difflib
 import ly.musicxml
 from lxml import etree
 import os
-import StringIO
+import io
 
 
 def test_glissando():
@@ -37,7 +37,7 @@ def ly_to_xml(filename):
     with open(filename, 'r') as lyfile:
         writer.parse_text(lyfile.read())
     xml = writer.musicxml()
-    sio = StringIO.StringIO()
+    sio = io.StringIO()
     xml.write(sio, "utf-8")
     return sio.getvalue()
 
