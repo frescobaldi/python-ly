@@ -94,6 +94,7 @@ def default_mapping():
     from ly.lex import texinfo
     #from ly.lex import latex
     #from ly.lex import docbook
+    from ly.lex import mup
 
     return (
         ('lilypond', (
@@ -160,6 +161,11 @@ def default_mapping():
             style('escapechar', 'escape', (texinfo.EscapeChar,)),
             style('verbatim', 'string', (texinfo.Verbatim,)),
             style('comment', 'comment', (texinfo.Comment,)),
+        )),
+        ('mup', (
+            style('string', 'string', (mup.String,)),
+            style('stringescape', 'escape', (mup.StringQuoteEscape,)),
+            style('comment', 'comment', (mup.Comment,)),
         )),
     ) # end of mapping
 
@@ -239,6 +245,8 @@ default_scheme = {
     'html': {
     },
     'texinfo': {
+    },
+    'mup': {
     },
 } # end of default_css_styles
 

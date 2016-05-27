@@ -77,6 +77,10 @@ def _modes():
         from . import html
         return html.ParseHTML
         
+    def mup():
+        from . import mup
+        return mup.ParseMup
+    
     # more modes can be added here
     return locals()
     
@@ -111,6 +115,11 @@ def guessMode(text):
         return "scheme"
     if text.startswith('@'):
         return "texinfo"
+    if text.startswith('//'):
+        return "mup"
+    s = text.split(None, 1)
+    if s and s[0] in ('include', 'score', 'music'):
+        return "mup"
     return "lilypond"
 
 
@@ -123,5 +132,6 @@ extensions = {
     'latex':    '.lytex',
     'texinfo':  '.texi',
     'docbook':  '.docbook',
+    'mup':      '.mup',
 }
 
