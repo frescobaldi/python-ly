@@ -66,7 +66,8 @@ _start = (
     ly.lex.lilypond.Accidental,
     ly.lex.lilypond.OctaveCheck,
     ly.lex.lilypond.Duration,
-    ly.lex.lilypond.Tempo
+    ly.lex.lilypond.Tempo,
+    ly.lex.lilypond.Partial
 )
 
 _stay = (
@@ -156,7 +157,7 @@ def music_items(cursor, command=False, chord=False, partial=ly.document.INSIDE):
                 dur_tokens.append(t)
             else:
                 tokens.append(t)
-        may_remove = not any(map(('\\skip', '\\tempo', '\\tuplet').__contains__, tokens))
+        may_remove = not any(map(('\\skip', '\\tempo', '\\tuplet', '\\partial').__contains__, tokens))
         if dur_tokens:
             insert_pos = dur_tokens[0].pos
         else:
@@ -312,7 +313,7 @@ def rhythm_implicit(cursor):
     prev = item.dur_tokens or preceding_duration(cursor)
     with cursor.document as d:
         for item in items:
-            if '\\tempo' not in item.tokens and '\\tuplet' not in item.tokens:
+            if not set(item.tokens) & set(('\\tempo', '\\tuplet', '\\partial')):
                 if item.dur_tokens:
                     if item.dur_tokens == prev and item.may_remove:
                         del d[item.dur_tokens[0].pos:item.dur_tokens[-1].end]
@@ -329,7 +330,7 @@ def rhythm_implicit_per_line(cursor):
     previous_block = cursor.document.block(prev[0].pos)
     with cursor.document as d:
         for item in items:
-            if '\\tempo' not in item.tokens and '\\tuplet' not in item.tokens:
+            if not set(item.tokens) & set(('\\tempo', '\\tuplet', '\\partial')):
                 block = d.block( (item.dur_tokens or item.tokens) [0].pos)
                 if block != previous_block:
                     if not item.dur_tokens:
@@ -352,7 +353,7 @@ def rhythm_explicit(cursor):
     prev = item.dur_tokens or preceding_duration(cursor)
     with cursor.document as d:
         for item in items:
-            if '\\tempo' not in item.tokens and '\\tuplet' not in item.tokens:
+            if not set(item.tokens) & set(('\\tempo', '\\tuplet', '\\partial')):
                 if item.dur_tokens:
                     prev = item.dur_tokens
                 else:

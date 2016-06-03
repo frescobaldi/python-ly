@@ -573,6 +573,10 @@ class TempoSeparator(Delimiter):
     rx = r"[-~](?=\s*\d)"
 
 
+class Partial(Command):
+    rx = r"\\partial\b"
+
+
 class Override(Keyword):
     rx = r"\\override\b"
     def update_state(self, state):
@@ -915,6 +919,7 @@ command_items = (
     With,
     Clef,
     Tempo,
+    Partial,
     KeySignatureMode,
     AccidentalStyle,
     AlterBroken,
