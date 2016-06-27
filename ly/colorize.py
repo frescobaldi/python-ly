@@ -166,6 +166,8 @@ def default_mapping():
             style('string', 'string', (mup.String,)),
             style('stringescape', 'escape', (mup.StringQuoteEscape,)),
             style('comment', 'comment', (mup.Comment,)),
+            style('macro', 'variable', (mup.Macro,)),
+            style('preprocessor', 'keyword', (mup.Preprocessor,)),
         )),
     ) # end of mapping
 

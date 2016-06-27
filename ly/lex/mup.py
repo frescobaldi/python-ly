@@ -62,6 +62,14 @@ class StringQuoteEscape(_token.Character):
     rx = r'\\[\\"]'
 
 
+class Macro(_token.Token):
+    rx = r'\b[A-Z][A-Z0-9_]*'
+
+
+class Preprocessor(_token.Token):
+    rx = (r'\b('
+        'if|then|else|endif|define|undef|ifdef|ifndef'
+        r')\b|@')
 
 
 class ParseMup(Parser):
@@ -69,6 +77,8 @@ class ParseMup(Parser):
     items = (
         LineComment,
         StringQuotedStart,
+        Macro,
+        Preprocessor,
     )
 
 
