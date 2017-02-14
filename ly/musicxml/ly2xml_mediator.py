@@ -76,6 +76,7 @@ class Mediator():
         self.prev_tremolo = 8
         self.tupl_dur = 0
         self.tupl_sum = 0
+        self.slur_stack = []
 
     def new_header_assignment(self, name, value):
         """Distributing header information."""
@@ -625,7 +626,16 @@ class Mediator():
     def set_slur(self, nr, slur_type):
         """
         Set the slur start or stop for the current note. """
-        self.current_note.set_slur(nr, slur_type)
+
+        slur_start = None
+
+        if slur_type == 'stop':
+            slur_start = self.slur_stack.pop()
+
+        self.current_note.set_slur(nr, slur_type, slur_start)
+
+        if slur_type == 'start':
+            self.slur_stack.append(self.current_note.slur[-1])
 
     def new_articulation(self, art_token):
         """
