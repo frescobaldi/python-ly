@@ -595,11 +595,13 @@ class Tuplet():
         self.normtype = normtype
 
 class Slur():
-    """Stores information about slur."""
-    def __init__(self, nr, slurtype):
+    """Stores information about slur. start_node is only interesting if slurtype is 'stop'.
+    start_node must be None or a Slur instance."""
+    def __init__(self, nr, slurtype, start_node=None):
         self.nr = nr
         self.slurtype = slurtype
 
+        self.start_node = start_node
 
 ##
 # Subclasses of BarMus
@@ -641,8 +643,8 @@ class BarNote(BarMus):
     def set_tie(self, tie_type):
         self.tie.append(tie_type)
 
-    def set_slur(self, nr, slur_type):
-        self.slur.append(Slur(nr, slur_type))
+    def set_slur(self, nr, slur_type, slur_start_node=None):
+        self.slur.append(Slur(nr, slur_type, slur_start_node))
 
     def add_articulation(self, art_name):
         self.artic.append(art_name)
