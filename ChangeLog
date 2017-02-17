@@ -2,6 +2,15 @@ ChangeLog for python-ly
 =======================
 
 
+2017-02-17: python-ly 0.9.5
+
+- basic support for tokenizing the MUP format 
+- fix wbsoft/frescobaldi#832: wrong duration handling with \partial when
+  changing durations
+- xml export tests now work correctly with Python3
+- fix #74 traversing events fails in empty \alternative
+
+
 2016-04-20: python-ly 0.9.4
 
 - support LilyPond 2.18+ behaviour on \relative without startpitch in
