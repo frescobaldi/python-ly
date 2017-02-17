@@ -694,7 +694,7 @@ class Repeat(Music):
         
         if e.unfold_repeats or self.specifier() != "volta":
             count = self.repeat_count()
-            if alt and len(alt):
+            if alt and len(alt) and len(alt[0]):
                 alts = list(alt[0])[:count+1]
                 alts[0:0] = [alts[0]] * (count - len(alts))
                 for a in alts:
