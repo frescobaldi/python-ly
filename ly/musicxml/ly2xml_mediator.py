@@ -41,6 +41,11 @@ class Mediator():
     def __init__(self):
         """ create global lists """
         self.score = xml_objs.Score()
+
+        # Previous and active bar, necessary for putting repeat sign at correct position
+        self.prev_bar = None
+        self.bar = None
+
         self.sections = []
         """ default and initial values """
         self.insert_into = None
@@ -95,6 +100,7 @@ class Mediator():
         self.insert_into = section
         self.sections.append(section)
         self.bar = None
+        self.prev_bar = None
 
     def new_snippet(self, name):
         name = self.check_name(name)
@@ -102,6 +108,7 @@ class Mediator():
         self.insert_into = snippet
         self.sections.append(snippet)
         self.bar = None
+        self.prev_bar = None
 
     def new_lyric_section(self, name, voice_id):
         name = self.check_name(name)
@@ -152,6 +159,7 @@ class Mediator():
                 self.score.partlist.append(self.part)
         self.insert_into = self.part
         self.bar = None
+        self.prev_bar = None
 
     def part_not_empty(self):
         return self.part and self.part.barlist
@@ -312,6 +320,9 @@ class Mediator():
     def new_bar(self, fill_prev=True):
         if self.bar and fill_prev:
             self.bar.list_full = True
+
+        self.prev_bar = self.bar
+
         self.current_attr = xml_objs.BarAttr()
         self.bar = xml_objs.Bar()
         self.bar.obj_list = [self.current_attr]
