@@ -442,6 +442,10 @@ class ParseSource():
         elif repeat.specifier() == 'tremolo':
             self.trem_rep = repeat.repeat_count()
 
+    def Alternative(self, alternative):
+        """\alternative"""
+        pass
+
     def Tremolo(self, tremolo):
         """A tremolo item ":"."""
         if self.look_ahead(tremolo, ly.music.items.Duration):
