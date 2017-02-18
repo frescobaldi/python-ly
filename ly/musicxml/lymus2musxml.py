@@ -595,7 +595,9 @@ class ParseSource():
             self.grace_seq = False
         elif end.node.token == '\\repeat':
             if end.node.specifier() == 'volta':
-                self.mediator.new_repeat('backward', end.node.repeat_count())
+                if not end.node.find_child(ly.music.items.Alternative, 1):
+                    # the repeat does not contain alternative endings, treat as normal repeat
+                    self.mediator.new_repeat('backward', end.node.repeat_count())
             elif end.node.specifier() == 'tremolo':
                 if self.look_ahead(end.node, ly.music.items.MusicList):
                     self.mediator.set_tremolo(trem_type="stop")
