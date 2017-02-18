@@ -126,6 +126,8 @@ class IterateXmlObjs():
             self.musxml.add_barline(obj.barline, obj.repeat, obj.repeat_times)
         elif obj.barline:
             self.musxml.add_barline(obj.barline)
+        elif obj.ending:
+            self.musxml.add_ending(obj.ending, obj.ending_number)
         if obj.staves:
             self.musxml.add_staves(obj.staves)
         if obj.multiclef:

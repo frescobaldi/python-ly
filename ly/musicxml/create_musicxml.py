@@ -540,6 +540,20 @@ class CreateMusicXML():
             if repeat_times and repeat_times > 2:
                 repeatnode.attrib['times'] = str(repeat_times)
 
+    def add_ending(self, ending, number):
+        barnode = etree.SubElement(self.current_bar, "barline", location="right")
+
+        if not(isinstance(number,list)):
+            number = [number]
+
+        number_attr = ','.join(str(n) for n in number)
+
+        endingnode = etree.SubElement(barnode, "ending", type=ending, number=number_attr)
+
+        if ending == 'start':
+            barnode.attrib['location'] = 'left'
+            endingnode.text = ', '.join('{}.'.format(n) for n in number)
+
     def add_backup(self, duration):
         if duration <= 0:
             return
