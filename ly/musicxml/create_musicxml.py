@@ -528,12 +528,17 @@ class CreateMusicXML():
             octchnode = etree.SubElement(clefnode, "clef-octave-change")
             octchnode.text = str(oct_ch)
 
-    def add_barline(self, bl_type, repeat=None):
+    def add_barline(self, bl_type, repeat=None, repeat_times=None):
         barnode = etree.SubElement(self.current_bar, "barline", location="right")
         barstyle = etree.SubElement(barnode, "bar-style")
         barstyle.text = bl_type
         if repeat:
+            if repeat == "forward":
+                barnode.attrib["location"] = "left"
             repeatnode = etree.SubElement(barnode, "repeat", direction=repeat)
+
+            if repeat_times and repeat_times > 2:
+                repeatnode.attrib['times'] = str(repeat_times)
 
     def add_backup(self, duration):
         if duration <= 0:
