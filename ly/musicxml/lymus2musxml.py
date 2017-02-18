@@ -195,6 +195,10 @@ class ParseSource():
                 self.sims_and_seqs.append('sim')
         elif musicList.token == '{':
             self.sims_and_seqs.append('seq')
+            if isinstance(musicList.parent().parent(), ly.music.items.Alternative):
+                # The grandparent node is an instance of \alternative,
+                # this indicates that this musiclist instance is an ending to a \repeat
+                self.alternative_handler(musicList, 'start')
 
     def Chord(self, chord):
         self.mediator.clear_chord()
@@ -675,6 +679,8 @@ class ParseSource():
                 if self.sims_and_seqs:
                     self.sims_and_seqs.pop()
         elif end.node.token == '{':
+            if isinstance(end.node.parent().parent(), ly.music.items.Alternative):
+                self.alternative_handler(end.node, 'stop')
             if self.sims_and_seqs:
                 self.sims_and_seqs.pop()
         elif end.node.token == '<': #chord
