@@ -446,6 +446,50 @@ class ParseSource():
         """\alternative"""
         pass
 
+    def alternative_handler(self, node, type):
+        """
+        Helper method for handling alternative endings.
+        Generates number lists for the number attribute in MusicXML's ending element.
+
+        It tries to follow the same pattern as the default in Lilypond
+        (see http://lilypond.org/doc/v2.18/Documentation/notation/long-repeats#normal-repeats)
+        """
+
+        # Should contain an array of MusicLists
+        alternative_container = node.parent()
+
+        # Instance of \alternative
+        alternative_instance = alternative_container.parent()
+
+        # instance of \repeat
+        repeat_instance = alternative_instance.parent()
+
+        num_repeats = repeat_instance.repeat_count()
+        num_alternatives = len(alternative_container._children)
+
+        idx = alternative_container.index(node) + 1
+        ending_numbers = [idx]
+
+        if num_alternatives < num_repeats:
+            # If there are fewer ending alternatives than repeats, generate
+            # ending numbers following the same order as Lilypond.
+            if idx == 1:
+                ending_numbers = list(range(1, num_repeats - num_alternatives + 2))
+            else:
+                ending_numbers = [idx + num_repeats - num_alternatives]
+
+        if type == 'start':
+            self.mediator.new_ending(type, ending_numbers)
+        elif type == 'stop':
+            if idx == 1 and num_alternatives < num_repeats:
+                self.mediator.new_repeat('backward', len(ending_numbers)+1)
+            elif idx < num_alternatives:
+                self.mediator.new_repeat('backward')
+            if idx == num_alternatives:
+                type = 'discontinue'
+
+            self.mediator.new_ending(type, ending_numbers)
+
     def Tremolo(self, tremolo):
         """A tremolo item ":"."""
         if self.look_ahead(tremolo, ly.music.items.Duration):
