@@ -123,7 +123,7 @@ class IterateXmlObjs():
         if obj.has_attr():
             self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, obj.divs)
         if obj.repeat:
-            self.musxml.add_barline(obj.barline, obj.repeat)
+            self.musxml.add_barline(obj.barline, obj.repeat, obj.repeat_times)
         elif obj.barline:
             self.musxml.add_barline(obj.barline)
         if obj.staves:
