@@ -741,6 +741,11 @@ class BarAttr():
         self.multiclef = []
         self.tempo = None
 
+        # Ending type, 'start', 'stop' or 'discontinue'
+        self.ending = None
+        # Ending number should either be a number, or a list of numbers
+        self.ending_number = None
+
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.time)
 
@@ -766,6 +771,10 @@ class BarAttr():
 
     def set_tempo(self, unit=0, unittype='', beats=0, dots=0, text=""):
         self.tempo = TempoDir(unit, unittype, beats, dots, text)
+
+    def set_ending(self, type, number):
+        self.ending = type
+        self.ending_number = number
 
     def has_attr(self):
         check = False
