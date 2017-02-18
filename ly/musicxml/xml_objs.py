@@ -438,7 +438,20 @@ class Bar():
         return '<{0} {1}>'.format(self.__class__.__name__, self.obj_list)
 
     def add(self, obj):
-        self.obj_list.append(obj)
+        if isinstance(obj, BarAttr):
+            # Find first idx of instance which is not a BarAttr
+            idx = len(self.obj_list)
+            for (i, x) in enumerate(self.obj_list):
+                if not isinstance(x, BarAttr):
+                    idx = i
+                    break
+
+            if (obj not in self.obj_list):
+                # The candidate does not exists in our obj_list, add it at a fitting
+                # location in the list
+                self.obj_list.insert(idx, obj)
+        else:
+            self.obj_list.append(obj)
 
     def has_music(self):
         """ Check if bar contains music. """
@@ -730,6 +743,11 @@ class BarAttr():
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.time)
+
+    def __eq__(self, other):
+        if self.__class__ != other.__class__:
+            return False
+        return self.__dict__ == other.__dict__
 
     def set_key(self, muskey, mode):
         self.key = muskey
