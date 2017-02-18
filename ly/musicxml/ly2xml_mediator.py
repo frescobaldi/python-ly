@@ -356,6 +356,21 @@ class Mediator():
         else:
             self.bar.add(barline)
 
+    def new_ending(self, type, number):
+        # type must be either 'start', 'stop' or 'discontinue'
+        # number must be ending number or a list of ending numbers
+
+        ending = xml_objs.BarAttr()
+        ending.set_ending(type, number)
+
+        if self.bar is None:
+            self.new_bar()
+
+        if type in ['stop', 'discontinue'] and not self.bar.has_music() and self.prev_bar:
+            self.prev_bar.add(ending)
+        else:
+            self.bar.add(ending)
+
     def new_key(self, key_name, mode):
         if self.bar is None:
             self.new_bar()
