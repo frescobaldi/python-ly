@@ -723,6 +723,7 @@ class BarAttr():
         self.divs = 0
         self.barline = None
         self.repeat = None
+        self.repeat_times = None
         self.staves = 0
         self.multiclef = []
         self.tempo = None
