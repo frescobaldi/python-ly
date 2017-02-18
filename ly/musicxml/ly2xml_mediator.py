@@ -339,13 +339,22 @@ class Mediator():
         self.bar.add(barline)
         self.new_bar()
 
-    def new_repeat(self, rep):
+    def new_repeat(self, rep, times=None):
+
         barline = xml_objs.BarAttr()
         barline.set_barline(rep)
         barline.repeat = rep
+        barline.repeat_times = times
+
         if self.bar is None:
             self.new_bar()
-        self.bar.add(barline)
+
+        if rep == 'backward' and not self.bar.has_music() and self.prev_bar:
+            # If we are ending a repeat, but the current bar has no music (no rests, too),
+            # use the previous bar
+            self.prev_bar.add(barline)
+        else:
+            self.bar.add(barline)
 
     def new_key(self, key_name, mode):
         if self.bar is None:
