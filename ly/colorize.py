@@ -136,6 +136,7 @@ def default_mapping():
         ('scheme', (
             style('scheme', None, (lilypond.SchemeStart, scheme.Scheme,)),
             style('string', 'string', (scheme.String,)),
+            style('stringescape', 'escape', (scheme.StringQuoteEscape,)),
             style('comment', 'comment', (scheme.Comment,)),
             style('number', 'value', (scheme.Number,)),
             style('lilypond', None, (scheme.LilyPond,)),
