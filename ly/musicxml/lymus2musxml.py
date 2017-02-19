@@ -477,6 +477,9 @@ class ParseSource():
             self.mediator.set_by_property(cont_set.property(), val)
         elif cont_set.context() in group_contexts:
             self.mediator.set_by_property(cont_set.property(), val, group=True)
+        elif cont_set.property() == 'stanza' and self.alt_mode == 'lyric':
+            self.mediator.set_by_property(cont_set.property(), val)
+
 
     def Command(self, command):
         r""" \bar, \rest etc """
