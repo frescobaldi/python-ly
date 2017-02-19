@@ -263,9 +263,15 @@ class Mediator():
         lyrics_section = self.lyric_sections['lyricsto'+voice_id]
         voice_section = self.get_var_byname(lyrics_section.voice_id)
         if voice_section:
-            voice_section.merge_lyrics(lyrics_section)
+            voice_section.merge_lyrics(lyrics_section, voice_id)
         else:
-            print("Warning can't merge in lyrics!", voice_section)
+            # A potentially slow path
+            voice_section = self.score.find_section_for_voice(voice_id)
+            if voice_section:
+                # Must explicitly only merge with notes with the same voice_id
+                voice_section.merge_lyrics(lyrics_section, voice_id)
+            else:
+                print("Warning can't merge in lyrics!", voice_section)
 
     def check_part(self):
         """Adds the latest active section to the part."""

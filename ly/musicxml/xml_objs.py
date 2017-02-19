@@ -274,6 +274,25 @@ class Score():
         for i in self.partlist:
             debug_group(i)
 
+    def find_section_for_voice(self, voice_context, parent = None):
+        partlist = self.partlist
+
+        if parent:
+            partlist = parent.partlist
+
+        for section in partlist[::-1]:
+            # Iterate over sections in partlist, in reverser order (newest to oldest)
+            if isinstance(section, ScorePartGroup):
+                section_candidate = self.find_section_for_voice(voice_context, section)
+                if section_candidate:
+                    return section_candidate
+            elif isinstance(section, ScoreSection):
+                for bar in section.barlist:
+                    for obj in bar.obj_list:
+                        if isinstance(obj, BarMus) and obj.voice_context == voice_context:
+                            return section
+        return None
+
 
 class ScorePartGroup():
     """Object to keep track of part group."""
