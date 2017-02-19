@@ -826,7 +826,7 @@ class Mediator():
                 self.lyric_syll = True
         elif item == '__':
             self.lyric.append("extend")
-        elif item == '\\skip':
+        elif item == '\\skip' or item == '_':
             self.insert_into.barlist.append("skip")
 
     def duration_from_tokens(self, tokens):
