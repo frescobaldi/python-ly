@@ -312,13 +312,18 @@ class ScoreSection():
         if len(voice.barlist) > bl_len:
             self.barlist += voice.barlist[bl_len:]
 
-    def merge_lyrics(self, lyrics):
-        """Merge in lyrics in music section."""
+    def merge_lyrics(self, lyrics, voice_context=None):
+        """
+        Merge in lyrics in music section.
+        If voice_context is set, it will only merge with notes that has the same voice_context
+        """
         i = 0
         ext = False
         for bar in self.barlist:
             for obj in bar.obj_list:
-                if isinstance(obj, BarNote):
+                if isinstance(obj, BarNote) and \
+                        not obj.chord and \
+                        (not voice_context or obj.voice_context == voice_context):
                     if ext:
                         if obj.slur:
                             ext = False
