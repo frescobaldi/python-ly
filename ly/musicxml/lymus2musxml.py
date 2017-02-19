@@ -331,6 +331,11 @@ class ParseSource():
 
     def Duration(self, duration):
         """A written duration"""
+
+        if 'lyrics' in self.sims_and_seqs:
+            # Skip the duration of the skip when typing lyrics
+            return
+
         if self.tempo:
             self.mediator.new_tempo(duration.token, duration.tokens, *self.tempo)
             self.tempo = ()
