@@ -320,6 +320,12 @@ class Mediator():
     def add_to_bar(self, obj):
         if self.bar is None:
             self.new_bar()
+
+        if isinstance(obj, xml_objs.BarMus):
+            # assign the voice context the obj belongs to, useful when we must modify the note
+            # after section merging, eg. set lyrics to a named voice
+            obj.voice_context = self.insert_into.name
+
         self.bar.add(obj)
 
     def create_barline(self, bl):

@@ -511,6 +511,11 @@ class BarMus():
         self.dynamic = []
         self.oct_shift = None
 
+        # set to some object identifying the context this belongs to, eg. string.
+        # It is useful to set this before merging a voice into another section
+        # This helps when adding lyrics to named voices outside a score context
+        self.voice_context = None
+
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.duration)
 
