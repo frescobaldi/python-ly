@@ -337,28 +337,41 @@ class ScoreSection():
         If voice_context is set, it will only merge with notes that has the same voice_context
         """
         i = 0
-        ext = False
+
+        # If we are at the end or inside the slur, but not at the start
+        inside_slur = False
+
         for bar in self.barlist:
             for obj in bar.obj_list:
                 if isinstance(obj, BarNote) and \
                         not obj.chord and \
                         (not voice_context or obj.voice_context == voice_context):
-                    if ext:
-                        if obj.slur:
-                            ext = False
-                    else:
+
+                    slur_started = False
+                    slur_stopped = False
+
+                    for slur in obj.slur:
+                        #if slur.phrasing:
+                        #    # ignore slur object if it is a phrasing mark
+                        #    continue
+                        if slur.slurtype == 'start':
+                            slur_started = True
+                        elif slur.slurtype == 'stop':
+                            slur_stopped = True
+
+                    if not inside_slur:
                         try:
                             l = lyrics.barlist[i]
                         except IndexError:
                             break
                         if l != 'skip':
-                            try:
-                                if l[3] == "extend" and obj.slur:
-                                    ext = True
-                            except IndexError:
-                                pass
                             obj.add_lyric(l)
                         i += 1
+
+                    if slur_started:
+                        inside_slur = True
+                    elif slur_stopped:
+                        inside_slur = False
 
 
 class Snippet(ScoreSection):
