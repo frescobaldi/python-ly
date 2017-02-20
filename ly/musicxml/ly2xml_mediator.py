@@ -273,8 +273,10 @@ class Mediator():
         if voice_section:
             voice_section.merge_lyrics(lyrics_section, voice_id)
         else:
-            # A potentially slow path
-            voice_section = self.score.find_section_for_voice(voice_id)
+            voice_section = self.score.find_section_for_voice(voice_id, self.sections)
+            if not voice_section:
+                # A potentially slow path, search the whole score
+                voice_section = self.score.find_section_for_voice(voice_id)
             if voice_section:
                 # Must explicitly only merge with notes with the same voice_id
                 voice_section.merge_lyrics(lyrics_section, voice_id)

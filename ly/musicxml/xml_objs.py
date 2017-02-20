@@ -274,16 +274,14 @@ class Score():
         for i in self.partlist:
             debug_group(i)
 
-    def find_section_for_voice(self, voice_context, parent = None):
-        partlist = self.partlist
-
-        if parent:
-            partlist = parent.partlist
+    def find_section_for_voice(self, voice_context, partlist = None):
+        if not partlist:
+            partlist = self.partlist
 
         for section in partlist[::-1]:
             # Iterate over sections in partlist, in reverser order (newest to oldest)
             if isinstance(section, ScorePartGroup):
-                section_candidate = self.find_section_for_voice(voice_context, section)
+                section_candidate = self.find_section_for_voice(voice_context, section.partlist)
                 if section_candidate:
                     return section_candidate
             elif isinstance(section, ScoreSection):
