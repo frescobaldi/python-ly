@@ -623,16 +623,18 @@ class Mediator():
         self.tied = True
         self.current_note.set_tie(tie_type)
 
-    def set_slur(self, nr, slur_type):
+    def set_slur(self, nr, slur_type, phrasing=False):
         """
-        Set the slur start or stop for the current note. """
+        Set the slur start or stop for the current note.
+        phrasing should be set to True if the slur is meant to be a phrasing mark.
+        """
 
         slur_start = None
 
         if slur_type == 'stop':
             slur_start = self.slur_stack.pop()
 
-        self.current_note.set_slur(nr, slur_type, slur_start)
+        self.current_note.set_slur(nr, slur_type, phrasing, slur_start)
 
         if slur_type == 'start':
             self.slur_stack.append(self.current_note.slur[-1])

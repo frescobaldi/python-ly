@@ -638,10 +638,10 @@ class Tuplet():
 class Slur():
     """Stores information about slur. start_node is only interesting if slurtype is 'stop'.
     start_node must be None or a Slur instance."""
-    def __init__(self, nr, slurtype, start_node=None):
+    def __init__(self, nr, slurtype, phrasing=False, start_node=None):
         self.nr = nr
         self.slurtype = slurtype
-
+        self.phrasing = phrasing
         self.start_node = start_node
 
 ##
@@ -684,8 +684,8 @@ class BarNote(BarMus):
     def set_tie(self, tie_type):
         self.tie.append(tie_type)
 
-    def set_slur(self, nr, slur_type, slur_start_node=None):
-        self.slur.append(Slur(nr, slur_type, slur_start_node))
+    def set_slur(self, nr, slur_type, phrasing=False, slur_start_node=None):
+        self.slur.append(Slur(nr, slur_type, phrasing, slur_start_node))
 
     def add_articulation(self, art_name):
         self.artic.append(art_name)
