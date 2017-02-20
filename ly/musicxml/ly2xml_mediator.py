@@ -44,6 +44,10 @@ class Mediator():
         self.sections = []
         """ default and initial values """
         self.insert_into = None
+
+        # Current music section are useful when using "\addlyrics"
+        self.current_music_section = None
+
         self.current_note = None
         self.current_lynote = None
         self.current_is_rest = False
@@ -92,6 +96,8 @@ class Mediator():
     def new_section(self, name, glob=False):
         name = self.check_name(name)
         section = xml_objs.ScoreSection(name, glob)
+
+        self.current_music_section = section
         self.insert_into = section
         self.sections.append(section)
         self.bar = None
@@ -150,6 +156,8 @@ class Mediator():
                 self.group.partlist.append(self.part)
             else:
                 self.score.partlist.append(self.part)
+
+        self.current_music_section = self.part
         self.insert_into = self.part
         self.bar = None
 
