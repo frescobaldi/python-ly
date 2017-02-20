@@ -560,6 +560,11 @@ class ParseSource():
         r"""A \lyricmode, \lyrics or \addlyrics expression."""
         self.alt_mode = 'lyric'
 
+        if lyricmode.token == '\\addlyrics':
+            section = self.mediator.current_music_section
+            self.mediator.new_lyric_section('lyricsto' + section.name, section.name)
+            self.sims_and_seqs.append('lyrics')
+
     def Override(self, override):
         r"""An \override command."""
         self.override_key = ''
@@ -649,6 +654,9 @@ class ParseSource():
         elif isinstance(end.node, ly.music.items.Relative):
             self.relative = False
             self.rel_pitch_isset = False
+        elif isinstance(end.node, ly.music.items.LyricMode) and end.node.token == '\\addlyrics':
+            self.mediator.check_lyrics(self.mediator.insert_into.voice_id)
+            self.sims_and_seqs.pop()
         else:
             # print("end:", end.node.token)
             pass
