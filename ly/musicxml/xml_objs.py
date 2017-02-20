@@ -458,7 +458,8 @@ class Bar():
                     s *= obj.duration[1]
             elif isinstance(obj, BarBackup):
                 break
-        self.add(BarBackup((b, s)))
+        if b != 0:
+            self.add(BarBackup((b, s)))
 
     def is_skip(self, obj_list=None):
         """ Check if bar has nothing but skips. """
