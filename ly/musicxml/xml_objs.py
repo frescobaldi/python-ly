@@ -338,12 +338,22 @@ class ScoreSection():
 
         # If we are at the end or inside the slur, but not at the start
         inside_slur = False
+        inside_tie = False
 
         for bar in self.barlist:
             for obj in bar.obj_list:
                 if isinstance(obj, BarNote) and \
                         not obj.chord and \
                         (not voice_context or obj.voice_context == voice_context):
+
+                    tie_started = False
+                    tie_stopped = False
+
+                    # Ties can both start and stop at the same note, prefer starts
+                    if 'start' in obj.tie:
+                        tie_started = True
+                    elif 'stop' in obj.tie:
+                        tie_stopped = True
 
                     slur_started = False
                     slur_stopped = False
@@ -357,7 +367,7 @@ class ScoreSection():
                         elif slur.slurtype == 'stop':
                             slur_stopped = True
 
-                    if not inside_slur:
+                    if not inside_tie and not inside_slur:
                         try:
                             l = lyrics.barlist[i]
                         except IndexError:
@@ -371,6 +381,10 @@ class ScoreSection():
                     elif slur_stopped:
                         inside_slur = False
 
+                    if tie_started:
+                        inside_tie = True
+                    elif tie_stopped:
+                        inside_tie = False
 
 class Snippet(ScoreSection):
     """ Short section intended to be merged.
