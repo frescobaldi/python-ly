@@ -43,6 +43,7 @@ except ImportError:
 
 import ly.pkginfo
 
+from .midi_sound_map import midi_sound_map
 
 class CreateMusicXML():
     """ Creates the XML nodes according to the Music XML standard."""
@@ -103,6 +104,11 @@ class CreateMusicXML():
             scoreinstr = etree.SubElement(part, "score-instrument", id="P"+strnr+"-I"+strnr)
             instrname = etree.SubElement(scoreinstr, "instrument-name")
             instrname.text = midi
+
+            if midi in midi_sound_map and midi_sound_map[midi]:
+                instrsound = etree.SubElement(scoreinstr, "instrument-sound")
+                instrsound.text = midi_sound_map[midi]
+
             midiinstr = etree.SubElement(part, "midi-instrument", id="P"+strnr+"-I"+strnr)
             midich = etree.SubElement(midiinstr, "midi-channel")
             midich.text = strnr
