@@ -46,6 +46,7 @@ class Mediator():
         self.insert_into = None
         self.current_note = None
         self.current_lynote = None
+        self.stem_direction = None
         self.current_is_rest = False
         self.action_onnext = []
         self.divisions = 1
@@ -378,6 +379,10 @@ class Mediator():
             self.current_note = self.create_barnote_from_note(note)
             self.current_lynote = note
             self.check_current_note(rel)
+
+        if self.stem_direction:
+            self.current_note.set_stem(self.stem_direction)
+
         self.do_action_onnext(self.current_note)
         self.action_onnext = []
 
@@ -777,6 +782,10 @@ class Mediator():
             self.new_lyric_nr(value)
         elif prprty == 'systemStartDelimiter':
             self.change_group_bracket(value)
+
+    def set_stem_direction(self, direction):
+        """Set current stem direction. direction can be 'up', 'down' or None"""
+        self.stem_direction = direction
 
     def set_partname(self, name):
         if self.score.is_empty():

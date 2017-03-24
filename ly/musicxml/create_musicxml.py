@@ -377,6 +377,10 @@ class CreateMusicXML():
         if not self.current_notation:
             self.current_notation = etree.SubElement(self.current_note, "notations")
 
+    def set_stem(self, stem):
+        note_stem = etree.SubElement(self.current_note, "stem")
+        note_stem.text = stem
+
     def add_tied(self, tie_type):
         """Create node tied (used for notation of tie) """
         etree.SubElement(self.current_notation, "tied", type=tie_type)
