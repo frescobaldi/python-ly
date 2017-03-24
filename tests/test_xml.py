@@ -30,6 +30,8 @@ def test_dynamics():
 def test_tuplet():
     compare_output('tuplet')
 
+def test_stem():
+    compate_output('stem')
 
 def ly_to_xml(filename):
     """Read Lilypond file and return XML string."""
