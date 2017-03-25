@@ -103,6 +103,10 @@ class IterateXmlObjs():
     def iterate_bar(self, bar):
         """The objects in the bar are output to the xml-file."""
         self.musxml.create_measure()
+
+        if bar.line_break:
+            self.musxml.new_system()
+
         for obj in bar.obj_list:
             if isinstance(obj, BarAttr):
                 self.new_xml_bar_attr(obj)
@@ -433,6 +437,7 @@ class Bar():
     def __init__(self):
         self.obj_list = []
         self.list_full = False
+        self.line_break = False
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.obj_list)
@@ -478,6 +483,10 @@ class Bar():
         """ Adding new voice to bar.
         Omitting double or conflicting bar attributes as long as override is false.
         Omitting also bars with only skips."""
+
+        if new_voice.line_break:
+            self.line_break = True
+
         if new_voice.obj_list[0].has_attr():
             if self.obj_list[0].has_attr():
                 self.obj_list[0].merge_attr(new_voice.obj_list[0], override)
