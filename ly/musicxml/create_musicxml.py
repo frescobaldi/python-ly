@@ -614,7 +614,7 @@ class CreateMusicXML():
         pmnode.text = str(beats)
 
     def add_sound_dir(self, midi_tempo):
-        soundnode = etree.SubElement(self.direction, "sound", tempo=str(midi_tempo))
+        soundnode = etree.SubElement(self.direction, "sound", tempo=str(int(midi_tempo)))
 
     def add_lyric(self, txt, syll, nr, ext=False):
         """ Add lyric element. """
