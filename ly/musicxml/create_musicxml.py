@@ -115,6 +115,7 @@ class CreateMusicXML():
     def create_measure(self, **bar_attrs):
         """Create new measure """
         self.current_bar = etree.SubElement(self.current_part, "measure", number=str(self.bar_nr))
+        self.current_print = None
         self.bar_nr +=1
         if bar_attrs:
             self.new_bar_attr(**bar_attrs)
@@ -627,6 +628,13 @@ class CreateMusicXML():
         if ext:
             etree.SubElement(lyricnode, "extend")
 
+    def new_system(self):
+        if not self.current_print:
+            self.create_print()
+        self.current_print.attrib["new-system"] = "yes"
+
+    def create_print(self):
+        self.current_print = etree.SubElement(self.current_bar, "print")
 
     ##
     # Create the XML document

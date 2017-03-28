@@ -829,6 +829,10 @@ class Mediator():
         elif item == '\\skip':
             self.insert_into.barlist.append("skip")
 
+    def line_break(self):
+        if self.bar:
+            self.bar.line_break = True
+
     def duration_from_tokens(self, tokens):
         """Calculate dots and multibar rests from tokens."""
         dots = 0
