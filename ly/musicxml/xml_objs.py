@@ -510,6 +510,7 @@ class BarMus():
         self.other_notation = None
         self.dynamic = []
         self.oct_shift = None
+        self.sustain = None
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.duration)
@@ -540,6 +541,9 @@ class BarMus():
 
     def set_oct_shift(self, plac, octdir, size):
         self.oct_shift = OctaveShift(plac, octdir, size)
+
+    def set_sustain(self, type, line='no', sign='yes'):
+        self.sustain = Sustain(type, line, sign)
 
     def has_attr(self):
         return False
