@@ -600,6 +600,12 @@ class Slur():
         self.nr = nr
         self.slurtype = slurtype
 
+class Sustain():
+    """Stores information about sustain."""
+    def __init__(self, type, line='no', sign='yes'):
+        self.type = type
+        self.line = line
+        self.sign = sign
 
 ##
 # Subclasses of BarMus
