@@ -140,6 +140,8 @@ class IterateXmlObjs():
         self._add_dynamics([d for d in obj.dynamic if d.before])
         if obj.oct_shift and not obj.oct_shift.octdir == 'stop':
             self.musxml.add_octave_shift(obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
+        if obj.sustain:
+            self.musxml.add_sustain(obj.sustain.type, obj.sustain.line, obj.sustain.sign)
 
     def after_note(self, obj):
         """Xml-nodes after note."""
@@ -510,6 +512,7 @@ class BarMus():
         self.other_notation = None
         self.dynamic = []
         self.oct_shift = None
+        self.sustain = None
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.duration)
@@ -540,6 +543,9 @@ class BarMus():
 
     def set_oct_shift(self, plac, octdir, size):
         self.oct_shift = OctaveShift(plac, octdir, size)
+
+    def set_sustain(self, type, line='no', sign='yes'):
+        self.sustain = Sustain(type, line, sign)
 
     def has_attr(self):
         return False
@@ -600,6 +606,12 @@ class Slur():
         self.nr = nr
         self.slurtype = slurtype
 
+class Sustain():
+    """Stores information about sustain."""
+    def __init__(self, type, line='no', sign='yes'):
+        self.type = type
+        self.line = line
+        self.sign = sign
 
 ##
 # Subclasses of BarMus

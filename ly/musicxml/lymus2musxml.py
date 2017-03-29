@@ -464,6 +464,11 @@ class ParseSource():
                     self.mediator.unset_tuplspan_dur()
                 return
             val = cont_set.value().get_string()
+
+            if cont_set.property() == 'pedalSustainStyle':
+                # access #'value
+                # FIXME: find a safer way to get a string
+                val = cont_set.value()[0][0].token
         else:
             val = cont_set.value().value()
         if cont_set.context() in part_contexts:
@@ -497,6 +502,10 @@ class ParseSource():
             if self.tupl_span:
                 self.mediator.unset_tuplspan_dur()
                 self.tupl_span = False
+        elif command.token == '\\sustainOn':
+            self.mediator.new_sustain('start')
+        elif command.token == '\\sustainOff':
+            self.mediator.new_sustain('stop')
         else:
             if command.token not in excls:
                 print("Unknown command:", command.token)

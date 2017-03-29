@@ -596,6 +596,11 @@ class CreateMusicXML():
         dirtypenode = etree.SubElement(direction, "direction-type")
         dyn_node = etree.SubElement(dirtypenode, "octave-shift", oct_dict)
 
+    def add_sustain(self, type, line, sign):
+        direction = etree.SubElement(self.current_bar, "direction", placement='below')
+        dirtypenode = etree.SubElement(direction, "direction-type")
+        pedal = etree.SubElement(dirtypenode, "pedal", type=type, line=line, sign=sign)
+
     def add_dirwords(self, words):
         """Add words in direction, e. g. a tempo mark."""
         dirtypenode = etree.SubElement(self.direction, "direction-type")
