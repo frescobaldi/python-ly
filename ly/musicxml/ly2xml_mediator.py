@@ -76,6 +76,7 @@ class Mediator():
         self.prev_tremolo = 8
         self.tupl_dur = 0
         self.tupl_sum = 0
+        self.sustain_style = 'text'
 
     def new_header_assignment(self, name, value):
         """Distributing header information."""
@@ -724,8 +725,14 @@ class Mediator():
                         self.current_note.sustain.type == 'stop' and type == 'start':
             type = 'change'
 
+        # implied that self.sustain_style == 'text'
         line = 'no'
         sign = 'yes'
+        if self.sustain_style == 'mixed':
+            line = 'yes'
+        elif self.sustain_style == 'bracket':
+            line = 'yes'
+            sign = 'no'
 
         self.current_note.set_sustain(type, line, sign)
 
@@ -789,6 +796,8 @@ class Mediator():
             self.new_lyric_nr(value)
         elif prprty == 'systemStartDelimiter':
             self.change_group_bracket(value)
+        elif prprty == 'pedalSustainStyle':
+            self.set_sustain_style(value)
 
     def set_partname(self, name):
         if self.score.is_empty():
@@ -812,6 +821,9 @@ class Mediator():
         if self.score.is_empty():
             self.new_part()
         self.part.midi = midi
+
+    def set_sustain_style(self, style):
+        self.sustain_style = style
 
     def new_lyric_nr(self, num):
         self.lyric_nr = num

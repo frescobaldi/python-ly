@@ -464,6 +464,11 @@ class ParseSource():
                     self.mediator.unset_tuplspan_dur()
                 return
             val = cont_set.value().get_string()
+
+            if cont_set.property() == 'pedalSustainStyle':
+                # access #'value
+                # FIXME: find a safer way to get a string
+                val = cont_set.value()[0][0].token
         else:
             val = cont_set.value().value()
         if cont_set.context() in part_contexts:
