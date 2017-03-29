@@ -717,6 +717,18 @@ class Mediator():
             end = "start"
         self.current_note.add_adv_ornament('wavy-line', end)
 
+    def new_sustain(self, type=None):
+        if not type:
+            type = 'start'
+        if self.current_note.sustain and \
+                        self.current_note.sustain.type == 'stop' and type == 'start':
+            type = 'change'
+
+        line = 'no'
+        sign = 'yes'
+
+        self.current_note.set_sustain(type, line, sign)
+
     def new_ottava(self, octdiff):
         octdiff = int(octdiff)
         if self.octdiff == octdiff:
