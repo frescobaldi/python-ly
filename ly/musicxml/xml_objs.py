@@ -140,6 +140,8 @@ class IterateXmlObjs():
         self._add_dynamics([d for d in obj.dynamic if d.before])
         if obj.oct_shift and not obj.oct_shift.octdir == 'stop':
             self.musxml.add_octave_shift(obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
+        if obj.sustain:
+            self.musxml.add_sustain(obj.sustain.type, obj.sustain.line, obj.sustain.sign)
 
     def after_note(self, obj):
         """Xml-nodes after note."""
