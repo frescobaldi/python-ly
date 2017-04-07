@@ -331,6 +331,12 @@ class ParseSource():
 
     def Duration(self, duration):
         """A written duration"""
+
+        if isinstance(duration.parent(), ly.music.items.Partial):
+            # No need to handle the duration element for a \partial element
+            # unless barcheck should be implemented
+            return
+
         if self.tempo:
             self.mediator.new_tempo(duration.token, duration.tokens, *self.tempo)
             self.tempo = ()
@@ -549,6 +555,10 @@ class ParseSource():
     def LyricMode(self, lyricmode):
         r"""A \lyricmode, \lyrics or \addlyrics expression."""
         self.alt_mode = 'lyric'
+
+    def Partial(self, partial):
+        r"""A \partial node"""
+        pass
 
     def Override(self, override):
         r"""An \override command."""
