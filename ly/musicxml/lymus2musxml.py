@@ -92,10 +92,10 @@ class ParseSource():
 
     def parse_text(self, ly_text, filename=None):
         """Parse the LilyPond source specified as text.
-        
+
         If you specify a filename, it can be used to resolve \\include commands
         correctly.
-        
+
         """
         doc = ly.document.Document(ly_text)
         doc.filename = filename
@@ -103,11 +103,11 @@ class ParseSource():
 
     def parse_document(self, ly_doc, relative_first_pitch_absolute=False):
         """Parse the LilyPond source specified as a ly.document document.
-        
+
         If relative_first_pitch_absolute is set to True, the first pitch in a
         \relative expression without startpitch is considered to be absolute
         (LilyPond 2.18+ behaviour).
-        
+
         """
         # The document is copied and the copy is converted to absolute mode to
         # facilitate the export. The original document is unchanged.
@@ -497,6 +497,8 @@ class ParseSource():
             if self.tupl_span:
                 self.mediator.unset_tuplspan_dur()
                 self.tupl_span = False
+        elif command.token == '\\break':
+            self.mediator.add_break()
         else:
             if command.token not in excls:
                 print("Unknown command:", command.token)

@@ -122,6 +122,8 @@ class IterateXmlObjs():
         """Create bar attribute xml-nodes."""
         if obj.has_attr():
             self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, obj.divs)
+        if obj.new_system:
+            self.musxml.new_system(obj.new_system)
         if obj.repeat:
             self.musxml.add_barline(obj.barline, obj.repeat)
         elif obj.barline:
@@ -726,9 +728,13 @@ class BarAttr():
         self.staves = 0
         self.multiclef = []
         self.tempo = None
+        self.new_system = None
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.time)
+
+    def add_break(self, force_break):
+        self.new_system = force_break
 
     def set_key(self, muskey, mode):
         self.key = muskey
