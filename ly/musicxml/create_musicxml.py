@@ -529,7 +529,7 @@ class CreateMusicXML():
             octchnode.text = str(oct_ch)
 
     def new_system(self, force_break):
-        etree.SubElement(self.current_bar, "print", new_system=force_break)
+        etree.SubElement(self.current_bar, "print", {'new-system':force_break})
 
     def add_barline(self, bl_type, repeat=None):
         barnode = etree.SubElement(self.current_bar, "barline", location="right")
