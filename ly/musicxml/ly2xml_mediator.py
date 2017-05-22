@@ -76,7 +76,8 @@ class Mediator():
         self.prev_tremolo = 8
         self.tupl_dur = 0
         self.tupl_sum = 0
-        self.compress_bar_rests = False
+        self.multiple_rest = False
+        self.multiple_rest_bar = None
 
     def new_header_assignment(self, name, value):
         """Distributing header information."""
@@ -551,6 +552,8 @@ class Mediator():
             self.current_note = xml_objs.BarRest(dur, self.voice)
         elif rtype == 'R':
             self.current_note = xml_objs.BarRest(dur, self.voice, show_type=False)
+            if self.multiple_rest:
+                self.multiple_rest_bar = self.bar
         elif rtype == 's' or rtype == '\\skip':
             self.current_note = xml_objs.BarRest(dur, self.voice, skip=True)
         self.check_current_note(rest=True)
@@ -565,8 +568,14 @@ class Mediator():
         self.bar.obj_list.pop()
         self.bar.add(self.current_note)
 
-    def set_mult_bar_rest(self):
-        self.compress_bar_rests = True
+    def set_mult_rest(self):
+        self.multiple_rest = True
+
+    def set_mult_rest_bar(self, bar, multp, dur):
+        """ add multiple-rest attribute to bar """
+        new_bar_attr = xml_objs.BarAttr()
+        new_bar_attr.set_multp_rest(multp, dur)
+        bar.add(new_bar_attr)
 
     def scale_rest(self, multp):
         """ create multiple whole bar rests """
@@ -574,16 +583,13 @@ class Mediator():
         voc = self.current_note.voice
         st = self.current_note.show_type
         sk = self.current_note.skip
-        if self.compress_bar_rests:
+        if self.multiple_rest_bar:
+            self.set_mult_rest_bar(self.multiple_rest_bar, multp, dur)
+            self.multiple_rest_bar = None
+        for i in range(1, int(multp)):
             self.new_bar()
-            new_bar_attr = xml_objs.BarAttr()
-            new_bar_attr.set_multp_rest(multp, dur)
-            self.add_to_bar(new_bar_attr)
-        else:
-            for i in range(1, int(multp)):
-                self.new_bar()
-                rest_copy = xml_objs.BarRest(dur, voice=voc, show_type=st, skip=sk)
-                self.add_to_bar(rest_copy)
+            rest_copy = xml_objs.BarRest(dur, voice=voc, show_type=st, skip=sk)
+            self.add_to_bar(rest_copy)
 
     def change_to_tuplet(self, tfraction, ttype, nr, length=None):
         """Change the current note into a tuplet note."""

@@ -498,7 +498,7 @@ class ParseSource():
                 self.mediator.unset_tuplspan_dur()
                 self.tupl_span = False
         elif command.token == '\\compressFullBarRests':
-            self.mediator.set_mult_bar_rest()
+            self.mediator.set_mult_rest()
         else:
             if command.token not in excls:
                 print("Unknown command:", command.token)
