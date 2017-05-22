@@ -226,7 +226,7 @@ class CreateMusicXML():
         if ornament == "wavy-line":
             self.add_wavyline(args['type'])
 
-    def new_bar_attr(self, clef=0, mustime=0, key=None, mode=0, divs=0):
+    def new_bar_attr(self, clef=0, mustime=0, key=None, mode=0, divs=0, multirest=0):
         """Create all bar attributes set. """
         self.create_bar_attr()
         if divs:
@@ -238,6 +238,8 @@ class CreateMusicXML():
         if clef:
             sign, line, octch = clef
             self.add_clef(sign, line, oct_ch=octch)
+        if multirest:
+            self.add_bar_style(multirest)
 
     def create_tempo(self, words, metronome, sound, dots):
         self.add_direction()
@@ -527,6 +529,14 @@ class CreateMusicXML():
         if oct_ch:
             octchnode = etree.SubElement(clefnode, "clef-octave-change")
             octchnode.text = str(oct_ch)
+
+    def add_bar_style(self, multirest=None):
+        bar_style = etree.SubElement(self.bar_attr, "measure-style")
+        if multirest:
+            multirestnode = etree.SubElement(bar_style, "multiple-rest")
+            number_of_measures = multirest
+            # TO DO
+            multirestnode.text = str(4)
 
     def add_barline(self, bl_type, repeat=None):
         barnode = etree.SubElement(self.current_bar, "barline", location="right")

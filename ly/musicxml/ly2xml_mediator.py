@@ -76,6 +76,7 @@ class Mediator():
         self.prev_tremolo = 8
         self.tupl_dur = 0
         self.tupl_sum = 0
+        self.compress_bar_rests = False
 
     def new_header_assignment(self, name, value):
         """Distributing header information."""
@@ -564,16 +565,25 @@ class Mediator():
         self.bar.obj_list.pop()
         self.bar.add(self.current_note)
 
+    def set_mult_bar_rest(self):
+        self.compress_bar_rests = True
+
     def scale_rest(self, multp):
         """ create multiple whole bar rests """
         dur = self.current_note.duration
         voc = self.current_note.voice
         st = self.current_note.show_type
         sk = self.current_note.skip
-        for i in range(1, int(multp)):
+        if self.compress_bar_rests:
             self.new_bar()
-            rest_copy = xml_objs.BarRest(dur, voice=voc, show_type=st, skip=sk)
-            self.add_to_bar(rest_copy)
+            new_bar_attr = xml_objs.BarAttr()
+            new_bar_attr.set_multp_rest(multp, dur)
+            self.add_to_bar(new_bar_attr)
+        else:
+            for i in range(1, int(multp)):
+                self.new_bar()
+                rest_copy = xml_objs.BarRest(dur, voice=voc, show_type=st, skip=sk)
+                self.add_to_bar(rest_copy)
 
     def change_to_tuplet(self, tfraction, ttype, nr, length=None):
         """Change the current note into a tuplet note."""

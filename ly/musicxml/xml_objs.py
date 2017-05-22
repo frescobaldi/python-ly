@@ -121,7 +121,8 @@ class IterateXmlObjs():
     def new_xml_bar_attr(self, obj):
         """Create bar attribute xml-nodes."""
         if obj.has_attr():
-            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, obj.divs)
+            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, 
+                obj.divs, obj.multirest)
         if obj.repeat:
             self.musxml.add_barline(obj.barline, obj.repeat)
         elif obj.barline:
@@ -726,6 +727,7 @@ class BarAttr():
         self.staves = 0
         self.multiclef = []
         self.tempo = None
+        self.multirest = None
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.time)
@@ -747,6 +749,11 @@ class BarAttr():
 
     def set_tempo(self, unit=0, unittype='', beats=0, dots=0, text=""):
         self.tempo = TempoDir(unit, unittype, beats, dots, text)
+    
+    def set_multp_rest(self, multp=0, dur=None):
+        self.multirest = {}
+        self.multirest['multp'] = multp
+        self.multirest['dur'] = dur
 
     def has_attr(self):
         check = False
@@ -759,6 +766,8 @@ class BarAttr():
         elif self.multiclef:
             check = True
         elif self.divs != 0:
+            check = True
+        elif self.multirest is not None:
             check = True
         return check
 
