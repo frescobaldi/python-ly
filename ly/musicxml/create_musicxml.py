@@ -112,8 +112,10 @@ class CreateMusicXML():
         self.part_count += 1
         self.bar_nr = 1
 
-    def create_measure(self, **bar_attrs):
+    def create_measure(self, pickup = False, **bar_attrs):
         """Create new measure """
+        if pickup and self.bar_nr == 1:
+            self.bar_nr = 0
         self.current_bar = etree.SubElement(self.current_part, "measure", number=str(self.bar_nr))
         self.bar_nr +=1
         if bar_attrs:

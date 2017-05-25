@@ -345,7 +345,7 @@ class ParseSource():
             self.mediator.set_tuplspan_dur(duration.token, duration.tokens)
             self.tupl_span = False
         elif self.pickup:
-            #TO DO
+            self.mediator.set_pickup()
             self.pickup = False
         else:
             self.mediator.new_duration_token(duration.token, duration.tokens)
