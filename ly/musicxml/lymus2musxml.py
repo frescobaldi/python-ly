@@ -473,7 +473,7 @@ class ParseSource():
 
     def Command(self, command):
         r""" \bar, \rest etc """
-        excls = ['\\major', '\\minor', '\\bar']
+        excls = ['\\major', '\\minor', '\\dorian', '\\bar']
         if command.token == '\\rest':
             self.mediator.note2rest()
         elif command.token == '\\numericTimeSignature':

@@ -915,6 +915,8 @@ def get_fifths(key, mode):
         return fifths-3
     elif mode=='major':
         return fifths
+    elif mode=='dorian':
+        return fifths-2
 
 def clefname2clef(clefname):
     """
