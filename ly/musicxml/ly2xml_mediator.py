@@ -983,7 +983,7 @@ def artic_token2xml_name(art_token):
     artic_dict = {
     ".": "staccato", "-": "tenuto", ">": "accent",
     "_": "detached-legato", "!": "staccatissimo",
-    "\\staccatissimo": "staccatissimo"
+    "\\staccatissimo": "staccatissimo", "\\breathe":"breath-mark"
     }
     ornaments = ['\\trill', '\\prall', '\\mordent', '\\turn']
     others = ['\\fermata']

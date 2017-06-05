@@ -493,6 +493,9 @@ class ParseSource():
             self.mediator.new_trill_spanner("stop")
         elif command.token == '\\ottava':
             self.ottava = True
+        elif command.token == '\\breathe':
+            art = type('',(object,),{"token": "\\breathe"})()
+            self.Articulation(art)
         elif command.token == '\\default':
             if self.tupl_span:
                 self.mediator.unset_tuplspan_dur()
