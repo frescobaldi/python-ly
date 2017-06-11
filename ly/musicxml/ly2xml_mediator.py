@@ -76,6 +76,7 @@ class Mediator():
         self.prev_tremolo = 8
         self.tupl_dur = 0
         self.tupl_sum = 0
+        self.word = None
 
     def new_header_assignment(self, name, value):
         """Distributing header information."""
@@ -345,6 +346,16 @@ class Mediator():
             self.add_to_bar(new_bar_attr)
         else:
             self.current_attr.set_key(get_fifths(key_name, mode), mode)
+
+    def new_word(self, word):
+        if self.bar is None:
+            self.new_bar()
+        if self.bar.has_music():
+            new_bar_attr = xml_objs.BarAttr()
+            new_bar_attr.set_word(word)
+            self.add_to_bar(new_bar_attr)
+        else:
+            self.current_attr.set_word(word)
 
     def new_time(self, num, den, numeric=False):
         if self.bar is None:

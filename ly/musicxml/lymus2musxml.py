@@ -506,6 +506,12 @@ class ParseSource():
         if usercommand.name() == 'tupletSpan':
             self.tupl_span = True
 
+    def Markup(self, markup):
+        pass
+
+    def MarkupWord(self, markupWord):
+        self.mediator.new_word(markupWord.token)
+
     def String(self, string):
         prev = self.get_previous_node(string)
         if prev and prev.token == '\\bar':
