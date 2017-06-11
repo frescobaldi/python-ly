@@ -253,7 +253,7 @@ class ParseSource():
 
     def PipeSymbol(self, barcheck):
         """ PipeSymbol = | """
-        self.mediator.new_bar()
+        pass
 
     def Clef(self, clef):
         r""" Clef \clef"""
