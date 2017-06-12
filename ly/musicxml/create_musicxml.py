@@ -602,6 +602,14 @@ class CreateMusicXML():
         wordsnode = etree.SubElement(dirtypenode, "words")
         wordsnode.text = words
 
+    def add_mark(self, mark):
+        """Add rehearsal mark in direction"""
+        if self.current_bar.find('direction') == None:
+            self.add_direction()
+        dirtypenode = etree.SubElement(self.direction, "direction-type")
+        rehearsalnode = etree.SubElement(dirtypenode, "rehearsal")
+        rehearsalnode.text = mark
+
     def add_metron_dir(self, unit, beats, dots):
         dirtypenode = etree.SubElement(self.direction, "direction-type")
         metrnode = etree.SubElement(dirtypenode, "metronome")

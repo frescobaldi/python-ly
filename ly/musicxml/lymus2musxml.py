@@ -89,6 +89,7 @@ class ParseSource():
         self.slurcount = 0
         self.slurnr = 0
         self.phrslurnr = 0
+        self.mark = False
 
     def parse_text(self, ly_text, filename=None):
         """Parse the LilyPond source specified as text.
@@ -493,10 +494,15 @@ class ParseSource():
             self.mediator.new_trill_spanner("stop")
         elif command.token == '\\ottava':
             self.ottava = True
+        elif command.token == '\\mark':
+            self.mark = True
+            self.mediator.new_mark()
         elif command.token == '\\default':
             if self.tupl_span:
                 self.mediator.unset_tuplspan_dur()
                 self.tupl_span = False
+            elif self.mark:
+                self.mark = False
         else:
             if command.token not in excls:
                 print("Unknown command:", command.token)
