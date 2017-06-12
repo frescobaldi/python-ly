@@ -598,7 +598,7 @@ class CreateMusicXML():
 
     def add_dirwords(self, words):
         """Add words in direction, e. g. a tempo mark."""
-        if not hasattr(self,'direction'):
+        if self.current_bar.find('direction') == None:
             self.add_direction()
         dirtypenode = etree.SubElement(self.direction, "direction-type")
         wordsnode = etree.SubElement(dirtypenode, "words")
