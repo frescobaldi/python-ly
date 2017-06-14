@@ -76,6 +76,7 @@ class Mediator():
         self.prev_tremolo = 8
         self.tupl_dur = 0
         self.tupl_sum = 0
+        self.bar_is_pickup = False
 
     def new_header_assignment(self, name, value):
         """Distributing header information."""
@@ -309,11 +310,17 @@ class Mediator():
         if self.sections:
             return self.sections[0].barlist
 
+    def set_pickup(self):
+        self.bar_is_pickup = True
+
     def new_bar(self, fill_prev=True):
         if self.bar and fill_prev:
             self.bar.list_full = True
         self.current_attr = xml_objs.BarAttr()
         self.bar = xml_objs.Bar()
+        if self.bar_is_pickup:
+            self.bar.pickup = True
+            self.bar_is_pickup = False
         self.bar.obj_list = [self.current_attr]
         self.insert_into.barlist.append(self.bar)
 
