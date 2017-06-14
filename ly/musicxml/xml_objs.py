@@ -202,6 +202,8 @@ class IterateXmlObjs():
                     self.musxml.add_lyric(l[0], l[1], l[2], l[3])
                 except IndexError:
                     self.musxml.add_lyric(l[0], l[1], l[2])
+        if obj.stem:
+            self.musxml.set_stem(obj.stem)
 
     def new_xml_rest(self, obj):
         """Create rest specific xml-nodes."""
@@ -626,6 +628,7 @@ class BarNote(BarMus):
         self.adv_ornament = None
         self.fingering = None
         self.lyric = None
+        self.stem = None
 
     def set_duration(self, duration, durtype=''):
         self.duration = duration
@@ -681,6 +684,9 @@ class BarNote(BarMus):
 
     def change_lyric_nr(self, index, nr):
         self.lyric[index][2] = nr
+
+    def set_stem(self, stem):
+        self.stem = stem
 
 
 class Unpitched(BarNote):

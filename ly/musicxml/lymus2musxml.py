@@ -504,6 +504,12 @@ class ParseSource():
             if self.tupl_span:
                 self.mediator.unset_tuplspan_dur()
                 self.tupl_span = False
+        elif command.token == '\\stemUp':
+            self.mediator.set_stem_direction('up')
+        elif command.token == '\\stemDown':
+            self.mediator.set_stem_direction('down')
+        elif command.token == '\\stemNeutral':
+            self.mediator.set_stem_direction(None)
         else:
             if command.token not in excls:
                 print("Unknown command:", command.token)

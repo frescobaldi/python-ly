@@ -30,6 +30,8 @@ def test_dynamics():
 def test_tuplet():
     compare_output('tuplet')
 
+def test_stem():
+    compate_output('stem')
 
 def test_partial():
     compare_output('partial')
