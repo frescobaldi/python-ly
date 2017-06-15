@@ -35,6 +35,10 @@ def test_mark():
     compare_output('mark')
 
 
+def test_partial():
+    compare_output('partial')
+
+
 def ly_to_xml(filename):
     """Read Lilypond file and return XML string."""
     writer = ly.musicxml.writer()
