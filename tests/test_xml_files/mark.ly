@@ -3,7 +3,7 @@
 \score {
   \relative c' {
     c1 \mark \default |
-    d1 \mark \default |
+    d1 \mark |
     e1
   }
 }
