@@ -354,6 +354,22 @@ class Mediator():
         else:
             self.current_attr.set_key(get_fifths(key_name, mode), mode)
 
+    def increment_str(self, s):
+        l = s.rstrip('Z')
+        num_replacements = len(s) - len(l)
+        new_s = l[:-1]
+        if not l:  # s contains only 'Z'
+            new_s = 'A' * (len(s) + 1)
+        else:
+            c = l[-1]
+            num_replacements = len(s) - len(l)
+            if c == 'H':
+                new_s = l[:-1] + chr(ord(c) + 2)
+            else:
+                new_s = l[:-1] + chr(ord(c) + 1) if c != 'Z' else 'A'
+            new_s += 'A' * num_replacements
+        return new_s
+
     def new_mark(self):
         if self.bar is None:
             self.new_bar()
@@ -363,7 +379,7 @@ class Mediator():
             self.add_to_bar(new_bar_attr)
         else:
             self.current_attr.set_mark(self.current_mark)
-        self.current_mark = chr(ord(self.current_mark) + 1)
+        self.current_mark = self.increment_str(self.current_mark)
 
     def new_time(self, num, den, numeric=False):
         if self.bar is None:
