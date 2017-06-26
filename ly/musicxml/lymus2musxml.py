@@ -584,6 +584,8 @@ class ParseSource():
             self.override_dict[self.override_key] = item.token
         elif self.schm_assignm:
             self.mediator.set_by_property(self.schm_assignm, item.token)
+        elif self.mark:
+            self.mediator.new_mark(int(item.token))
         else:
             print("SchemeItem not implemented:", item.token)
 
