@@ -5,7 +5,7 @@
   <identification>
     <encoding>
       <software>python-ly 0.9.5</software>
-      <encoding-date>2017-06-23</encoding-date>
+      <encoding-date>2017-06-26</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -26,166 +26,45 @@
           <line>2</line>
         </clef>
       </attributes>
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
       <direction placement="above">
         <direction-type>
           <rehearsal>A</rehearsal>
         </direction-type>
       </direction>
+      <note>
+        <pitch>
+          <step>C</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>whole</type>
+      </note>
     </measure>
     <measure number="2">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>B</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="3">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>C</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="4">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>D</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="5">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>E</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="6">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>F</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="7">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>G</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="8">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
+      <attributes />
       <direction placement="above">
         <direction-type>
           <rehearsal>H</rehearsal>
         </direction-type>
       </direction>
-    </measure>
-    <measure number="9">
       <note>
         <pitch>
-          <step>C</step>
+          <step>D</step>
           <octave>4</octave>
         </pitch>
         <duration>4</duration>
         <voice>1</voice>
         <type>whole</type>
       </note>
+    </measure>
+    <measure number="3">
+      <attributes />
       <direction placement="above">
         <direction-type>
           <rehearsal>J</rehearsal>
         </direction-type>
       </direction>
-    </measure>
-    <measure number="10">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>K</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="11">
       <note>
         <pitch>
           <step>C</step>
@@ -195,237 +74,14 @@
         <voice>1</voice>
         <type>whole</type>
       </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>L</rehearsal>
-        </direction-type>
-      </direction>
     </measure>
-    <measure number="12">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>M</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="13">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>N</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="14">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>O</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="15">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>P</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="16">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>Q</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="17">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>R</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="18">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>S</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="19">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>T</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="20">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>U</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="21">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>V</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="22">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>W</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="23">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>X</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="24">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>Y</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="25">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
+    <measure number="4">
+      <attributes />
       <direction placement="above">
         <direction-type>
           <rehearsal>Z</rehearsal>
         </direction-type>
       </direction>
-    </measure>
-    <measure number="26">
       <note>
         <pitch>
           <step>D</step>
@@ -435,13 +91,14 @@
         <voice>1</voice>
         <type>whole</type>
       </note>
+    </measure>
+    <measure number="5">
+      <attributes />
       <direction placement="above">
         <direction-type>
           <rehearsal>AA</rehearsal>
         </direction-type>
       </direction>
-    </measure>
-    <measure number="27">
       <note>
         <pitch>
           <step>C</step>
@@ -451,381 +108,14 @@
         <voice>1</voice>
         <type>whole</type>
       </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AB</rehearsal>
-        </direction-type>
-      </direction>
     </measure>
-    <measure number="28">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AC</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="29">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AD</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="30">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AE</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="31">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AF</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="32">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AG</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="33">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AH</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="34">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AJ</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="35">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AK</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="36">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AL</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="37">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AM</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="38">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AN</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="39">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AO</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="40">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AP</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="41">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AQ</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="42">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AR</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="43">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AS</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="44">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AT</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="45">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AU</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="46">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AV</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="47">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AW</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="48">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AX</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="49">
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>AY</rehearsal>
-        </direction-type>
-      </direction>
-    </measure>
-    <measure number="50">
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
+    <measure number="6">
+      <attributes />
       <direction placement="above">
         <direction-type>
           <rehearsal>AZ</rehearsal>
         </direction-type>
       </direction>
-    </measure>
-    <measure number="51">
       <note>
         <pitch>
           <step>D</step>
@@ -835,13 +125,14 @@
         <voice>1</voice>
         <type>whole</type>
       </note>
+    </measure>
+    <measure number="7">
+      <attributes />
       <direction placement="above">
         <direction-type>
           <rehearsal>BA</rehearsal>
         </direction-type>
       </direction>
-    </measure>
-    <measure number="52">
       <note>
         <pitch>
           <step>C</step>
@@ -851,22 +142,9 @@
         <voice>1</voice>
         <type>whole</type>
       </note>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>BB</rehearsal>
-        </direction-type>
-      </direction>
     </measure>
-    <measure number="53">
-      <note>
-        <pitch>
-          <step>E</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-      </note>
+    <measure number="8">
+      <attributes />
     </measure>
   </part>
 </score-partwise>
