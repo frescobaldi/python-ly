@@ -3,57 +3,11 @@
 \score {
   \relative c' {
     c1 \mark \default |
-    d1 \mark |
+    d1 \mark #8 |
     c1 \mark \default |
-    d1 \mark |
+    d1 \mark #25 |
     c1 \mark \default |
-    d1 \mark |
+    d1 \mark #50 |
     c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    d1 \mark |
-    c1 \mark \default |
-    e1
   }
 }
