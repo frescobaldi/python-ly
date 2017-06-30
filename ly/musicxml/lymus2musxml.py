@@ -512,6 +512,9 @@ class ParseSource():
     def MarkupWord(self, markupWord):
         self.mediator.new_word(markupWord.token)
 
+    def MarkupList(self, markuplist):
+        pass
+
     def String(self, string):
         prev = self.get_previous_node(string)
         if prev and prev.token == '\\bar':

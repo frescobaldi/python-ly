@@ -449,6 +449,13 @@ class Bar():
                 return True
         return False
 
+    def has_attr(self):
+         """ Check if bar contains attribute. """
+         for obj in self.obj_list:
+             if isinstance(obj, BarAttr):
+                 return True
+         return False
+
     def create_backup(self):
         """ Calculate and create backup object."""
         b = 0
@@ -754,7 +761,7 @@ class BarAttr():
     def set_word(self, words):
         if self.word == None:
             self.word = ''
-        self.word += words
+        self.word += words + ' '
 
     def has_attr(self):
         check = False

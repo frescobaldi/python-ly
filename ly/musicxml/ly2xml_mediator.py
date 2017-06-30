@@ -350,12 +350,12 @@ class Mediator():
     def new_word(self, word):
         if self.bar is None:
             self.new_bar()
-        if self.bar.has_music():
+        if self.bar.has_attr():
+            self.current_attr.set_word(word)
+        else:
             new_bar_attr = xml_objs.BarAttr()
             new_bar_attr.set_word(word)
             self.add_to_bar(new_bar_attr)
-        else:
-            self.current_attr.set_word(word)
 
     def new_time(self, num, den, numeric=False):
         if self.bar is None:
