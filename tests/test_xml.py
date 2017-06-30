@@ -31,6 +31,10 @@ def test_tuplet():
     compare_output('tuplet')
 
 
+def test_markup():
+    compare_output('markup')
+
+
 def ly_to_xml(filename):
     """Read Lilypond file and return XML string."""
     writer = ly.musicxml.writer()
