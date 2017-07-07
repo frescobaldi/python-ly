@@ -47,6 +47,7 @@ class Mediator():
         self.current_note = None
         self.current_lynote = None
         self.current_is_rest = False
+        self.current_time = Fraction(4, 4)
         self.action_onnext = []
         self.divisions = 1
         self.dur_token = "4"
@@ -354,6 +355,7 @@ class Mediator():
             self.current_attr.set_key(get_fifths(key_name, mode), mode)
 
     def new_time(self, num, den, numeric=False):
+        self.current_time = Fraction(num, den.denominator)
         if self.bar is None:
             self.new_bar()
         self.current_attr.set_time([num, den.denominator], numeric)
@@ -480,7 +482,7 @@ class Mediator():
                 if rs == bs[1]:
                     self.current_note.duration = (bs[0], 1)
                     self.current_note.dot = 0
-                    self.scale_rest(rs)
+                    self.scale_rest(bs)
                     return
         self.current_note.dot = dots
         self.dots = dots
@@ -571,12 +573,13 @@ class Mediator():
         self.bar.obj_list.pop()
         self.bar.add(self.current_note)
 
-    def scale_rest(self, multp):
+    def scale_rest(self, bs):
         """ create multiple whole bar rests """
         dur = self.current_note.duration
         voc = self.current_note.voice
         st = self.current_note.show_type
         sk = self.current_note.skip
+        multp = int(bs[1] * (bs[0]/self.current_time))
         for i in range(1, int(multp)):
             self.new_bar()
             rest_copy = xml_objs.BarRest(dur, voice=voc, show_type=st, skip=sk)
