@@ -750,10 +750,8 @@ class BarAttr():
     def set_tempo(self, unit=0, unittype='', beats=0, dots=0, text=""):
         self.tempo = TempoDir(unit, unittype, beats, dots, text)
 
-    def set_multp_rest(self, multp=0, dur=None):
-        self.multirest = {}
-        self.multirest['multp'] = multp
-        self.multirest['dur'] = dur
+    def set_multp_rest(self, size=0):
+        self.multirest = size
 
     def has_attr(self):
         check = False

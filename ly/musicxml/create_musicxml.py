@@ -534,9 +534,7 @@ class CreateMusicXML():
         bar_style = etree.SubElement(self.bar_attr, "measure-style")
         if multirest:
             multirestnode = etree.SubElement(bar_style, "multiple-rest")
-            number_of_measures = multirest
-            # TO DO
-            multirestnode.text = str(4)
+            multirestnode.text = str(multirest)
 
     def add_barline(self, bl_type, repeat=None):
         barnode = etree.SubElement(self.current_bar, "barline", location="right")

@@ -47,6 +47,7 @@ class Mediator():
         self.current_note = None
         self.current_lynote = None
         self.current_is_rest = False
+        self.current_time = Fraction(4, 4)
         self.action_onnext = []
         self.divisions = 1
         self.dur_token = "4"
@@ -349,6 +350,7 @@ class Mediator():
             self.current_attr.set_key(get_fifths(key_name, mode), mode)
 
     def new_time(self, num, den, numeric=False):
+        self.current_time = Fraction(num, den.denominator)
         if self.bar is None:
             self.new_bar()
         self.current_attr.set_time([num, den.denominator], numeric)
@@ -553,7 +555,7 @@ class Mediator():
         elif rtype == 'R':
             self.current_note = xml_objs.BarRest(dur, self.voice, show_type=False)
             if self.multiple_rest:
-                self.multiple_rest_bar = self.bar
+                self.set_mult_rest_bar(dur)
         elif rtype == 's' or rtype == '\\skip':
             self.current_note = xml_objs.BarRest(dur, self.voice, skip=True)
         self.check_current_note(rest=True)
@@ -571,11 +573,15 @@ class Mediator():
     def set_mult_rest(self):
         self.multiple_rest = True
 
-    def set_mult_rest_bar(self, bar, multp, dur):
+    def set_mult_rest_bar(self, dur):
         """ add multiple-rest attribute to bar """
+        if self.bar is None:
+            self.new_bar()
+        multp = dur[1]
+        rest_size = int(multp * (dur[0]/self.current_time))
         new_bar_attr = xml_objs.BarAttr()
-        new_bar_attr.set_multp_rest(multp, dur)
-        bar.add(new_bar_attr)
+        new_bar_attr.set_multp_rest(rest_size)
+        self.bar.add(new_bar_attr)
 
     def scale_rest(self, multp):
         """ create multiple whole bar rests """
@@ -583,9 +589,6 @@ class Mediator():
         voc = self.current_note.voice
         st = self.current_note.show_type
         sk = self.current_note.skip
-        if self.multiple_rest_bar:
-            self.set_mult_rest_bar(self.multiple_rest_bar, multp, dur)
-            self.multiple_rest_bar = None
         for i in range(1, int(multp)):
             self.new_bar()
             rest_copy = xml_objs.BarRest(dur, voice=voc, show_type=st, skip=sk)
