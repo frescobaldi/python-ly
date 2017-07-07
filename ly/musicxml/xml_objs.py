@@ -102,7 +102,7 @@ class IterateXmlObjs():
 
     def iterate_bar(self, bar):
         """The objects in the bar are output to the xml-file."""
-        self.musxml.create_measure()
+        self.musxml.create_measure(pickup = bar.pickup)
         for obj in bar.obj_list:
             if isinstance(obj, BarAttr):
                 self.new_xml_bar_attr(obj)
@@ -433,6 +433,7 @@ class Bar():
     Contains also information about how complete it is."""
     def __init__(self):
         self.obj_list = []
+        self.pickup = False
         self.list_full = False
 
     def __repr__(self):
