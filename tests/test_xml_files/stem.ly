@@ -5,7 +5,7 @@
     \stemUp g4
     f4
     \stemDown g4
-    f4
+    f4 |
     \stemNeutral g4
     f4
   }
