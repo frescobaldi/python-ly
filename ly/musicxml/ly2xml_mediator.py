@@ -77,6 +77,7 @@ class Mediator():
         self.tupl_dur = 0
         self.tupl_sum = 0
         self.bar_is_pickup = False
+        self.stem_dir = None
 
     def new_header_assignment(self, name, value):
         """Distributing header information."""
@@ -385,6 +386,8 @@ class Mediator():
             self.current_note = self.create_barnote_from_note(note)
             self.current_lynote = note
             self.check_current_note(rel)
+        if self.stem_dir:
+            self.current_note.set_stem_direction(self.stem_dir)
         self.do_action_onnext(self.current_note)
         self.action_onnext = []
 
@@ -456,6 +459,14 @@ class Mediator():
                 else:
                     self.staff_unset_notes[self.staff] = [self.current_note]
         self.add_to_bar(self.current_note)
+
+    def stem_direction(self, direction):
+        if direction == '\\stemUp':
+            self.stem_dir = 'up'
+        elif direction == '\\stemDown':
+            self.stem_dir = 'down'
+        elif direction == '\\stemNeutral':
+            self.stem_dir = None
 
     def set_octave(self, relative):
         """Set octave by getting the octave of an absolute note + 3."""
