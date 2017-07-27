@@ -500,6 +500,8 @@ class ParseSource():
             self.mediator.new_trill_spanner("stop")
         elif command.token == '\\ottava':
             self.ottava = True
+        elif command.token == '\\stemUp' or command.token == '\\stemDown' or command.token == '\\stemNeutral':
+            self.mediator.stem_direction(command.token)
         elif command.token == '\\default':
             if self.tupl_span:
                 self.mediator.unset_tuplspan_dur()
