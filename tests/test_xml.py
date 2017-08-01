@@ -39,6 +39,10 @@ def test_stem_direction():
     compare_output('stem')
 
 
+def test_no_barcheck():
+    compare_output('no_barcheck')
+
+
 def ly_to_xml(filename):
     """Read Lilypond file and return XML string."""
     writer = ly.musicxml.writer()
