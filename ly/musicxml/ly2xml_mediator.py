@@ -48,6 +48,7 @@ class Mediator():
         self.current_lynote = None
         self.current_is_rest = False
         self.current_time = Fraction(4, 4)
+        self.bar_dura = Fraction(0, 4)
         self.action_onnext = []
         self.divisions = 1
         self.dur_token = "4"
@@ -307,8 +308,6 @@ class Mediator():
             self.new_part()
             self.part.barlist.extend(self.get_first_var())
         self.score.merge_globally(self.score.glob_section, override=True)
-        for p in self.score.partlist:
-            p.restructure_bars()
 
     def get_first_var(self):
         if self.sections:
@@ -380,6 +379,12 @@ class Mediator():
     def set_relative(self, note):
         self.prev_pitch = note.pitch
 
+    def increase_bar_dura(self, duration):
+        self.bar_dura += duration[0] * duration[1]
+        if self.bar_dura >= self.current_time:
+            self.bar_dura = 0
+            self.new_bar()
+
     def new_note(self, note, rel=False, is_unpitched=False):
         self.current_is_rest = False
         self.clear_chord()
@@ -394,6 +399,7 @@ class Mediator():
             self.current_note.set_stem_direction(self.stem_dir)
         self.do_action_onnext(self.current_note)
         self.action_onnext = []
+        self.increase_bar_dura(note.duration)
 
     def new_iso_dura(self, note, rel=False, is_unpitched=False):
         """
@@ -575,6 +581,7 @@ class Mediator():
         elif rtype == 's' or rtype == '\\skip':
             self.current_note = xml_objs.BarRest(dur, self.voice, skip=True)
         self.check_current_note(rest=True)
+        self.increase_bar_dura(dur)
 
     def note2rest(self):
         """Note used as rest position transformed to rest."""
