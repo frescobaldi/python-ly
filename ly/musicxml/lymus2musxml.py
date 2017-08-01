@@ -89,6 +89,7 @@ class ParseSource():
         self.slurcount = 0
         self.slurnr = 0
         self.phrslurnr = 0
+        self.pickup = False
 
     def parse_text(self, ly_text, filename=None):
         """Parse the LilyPond source specified as text.
@@ -266,6 +267,9 @@ class ParseSource():
         r"""A \relative music expression."""
         self.relative = True
 
+    def Partial(self, partial):
+        self.pickup = True
+
     def Note(self, note):
         """ notename, e.g. c, cis, a bes ... """
         #print(note.token)
@@ -340,6 +344,9 @@ class ParseSource():
         elif self.tupl_span:
             self.mediator.set_tuplspan_dur(duration.token, duration.tokens)
             self.tupl_span = False
+        elif self.pickup:
+            self.mediator.set_pickup()
+            self.pickup = False
         else:
             self.mediator.new_duration_token(duration.token, duration.tokens)
             if self.trem_rep:
@@ -493,6 +500,8 @@ class ParseSource():
             self.mediator.new_trill_spanner("stop")
         elif command.token == '\\ottava':
             self.ottava = True
+        elif command.token == '\\stemUp' or command.token == '\\stemDown' or command.token == '\\stemNeutral':
+            self.mediator.stem_direction(command.token)
         elif command.token == '\\default':
             if self.tupl_span:
                 self.mediator.unset_tuplspan_dur()
