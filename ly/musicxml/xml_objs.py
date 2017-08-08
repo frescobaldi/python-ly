@@ -93,10 +93,14 @@ class IterateXmlObjs():
     def iterate_part(self, part):
         """The part is iterated."""
         if part.barlist:
+            last_bar = part.barlist[-1]
+            last_bar_objs = last_bar.obj_list
             part.set_first_bar(self.divisions)
             self.musxml.create_part(part.name, part.abbr, part.midi)
-            for bar in part.barlist:
+            for bar in part.barlist[:-1]:
                 self.iterate_bar(bar)
+            if len(last_bar_objs) > 1 or last_bar_objs[0].has_attr():
+                self.iterate_bar(last_bar)
         else:
             print("Warning: empty part:", part.name)
 

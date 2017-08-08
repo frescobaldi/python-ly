@@ -5,7 +5,7 @@
   <identification>
     <encoding>
       <software>python-ly 0.9.5</software>
-      <encoding-date>2017-08-01</encoding-date>
+      <encoding-date>2017-08-08</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -117,6 +117,5 @@
         <type>whole</type>
       </note>
     </measure>
-    <measure number="6" />
   </part>
 </score-partwise>
