@@ -41,6 +41,10 @@ def test_stem_direction():
     compare_output('stem')
 
 
+def test_church():
+    compare_output('church_modes')
+
+
 def ly_to_xml(filename):
     """Read Lilypond file and return XML string."""
     writer = ly.musicxml.writer()
