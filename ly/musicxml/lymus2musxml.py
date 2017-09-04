@@ -506,6 +506,8 @@ class ParseSource():
             if self.tupl_span:
                 self.mediator.unset_tuplspan_dur()
                 self.tupl_span = False
+        elif command.token == '\\break':
+            self.mediator.add_break()
         else:
             if command.token not in excls:
                 print("Unknown command:", command.token)

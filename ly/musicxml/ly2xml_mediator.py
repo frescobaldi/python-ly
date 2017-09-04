@@ -888,6 +888,10 @@ class Mediator():
             mult = get_mult(a, b)
             self.divisions = divs*mult
 
+    def add_break(self):
+        if self.bar is None:
+            self.new_bar()
+        self.current_attr.add_break('yes')
 
 
 ##
