@@ -123,6 +123,8 @@ class IterateXmlObjs():
         if obj.has_attr():
             self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, 
                 obj.divs, obj.multirest)
+        if obj.new_system:
+            self.musxml.new_system(obj.new_system)
         if obj.repeat:
             self.musxml.add_barline(obj.barline, obj.repeat)
         elif obj.barline:
@@ -135,6 +137,10 @@ class IterateXmlObjs():
         if obj.tempo:
             self.musxml.create_tempo(obj.tempo.text, obj.tempo.metr,
                                      obj.tempo.midi, obj.tempo.dots)
+        if obj.mark:
+            self.musxml.add_mark(obj.mark)
+        if obj.word:
+            self.musxml.add_dirwords(obj.word)
 
     def before_note(self, obj):
         """Xml-nodes before note."""
@@ -180,7 +186,7 @@ class IterateXmlObjs():
         else:
             self.musxml.new_note(obj.base_note, obj.octave, obj.type, divdur,
                 obj.alter, obj.accidental_token, obj.voice, obj.dot, obj.chord,
-                obj.grace)
+                obj.grace, obj.stem_direction)
         for t in obj.tie:
             self.musxml.tie_note(t)
         for s in obj.slur:
@@ -449,6 +455,13 @@ class Bar():
                 return True
         return False
 
+    def has_attr(self):
+        """ Check if bar contains attribute. """
+        for obj in self.obj_list:
+            if isinstance(obj, BarAttr):
+                return True
+        return False
+
     def create_backup(self):
         """ Calculate and create backup object."""
         b = 0
@@ -627,6 +640,7 @@ class BarNote(BarMus):
         self.adv_ornament = None
         self.fingering = None
         self.lyric = None
+        self.stem_direction = None
 
     def set_duration(self, duration, durtype=''):
         self.duration = duration
@@ -668,6 +682,9 @@ class BarNote(BarMus):
             self.tremolo = (trem_type, dur2lines(duration))
         else:
             self.tremolo = (trem_type, self.tremolo[1])
+
+    def set_stem_direction(self, direction):
+        self.stem_direction = direction
 
     def add_fingering(self, finger_nr):
         self.fingering = finger_nr
@@ -729,9 +746,15 @@ class BarAttr():
         self.multiclef = []
         self.tempo = None
         self.multirest = None
+        self.mark = None
+        self.word = None
+        self.new_system = None
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.time)
+
+    def add_break(self, force_break):
+        self.new_system = force_break
 
     def set_key(self, muskey, mode):
         self.key = muskey
@@ -754,6 +777,14 @@ class BarAttr():
     def set_multp_rest(self, size=0):
         self.multirest = size
 
+    def set_mark(self, mark):
+        self.mark = mark
+
+    def set_word(self, words):
+        if self.word == None:
+            self.word = ''
+        self.word += words + ' '
+
     def has_attr(self):
         check = False
         if self.key is not None:
@@ -767,6 +798,8 @@ class BarAttr():
         elif self.divs != 0:
             check = True
         elif self.multirest is not None:
+            check = True
+        elif self.mark != 0:
             check = True
         return check
 
