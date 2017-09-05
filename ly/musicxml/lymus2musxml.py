@@ -500,6 +500,9 @@ class ParseSource():
             self.mediator.new_trill_spanner("stop")
         elif command.token == '\\ottava':
             self.ottava = True
+        elif command.token == '\\breathe':
+            art = type('',(object,),{"token": "\\breathe"})()
+            self.Articulation(art)
         elif command.token == '\\stemUp' or command.token == '\\stemDown' or command.token == '\\stemNeutral':
             self.mediator.stem_direction(command.token)
         elif command.token == '\\default':
