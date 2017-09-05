@@ -77,6 +77,8 @@ class Mediator():
         self.prev_tremolo = 8
         self.tupl_dur = 0
         self.tupl_sum = 0
+        self.multiple_rest = False
+        self.multiple_rest_bar = None
         self.current_mark = 1
         self.bar_is_pickup = False
         self.stem_dir = None
@@ -608,6 +610,8 @@ class Mediator():
             self.current_note = xml_objs.BarRest(dur, self.voice)
         elif rtype == 'R':
             self.current_note = xml_objs.BarRest(dur, self.voice, show_type=False)
+            if self.multiple_rest:
+                self.set_mult_rest_bar(dur)
         elif rtype == 's' or rtype == '\\skip':
             self.current_note = xml_objs.BarRest(dur, self.voice, skip=True)
         self.check_current_note(rest=True)
@@ -621,6 +625,19 @@ class Mediator():
         self.check_duration(rest=True)
         self.bar.obj_list.pop()
         self.bar.add(self.current_note)
+
+    def set_mult_rest(self):
+        self.multiple_rest = True
+
+    def set_mult_rest_bar(self, dur):
+        """ add multiple-rest attribute to bar """
+        if self.bar is None:
+            self.new_bar()
+        multp = dur[1]
+        rest_size = int(multp * (dur[0]/self.current_time))
+        new_bar_attr = xml_objs.BarAttr()
+        new_bar_attr.set_multp_rest(rest_size)
+        self.bar.add(new_bar_attr)
 
     def scale_rest(self, bs):
         """ create multiple whole bar rests """

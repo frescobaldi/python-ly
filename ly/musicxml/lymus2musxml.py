@@ -515,6 +515,8 @@ class ParseSource():
                 self.tupl_span = False
             elif self.mark:
                 self.mark = False
+        elif command.token == '\\compressFullBarRests':
+            self.mediator.set_mult_rest()
         elif command.token == '\\break':
             self.mediator.add_break()
         else:
