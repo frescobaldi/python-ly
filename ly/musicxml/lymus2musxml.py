@@ -504,6 +504,9 @@ class ParseSource():
         elif command.token == '\\mark':
             self.mark = True
             self.mediator.new_mark()
+        elif command.token == '\\breathe':
+            art = type('',(object,),{"token": "\\breathe"})()
+            self.Articulation(art)
         elif command.token == '\\stemUp' or command.token == '\\stemDown' or command.token == '\\stemNeutral':
             self.mediator.stem_direction(command.token)
         elif command.token == '\\default':
@@ -522,6 +525,15 @@ class ParseSource():
         """Music variables are substituted so this must be something else."""
         if usercommand.name() == 'tupletSpan':
             self.tupl_span = True
+
+    def Markup(self, markup):
+        pass
+
+    def MarkupWord(self, markupWord):
+        self.mediator.new_word(markupWord.token)
+
+    def MarkupList(self, markuplist):
+        pass
 
     def String(self, string):
         prev = self.get_previous_node(string)

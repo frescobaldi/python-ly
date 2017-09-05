@@ -49,6 +49,14 @@ def test_church():
     compare_output('church_modes')
 
 
+def test_markup():
+    compare_output('markup')
+
+
+def test_breathe():
+    compare_output('breathe')
+
+
 def ly_to_xml(filename):
     """Read Lilypond file and return XML string."""
     writer = ly.musicxml.writer()

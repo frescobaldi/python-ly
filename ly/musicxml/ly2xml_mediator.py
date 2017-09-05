@@ -383,6 +383,16 @@ class Mediator():
             self.current_attr.set_mark(self.bijective(self.current_mark))
         self.current_mark += 1
 
+    def new_word(self, word):
+        if self.bar is None:
+            self.new_bar()
+        if self.bar.has_attr():
+            self.current_attr.set_word(word)
+        else:
+            new_bar_attr = xml_objs.BarAttr()
+            new_bar_attr.set_word(word)
+            self.add_to_bar(new_bar_attr)
+
     def new_time(self, num, den, numeric=False):
         self.current_time = Fraction(num, den.denominator)
         if self.bar is None:
@@ -1038,7 +1048,7 @@ def artic_token2xml_name(art_token):
     artic_dict = {
     ".": "staccato", "-": "tenuto", ">": "accent",
     "_": "detached-legato", "!": "staccatissimo",
-    "\\staccatissimo": "staccatissimo"
+    "\\staccatissimo": "staccatissimo", "\\breathe":"breath-mark"
     }
     ornaments = ['\\trill', '\\prall', '\\mordent', '\\turn']
     others = ['\\fermata']
