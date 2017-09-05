@@ -30,6 +30,8 @@ def test_dynamics():
 def test_tuplet():
     compare_output('tuplet')
 
+def test_break():
+    compare_output('break')
 
 def test_mark():
     compare_output('mark')
@@ -37,6 +39,14 @@ def test_mark():
 
 def test_partial():
     compare_output('partial')
+
+
+def test_stem_direction():
+    compare_output('stem')
+
+
+def test_church():
+    compare_output('church_modes')
 
 
 def ly_to_xml(filename):

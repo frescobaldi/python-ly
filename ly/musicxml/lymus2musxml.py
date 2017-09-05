@@ -481,7 +481,7 @@ class ParseSource():
 
     def Command(self, command):
         r""" \bar, \rest etc """
-        excls = ['\\major', '\\minor', '\\bar']
+        excls = ['\\major', '\\minor', '\\dorian', '\\bar']
         if command.token == '\\rest':
             self.mediator.note2rest()
         elif command.token == '\\numericTimeSignature':
@@ -504,12 +504,16 @@ class ParseSource():
         elif command.token == '\\mark':
             self.mark = True
             self.mediator.new_mark()
+        elif command.token == '\\stemUp' or command.token == '\\stemDown' or command.token == '\\stemNeutral':
+            self.mediator.stem_direction(command.token)
         elif command.token == '\\default':
             if self.tupl_span:
                 self.mediator.unset_tuplspan_dur()
                 self.tupl_span = False
             elif self.mark:
                 self.mark = False
+        elif command.token == '\\break':
+            self.mediator.add_break()
         else:
             if command.token not in excls:
                 print("Unknown command:", command.token)

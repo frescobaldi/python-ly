@@ -47,6 +47,7 @@ class Mediator():
         self.current_note = None
         self.current_lynote = None
         self.current_is_rest = False
+        self.current_time = Fraction(4, 4)
         self.action_onnext = []
         self.divisions = 1
         self.dur_token = "4"
@@ -78,6 +79,7 @@ class Mediator():
         self.tupl_sum = 0
         self.current_mark = 1
         self.bar_is_pickup = False
+        self.stem_dir = None
 
     def new_header_assignment(self, name, value):
         """Distributing header information."""
@@ -382,6 +384,7 @@ class Mediator():
         self.current_mark += 1
 
     def new_time(self, num, den, numeric=False):
+        self.current_time = Fraction(num, den.denominator)
         if self.bar is None:
             self.new_bar()
         self.current_attr.set_time([num, den.denominator], numeric)
@@ -413,6 +416,8 @@ class Mediator():
             self.current_note = self.create_barnote_from_note(note)
             self.current_lynote = note
             self.check_current_note(rel)
+        if self.stem_dir:
+            self.current_note.set_stem_direction(self.stem_dir)
         self.do_action_onnext(self.current_note)
         self.action_onnext = []
 
@@ -485,6 +490,14 @@ class Mediator():
                     self.staff_unset_notes[self.staff] = [self.current_note]
         self.add_to_bar(self.current_note)
 
+    def stem_direction(self, direction):
+        if direction == '\\stemUp':
+            self.stem_dir = 'up'
+        elif direction == '\\stemDown':
+            self.stem_dir = 'down'
+        elif direction == '\\stemNeutral':
+            self.stem_dir = None
+
     def set_octave(self, relative):
         """Set octave by getting the octave of an absolute note + 3."""
         p = self.current_lynote.pitch.copy()
@@ -508,7 +521,7 @@ class Mediator():
                 if rs == bs[1]:
                     self.current_note.duration = (bs[0], 1)
                     self.current_note.dot = 0
-                    self.scale_rest(rs)
+                    self.scale_rest(bs)
                     return
         self.current_note.dot = dots
         self.dots = dots
@@ -599,12 +612,13 @@ class Mediator():
         self.bar.obj_list.pop()
         self.bar.add(self.current_note)
 
-    def scale_rest(self, multp):
+    def scale_rest(self, bs):
         """ create multiple whole bar rests """
         dur = self.current_note.duration
         voc = self.current_note.voice
         st = self.current_note.show_type
         sk = self.current_note.skip
+        multp = int(bs[1] * (bs[0]/self.current_time))
         for i in range(1, int(multp)):
             self.new_bar()
             rest_copy = xml_objs.BarRest(dur, voice=voc, show_type=st, skip=sk)
@@ -902,6 +916,10 @@ class Mediator():
             mult = get_mult(a, b)
             self.divisions = divs*mult
 
+    def add_break(self):
+        if self.bar is None:
+            self.new_bar()
+        self.current_attr.add_break('yes')
 
 
 ##
@@ -950,6 +968,8 @@ def get_fifths(key, mode):
         return fifths-3
     elif mode=='major':
         return fifths
+    elif mode=='dorian':
+        return fifths-2
 
 def clefname2clef(clefname):
     """
