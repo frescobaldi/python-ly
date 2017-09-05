@@ -355,6 +355,16 @@ class Mediator():
         else:
             self.current_attr.set_key(get_fifths(key_name, mode), mode)
 
+    def new_word(self, word):
+        if self.bar is None:
+            self.new_bar()
+        if self.bar.has_attr():
+            self.current_attr.set_word(word)
+        else:
+            new_bar_attr = xml_objs.BarAttr()
+            new_bar_attr.set_word(word)
+            self.add_to_bar(new_bar_attr)
+
     def new_time(self, num, den, numeric=False):
         self.current_time = Fraction(num, den.denominator)
         if self.bar is None:
