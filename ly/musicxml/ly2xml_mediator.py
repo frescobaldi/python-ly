@@ -77,6 +77,7 @@ class Mediator():
         self.prev_tremolo = 8
         self.tupl_dur = 0
         self.tupl_sum = 0
+        self.current_mark = 1
         self.bar_is_pickup = False
         self.stem_dir = None
 
@@ -354,6 +355,33 @@ class Mediator():
             self.add_to_bar(new_bar_attr)
         else:
             self.current_attr.set_key(get_fifths(key_name, mode), mode)
+
+    def bijective(self, n):
+        '''encodes an int to a sequence of letters'''
+        import string
+        digits = string.ascii_uppercase.replace("I","")
+        result = []
+        while n > 0:
+            n, mod = divmod(n - 1, len(digits))
+            result += digits[mod]
+        return ''.join(reversed(result))
+
+    def new_mark(self, num_mark = None):
+        if num_mark == None:
+            if self.bar is None:
+                self.new_bar()
+            if self.bar.has_attr():
+                self.current_attr.set_mark(self.bijective(self.current_mark))
+            else:
+                new_bar_attr = xml_objs.BarAttr()
+                new_bar_attr.set_mark(self.bijective(self.current_mark))
+                self.add_to_bar(new_bar_attr)
+        elif num_mark <= 0:
+            print("Mark value out of range")
+        else:
+            self.current_mark = num_mark
+            self.current_attr.set_mark(self.bijective(self.current_mark))
+        self.current_mark += 1
 
     def new_word(self, word):
         if self.bar is None:

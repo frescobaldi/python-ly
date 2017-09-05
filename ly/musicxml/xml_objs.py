@@ -136,6 +136,8 @@ class IterateXmlObjs():
         if obj.tempo:
             self.musxml.create_tempo(obj.tempo.text, obj.tempo.metr,
                                      obj.tempo.midi, obj.tempo.dots)
+        if obj.mark:
+            self.musxml.add_mark(obj.mark)
         if obj.word:
             self.musxml.add_dirwords(obj.word)
 
@@ -453,11 +455,11 @@ class Bar():
         return False
 
     def has_attr(self):
-         """ Check if bar contains attribute. """
-         for obj in self.obj_list:
-             if isinstance(obj, BarAttr):
-                 return True
-         return False
+        """ Check if bar contains attribute. """
+        for obj in self.obj_list:
+            if isinstance(obj, BarAttr):
+                return True
+        return False
 
     def create_backup(self):
         """ Calculate and create backup object."""
@@ -742,6 +744,7 @@ class BarAttr():
         self.staves = 0
         self.multiclef = []
         self.tempo = None
+        self.mark = None
         self.word = None
         self.new_system = None
 
@@ -769,6 +772,9 @@ class BarAttr():
     def set_tempo(self, unit=0, unittype='', beats=0, dots=0, text=""):
         self.tempo = TempoDir(unit, unittype, beats, dots, text)
 
+    def set_mark(self, mark):
+        self.mark = mark
+
     def set_word(self, words):
         if self.word == None:
             self.word = ''
@@ -785,6 +791,8 @@ class BarAttr():
         elif self.multiclef:
             check = True
         elif self.divs != 0:
+            check = True
+        elif self.mark != 0:
             check = True
         return check
 

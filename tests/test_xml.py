@@ -33,6 +33,10 @@ def test_tuplet():
 def test_break():
     compare_output('break')
 
+def test_mark():
+    compare_output('mark')
+
+
 def test_partial():
     compare_output('partial')
 

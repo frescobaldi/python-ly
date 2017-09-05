@@ -89,6 +89,7 @@ class ParseSource():
         self.slurcount = 0
         self.slurnr = 0
         self.phrslurnr = 0
+        self.mark = False
         self.pickup = False
 
     def parse_text(self, ly_text, filename=None):
@@ -500,6 +501,9 @@ class ParseSource():
             self.mediator.new_trill_spanner("stop")
         elif command.token == '\\ottava':
             self.ottava = True
+        elif command.token == '\\mark':
+            self.mark = True
+            self.mediator.new_mark()
         elif command.token == '\\breathe':
             art = type('',(object,),{"token": "\\breathe"})()
             self.Articulation(art)
@@ -509,6 +513,8 @@ class ParseSource():
             if self.tupl_span:
                 self.mediator.unset_tuplspan_dur()
                 self.tupl_span = False
+            elif self.mark:
+                self.mark = False
         elif command.token == '\\break':
             self.mediator.add_break()
         else:
@@ -594,6 +600,8 @@ class ParseSource():
             self.override_dict[self.override_key] = item.token
         elif self.schm_assignm:
             self.mediator.set_by_property(self.schm_assignm, item.token)
+        elif self.mark:
+            self.mediator.new_mark(int(item.token))
         else:
             print("SchemeItem not implemented:", item.token)
 
