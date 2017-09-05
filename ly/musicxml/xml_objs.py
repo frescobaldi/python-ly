@@ -102,7 +102,7 @@ class IterateXmlObjs():
 
     def iterate_bar(self, bar):
         """The objects in the bar are output to the xml-file."""
-        self.musxml.create_measure()
+        self.musxml.create_measure(pickup = bar.pickup)
         for obj in bar.obj_list:
             if isinstance(obj, BarAttr):
                 self.new_xml_bar_attr(obj)
@@ -122,6 +122,8 @@ class IterateXmlObjs():
         """Create bar attribute xml-nodes."""
         if obj.has_attr():
             self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, obj.divs)
+        if obj.new_system:
+            self.musxml.new_system(obj.new_system)
         if obj.repeat:
             self.musxml.add_barline(obj.barline, obj.repeat)
         elif obj.barline:
@@ -179,7 +181,7 @@ class IterateXmlObjs():
         else:
             self.musxml.new_note(obj.base_note, obj.octave, obj.type, divdur,
                 obj.alter, obj.accidental_token, obj.voice, obj.dot, obj.chord,
-                obj.grace)
+                obj.grace, obj.stem_direction)
         for t in obj.tie:
             self.musxml.tie_note(t)
         for s in obj.slur:
@@ -432,6 +434,7 @@ class Bar():
     Contains also information about how complete it is."""
     def __init__(self):
         self.obj_list = []
+        self.pickup = False
         self.list_full = False
 
     def __repr__(self):
@@ -625,6 +628,7 @@ class BarNote(BarMus):
         self.adv_ornament = None
         self.fingering = None
         self.lyric = None
+        self.stem_direction = None
 
     def set_duration(self, duration, durtype=''):
         self.duration = duration
@@ -666,6 +670,9 @@ class BarNote(BarMus):
             self.tremolo = (trem_type, dur2lines(duration))
         else:
             self.tremolo = (trem_type, self.tremolo[1])
+
+    def set_stem_direction(self, direction):
+        self.stem_direction = direction
 
     def add_fingering(self, finger_nr):
         self.fingering = finger_nr
@@ -726,9 +733,13 @@ class BarAttr():
         self.staves = 0
         self.multiclef = []
         self.tempo = None
+        self.new_system = None
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.time)
+
+    def add_break(self, force_break):
+        self.new_system = force_break
 
     def set_key(self, muskey, mode):
         self.key = muskey

@@ -89,6 +89,7 @@ class ParseSource():
         self.slurcount = 0
         self.slurnr = 0
         self.phrslurnr = 0
+        self.pickup = False
 
     def parse_text(self, ly_text, filename=None):
         """Parse the LilyPond source specified as text.
@@ -266,6 +267,9 @@ class ParseSource():
         r"""A \relative music expression."""
         self.relative = True
 
+    def Partial(self, partial):
+        self.pickup = True
+
     def Note(self, note):
         """ notename, e.g. c, cis, a bes ... """
         #print(note.token)
@@ -340,6 +344,9 @@ class ParseSource():
         elif self.tupl_span:
             self.mediator.set_tuplspan_dur(duration.token, duration.tokens)
             self.tupl_span = False
+        elif self.pickup:
+            self.mediator.set_pickup()
+            self.pickup = False
         else:
             self.mediator.new_duration_token(duration.token, duration.tokens)
             if self.trem_rep:
@@ -473,7 +480,7 @@ class ParseSource():
 
     def Command(self, command):
         r""" \bar, \rest etc """
-        excls = ['\\major', '\\minor', '\\bar']
+        excls = ['\\major', '\\minor', '\\dorian', '\\bar']
         if command.token == '\\rest':
             self.mediator.note2rest()
         elif command.token == '\\numericTimeSignature':
@@ -496,10 +503,14 @@ class ParseSource():
         elif command.token == '\\breathe':
             art = type('',(object,),{"token": "\\breathe"})()
             self.Articulation(art)
+        elif command.token == '\\stemUp' or command.token == '\\stemDown' or command.token == '\\stemNeutral':
+            self.mediator.stem_direction(command.token)
         elif command.token == '\\default':
             if self.tupl_span:
                 self.mediator.unset_tuplspan_dur()
                 self.tupl_span = False
+        elif command.token == '\\break':
+            self.mediator.add_break()
         else:
             if command.token not in excls:
                 print("Unknown command:", command.token)
