@@ -77,7 +77,6 @@ class Mediator():
         self.prev_tremolo = 8
         self.tupl_dur = 0
         self.tupl_sum = 0
-        self.word = None
         self.bar_is_pickup = False
         self.stem_dir = None
 
