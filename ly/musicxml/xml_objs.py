@@ -455,11 +455,11 @@ class Bar():
         return False
 
     def has_attr(self):
-         """ Check if bar contains attribute. """
-         for obj in self.obj_list:
-             if isinstance(obj, BarAttr):
-                 return True
-         return False
+        """ Check if bar contains attribute. """
+        for obj in self.obj_list:
+            if isinstance(obj, BarAttr):
+                return True
+        return False
 
     def create_backup(self):
         """ Calculate and create backup object."""
