@@ -125,7 +125,10 @@ class IterateXmlObjs():
     def new_xml_bar_attr(self, obj):
         """Create bar attribute xml-nodes."""
         if obj.has_attr():
-            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, obj.divs)
+            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, 
+                obj.divs, obj.multirest)
+        if obj.new_system:
+            self.musxml.new_system(obj.new_system)
         if obj.repeat:
             self.musxml.add_barline(obj.barline, obj.repeat)
         elif obj.barline:
@@ -138,6 +141,10 @@ class IterateXmlObjs():
         if obj.tempo:
             self.musxml.create_tempo(obj.tempo.text, obj.tempo.metr,
                                      obj.tempo.midi, obj.tempo.dots)
+        if obj.mark:
+            self.musxml.add_mark(obj.mark)
+        if obj.word:
+            self.musxml.add_dirwords(obj.word)
 
     def before_note(self, obj):
         """Xml-nodes before note."""
@@ -451,6 +458,13 @@ class Bar():
                 return True
         return False
 
+    def has_attr(self):
+        """ Check if bar contains attribute. """
+        for obj in self.obj_list:
+            if isinstance(obj, BarAttr):
+                return True
+        return False
+
     def create_backup(self):
         """ Calculate and create backup object."""
         b = 0
@@ -734,9 +748,16 @@ class BarAttr():
         self.staves = 0
         self.multiclef = []
         self.tempo = None
+        self.multirest = None
+        self.mark = None
+        self.word = None
+        self.new_system = None
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.time)
+
+    def add_break(self, force_break):
+        self.new_system = force_break
 
     def set_key(self, muskey, mode):
         self.key = muskey
@@ -756,6 +777,17 @@ class BarAttr():
     def set_tempo(self, unit=0, unittype='', beats=0, dots=0, text=""):
         self.tempo = TempoDir(unit, unittype, beats, dots, text)
 
+    def set_multp_rest(self, size=0):
+        self.multirest = size
+
+    def set_mark(self, mark):
+        self.mark = mark
+
+    def set_word(self, words):
+        if self.word == None:
+            self.word = ''
+        self.word += words + ' '
+
     def has_attr(self):
         check = False
         if self.key is not None:
@@ -767,6 +799,10 @@ class BarAttr():
         elif self.multiclef:
             check = True
         elif self.divs != 0:
+            check = True
+        elif self.multirest is not None:
+            check = True
+        elif self.mark != 0:
             check = True
         return check
 
