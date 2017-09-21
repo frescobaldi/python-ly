@@ -347,6 +347,7 @@ class ScoreSection():
                             obj.add_lyric(l)
                         i += 1
 
+
 class Snippet(ScoreSection):
     """ Short section intended to be merged.
     Holds reference to the barlist to be merged into."""
