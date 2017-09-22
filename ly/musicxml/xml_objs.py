@@ -803,7 +803,7 @@ class BarAttr():
             check = True
         elif self.multirest is not None:
             check = True
-        elif self.mark != 0:
+        elif self.mark:
             check = True
         return check
 
