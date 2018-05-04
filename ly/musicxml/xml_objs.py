@@ -72,7 +72,11 @@ class IterateXmlObjs():
         for itag in score.info:
             self.musxml.create_score_info(itag, score.info[itag])
         if score.rights:
-            self.musxml.add_rights(score.rights)
+            if len(score.rights) > 1:
+                for right in score.rights:
+                    self.musxml.add_rights(right[0], right[1])
+            else:
+                self.musxml.add_rights(score.rights[0][0])
         for p in score.partlist:
             if isinstance(p, ScorePart):
                 self.iterate_part(p)
@@ -238,8 +242,11 @@ class Score():
         self.title = None
         self.creators = {}
         self.info = {}
-        self.rights = None
+        self.rights = []
         self.glob_section = ScoreSection('global', True)
+
+    def add_right(self, value, type):
+        self.rights.append((value, type))
 
     def is_empty(self):
         """Check if score is empty."""
