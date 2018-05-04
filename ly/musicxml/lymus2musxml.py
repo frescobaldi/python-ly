@@ -91,13 +91,22 @@ class ParseSource():
         self.phrslurnr = 0
         self.mark = False
         self.pickup = False
+        self.handlers = {}
+        self.set_command_handlers()
+
+    def get_handler(self, category, element):
+        """Return a handler function of a given category, for a given element,
+        retrieved from the self.handlers dictionary.
+        For example: self.get_handler['Command']['\\rest']
+        If a handler for the given element is not defined, return None."""
+        return self.handlers[category].get(element, None)
 
     def parse_text(self, ly_text, filename=None):
         """Parse the LilyPond source specified as text.
-        
+
         If you specify a filename, it can be used to resolve \\include commands
         correctly.
-        
+
         """
         doc = ly.document.Document(ly_text)
         doc.filename = filename
@@ -105,11 +114,11 @@ class ParseSource():
 
     def parse_document(self, ly_doc, relative_first_pitch_absolute=False):
         """Parse the LilyPond source specified as a ly.document document.
-        
+
         If relative_first_pitch_absolute is set to True, the first pitch in a
         \relative expression without startpitch is considered to be absolute
         (LilyPond 2.18+ behaviour).
-        
+
         """
         # The document is copied and the copy is converted to absolute mode to
         # facilitate the export. The original document is unchanged.
@@ -479,46 +488,71 @@ class ParseSource():
         elif cont_set.context() in group_contexts:
             self.mediator.set_by_property(cont_set.property(), val, group=True)
 
-    def Command(self, command):
-        r""" \bar, \rest etc """
-        excls = ['\\major', '\\minor', '\\dorian', '\\bar']
-        if command.token == '\\rest':
-            self.mediator.note2rest()
-        elif command.token == '\\numericTimeSignature':
-            self.numericTime = True
-        elif command.token == '\\defaultTimeSignature':
-            self.numericTime = False
-        elif command.token.find('voice') == 1:
-            self.mediator.set_voicenr(command.token[1:], piano=self.piano_staff)
-        elif command.token == '\\glissando':
-            try:
-                self.mediator.new_gliss(self.override_dict["Glissando.style"])
-            except KeyError:
-                self.mediator.new_gliss()
-        elif command.token == '\\startTrillSpan':
-            self.mediator.new_trill_spanner()
-        elif command.token == '\\stopTrillSpan':
-            self.mediator.new_trill_spanner("stop")
-        elif command.token == '\\ottava':
-            self.ottava = True
-        elif command.token == '\\mark':
-            self.mark = True
-            self.mediator.new_mark()
-        elif command.token == '\\breathe':
+    def set_command_handlers(self):
+        """Define handler functions for Command elements."""
+
+        # local functions
+        def breathe():
             art = type('',(object,),{"token": "\\breathe"})()
             self.Articulation(art)
-        elif command.token == '\\stemUp' or command.token == '\\stemDown' or command.token == '\\stemNeutral':
-            self.mediator.stem_direction(command.token)
-        elif command.token == '\\default':
+
+        def default():
             if self.tupl_span:
                 self.mediator.unset_tuplspan_dur()
                 self.tupl_span = False
             elif self.mark:
                 self.mark = False
-        elif command.token == '\\compressFullBarRests':
-            self.mediator.set_mult_rest()
-        elif command.token == '\\break':
-            self.mediator.add_break()
+
+        def default_time_signature():
+            self.numericTime = False
+
+        def glissando():
+            try:
+                self.mediator.new_gliss(self.override_dict["Glissando.style"])
+            except KeyError:
+                self.mediator.new_gliss()
+
+        def mark():
+            self.mark = True
+            self.mediator.new_mark()
+
+        def numeric_time_signature():
+            self.numericTime = True
+
+        def ottava():
+            self.ottava = True
+
+        handlers = {
+            '\\break': self.mediator.add_break,
+            '\\breathe': breathe,
+            '\\compressFullBarRests': self.mediator.set_mult_rest,
+            '\\default': default,
+            '\\defaultTimeSignature': default_time_signature,
+            '\\mark': mark,
+            '\\numericTimeSignature': numeric_time_signature,
+            '\\glissando': glissando,
+            '\\ottava': ottava,
+            '\\rest': self.mediator.note2rest,
+            '\\startTrillSpan': self.mediator.new_trill_spanner,
+            '\\stopTrillSpan': lambda: self.mediator.new_trill_spanner("stop"),
+        }
+        self.handlers['Command'] = handlers
+
+    def Command(self, command):
+        r""" \bar, \rest etc """
+        excls = ['\\major', '\\minor', '\\dorian', '\\bar']
+
+        # Retrieve and call generic, argument-less handlers
+        handler = self.get_handler('Command', command.token)
+        if handler:
+            handler()
+            return
+
+        # Handle special cases or issue a warning
+        if command.token.find('voice') == 1:
+            self.mediator.set_voicenr(command.token[1:], piano=self.piano_staff)
+        elif command.token in ['\\stemUp', '\\stemDown', '\\stemNeutral']:
+            self.mediator.stem_direction(command.token)
         else:
             if command.token not in excls:
                 print("Unknown command:", command.token)
