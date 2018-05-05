@@ -297,6 +297,8 @@ class ParseSource():
                 # chord as grace note
                 if self.grace_seq:
                     self.mediator.new_chord_grace()
+        if self.beamcount > 0:
+            self.mediator.set_beam(self.beamnr, "continue")
 
     def Unpitched(self, unpitched):
         """A note without pitch, just a standalone duration."""

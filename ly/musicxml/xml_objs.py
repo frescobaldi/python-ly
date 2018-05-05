@@ -125,7 +125,7 @@ class IterateXmlObjs():
     def new_xml_bar_attr(self, obj):
         """Create bar attribute xml-nodes."""
         if obj.has_attr():
-            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, 
+            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode,
                 obj.divs, obj.multirest)
         if obj.new_system:
             self.musxml.new_system(obj.new_system)
@@ -655,7 +655,14 @@ class BarNote(BarMus):
         self.stem_direction = None
 
     def set_beam(self, nr, beam_type):
-        self.beam.append(Beam(nr, beam_type))
+        # NOTE: The following is only function as long as we're
+        # only dealing with *one* beam instead of a proper beaming pattern.
+        # If we have a real beaming pattern, a beam end has to end *all*
+        # beam levels.
+        if beam_type == 'end':
+            self.beam = [Beam(nr, beam_type)]
+        else:
+            self.beam.append(Beam(nr, beam_type))
 
     def set_duration(self, duration, durtype=''):
         self.duration = duration
