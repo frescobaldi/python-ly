@@ -86,6 +86,8 @@ class ParseSource():
         self.unset_tuplspan = False
         self.alt_mode = None
         self.rel_pitch_isset = False
+        self.beamcount = 0
+        self.beamnr = 0
         self.slurcount = 0
         self.slurnr = 0
         self.phrslurnr = 0
@@ -94,10 +96,10 @@ class ParseSource():
 
     def parse_text(self, ly_text, filename=None):
         """Parse the LilyPond source specified as text.
-        
+
         If you specify a filename, it can be used to resolve \\include commands
         correctly.
-        
+
         """
         doc = ly.document.Document(ly_text)
         doc.filename = filename
@@ -105,11 +107,11 @@ class ParseSource():
 
     def parse_document(self, ly_doc, relative_first_pitch_absolute=False):
         """Parse the LilyPond source specified as a ly.document document.
-        
+
         If relative_first_pitch_absolute is set to True, the first pitch in a
         \relative expression without startpitch is considered to be absolute
         (LilyPond 2.18+ behaviour).
-        
+
         """
         # The document is copied and the copy is converted to absolute mode to
         # facilitate the export. The original document is unchanged.
@@ -295,6 +297,8 @@ class ParseSource():
                 # chord as grace note
                 if self.grace_seq:
                     self.mediator.new_chord_grace()
+        if self.beamcount > 0:
+            self.mediator.set_beam(self.beamnr, "continue")
 
     def Unpitched(self, unpitched):
         """A note without pitch, just a standalone duration."""
@@ -412,7 +416,13 @@ class ParseSource():
         pass
 
     def Beam(self, beam):
-        pass
+        if beam.token == '[':
+            self.beamcount += 1
+            self.beamnr = self.beamcount
+            self.mediator.set_beam(self.beamnr, "begin")
+        else:
+            self.mediator.set_beam(self.beamnr, "end")
+            self.beamcount -= 1
 
     def Slur(self, slur):
         """ Slur, '(' = start, ')' = stop. """

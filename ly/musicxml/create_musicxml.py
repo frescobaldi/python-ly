@@ -367,7 +367,7 @@ class CreateMusicXML():
 
     def add_beam(self, nr, beam_type):
         """Add beam. """
-        beam_node = etree.SubElement(self.current_notation, "beam", number=str(nr))
+        beam_node = etree.SubElement(self.current_note, "beam", number=str(nr))
         beam_node.text = beam_type
 
     def add_tie(self, tie_type):

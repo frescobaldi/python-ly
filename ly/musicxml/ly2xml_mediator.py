@@ -707,6 +707,9 @@ class Mediator():
         self.tied = True
         self.current_note.set_tie(tie_type)
 
+    def set_beam(self, nr, beam_type):
+        self.current_note.set_beam(nr, beam_type)
+        
     def set_slur(self, nr, slur_type):
         """
         Set the slur start or stop for the current note. """

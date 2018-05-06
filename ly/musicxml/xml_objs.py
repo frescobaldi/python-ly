@@ -129,7 +129,7 @@ class IterateXmlObjs():
     def new_xml_bar_attr(self, obj):
         """Create bar attribute xml-nodes."""
         if obj.has_attr():
-            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, 
+            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode,
                 obj.divs, obj.multirest)
         if obj.new_system:
             self.musxml.new_system(obj.new_system)
@@ -199,6 +199,8 @@ class IterateXmlObjs():
             self.musxml.tie_note(t)
         for s in obj.slur:
             self.musxml.add_slur(s.nr, s.slurtype)
+        for b in obj.beam:
+            self.musxml.add_beam(b.nr, b.beam_type)
         for a in obj.artic:
             self.musxml.new_articulation(a)
         if obj.ornament:
@@ -626,6 +628,11 @@ class Slur():
         self.nr = nr
         self.slurtype = slurtype
 
+class Beam():
+    def __init__(self, nr, beam_type):
+        """Stores information about a beam."""
+        self.nr = nr
+        self.beam_type = beam_type
 
 ##
 # Subclasses of BarMus
@@ -644,6 +651,7 @@ class BarNote(BarMus):
         self.grace = (0, 0)
         self.gliss = None
         self.tremolo = ('', 0)
+        self.beam = []
         self.skip = False
         self.slur = []
         self.artic = []
@@ -652,6 +660,16 @@ class BarNote(BarMus):
         self.fingering = None
         self.lyric = None
         self.stem_direction = None
+
+    def set_beam(self, nr, beam_type):
+        # NOTE: The following is only function as long as we're
+        # only dealing with *one* beam instead of a proper beaming pattern.
+        # If we have a real beaming pattern, a beam end has to end *all*
+        # beam levels.
+        if beam_type == 'end':
+            self.beam = [Beam(nr, beam_type)]
+        else:
+            self.beam.append(Beam(nr, beam_type))
 
     def set_duration(self, duration, durtype=''):
         self.duration = duration
