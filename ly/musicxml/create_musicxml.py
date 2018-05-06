@@ -273,9 +273,10 @@ class CreateMusicXML():
         attr = {'type': creator }
         self.create_score_info("creator", name, attr)
 
-    def add_rights(self, rights):
+    def add_rights(self, rights, type=None):
         """Add rights to score info."""
-        self.create_score_info("rights", rights)
+        attr = {'type': type} if type else {}
+        self.create_score_info("rights", rights, attr)
 
     def create_note(self):
         """Create new note."""
