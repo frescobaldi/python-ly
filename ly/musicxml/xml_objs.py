@@ -292,6 +292,23 @@ class Score():
         for i in self.partlist:
             debug_group(i)
 
+    def find_section_for_voice(self, voice_context, partlist = None):
+        if not partlist:
+            partlist = self.partlist
+
+        for section in partlist[::-1]:
+            # Iterate over sections in partlist, in reverser order (newest to oldest)
+            if isinstance(section, ScorePartGroup):
+                section_candidate = self.find_section_for_voice(voice_context, section.partlist)
+                if section_candidate:
+                    return section_candidate
+            elif isinstance(section, ScoreSection):
+                for bar in section.barlist:
+                    for obj in bar.obj_list:
+                        if isinstance(obj, BarMus) and obj.voice_context == voice_context:
+                            return section
+        return None
+
 
 class ScorePartGroup():
     """Object to keep track of part group."""
@@ -330,30 +347,62 @@ class ScoreSection():
         if len(voice.barlist) > bl_len:
             self.barlist += voice.barlist[bl_len:]
 
-    def merge_lyrics(self, lyrics):
-        """Merge in lyrics in music section."""
+    def merge_lyrics(self, lyrics, voice_context=None):
+        """
+        Merge in lyrics in music section.
+        If voice_context is set, it will only merge with notes that has the same voice_context
+        """
         i = 0
-        ext = False
+
+        # If we are at the end or inside the slur, but not at the start
+        inside_slur = False
+        inside_tie = False
+
         for bar in self.barlist:
             for obj in bar.obj_list:
-                if isinstance(obj, BarNote):
-                    if ext:
-                        if obj.slur:
-                            ext = False
-                    else:
+                if isinstance(obj, BarNote) and \
+                        not obj.chord and \
+                        (not voice_context or obj.voice_context == voice_context):
+
+                    tie_started = False
+                    tie_stopped = False
+
+                    # Ties can both start and stop at the same note, prefer starts
+                    if 'start' in obj.tie:
+                        tie_started = True
+                    elif 'stop' in obj.tie:
+                        tie_stopped = True
+
+                    slur_started = False
+                    slur_stopped = False
+
+                    for slur in obj.slur:
+                        #if slur.phrasing:
+                        #    # ignore slur object if it is a phrasing mark
+                        #    continue
+                        if slur.slurtype == 'start':
+                            slur_started = True
+                        elif slur.slurtype == 'stop':
+                            slur_stopped = True
+
+                    if not inside_tie and not inside_slur:
                         try:
                             l = lyrics.barlist[i]
                         except IndexError:
                             break
                         if l != 'skip':
-                            try:
-                                if l[3] == "extend" and obj.slur:
-                                    ext = True
-                            except IndexError:
-                                pass
                             obj.add_lyric(l)
                         i += 1
 
+                    if slur_started:
+                        inside_slur = True
+                    elif slur_stopped:
+                        inside_slur = False
+
+                    if tie_started:
+                        inside_tie = True
+                    elif tie_stopped:
+                        inside_tie = False
 
 class Snippet(ScoreSection):
     """ Short section intended to be merged.
@@ -536,6 +585,11 @@ class BarMus():
         self.other_notation = None
         self.dynamic = []
         self.oct_shift = None
+
+        # set to some object identifying the context this belongs to, eg. string.
+        # It is useful to set this before merging a voice into another section
+        # This helps when adding lyrics to named voices outside a score context
+        self.voice_context = None
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.duration)

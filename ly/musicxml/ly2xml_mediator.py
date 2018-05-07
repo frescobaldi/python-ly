@@ -44,6 +44,10 @@ class Mediator():
         self.sections = []
         """ default and initial values """
         self.insert_into = None
+
+        # Current music section are useful when using "\addlyrics"
+        self.current_music_section = None
+
         self.current_note = None
         self.current_lynote = None
         self.current_is_rest = False
@@ -99,6 +103,8 @@ class Mediator():
     def new_section(self, name, glob=False):
         name = self.check_name(name)
         section = xml_objs.ScoreSection(name, glob)
+
+        self.current_music_section = section
         self.insert_into = section
         self.sections.append(section)
         self.bar = None
@@ -157,6 +163,8 @@ class Mediator():
                 self.group.partlist.append(self.part)
             else:
                 self.score.partlist.append(self.part)
+
+        self.current_music_section = self.part
         self.insert_into = self.part
         self.bar = None
 
@@ -270,9 +278,17 @@ class Mediator():
         lyrics_section = self.lyric_sections['lyricsto'+voice_id]
         voice_section = self.get_var_byname(lyrics_section.voice_id)
         if voice_section:
-            voice_section.merge_lyrics(lyrics_section)
+            voice_section.merge_lyrics(lyrics_section, voice_id)
         else:
-            print("Warning can't merge in lyrics!", voice_section)
+            voice_section = self.score.find_section_for_voice(voice_id, self.sections)
+            if not voice_section:
+                # A potentially slow path, search the whole score
+                voice_section = self.score.find_section_for_voice(voice_id)
+            if voice_section:
+                # Must explicitly only merge with notes with the same voice_id
+                voice_section.merge_lyrics(lyrics_section, voice_id)
+            else:
+                print("Warning can't merge in lyrics!", voice_section)
 
     def check_part(self):
         """Adds the latest active section to the part."""
@@ -333,6 +349,12 @@ class Mediator():
     def add_to_bar(self, obj):
         if self.bar is None:
             self.new_bar()
+
+        if isinstance(obj, xml_objs.BarMus):
+            # assign the voice context the obj belongs to, useful when we must modify the note
+            # after section merging, eg. set lyrics to a named voice
+            obj.voice_context = self.insert_into.name
+
         self.bar.add(obj)
 
     def create_barline(self, bl):
@@ -911,7 +933,7 @@ class Mediator():
                 self.lyric_syll = True
         elif item == '__':
             self.lyric.append("extend")
-        elif item == '\\skip':
+        elif item == '\\skip' or item == '_':
             self.insert_into.barlist.append("skip")
 
     def duration_from_tokens(self, tokens):

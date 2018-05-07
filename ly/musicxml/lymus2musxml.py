@@ -241,6 +241,8 @@ class ParseSource():
                 self.mediator.new_section('voice')
         elif context == 'Devnull':
             self.mediator.new_section('devnull', True)
+        elif context == 'Lyrics':
+            pass
         else:
             print("Context not implemented:", context)
 
@@ -336,6 +338,11 @@ class ParseSource():
 
     def Duration(self, duration):
         """A written duration"""
+
+        if 'lyrics' in self.sims_and_seqs:
+            # Skip the duration of the skip when typing lyrics
+            return
+
         if self.tempo:
             self.mediator.new_tempo(duration.token, duration.tokens, *self.tempo)
             self.tempo = ()
@@ -478,6 +485,9 @@ class ParseSource():
             self.mediator.set_by_property(cont_set.property(), val)
         elif cont_set.context() in group_contexts:
             self.mediator.set_by_property(cont_set.property(), val, group=True)
+        elif cont_set.property() == 'stanza' and self.alt_mode == 'lyric':
+            self.mediator.set_by_property(cont_set.property(), val)
+
 
     def Command(self, command):
         r""" \bar, \rest etc """
@@ -581,6 +591,11 @@ class ParseSource():
         r"""A \lyricmode, \lyrics or \addlyrics expression."""
         self.alt_mode = 'lyric'
 
+        if lyricmode.token == '\\addlyrics':
+            section = self.mediator.current_music_section
+            self.mediator.new_lyric_section('lyricsto' + section.name, section.name)
+            self.sims_and_seqs.append('lyrics')
+
     def Override(self, override):
         r"""An \override command."""
         self.override_key = ''
@@ -672,6 +687,9 @@ class ParseSource():
         elif isinstance(end.node, ly.music.items.Relative):
             self.relative = False
             self.rel_pitch_isset = False
+        elif isinstance(end.node, ly.music.items.LyricMode) and end.node.token == '\\addlyrics':
+            self.mediator.check_lyrics(self.mediator.insert_into.voice_id)
+            self.sims_and_seqs.pop()
         else:
             # print("end:", end.node.token)
             pass

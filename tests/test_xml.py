@@ -30,6 +30,11 @@ def test_dynamics():
 def test_tuplet():
     compare_output('tuplet')
 
+def test_lyrics_simple_lyricsto():
+    compare_output('lyrics_simple_lyricsto')
+
+def test_lyrics_simple_addlyrics():
+    compare_output('lyrics_simple_addlyrics')
 
 def test_break():
     compare_output('break')
