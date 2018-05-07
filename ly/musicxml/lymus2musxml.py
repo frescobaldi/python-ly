@@ -89,6 +89,8 @@ class ParseSource():
         self.slurcount = 0
         self.slurnr = 0
         self.phrslurnr = 0
+        self.mark = False
+        self.pickup = False
 
     def parse_text(self, ly_text, filename=None):
         """Parse the LilyPond source specified as text.
@@ -253,7 +255,7 @@ class ParseSource():
 
     def PipeSymbol(self, barcheck):
         """ PipeSymbol = | """
-        self.mediator.new_bar()
+        pass
 
     def Clef(self, clef):
         r""" Clef \clef"""
@@ -265,6 +267,9 @@ class ParseSource():
     def Relative(self, relative):
         r"""A \relative music expression."""
         self.relative = True
+
+    def Partial(self, partial):
+        self.pickup = True
 
     def Note(self, note):
         """ notename, e.g. c, cis, a bes ... """
@@ -340,6 +345,9 @@ class ParseSource():
         elif self.tupl_span:
             self.mediator.set_tuplspan_dur(duration.token, duration.tokens)
             self.tupl_span = False
+        elif self.pickup:
+            self.mediator.set_pickup()
+            self.pickup = False
         else:
             self.mediator.new_duration_token(duration.token, duration.tokens)
             if self.trem_rep:
@@ -473,7 +481,7 @@ class ParseSource():
 
     def Command(self, command):
         r""" \bar, \rest etc """
-        excls = ['\\major', '\\minor', '\\bar']
+        excls = ['\\major', '\\minor', '\\dorian', '\\bar']
         if command.token == '\\rest':
             self.mediator.note2rest()
         elif command.token == '\\numericTimeSignature':
@@ -493,10 +501,24 @@ class ParseSource():
             self.mediator.new_trill_spanner("stop")
         elif command.token == '\\ottava':
             self.ottava = True
+        elif command.token == '\\mark':
+            self.mark = True
+            self.mediator.new_mark()
+        elif command.token == '\\breathe':
+            art = type('',(object,),{"token": "\\breathe"})()
+            self.Articulation(art)
+        elif command.token == '\\stemUp' or command.token == '\\stemDown' or command.token == '\\stemNeutral':
+            self.mediator.stem_direction(command.token)
         elif command.token == '\\default':
             if self.tupl_span:
                 self.mediator.unset_tuplspan_dur()
                 self.tupl_span = False
+            elif self.mark:
+                self.mark = False
+        elif command.token == '\\compressFullBarRests':
+            self.mediator.set_mult_rest()
+        elif command.token == '\\break':
+            self.mediator.add_break()
         else:
             if command.token not in excls:
                 print("Unknown command:", command.token)
@@ -505,6 +527,15 @@ class ParseSource():
         """Music variables are substituted so this must be something else."""
         if usercommand.name() == 'tupletSpan':
             self.tupl_span = True
+
+    def Markup(self, markup):
+        pass
+
+    def MarkupWord(self, markupWord):
+        self.mediator.new_word(markupWord.token)
+
+    def MarkupList(self, markuplist):
+        pass
 
     def String(self, string):
         prev = self.get_previous_node(string)
@@ -571,6 +602,8 @@ class ParseSource():
             self.override_dict[self.override_key] = item.token
         elif self.schm_assignm:
             self.mediator.set_by_property(self.schm_assignm, item.token)
+        elif self.mark:
+            self.mediator.new_mark(int(item.token))
         else:
             print("SchemeItem not implemented:", item.token)
 

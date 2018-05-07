@@ -46,7 +46,7 @@ def remove_dups(iterable):
         yield '' if i == old else i
         old = i
 
-# decribes a musical item that has a duration
+# describes a musical item that has a duration
 music_item = collections.namedtuple('music_item', (
     'tokens',       # tokens of the item
     'dur_tokens',   # Duration tokens of the item
