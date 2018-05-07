@@ -112,8 +112,10 @@ class CreateMusicXML():
         self.part_count += 1
         self.bar_nr = 1
 
-    def create_measure(self, **bar_attrs):
+    def create_measure(self, pickup = False, **bar_attrs):
         """Create new measure """
+        if pickup and self.bar_nr == 1:
+            self.bar_nr = 0
         self.current_bar = etree.SubElement(self.current_part, "measure", number=str(self.bar_nr))
         self.bar_nr +=1
         if bar_attrs:
@@ -124,7 +126,7 @@ class CreateMusicXML():
     ##
 
     def new_note(self, step, octave, durtype, divdur, alter=0,
-                 acc_token=0, voice=1, dot=0, chord=0, grace=(0, 0)):
+                 acc_token=0, voice=1, dot=0, chord=0, grace=(0, 0), stem_dir=0):
         """Create all nodes needed for a normal note. """
         self.create_note()
         if grace[0]:
@@ -146,6 +148,8 @@ class CreateMusicXML():
                 self.add_accidental(alter, parenth=True)
             else:
                 self.add_accidental(alter)
+        if stem_dir:
+            self.set_stem_dir(stem_dir)
 
     def new_unpitched_note(self, step, octave, durtype, divdur, voice=1,
                             dot=0, chord=0, grace=(0, 0)):
@@ -226,7 +230,7 @@ class CreateMusicXML():
         if ornament == "wavy-line":
             self.add_wavyline(args['type'])
 
-    def new_bar_attr(self, clef=0, mustime=0, key=None, mode=0, divs=0):
+    def new_bar_attr(self, clef=0, mustime=0, key=None, mode=0, divs=0, multirest=0):
         """Create all bar attributes set. """
         self.create_bar_attr()
         if divs:
@@ -238,6 +242,8 @@ class CreateMusicXML():
         if clef:
             sign, line, octch = clef
             self.add_clef(sign, line, oct_ch=octch)
+        if multirest:
+            self.add_bar_style(multirest)
 
     def create_tempo(self, words, metronome, sound, dots):
         self.add_direction()
@@ -267,9 +273,10 @@ class CreateMusicXML():
         attr = {'type': creator }
         self.create_score_info("creator", name, attr)
 
-    def add_rights(self, rights):
+    def add_rights(self, rights, type=None):
         """Add rights to score info."""
-        self.create_score_info("rights", rights)
+        attr = {'type': type} if type else {}
+        self.create_score_info("rights", rights, attr)
 
     def create_note(self):
         """Create new note."""
@@ -314,6 +321,10 @@ class CreateMusicXML():
         1.5: 'sharp-up', -1.5: 'flat-down'
         }
         acc.text = acc_dict[alter]
+
+    def set_stem_dir(self, dir):
+        stem_dir = etree.SubElement(self.current_note, "stem")
+        stem_dir.text = dir
 
     def add_rest(self):
         """Create rest."""
@@ -528,6 +539,15 @@ class CreateMusicXML():
             octchnode = etree.SubElement(clefnode, "clef-octave-change")
             octchnode.text = str(oct_ch)
 
+    def add_bar_style(self, multirest=None):
+        bar_style = etree.SubElement(self.bar_attr, "measure-style")
+        if multirest:
+            multirestnode = etree.SubElement(bar_style, "multiple-rest")
+            multirestnode.text = str(multirest)
+
+    def new_system(self, force_break):
+        etree.SubElement(self.current_bar, "print", {'new-system':force_break})
+
     def add_barline(self, bl_type, repeat=None):
         barnode = etree.SubElement(self.current_bar, "barline", location="right")
         barstyle = etree.SubElement(barnode, "bar-style")
@@ -598,9 +618,19 @@ class CreateMusicXML():
 
     def add_dirwords(self, words):
         """Add words in direction, e. g. a tempo mark."""
+        if self.current_bar.find('direction') == None:
+            self.add_direction()
         dirtypenode = etree.SubElement(self.direction, "direction-type")
         wordsnode = etree.SubElement(dirtypenode, "words")
         wordsnode.text = words
+
+    def add_mark(self, mark):
+        """Add rehearsal mark in direction"""
+        if self.current_bar.find('direction') == None:
+            self.add_direction()
+        dirtypenode = etree.SubElement(self.direction, "direction-type")
+        rehearsalnode = etree.SubElement(dirtypenode, "rehearsal")
+        rehearsalnode.text = mark
 
     def add_metron_dir(self, unit, beats, dots):
         dirtypenode = etree.SubElement(self.direction, "direction-type")

@@ -72,7 +72,11 @@ class IterateXmlObjs():
         for itag in score.info:
             self.musxml.create_score_info(itag, score.info[itag])
         if score.rights:
-            self.musxml.add_rights(score.rights)
+            if len(score.rights) > 1:
+                for right in score.rights:
+                    self.musxml.add_rights(right[0], right[1])
+            else:
+                self.musxml.add_rights(score.rights[0][0])
         for p in score.partlist:
             if isinstance(p, ScorePart):
                 self.iterate_part(p)
@@ -93,16 +97,20 @@ class IterateXmlObjs():
     def iterate_part(self, part):
         """The part is iterated."""
         if part.barlist:
+            last_bar = part.barlist[-1]
+            last_bar_objs = last_bar.obj_list
             part.set_first_bar(self.divisions)
             self.musxml.create_part(part.name, part.abbr, part.midi)
-            for bar in part.barlist:
+            for bar in part.barlist[:-1]:
                 self.iterate_bar(bar)
+            if len(last_bar_objs) > 1 or last_bar_objs[0].has_attr():
+                self.iterate_bar(last_bar)
         else:
             print("Warning: empty part:", part.name)
 
     def iterate_bar(self, bar):
         """The objects in the bar are output to the xml-file."""
-        self.musxml.create_measure()
+        self.musxml.create_measure(pickup = bar.pickup)
         for obj in bar.obj_list:
             if isinstance(obj, BarAttr):
                 self.new_xml_bar_attr(obj)
@@ -121,7 +129,10 @@ class IterateXmlObjs():
     def new_xml_bar_attr(self, obj):
         """Create bar attribute xml-nodes."""
         if obj.has_attr():
-            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, obj.divs)
+            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, 
+                obj.divs, obj.multirest)
+        if obj.new_system:
+            self.musxml.new_system(obj.new_system)
         if obj.repeat:
             self.musxml.add_barline(obj.barline, obj.repeat)
         elif obj.barline:
@@ -134,6 +145,10 @@ class IterateXmlObjs():
         if obj.tempo:
             self.musxml.create_tempo(obj.tempo.text, obj.tempo.metr,
                                      obj.tempo.midi, obj.tempo.dots)
+        if obj.mark:
+            self.musxml.add_mark(obj.mark)
+        if obj.word:
+            self.musxml.add_dirwords(obj.word)
 
     def before_note(self, obj):
         """Xml-nodes before note."""
@@ -179,7 +194,7 @@ class IterateXmlObjs():
         else:
             self.musxml.new_note(obj.base_note, obj.octave, obj.type, divdur,
                 obj.alter, obj.accidental_token, obj.voice, obj.dot, obj.chord,
-                obj.grace)
+                obj.grace, obj.stem_direction)
         for t in obj.tie:
             self.musxml.tie_note(t)
         for s in obj.slur:
@@ -227,8 +242,11 @@ class Score():
         self.title = None
         self.creators = {}
         self.info = {}
-        self.rights = None
+        self.rights = []
         self.glob_section = ScoreSection('global', True)
+
+    def add_right(self, value, type):
+        self.rights.append((value, type))
 
     def is_empty(self):
         """Check if score is empty."""
@@ -481,6 +499,7 @@ class Bar():
     Contains also information about how complete it is."""
     def __init__(self):
         self.obj_list = []
+        self.pickup = False
         self.list_full = False
 
     def __repr__(self):
@@ -493,6 +512,13 @@ class Bar():
         """ Check if bar contains music. """
         for obj in self.obj_list:
             if isinstance(obj, BarMus):
+                return True
+        return False
+
+    def has_attr(self):
+        """ Check if bar contains attribute. """
+        for obj in self.obj_list:
+            if isinstance(obj, BarAttr):
                 return True
         return False
 
@@ -679,6 +705,7 @@ class BarNote(BarMus):
         self.adv_ornament = None
         self.fingering = None
         self.lyric = None
+        self.stem_direction = None
 
     def set_duration(self, duration, durtype=''):
         self.duration = duration
@@ -720,6 +747,9 @@ class BarNote(BarMus):
             self.tremolo = (trem_type, dur2lines(duration))
         else:
             self.tremolo = (trem_type, self.tremolo[1])
+
+    def set_stem_direction(self, direction):
+        self.stem_direction = direction
 
     def add_fingering(self, finger_nr):
         self.fingering = finger_nr
@@ -780,9 +810,16 @@ class BarAttr():
         self.staves = 0
         self.multiclef = []
         self.tempo = None
+        self.multirest = None
+        self.mark = None
+        self.word = None
+        self.new_system = None
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.time)
+
+    def add_break(self, force_break):
+        self.new_system = force_break
 
     def set_key(self, muskey, mode):
         self.key = muskey
@@ -802,6 +839,17 @@ class BarAttr():
     def set_tempo(self, unit=0, unittype='', beats=0, dots=0, text=""):
         self.tempo = TempoDir(unit, unittype, beats, dots, text)
 
+    def set_multp_rest(self, size=0):
+        self.multirest = size
+
+    def set_mark(self, mark):
+        self.mark = mark
+
+    def set_word(self, words):
+        if self.word == None:
+            self.word = ''
+        self.word += words + ' '
+
     def has_attr(self):
         check = False
         if self.key is not None:
@@ -813,6 +861,10 @@ class BarAttr():
         elif self.multiclef:
             check = True
         elif self.divs != 0:
+            check = True
+        elif self.multirest is not None:
+            check = True
+        elif self.mark:
             check = True
         return check
 
