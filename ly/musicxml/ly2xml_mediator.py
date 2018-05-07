@@ -387,14 +387,7 @@ class Mediator():
         self.current_mark += 1
 
     def new_word(self, word):
-        if self.bar is None:
-            self.new_bar()
-        if self.bar.has_attr():
-            self.current_attr.set_word(word)
-        else:
-            new_bar_attr = xml_objs.BarAttr()
-            new_bar_attr.set_word(word)
-            self.add_to_bar(new_bar_attr)
+        self.current_note.add_word(word)
 
     def new_time(self, num, den, numeric=False):
         self.current_time = Fraction(num, den.denominator)
@@ -913,6 +906,9 @@ class Mediator():
             self.lyric.append("extend")
         elif item == '\\skip':
             self.insert_into.barlist.append("skip")
+
+    def new_markup(self, direction):
+        self.current_note.add_markup(direction)
 
     def duration_from_tokens(self, tokens):
         """Calculate dots and multibar rests from tokens."""

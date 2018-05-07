@@ -286,6 +286,21 @@ class CreateMusicXML():
         self.current_ornament = None
         self.current_tech = None
 
+    def add_markup(self, markup):
+        """ Create a new Markup element, attached to (exported before) a note"""
+        d = etree.SubElement(
+            self.current_bar,
+            'direction',
+            { 'placement': markup.direction } if markup.direction else {})
+        dt = etree.SubElement(d, 'direction-type')
+        for e in markup.elements:
+            # TODO: This loop iterates over all MarkupElement() objects,
+            # which are intended to handle different formattings.
+            # Currently there will always be only *one* such element
+            # without any explicit formatting
+            cont = etree.SubElement(dt, 'words')
+            cont.text = e.content()
+
     def add_pitch(self, step, alter, octave):
         """Create new pitch."""
         pitch = etree.SubElement(self.current_note, "pitch")

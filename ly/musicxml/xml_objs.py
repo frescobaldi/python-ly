@@ -129,7 +129,7 @@ class IterateXmlObjs():
     def new_xml_bar_attr(self, obj):
         """Create bar attribute xml-nodes."""
         if obj.has_attr():
-            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, 
+            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode,
                 obj.divs, obj.multirest)
         if obj.new_system:
             self.musxml.new_system(obj.new_system)
@@ -152,6 +152,7 @@ class IterateXmlObjs():
 
     def before_note(self, obj):
         """Xml-nodes before note."""
+        self._add_markups(obj)
         self._add_dynamics([d for d in obj.dynamic if d.before])
         if obj.oct_shift and not obj.oct_shift.octdir == 'stop':
             self.musxml.add_octave_shift(obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
@@ -173,6 +174,11 @@ class IterateXmlObjs():
                 self.musxml.add_dynamic_text(d.sign)
             elif isinstance(d, DynamicsDashes):
                 self.musxml.add_dynamic_dashes(d.sign)
+
+    def _add_markups(self, obj):
+        """Add XML nodes for markups attached to notes/rests."""
+        for m in obj.markup:
+            self.musxml.add_markup(m)
 
     def gener_xml_mus(self, obj):
         """Nodes generic for both notes and rests."""
@@ -522,6 +528,29 @@ class Bar():
             for bl in backup_list:
                 self.add(bl)
 
+class MarkupElement():
+    """ Class for (formatted) markup.
+        One Markup() consists of one or more MarkupElement()s. """
+    def __init__(self, attrs={}):
+        self.attributes = attrs
+        self.words = []
+
+    def add_word(self, word):
+        self.words.append(word)
+
+    def content(self):
+        return ' '.join(self.words)
+
+class Markup():
+    """ Class for markups attached to BarMus() elements.
+    Each element is a (formatted) MarkupElement(). """
+    def __init__(self, direction=None):
+        self.direction = direction
+        self.curr_attrs = {}
+        self.elements = [MarkupElement()]
+
+    def add_word(self, word):
+        self.elements[-1].add_word(word)
 
 class BarMus():
     """ Common class for notes and rests. """
@@ -535,6 +564,7 @@ class BarMus():
         self.chord = False
         self.other_notation = None
         self.dynamic = []
+        self.markup = []
         self.oct_shift = None
 
     def __repr__(self):
@@ -548,6 +578,15 @@ class BarMus():
 
     def add_dot(self):
         self.dot += 1
+
+    def add_markup(self, direction):
+        self.markup.append(Markup(direction))
+
+    def add_word(self, word):
+        self.markup[-1].add_word(word)
+
+    def current_markup(self):
+        return self.markup[-1]
 
     def add_other_notation(self, other):
         self.other_notation = other
@@ -647,6 +686,7 @@ class BarNote(BarMus):
         self.skip = False
         self.slur = []
         self.artic = []
+        self.markup = []
         self.ornament = None
         self.adv_ornament = None
         self.fingering = None
