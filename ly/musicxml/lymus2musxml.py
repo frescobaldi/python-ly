@@ -91,13 +91,14 @@ class ParseSource():
         self.phrslurnr = 0
         self.mark = False
         self.pickup = False
+        self.postfix = None
 
     def parse_text(self, ly_text, filename=None):
         """Parse the LilyPond source specified as text.
-        
+
         If you specify a filename, it can be used to resolve \\include commands
         correctly.
-        
+
         """
         doc = ly.document.Document(ly_text)
         doc.filename = filename
@@ -105,11 +106,11 @@ class ParseSource():
 
     def parse_document(self, ly_doc, relative_first_pitch_absolute=False):
         """Parse the LilyPond source specified as a ly.document document.
-        
+
         If relative_first_pitch_absolute is set to True, the first pitch in a
         \relative expression without startpitch is considered to be absolute
         (LilyPond 2.18+ behaviour).
-        
+
         """
         # The document is copied and the copy is converted to absolute mode to
         # facilitate the export. The original document is unchanged.
@@ -409,7 +410,8 @@ class ParseSource():
         self.mediator.new_articulation(art.token)
 
     def Postfix(self, postfix):
-        pass
+        op = postfix.token
+        self.postfix = 'above' if op == '^' else 'below' if op == '_' else None
 
     def Beam(self, beam):
         pass
@@ -529,6 +531,12 @@ class ParseSource():
             self.tupl_span = True
 
     def Markup(self, markup):
+        self.mediator.new_markup(self.postfix)
+
+    def MarkupCommand(self, markupCommand):
+        pass
+
+    def MarkupUserCommand(self, markupUserCommand):
         pass
 
     def MarkupWord(self, markupWord):

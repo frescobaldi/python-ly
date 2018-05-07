@@ -2,8 +2,10 @@
 
 \score {
   \relative {
-    a'1-\markup intenso |
-    a1-\markup intenso |
-    a2^\markup { poco più forte  }
+    a'2-\markup intenso
+    a2_\markup intenso |
+    a2^\markup { poco più forte }
+    r2 |
+    r1 -\markup neutral _\markup below ^\markup above
   }
 }
