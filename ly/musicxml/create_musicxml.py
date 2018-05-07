@@ -121,6 +121,25 @@ class CreateMusicXML():
         if bar_attrs:
             self.new_bar_attr(**bar_attrs)
 
+    def get_previous_bar(self):
+        """ Return the previous bar or False if we're in the first. """
+        siblings = self.current_part.getchildren()
+        curr_index = siblings.index(self.current_bar)
+        if curr_index == 0:
+            return False
+        else:
+            return siblings[curr_index - 1]
+
+    def get_next_bar(self):
+        """ Return the next bar or False if we're in the last. """
+        siblings = self.current_part.getchildren()
+        curr_index = siblings.index(self.current_bar)
+        if curr_index == len(siblings) - 1:
+            return False
+        else:
+            return siblings[curr_index + 1]
+
+
     ##
     # High-level node creation
     ##
@@ -503,6 +522,21 @@ class CreateMusicXML():
     def create_bar_attr(self):
         """Create node attributes """
         self.bar_attr = etree.SubElement(self.current_bar, "attributes")
+
+    def create_barline(self, bar_style, ends_bar):
+        """Create a barline, either at the current position
+        or at the end of the previous bar. """
+        if ends_bar:
+            # This is necessary because when the user writes \bar as a bar end
+            # we are already in the next measure.
+            bar = self.get_previous_bar()
+            location = 'right'
+        else:
+            bar = self.current_bar
+            location = 'middle'
+        bl = etree.SubElement(bar, "barline", {'location': location})
+        bs = etree.SubElement(bl, 'bar-style')
+        bs.text = bar_style
 
     def add_divisions(self, div):
         division = etree.SubElement(self.bar_attr, "divisions")
