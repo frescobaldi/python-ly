@@ -78,6 +78,7 @@ class Mediator():
         self.prev_tremolo = 8
         self.tupl_dur = 0
         self.tupl_sum = 0
+        self.slur_stack = []
         self.multiple_rest = False
         self.multiple_rest_bar = None
         self.current_mark = 1
@@ -707,10 +708,21 @@ class Mediator():
         self.tied = True
         self.current_note.set_tie(tie_type)
 
-    def set_slur(self, nr, slur_type):
+    def set_slur(self, nr, slur_type, phrasing=False):
         """
-        Set the slur start or stop for the current note. """
-        self.current_note.set_slur(nr, slur_type)
+        Set the slur start or stop for the current note.
+        phrasing should be set to True if the slur is meant to be a phrasing mark.
+        """
+
+        slur_start = None
+
+        if slur_type == 'stop':
+            slur_start = self.slur_stack.pop()
+
+        self.current_note.set_slur(nr, slur_type, phrasing, slur_start)
+
+        if slur_type == 'start':
+            self.slur_stack.append(self.current_note.slur[-1])
 
     def new_articulation(self, art_token):
         """

@@ -312,6 +312,17 @@ class ScorePartGroup():
             part.merge_voice(voice, override)
 
 
+class SlurCount:
+    """Utility class meant for keeping count of started slurs in a section"""
+    def __init__(self):
+        self.count = 0
+
+    def inc(self):
+        self.count += 1
+
+    def dec(self):
+        self.count -= 1
+
 class ScoreSection():
     """ object to keep track of music section """
     def __init__(self, name, glob=False):
@@ -319,13 +330,16 @@ class ScoreSection():
         self.barlist = []
         self.glob = glob
 
+        # Keeps track of the number of started slurs in the section
+        self.active_slur_count = SlurCount()
+
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.name)
 
     def merge_voice(self, voice, override=False):
         """Merge in other ScoreSection."""
         for org_v, add_v in zip(self.barlist, voice.barlist):
-            org_v.inject_voice(add_v, override)
+            org_v.inject_voice(add_v, override, self.active_slur_count)
         bl_len = len(self.barlist)
         if len(voice.barlist) > bl_len:
             self.barlist += voice.barlist[bl_len:]
@@ -500,7 +514,7 @@ class Bar():
                     return False
         return True
 
-    def inject_voice(self, new_voice, override=False):
+    def inject_voice(self, new_voice, override=False, active_slur_count=None):
         """ Adding new voice to bar.
         Omitting double or conflicting bar attributes as long as override is false.
         Omitting also bars with only skips."""
@@ -519,9 +533,36 @@ class Bar():
             pass
         if not self.is_skip(backup_list):
             self.create_backup()
+
+            if active_slur_count:
+                # Update active_slur_count wrt to already existing slur starts
+                # and slur ends in the bar, before we add backup_list
+
+                for n in self.obj_list:
+                    if isinstance(n, BarNote):
+                        for slur in n.slur:
+                            if slur.slurtype == 'start':
+                                active_slur_count.inc()
+                            elif slur.slurtype == 'stop':
+                                active_slur_count.dec()
+
             for bl in backup_list:
                 self.add(bl)
 
+                if active_slur_count and isinstance(bl, BarNote):
+                    # If the slur is starting: increase active_slur_count and set slur number
+                    # to that value.
+                    # If the slur is ending: set slur number to be the same as the origin slur number.
+
+                    for slur in bl.slur:
+                        if slur.slurtype == 'start':
+                            active_slur_count.inc()
+                            slur.nr = active_slur_count.count
+                        elif slur.slurtype == 'stop':
+                            active_slur_count.dec()
+
+                            if slur.start_node:
+                                slur.nr = slur.start_node.nr
 
 class BarMus():
     """ Common class for notes and rests. """
@@ -621,11 +662,13 @@ class Tuplet():
         self.normtype = normtype
 
 class Slur():
-    """Stores information about slur."""
-    def __init__(self, nr, slurtype):
+    """Stores information about slur. start_node is only interesting if slurtype is 'stop'.
+    start_node must be None or a Slur instance."""
+    def __init__(self, nr, slurtype, phrasing=False, start_node=None):
         self.nr = nr
         self.slurtype = slurtype
-
+        self.phrasing = phrasing
+        self.start_node = start_node
 
 ##
 # Subclasses of BarMus
@@ -668,8 +711,8 @@ class BarNote(BarMus):
     def set_tie(self, tie_type):
         self.tie.append(tie_type)
 
-    def set_slur(self, nr, slur_type):
-        self.slur.append(Slur(nr, slur_type))
+    def set_slur(self, nr, slur_type, phrasing=False, slur_start_node=None):
+        self.slur.append(Slur(nr, slur_type, phrasing, slur_start_node))
 
     def add_articulation(self, art_name):
         self.artic.append(art_name)
