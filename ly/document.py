@@ -743,45 +743,60 @@ class Runner(object):
         if self._wp:
             pos += self._doc.position(self.block)
         return ly.lex.Newline('\n', pos)
-        
+
+    def next(self, in_line=False):
+        """Return the next token or False if there is no more token.
+        If in_line=True stop at the end of the current line."""
+        if self._index < len(self._tokens) - 1:
+            self._index += 1
+            return self._tokens[self._index]
+        elif in_line or not self.next_block():
+            return False
+        else:
+            return self._newline()
+
+    def previous(self, in_line=False):
+        """Return the previous token or False if there is no more token.
+        If in_line=True stop at the end of the current line."""
+        if self._index > 0:
+            self._index -= 1
+            return self._tokens[self._index]
+        elif in_line or not self.previous_block():
+            return False
+        else: return self._newline()
+
     def forward_line(self):
         """Yields tokens in forward direction in the current block."""
-        end = len(self._tokens)
-        if self._index < end:
-            while True:
-                self._index += 1
-                if self._index == end:
-                    break
-                yield self._tokens[self._index]
-    
+        while True:
+            token = self.next(True)
+            if not token:
+                break
+            yield token
+
     def forward(self):
         """Yields tokens in forward direction across blocks."""
         while True:
-            for t in self.forward_line():
-                yield t
-            newline = self._newline()
-            if not self.next_block():
+            token = self.next()
+            if not token:
                 break
-            yield newline
+            yield token
 
     def backward_line(self):
         """Yields tokens in backward direction in the current block."""
-        if self._index >= 0:
-            while True:
-                self._index -= 1
-                if self._index == -1:
-                    break
-                yield self._tokens[self._index]
-    
+        while True:
+            token = self.previous(True)
+            if not token:
+                break
+            yield token
+
     def backward(self):
         """Yields tokens in backward direction across blocks."""
         while True:
-            for t in self.backward_line():
-                yield t
-            if not self.previous_block():
+            token = self.previous()
+            if not token:
                 break
-            yield self._newline()
-    
+            yield token
+
     def previous_block(self, at_end=True):
         """Go to the previous block, positioning the cursor at the end by default.
         
