@@ -765,36 +765,44 @@ class Runner(object):
             return False
         else: return self._newline()
 
-    def forward_line(self):
-        """Yields tokens in forward direction in the current block."""
+    def _forward(self, in_line):
+        """Internal method to yield tokens in forward direction.
+        in_line determines whether this is globally or limited
+        to the current block."""
         while True:
-            token = self.next(True)
+            token = self.next(in_line)
             if not token:
                 break
             yield token
 
+    def forward_line(self):
+        """Yields tokens in forward direction in the current block."""
+        for token in self._forward(True):
+            yield token
+
     def forward(self):
         """Yields tokens in forward direction across blocks."""
+        for token in self._forward(False):
+            yield token
+
+    def _backward(self, in_line):
+        """Internal method to yield tokens in backward direction.
+        in_line determines whether this is globally or limited
+        to the current block."""
         while True:
-            token = self.next()
+            token = self.previous(in_line)
             if not token:
                 break
             yield token
 
     def backward_line(self):
         """Yields tokens in backward direction in the current block."""
-        while True:
-            token = self.previous(True)
-            if not token:
-                break
+        for token in self._backward(True):
             yield token
 
     def backward(self):
         """Yields tokens in backward direction across blocks."""
-        while True:
-            token = self.previous()
-            if not token:
-                break
+        for token in self._backward(False):
             yield token
 
     def previous_block(self, at_end=True):
