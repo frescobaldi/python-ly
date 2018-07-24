@@ -744,9 +744,9 @@ class Runner(object):
             pos += self._doc.position(self.block)
         return ly.lex.Newline('\n', pos)
 
-    def next(self, in_line=False):
+    def next(self, current_block=False):
         """Return the next token or False if there is no more token.
-        If in_line=True stop at the end of the current line."""
+        If current_block=True stop at the end of the current block."""
         if self._index < len(self._tokens) - 1:
             self._index += 1
             return self._tokens[self._index]
@@ -755,9 +755,9 @@ class Runner(object):
         else:
             return self._newline()
 
-    def previous(self, in_line=False):
+    def previous(self, current_block=False):
         """Return the previous token or False if there is no more token.
-        If in_line=True stop at the end of the current line."""
+        If current_block=True stop at the beginning of the current block."""
         if self._index > 0:
             self._index -= 1
             return self._tokens[self._index]
@@ -765,44 +765,44 @@ class Runner(object):
             return False
         else: return self._newline()
 
-    def _forward(self, in_line):
+    def _forward(self, current_block):
         """Internal method to yield tokens in forward direction.
-        in_line determines whether this is globally or limited
+        current_block determines whether this is globally or limited
         to the current block."""
         while True:
-            token = self.next(in_line)
+            token = self.next(current_block)
             if not token:
                 break
             yield token
 
     def forward_line(self):
         """Yields tokens in forward direction in the current block."""
-        for token in self._forward(True):
+        for token in self._forward(current_block=True):
             yield token
 
     def forward(self):
         """Yields tokens in forward direction across blocks."""
-        for token in self._forward(False):
+        for token in self._forward(current_block=False):
             yield token
 
-    def _backward(self, in_line):
+    def _backward(self, current_block):
         """Internal method to yield tokens in backward direction.
-        in_line determines whether this is globally or limited
+        current_block determines whether this is globally or limited
         to the current block."""
         while True:
-            token = self.previous(in_line)
+            token = self.previous(current_block)
             if not token:
                 break
             yield token
 
     def backward_line(self):
         """Yields tokens in backward direction in the current block."""
-        for token in self._backward(True):
+        for token in self._backward(current_block=True):
             yield token
 
     def backward(self):
         """Yields tokens in backward direction across blocks."""
-        for token in self._backward(False):
+        for token in self._backward(current_block=False):
             yield token
 
     def previous_block(self, at_end=True):
