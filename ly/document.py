@@ -750,7 +750,7 @@ class Runner(object):
         if self._index < len(self._tokens) - 1:
             self._index += 1
             return self._tokens[self._index]
-        elif in_line or not self.next_block():
+        elif current_block or not self.next_block():
             return False
         else:
             return self._newline()
@@ -761,7 +761,7 @@ class Runner(object):
         if self._index > 0:
             self._index -= 1
             return self._tokens[self._index]
-        elif in_line or not self.previous_block():
+        elif current_block or not self.previous_block():
             return False
         else: return self._newline()
 
