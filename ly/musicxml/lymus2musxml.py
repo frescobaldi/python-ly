@@ -615,6 +615,8 @@ class ParseSource():
                 self.mediator.set_voicenr(nr=1)
             elif end.node.context() == 'Devnull':
                 self.mediator.check_voices()
+            elif end.node.context() == 'Lyrics':
+                self.mediator.check_voices()
         elif end.node.token == '<<':
             if self.voice_sep:
                 self.mediator.check_voices_by_nr()
@@ -632,6 +634,7 @@ class ParseSource():
         elif end.node.token == '\\lyricsto':
             self.mediator.check_lyrics(end.node.context_id())
             self.sims_and_seqs.pop()
+            self.mediator.new_lyric_nr(self.mediator.lyric_nr + 1)
         elif end.node.token == '\\with':
             self.with_contxt = None
         elif end.node.token == '\\drums':

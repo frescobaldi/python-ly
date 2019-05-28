@@ -42,6 +42,7 @@ class Mediator():
         """ create global lists """
         self.score = xml_objs.Score()
         self.sections = []
+        self.permanent_sections = []
         """ default and initial values """
         self.insert_into = None
         self.current_note = None
@@ -94,6 +95,7 @@ class Mediator():
         section = xml_objs.ScoreSection(name, glob)
         self.insert_into = section
         self.sections.append(section)
+        self.permanent_sections.append(section)
         self.bar = None
 
     def new_snippet(self, name):
@@ -101,6 +103,7 @@ class Mediator():
         snippet = xml_objs.Snippet(name, self.insert_into)
         self.insert_into = snippet
         self.sections.append(snippet)
+        self.permanent_sections.append(section)
         self.bar = None
 
     def new_lyric_section(self, name, voice_id):
@@ -117,7 +120,7 @@ class Mediator():
         return name
 
     def get_var_byname(self, name):
-        for n in self.sections:
+        for n in self.permanent_sections:
             if n.name == name:
                 return n
 
