@@ -318,7 +318,7 @@ class ScoreSection():
         ext = False
         for bar in self.barlist:
             for obj in bar.obj_list:
-                if isinstance(obj, BarNote):
+                if isinstance(obj, BarNote) and obj.voice == 1:
                     if ext:
                         if obj.slur:
                             ext = False
