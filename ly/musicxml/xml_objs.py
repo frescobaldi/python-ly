@@ -760,6 +760,8 @@ class BarAttr():
             check = True
         elif self.divs != 0:
             check = True
+        elif self.barline is not None:
+            check = True
         return check
 
     def merge_attr(self, barattr, override=False):
@@ -841,3 +843,5 @@ def convert_barl(bl):
         return 'light-heavy'
     elif bl == "'":
         return 'tick'
+    elif bl == "":
+        return 'none'

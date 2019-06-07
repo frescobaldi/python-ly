@@ -89,6 +89,11 @@ class ParseSource():
         self.slurcount = 0
         self.slurnr = 0
         self.phrslurnr = 0
+        # Variables to keep track of place in music, and place of barlines (made with \bar)
+        self.voice = 0
+        self.time = 0
+        self.measure = 1
+        self.barline_locations = []
 
     def parse_text(self, ly_text, filename=None):
         """Parse the LilyPond source specified as text.
@@ -232,6 +237,8 @@ class ParseSource():
                     self.mediator.new_part(context_id)
             self.mediator.add_staff_id(context_id)
         elif context == 'Voice':
+            self.voice += 1
+            self.measure = 1
             self.sims_and_seqs.append('voice')
             if context_id:
                 self.mediator.new_section(context_id)
@@ -241,6 +248,20 @@ class ParseSource():
             self.mediator.new_section('devnull', True)
         else:
             print("Context not implemented:", context)
+
+    def check_for_barline(self):
+        """
+        Checks at the current location in music to see if a barline is needed
+        Creates a barline if needed
+        Based on whether the first voice had a barline at the current location
+        Only operates after the first voice
+        """
+        if self.voice != 1:
+            for b in self.barline_locations:
+                if self.measure == b[0] and self.time == b[1]:
+                    self.mediator.create_barline(b[2])
+                    self.time = 0
+                    self.measure += 1
 
     def VoiceSeparator(self, voice_sep):
         self.mediator.new_snippet('sim')
@@ -253,7 +274,10 @@ class ParseSource():
 
     def PipeSymbol(self, barcheck):
         """ PipeSymbol = | """
-        self.mediator.new_bar()
+        if self.time != 0:  # Avoids making blank measures
+            self.time = 0
+            self.measure += 1
+            self.mediator.new_bar()
 
     def Clef(self, clef):
         r""" Clef \clef"""
@@ -269,6 +293,7 @@ class ParseSource():
     def Note(self, note):
         """ notename, e.g. c, cis, a bes ... """
         #print(note.token)
+        self.time += note.length()
         if note.length():
             if self.relative and not self.rel_pitch_isset:
                 self.mediator.new_note(note, False)
@@ -290,6 +315,8 @@ class ParseSource():
                 # chord as grace note
                 if self.grace_seq:
                     self.mediator.new_chord_grace()
+        # After every note in voices past 1, check if a barline is needed
+        self.check_for_barline()
 
     def Unpitched(self, unpitched):
         """A note without pitch, just a standalone duration."""
@@ -508,8 +535,13 @@ class ParseSource():
 
     def String(self, string):
         prev = self.get_previous_node(string)
-        if prev and prev.token == '\\bar':
+        # If a \bar is found in the first voice (not at the beginning of a measure):
+        #     Record its position and style-type, and create appropriate barline
+        if self.voice == 1 and prev and prev.token == '\\bar' and self.time != 0:
+            self.barline_locations.append([self.measure, self.time, string.value()])
             self.mediator.create_barline(string.value())
+            self.time = 0
+            self.measure += 1
 
     def LyricsTo(self, lyrics_to):
         r"""A \lyricsto expression. """
