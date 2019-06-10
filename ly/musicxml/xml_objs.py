@@ -457,6 +457,7 @@ class Bar():
                     b += obj.duration[0]
                     s *= obj.duration[1]
             elif isinstance(obj, BarBackup):
+                b = 0  # prevents multiple BarBackups from being made in same measure
                 break
         if b != 0:  # prevents the pickup measure from already having a blank BarBackup
             self.add(BarBackup((b, s)))
