@@ -102,21 +102,22 @@ class IterateXmlObjs():
 
     def iterate_bar(self, bar):
         """The objects in the bar are output to the xml-file."""
-        self.musxml.create_measure()
-        for obj in bar.obj_list:
-            if isinstance(obj, BarAttr):
-                self.new_xml_bar_attr(obj)
-            elif isinstance(obj, BarMus):
-                self.before_note(obj)
-                if isinstance(obj, BarNote):
-                    self.new_xml_note(obj)
-                elif isinstance(obj, BarRest):
-                    self.new_xml_rest(obj)
-                self.gener_xml_mus(obj)
-                self.after_note(obj)
-            elif isinstance(obj, BarBackup):
-                divdur = self.count_duration(obj.duration, self.divisions)
-                self.musxml.add_backup(divdur)
+        if len(bar.obj_list) > 1:  # Prevents empty measures from being made
+            self.musxml.create_measure()
+            for obj in bar.obj_list:
+                if isinstance(obj, BarAttr):
+                    self.new_xml_bar_attr(obj)
+                elif isinstance(obj, BarMus):
+                    self.before_note(obj)
+                    if isinstance(obj, BarNote):
+                        self.new_xml_note(obj)
+                    elif isinstance(obj, BarRest):
+                        self.new_xml_rest(obj)
+                    self.gener_xml_mus(obj)
+                    self.after_note(obj)
+                elif isinstance(obj, BarBackup):
+                    divdur = self.count_duration(obj.duration, self.divisions)
+                    self.musxml.add_backup(divdur)
 
     def new_xml_bar_attr(self, obj):
         """Create bar attribute xml-nodes."""
