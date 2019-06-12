@@ -164,9 +164,10 @@ class Reader(object):
                     self.source.pushback()
                     break
         if tokens:
-            d = self.factory(Duration, tokens[0])
-            d.tokens = tuple(tokens[1:])
-            item.append(d)
+            if not isinstance(item, ly.music.items.Partial):  # prevents \partial commands from changing the duration of notes
+                d = self.factory(Duration, tokens[0])
+                d.tokens = tuple(tokens[1:])
+                item.append(d)
             item.duration = self.prev_duration = ly.duration.base_scaling(tokens)
         else:
             item.duration = self.prev_duration

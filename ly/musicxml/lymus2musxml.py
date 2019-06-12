@@ -433,6 +433,10 @@ class ParseSource():
     def Beam(self, beam):
         pass
 
+    def Partial(self, partial):
+        r""" \partial # """
+        pass
+
     def Slur(self, slur):
         """ Slur, '(' = start, ')' = stop. """
         if slur.token == '(':
