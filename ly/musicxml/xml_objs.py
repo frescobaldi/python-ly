@@ -315,7 +315,6 @@ class ScoreSection():
         if len(voice.barlist) > bl_len:
             self.barlist += voice.barlist[bl_len:]
 
-    ##TODO
     def merge_lyrics(self, lyrics):
         """Merge in lyrics in music section."""
         i = 0
