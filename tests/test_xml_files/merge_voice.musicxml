@@ -5,8 +5,8 @@
   <movement-title>Somebody to love</movement-title>
   <identification>
     <encoding>
-      <software>python-ly 0.9.4</software>
-      <encoding-date>2016-03-28</encoding-date>
+      <software>python-ly 0.9.5</software>
+      <encoding-date>2019-06-13</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -146,9 +146,6 @@
         <type>quarter</type>
         <accidental>flat</accidental>
       </note>
-      <backup>
-        <duration>4</duration>
-      </backup>
       <backup>
         <duration>4</duration>
       </backup>

@@ -39,7 +39,7 @@
         <type>quarter</type>
       </note>
       <backup>
-          <duration>1</duration>
+        <duration>1</duration>
       </backup>
       <note>
         <pitch>
@@ -152,7 +152,7 @@
         <type>quarter</type>
       </note>
       <backup>
-          <duration>1</duration>
+        <duration>1</duration>
       </backup>
       <note>
         <pitch>
