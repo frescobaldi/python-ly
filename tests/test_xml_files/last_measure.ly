@@ -1,51 +1,37 @@
 \version "2.18.2"
 
-\language "english"
-
 keyTime = {
     \time 4/4
     \numericTimeSignature
+    \partial 4
 }
 
 Soprano = \relative c'' {
   \voiceOne
   \keyTime
-    g4 g \bar "'" g g \bar "||"
-  | g g \bar "" g g \bar "!"
-  | g g \bar "|" g g \bar "."
-  | g g \bar ".|" g g \bar ".."
-  | g g \bar ";" g g
-  \bar "|."
+    g4
+  | g2. \bar "|."
 }
 
-Alto = \relative c'' {
+Alto = \relative c' {
   \voiceTwo
   \keyTime
-    e4 e e e
-  | e e e e
-  | e e e e
-  | e e e e
-  | e e e e
+    g4
+  | g2.
 }
 
-Tenor = \relative c {
+Tenor = \relative c' {
   \voiceOne
   \keyTime
-    c4 c c c
-  | c c c c
-  | c c c c
-  | c c c c
-  | c c c c
+    g4
+  | g2.
 }
 
 Bass = \relative c {
   \voiceTwo
   \keyTime
-    a4 a a a
-  | a a a a
-  | a a a a
-  | a a a a
-  | a a a a
+    g4
+  | g2.
 }
 
 \score

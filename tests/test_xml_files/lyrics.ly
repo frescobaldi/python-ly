@@ -29,14 +29,14 @@ StanzaThree = \lyricmode {
 keyTime = {
     \time 4/4
     \numericTimeSignature
-    \key ef \major
+    \key c \major
 }
 
 Soprano = \relative c'' {
   \voiceOne
   \keyTime
-    bf4 cs( d ef)
-  | gf( af) b( c) 
+    b4 c( d e)
+  | g( a) b( c) 
   | g2 a
   | f8 g c a( c) b g f
 }
@@ -44,8 +44,8 @@ Soprano = \relative c'' {
 Alto = \relative c' {
   \voiceTwo
   \keyTime
-    g4 g ef ef
-  | f d ef e 
+    g4 g e e
+  | f d e e 
   | g2 a
   | f8 g c a( c) b g f
 }
@@ -53,8 +53,8 @@ Alto = \relative c' {
 Tenor = \relative c' {
   \voiceOne
   \keyTime
-    af4 bf af bf
-  | bf af bf af 
+    a4 b a b
+  | b a b a 
   | g2 a
   | f8 g c a( c) b g f
 }
@@ -62,8 +62,8 @@ Tenor = \relative c' {
 Bass = \relative c {
   \voiceTwo
   \keyTime
-    cf4 g af8 gf gf gf
-  | ds4 bf ds bf
+    c4 g a8 g g g
+  | d4 b d b
   | g2 a
   | f8 g c a( c) b g f
 }
