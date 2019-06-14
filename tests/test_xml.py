@@ -6,11 +6,15 @@ from lxml import etree
 import os
 import re
 import ly.pkginfo
+import glob
 
 
 def test_all():
     """Test all files in test_xml_files"""
-    test_list = ['glissando', 'tie', 'merge_voice', 'variable', 'dynamics', 'tuplet', 'pickup', 'lyrics', 'barlines']
+    filebase = os.path.join(os.path.dirname(__file__), 'test_xml_files')
+    # Help from https://www.mkyong.com/python/python-how-to-list-all-files-in-a-directory/
+    # Searches test_xml_files directory for all lilypond files and extracts their name (without .ly)
+    test_list = [re.search(r'([^/]*)\.ly', f).group(1) for f in glob.glob(filebase + "/*.ly")]
     for test in test_list:
         print("Testing {}.ly...".format(test))
         compare_output(test)
