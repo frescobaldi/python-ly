@@ -198,9 +198,12 @@ class IterateXmlObjs():
             self.musxml.add_fingering(obj.fingering)
         if obj.lyric:
             for l in obj.lyric:
-                try:
-                    self.musxml.add_lyric(l[0], l[1], l[2], l[3])
-                except IndexError:
+                # Allows a lyric to have the extend tag if necessary
+                if l[-1] == "extend":
+                    self.musxml.add_lyric(l[0], l[1], l[2], l[-1])
+                elif l[-2] == "extend":
+                    self.musxml.add_lyric(l[0], l[1], l[2], l[-2])
+                else:
                     self.musxml.add_lyric(l[0], l[1], l[2])
 
     def new_xml_rest(self, obj):
@@ -315,24 +318,39 @@ class ScoreSection():
     def merge_lyrics(self, lyrics):
         """Merge in lyrics in music section."""
         i = 0
-        ext = False
+        slurOn = True  # Indicates whether subsequent slurred notes should be skipped
+        slur = False   # Indicates whether the current note is slurred
+        tie = False    # Indicates whether the current note is tied
         for bar in self.barlist:
             for obj in bar.obj_list:
                 if isinstance(obj, BarNote) and obj.voice == 1:
-                    if ext:
+                    # Ends open slurs/ties
+                    if slur and tie:
                         if obj.slur:
-                            ext = False
+                            slur = False
+                        elif obj.tie:
+                            tie = False
+                    elif slur:
+                        if obj.slur:
+                            slur = False
+                    elif tie:
+                        if obj.tie:
+                            tie = False
+                    # If not a slurred/tied note, begins slurs/ties if needed and adds lyrics
                     else:
+                        if obj.slur and slurOn:
+                            slur = True
+                        if obj.tie and slurOn:
+                            tie = True
                         try:
                             l = lyrics.barlist[i]
                         except IndexError:
                             break
+                        if l[-1] == "slurOff" or l[-2] == "slurOff":
+                            slurOn = False
+                        elif l[-1] == "slurOn" or l[-2] == "slurOn":
+                            slurOn = True
                         if l != 'skip':
-                            try:
-                                if l[3] == "extend" and obj.slur:
-                                    ext = True
-                            except IndexError:
-                                pass
                             obj.add_lyric(l)
                         i += 1
 
