@@ -246,6 +246,8 @@ class ParseSource():
                 self.mediator.new_section('voice')
         elif context == 'Devnull':
             self.mediator.new_section('devnull', True)
+        elif context == 'Lyrics':
+            pass  # The way lyrics are implemented, they don't need a new section here (prevents irrelevant warning)
         else:
             print("Context not implemented:", context)
 
