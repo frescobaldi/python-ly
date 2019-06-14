@@ -34,7 +34,7 @@ def ly_to_xml(filename):
 
 def read_expected_xml(filename):
     """Return string with expected XML from file."""
-    with open(filename, 'r') as xmlfile:
+    with open(filename, 'r', encoding='utf-8') as xmlfile:
         output = xmlfile.read()
     # Replace date and python-ly version in XML file with today's date and current version
     output = re.sub(r'\d{4}-\d{2}-\d{2}', str(datetime.date.today()), output)
