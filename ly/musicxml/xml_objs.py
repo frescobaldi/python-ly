@@ -778,6 +778,8 @@ class BarAttr():
             check = True
         elif self.divs != 0:
             check = True
+        elif self.barline is not None:
+            check = True
         return check
 
     def merge_attr(self, barattr, override=False):
@@ -843,19 +845,21 @@ def dur2lines(dur):
 def convert_barl(bl):
     if bl == '|':
         return 'regular'
-    elif bl == ':':
+    elif bl == ':' or bl == ';':
         return 'dotted'
-    elif bl == 'dashed':
-        return bl
+    elif bl == 'dashed' or bl == '!':
+        return 'dashed'
     elif bl == '.':
         return 'heavy'
     elif bl == '||':
         return 'light-light'
     elif bl == '.|' or bl == 'forward':
         return 'heavy-light'
-    elif bl == '.|.':
+    elif bl == '.|.' or bl == '..':
         return 'heavy-heavy'
     elif bl == '|.' or bl == 'backward':
         return 'light-heavy'
     elif bl == "'":
         return 'tick'
+    elif bl == "":
+        return 'none'
