@@ -475,8 +475,10 @@ class Bar():
                     b += obj.duration[0]
                     s *= obj.duration[1]
             elif isinstance(obj, BarBackup):
+                b = 0  # prevents multiple BarBackups from being made in same measure
                 break
-        self.add(BarBackup((b, s)))
+        if b != 0:  # prevents the pickup measure from already having a blank BarBackup
+            self.add(BarBackup((b, s)))
 
     def is_skip(self, obj_list=None):
         """ Check if bar has nothing but skips. """
@@ -797,7 +799,6 @@ class BarAttr():
             self.multiclef += barattr.multiclef
         if barattr.tempo is not None and (override or self.tempo is None):
             self.tempo = barattr.tempo
-
 
 class BarBackup():
     """ Object that stores duration for backup """
