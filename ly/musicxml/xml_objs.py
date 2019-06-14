@@ -352,6 +352,7 @@ class ScoreSection():
                         elif l[-1] == "slurOn" or l[-2] == "slurOn":
                             slurOn = True
                         if l != 'skip':
+                            l[0] = l[0].replace('~', chr(0x203f))  # Turns ~ into undertie
                             obj.add_lyric(l)
                         i += 1
 
