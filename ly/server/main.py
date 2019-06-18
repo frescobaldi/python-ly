@@ -72,15 +72,15 @@ def die(message):
 
 def parse_command_line():
     """Returns a two-tuple(server_opts, cmd_opts)
-    
+
     server_opts is a ServerOptions instance configuring the server behaviour
     cmd_opts is an Options instance with default options for future command
     executions triggered by HTTP requests.
-    
+
     Also performs error handling and may exit on certain circumstances.
-    
+
     """
-    
+
     if isinstance(sys.argv[0], type('')):
         # python 3 - arguments are unicode strings
         args = iter(sys.argv[1:])
@@ -88,17 +88,17 @@ def parse_command_line():
         # python 2 - arguments are bytes, decode them
         fsenc = sys.getfilesystemencoding() or 'latin1'
         args = (a.decode(fsenc) for a in sys.argv[1:])
-    
+
     server_opts = options.ServerOptions()
     cmd_opts = options.Options()
-    
+
     def next_arg(message):
         """Get the next argument, if missing, die with message."""
         try:
             return next(args)
         except StopIteration:
             die(message)
-    
+
     for arg in args:
         if arg in ('-h', '--help'):
             usage()
@@ -106,13 +106,13 @@ def parse_command_line():
         elif arg in ('-v', '--version'):
             version()
             sys.exit(0)
-        
+
         # Server Options
         elif arg in ('-p', '--port'):
             server_opts.port = int(next_arg("missing port number"))
         elif arg in ('-t', '--timeout'):
             server_opts.timeout = int(next_arg("missing timeout (in ms)"))
-            
+
         # Command Options
         elif arg in ('-e', '--encoding'):
             cmd_opts.encoding = next_arg("missing encoding name")
@@ -121,7 +121,7 @@ def parse_command_line():
         elif arg in ('-l', '--language'):
             s = next_arg("missing language name")
             cmd_opts.set_variable("default-language", s)
-        
+
         # Command configuration Variables
         elif arg == '-d':
             s = next_arg("missing variable=value")
@@ -130,10 +130,10 @@ def parse_command_line():
             except ValueError:
                 die("missing '=' in variable set")
             cmd_opts.set_variable(name, value)
-        
+
         elif arg.startswith('-'):
             die('unknown option: ' + arg)
-    
+
     return server_opts, cmd_opts
 
 

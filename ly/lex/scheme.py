@@ -23,6 +23,7 @@ Parses and tokenizes Scheme input.
 
 from __future__ import unicode_literals
 
+from . import lilypond
 from . import _token
 from . import Parser, FallthroughParser
 
@@ -38,16 +39,18 @@ class String(_token.String):
 
 class StringQuotedStart(String, _token.StringStart):
     rx = r'"'
+
     def update_state(self, state):
         state.enter(ParseString())
-        
+
 
 class StringQuotedEnd(String, _token.StringEnd):
     rx = r'"'
+
     def update_state(self, state):
         state.leave()
         state.endArgument()
-    
+
 
 class StringQuoteEscape(_token.Character):
     rx = r'\\[\\"]'
@@ -59,13 +62,14 @@ class Comment(_token.Comment):
 
 class LineComment(Comment, _token.LineComment):
     rx = r";.*$"
-    
+
 
 class BlockCommentStart(Comment, _token.BlockCommentStart):
     rx = r"#!"
+
     def update_state(self, state):
         state.enter(ParseBlockComment())
-        
+
 
 class BlockCommentEnd(Comment, _token.BlockCommentEnd, _token.Leaver):
     rx = "!#"
@@ -78,6 +82,7 @@ class BlockComment(Comment, _token.BlockComment):
 class OpenParen(Scheme, _token.MatchStart, _token.Indent):
     rx = r"\("
     matchname = "schemeparen"
+
     def update_state(self, state):
         state.enter(ParseScheme())
 
@@ -85,23 +90,24 @@ class OpenParen(Scheme, _token.MatchStart, _token.Indent):
 class CloseParen(Scheme, _token.MatchEnd, _token.Dedent):
     rx = r"\)"
     matchname = "schemeparen"
+
     def update_state(self, state):
         state.leave()
         state.endArgument()
-        
+
 
 class Quote(Scheme):
     rx = r"['`,]"
-    
-    
+
+
 class Dot(Scheme):
     rx = r"\.(?!\S)"
 
 
 class Bool(Scheme, _token.Item):
     rx = r"#[tf]\b"
-    
-    
+
+
 class Char(Scheme, _token.Item):
     rx = r"#\\([a-z]+|.)"
 
@@ -165,9 +171,10 @@ class LilyPond(_token.Token):
 class LilyPondStart(LilyPond, _token.MatchStart, _token.Indent):
     rx = r"#{"
     matchname = "schemelily"
+
     def update_state(self, state):
         state.enter(ParseLilyPond())
-        
+
 
 class LilyPondEnd(LilyPond, _token.Leaver, _token.MatchEnd, _token.Dedent):
     rx = r"#}"
@@ -200,7 +207,7 @@ class ParseScheme(Parser):
         Word,
         StringQuotedStart,
     )
-    
+
 
 class ParseString(Parser):
     default = String
@@ -208,7 +215,7 @@ class ParseString(Parser):
         StringQuotedEnd,
         StringQuoteEscape,
     )
-    
+
 
 class ParseBlockComment(Parser):
     default = BlockComment
@@ -217,8 +224,5 @@ class ParseBlockComment(Parser):
     )
 
 
-from . import lilypond
-
 class ParseLilyPond(lilypond.ParseMusic):
     items = (LilyPondEnd,) + lilypond.ParseMusic.items
-

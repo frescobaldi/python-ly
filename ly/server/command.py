@@ -42,6 +42,7 @@ known_commands = [
     'highlight'
 ]
 
+
 class _command(object):
     """Base class for commands.
 
@@ -54,6 +55,7 @@ class _command(object):
     yourself.
 
     """
+
     def __init__(self):
         pass
 
@@ -63,6 +65,7 @@ class _command(object):
 
 class set_variable(_command):
     """set a configuration variable to a value"""
+
     def __init__(self, arg):
         self.name, self.value = arg.split('=', 1)
 
@@ -71,7 +74,7 @@ class set_variable(_command):
 
 
 #################################
-### Base classes for commands ###
+#   Base classes for commands   #
 #################################
 
 # The command classes have a run() method that serves as a common structure
@@ -85,6 +88,7 @@ class _info_command(_command):
     The result is appended to the data['info'] array as a dict with 'command'
     and 'info' fields.
     """
+
     def run(self, opts, data):
         import ly.docinfo
         info = ly.docinfo.DocInfo(data['doc']['content'].document)
@@ -109,10 +113,11 @@ class _edit_command(_command):
     added to the data['doc']['commands'] dict so it is possible to retrace which
     commands have been applied to the final result.
     """
+
     def run(self, opts, data):
         self.edit(opts, data['doc']['content'])
         data['doc']['commands'].append(self.__class__.__name__)
-    
+
     def edit(self, opts, cursor):
         """Should edit the cursor in-place."""
         raise NotImplementedError()
@@ -124,48 +129,53 @@ class _export_command(_command):
     For each command an entry will be appended to data['exports'] field of the
     'data' dict, leaving data['doc'] untouched. Each entry in data['exports']
     has a ['doc'] and a ['command'] field, allowing the client to identify the
-    
+
     """
+
     def run(self, opts, data):
         export = self.export(opts, data['doc']['content'], data['exports'])
         data['exports'].append({
             'command': self.__class__.__name__,
             'doc': export
         })
-    
+
     def export(self, opts, cursor, exports):
         """Should return the converted document as string."""
         raise NotImplementedError()
 
 
 #####################
-### Info commands ###
+#   Info commands   #
 #####################
 
 class mode(_info_command):
     """retrieve mode from document"""
+
     def get_info(self, info):
         return info.mode()
 
 
 class version(_info_command):
     """retrieve version from document"""
+
     def get_info(self, info):
         return info.version_string()
 
 
 class language(_info_command):
     """retrieve language from document"""
+
     def get_info(self, info):
         return info.language()
 
 
 #####################
-### Edit commands ###
+#   Edit commands   #
 #####################
 
 class indent(_edit_command):
     """run the indenter"""
+
     def indenter(self, opts):
         """Get a ly.indent.Indenter initialized with our options."""
         import ly.indent
@@ -173,13 +183,14 @@ class indent(_edit_command):
         i.indent_tabs = opts.indent_tabs
         i.indent_width = opts.indent_width
         return i
-    
+
     def edit(self, opts, cursor):
         self.indenter(opts).indent(cursor)
 
 
 class reformat(indent):
     """reformat the document"""
+
     def edit(self, opts, cursor):
         import ly.reformat
         ly.reformat.reformat(cursor, self.indenter(opts))
@@ -187,45 +198,54 @@ class reformat(indent):
 
 class translate(_edit_command):
     """translate pitch names"""
+
     def __init__(self, language):
         if language not in ly.pitch.pitchInfo:
             raise ValueError()
         self.language = language
-    
+
     def edit(self, opts, cursor):
         import ly.pitch.translate
         try:
-            changed = ly.pitch.translate.translate(cursor, self.language, opts.default_language)
+            changed = ly.pitch.translate.translate(
+                cursor, self.language, opts.default_language)
         except ly.pitch.PitchNameNotAvailable as pna:
             raise ValueError(format(pna))
         if not changed:
             version = ly.docinfo.DocInfo(cursor.document).version()
-            ly.pitch.translate.insert_language(cursor.document, self.language, version)
-    
+            ly.pitch.translate.insert_language(
+                cursor.document, self.language, version)
+
 
 class transpose(_edit_command):
     """transpose music"""
+
     def __init__(self, arg):
         import re
         result = []
         for pitch, octave in re.findall(r"([a-z]+)([,']*)", arg):
             r = ly.pitch.pitchReader("nederlands")(pitch)
             if r:
-                result.append(ly.pitch.Pitch(*r, octave=ly.pitch.octaveToNum(octave)))
+                result.append(ly.pitch.Pitch(
+                    *r, octave=ly.pitch.octaveToNum(octave)))
         self.from_pitch, self.to_pitch = result
 
     def edit(self, opts, cursor):
         import ly.pitch.transpose
-        transposer = ly.pitch.transpose.Transposer(self.from_pitch, self.to_pitch)
+        transposer = ly.pitch.transpose.Transposer(
+            self.from_pitch, self.to_pitch)
         try:
-            ly.pitch.transpose.transpose(cursor, transposer, opts.default_language)
+            ly.pitch.transpose.transpose(
+                cursor, transposer, opts.default_language)
         except ly.pitch.PitchNameNotAvailable as pna:
-            language = ly.docinfo.DocInfo(cursor.document).language() or opts.default_language
+            language = ly.docinfo.DocInfo(
+                cursor.document).language() or opts.default_language
             raise ValueError(format(pna))
 
 
 class rel2abs(_edit_command):
     """convert relative music to absolute"""
+
     def edit(self, opts, cursor):
         import ly.pitch.rel2abs
         ly.pitch.rel2abs.rel2abs(cursor, opts.default_language)
@@ -233,22 +253,24 @@ class rel2abs(_edit_command):
 
 class abs2rel(_edit_command):
     """convert absolute music to relative"""
+
     def edit(self, opts, cursor):
         import ly.pitch.abs2rel
         ly.pitch.abs2rel.abs2rel(cursor, opts.default_language)
 
 
 #######################
-### Export commands ###
+#   Export commands   #
 #######################
 
 class musicxml(_export_command):
     """convert source to MusicXML"""
+
     def export(self, opts, cursor, exports):
         import ly.musicxml
         writer = ly.musicxml.writer()
         writer.parse_document(cursor.document)
-        #TODO!!!
+        # TODO!!!
         # In Python3 this incorrectly escapes the \n characters,
         # but leaving out the str() conversion returns a Bytes object,
         # which will in turn trigger an "object is not JSON serializable" error
@@ -257,10 +279,11 @@ class musicxml(_export_command):
 
 class highlight(_export_command):
     """convert source to syntax colored HTML."""
+
     def export(self, opts, cursor, exports):
         import ly.colorize
         w = ly.colorize.HtmlWriter()
-    
+
         # set configuration options
         w.full_html = opts.full_html
         w.inline_style = opts.inline_style

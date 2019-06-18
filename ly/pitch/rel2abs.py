@@ -30,39 +30,39 @@ import ly.lex.lilypond
 
 def rel2abs(cursor, language="nederlands", first_pitch_absolute=False):
     """Converts pitches from relative to absolute.
-    
+
     language: language to start reading pitch names in
-    
+
     first_pitch_absolute: if True, the first pitch of a \\relative expression
         is regarded as absolute, when no starting pitch was given. This mimics
         the behaviour of LilyPond >= 2.18.
         (In fact, the starting pitch is then assumed to be f.)
-        
+
         If False, the starting pitch, when not given, is assumed to be c'
         (LilyPond < 2.18 behaviour).
-        
+
     """
     start = cursor.start
     cursor.start = 0
-    
+
     source = ly.document.Source(cursor, True, tokens_with_position=True)
 
     pitches = ly.pitch.PitchIterator(source, language)
     psource = pitches.pitches()
-    
+
     if start > 0:
         # consume tokens before the selection, following the language
         t = source.consume(pitches.tokens(), start)
         if t:
             psource = itertools.chain((t,), psource)
-    
+
     # this class dispatches the tokens. we can't use a generator function
     # as that doesn't like to be called again while there is already a body
     # running.
     class gen(object):
         def __iter__(self):
             return self
-        
+
         def __next__(self):
             t = next(psource)
             while isinstance(t, (ly.lex.Space, ly.lex.Comment)):
@@ -74,11 +74,11 @@ def rel2abs(cursor, language="nederlands", first_pitch_absolute=False):
                 consume()
                 t = next(psource)
             return t
-        
+
         next = __next__
-            
+
     tsource = gen()
-    
+
     def makeAbsolute(p, lastPitch):
         """Makes pitch absolute (honoring and removing possible octaveCheck)."""
         if p.octavecheck is not None:
@@ -87,7 +87,7 @@ def rel2abs(cursor, language="nederlands", first_pitch_absolute=False):
         else:
             p.makeAbsolute(lastPitch)
         pitches.write(p)
-    
+
     def getpitches(iterable):
         """Consumes iterable but only yields Pitch instances."""
         for p in iterable:
@@ -101,18 +101,18 @@ def rel2abs(cursor, language="nederlands", first_pitch_absolute=False):
             yield t
             if source.state.depth() < depth:
                 return
-    
+
     def consume():
         """Consume tokens from context() returning the last token, if any."""
         t = None
         for t in context():
             pass
         return t
-    
+
     def relative(t):
         pos = t.pos
         lastPitch = None
-        
+
         t = next(tsource)
         if isinstance(t, ly.pitch.Pitch):
             lastPitch = t
@@ -121,19 +121,20 @@ def rel2abs(cursor, language="nederlands", first_pitch_absolute=False):
             lastPitch = ly.pitch.Pitch.f0()
         else:
             lastPitch = ly.pitch.Pitch.c1()
-        
+
         # remove the \relative <pitch> tokens
         del document[pos:t.pos]
-        
+
         while True:
             # eat stuff like \new Staff == "bla" \new Voice \notes etc.
-            if isinstance(source.state.parser(), ly.lex.lilypond.ParseTranslator):
+            if isinstance(source.state.parser(),
+                          ly.lex.lilypond.ParseTranslator):
                 t = consume()
             elif isinstance(t, (ly.lex.lilypond.ChordMode, ly.lex.lilypond.NoteMode)):
                 t = next(tsource)
             else:
                 break
-        
+
         # now convert the relative expression to absolute
         if t in ('{', '<<'):
             # Handle full music expression { ... } or << ... >>
@@ -145,7 +146,8 @@ def rel2abs(cursor, language="nederlands", first_pitch_absolute=False):
                         for p in getpitches(context()):
                             # remove the \octaveCheck
                             lastPitch = p
-                            end = (p.accidental_token or p.octave_token or p.note_token).end
+                            end = (
+                                p.accidental_token or p.octave_token or p.note_token).end
                             del document[pos:end]
                             break
                     else:
@@ -156,7 +158,7 @@ def rel2abs(cursor, language="nederlands", first_pitch_absolute=False):
                     for p in getpitches(context()):
                         makeAbsolute(p, chord[-1])
                         chord.append(p)
-                    lastPitch = chord[:2][-1] # same or first
+                    lastPitch = chord[:2][-1]  # same or first
                 elif isinstance(t, ly.pitch.Pitch):
                     makeAbsolute(t, lastPitch)
                     lastPitch = t
@@ -168,10 +170,8 @@ def rel2abs(cursor, language="nederlands", first_pitch_absolute=False):
         elif isinstance(t, ly.pitch.Pitch):
             # Handle just one pitch
             makeAbsolute(t, lastPitch)
-    
+
     # Do it!
     with cursor.document as document:
         for t in tsource:
             pass
-
-

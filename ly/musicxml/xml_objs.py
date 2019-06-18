@@ -53,12 +53,14 @@ from __future__ import print_function
 
 from fractions import Fraction
 
+
 class IterateXmlObjs():
     """
     A ly.musicxml.xml_objs.Score object is iterated and the Music XML node tree
     is constructed.
 
     """
+
     def __init__(self, score, musxml, div):
         """Create the basic score information, and initiate the
         iteration of the parts."""
@@ -122,7 +124,8 @@ class IterateXmlObjs():
     def new_xml_bar_attr(self, obj):
         """Create bar attribute xml-nodes."""
         if obj.has_attr():
-            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, obj.divs)
+            self.musxml.new_bar_attr(
+                obj.clef, obj.time, obj.key, obj.mode, obj.divs)
         if obj.repeat:
             self.musxml.add_barline(obj.barline, obj.repeat)
         elif obj.barline:
@@ -131,7 +134,8 @@ class IterateXmlObjs():
             self.musxml.add_staves(obj.staves)
         if obj.multiclef:
             for mc in obj.multiclef:
-                self.musxml.add_clef(sign=mc[0][0], line=mc[0][1], nr=mc[1], oct_ch=mc[0][2])
+                self.musxml.add_clef(
+                    sign=mc[0][0], line=mc[0][1], nr=mc[1], oct_ch=mc[0][2])
         if obj.tempo:
             self.musxml.create_tempo(obj.tempo.text, obj.tempo.metr,
                                      obj.tempo.midi, obj.tempo.dots)
@@ -140,13 +144,15 @@ class IterateXmlObjs():
         """Xml-nodes before note."""
         self._add_dynamics([d for d in obj.dynamic if d.before])
         if obj.oct_shift and not obj.oct_shift.octdir == 'stop':
-            self.musxml.add_octave_shift(obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
+            self.musxml.add_octave_shift(
+                obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
 
     def after_note(self, obj):
         """Xml-nodes after note."""
         self._add_dynamics([d for d in obj.dynamic if not d.before])
         if obj.oct_shift and obj.oct_shift.octdir == 'stop':
-            self.musxml.add_octave_shift(obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
+            self.musxml.add_octave_shift(
+                obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
 
     def _add_dynamics(self, dyns):
         """Add XML nodes for list of Dynamics objects."""
@@ -164,8 +170,14 @@ class IterateXmlObjs():
         """Nodes generic for both notes and rests."""
         if obj.tuplet:
             for t in obj.tuplet:
-                self.musxml.tuplet_note(t.fraction, obj.duration, t.ttype, t.nr,
-                                        self.divisions, t.acttype, t.normtype)
+                self.musxml.tuplet_note(
+                    t.fraction,
+                    obj.duration,
+                    t.ttype,
+                    t.nr,
+                    self.divisions,
+                    t.acttype,
+                    t.normtype)
         if obj.staff and not obj.skip:
             self.musxml.add_staff(obj.staff)
         if obj.other_notation:
@@ -175,11 +187,26 @@ class IterateXmlObjs():
         """Create note specific xml-nodes."""
         divdur = self.count_duration(obj.duration, self.divisions)
         if isinstance(obj, Unpitched):
-            self.musxml.new_unpitched_note(obj.base_note, obj.octave, obj.type, divdur,
-                obj.voice, obj.dot, obj.chord, obj.grace)
+            self.musxml.new_unpitched_note(
+                obj.base_note,
+                obj.octave,
+                obj.type,
+                divdur,
+                obj.voice,
+                obj.dot,
+                obj.chord,
+                obj.grace)
         else:
-            self.musxml.new_note(obj.base_note, obj.octave, obj.type, divdur,
-                obj.alter, obj.accidental_token, obj.voice, obj.dot, obj.chord,
+            self.musxml.new_note(
+                obj.base_note,
+                obj.octave,
+                obj.type,
+                divdur,
+                obj.alter,
+                obj.accidental_token,
+                obj.voice,
+                obj.dot,
+                obj.chord,
                 obj.grace)
         for t in obj.tie:
             self.musxml.tie_note(t)
@@ -190,7 +217,8 @@ class IterateXmlObjs():
         if obj.ornament:
             self.musxml.new_simple_ornament(obj.ornament)
         if obj.adv_ornament:
-            self.musxml.new_adv_ornament(obj.adv_ornament[0], obj.adv_ornament[1])
+            self.musxml.new_adv_ornament(
+                obj.adv_ornament[0], obj.adv_ornament[1])
         if obj.tremolo[1]:
             self.musxml.add_tremolo(obj.tremolo[0], obj.tremolo[1])
         if obj.gliss:
@@ -214,18 +242,19 @@ class IterateXmlObjs():
             self.musxml.add_skip(divdur)
         else:
             self.musxml.new_rest(divdur, obj.type, obj.pos,
-            obj.dot, obj.voice)
+                                 obj.dot, obj.voice)
 
     def count_duration(self, base_scaling, divs):
         base = base_scaling[0]
         scaling = base_scaling[1]
-        duration = divs*4*base
+        duration = divs * 4 * base
         duration = duration * scaling
         return int(duration)
 
 
 class Score():
     """Object that keep track of a whole score."""
+
     def __init__(self):
         self.partlist = []
         self.title = None
@@ -255,15 +284,25 @@ class Score():
 
         """
         ind = "  "
+
         def debug_part(p):
-            print("Score part:"+p.name)
+            print("Score part:" + p.name)
             for n, b in enumerate(p.barlist):
-                print(ind+"Bar nr: "+str(n+1))
+                print(ind + "Bar nr: " + str(n + 1))
                 for obj in b.obj_list:
-                    print(ind+ind+repr(obj))
+                    print(ind + ind + repr(obj))
                     for a in attr:
                         try:
-                            print(ind+ind+ind+a+':'+repr(getattr(obj, a)))
+                            print(
+                                ind
+                                + ind
+                                + ind
+                                + a
+                                + ':'
+                                + repr(
+                                    getattr(
+                                        obj,
+                                        a)))
                         except AttributeError:
                             pass
 
@@ -271,7 +310,7 @@ class Score():
             if hasattr(g, 'barlist'):
                 debug_part(g)
             else:
-                print("Score group:"+g.name)
+                print("Score group:" + g.name)
                 for pg in g.partlist:
                     debug_group(pg)
 
@@ -281,6 +320,7 @@ class Score():
 
 class ScorePartGroup():
     """Object to keep track of part group."""
+
     def __init__(self, num, bracket):
         self.bracket = bracket
         self.partlist = []
@@ -300,6 +340,7 @@ class ScorePartGroup():
 
 class ScoreSection():
     """ object to keep track of music section """
+
     def __init__(self, name, glob=False):
         self.name = name
         self.barlist = []
@@ -337,29 +378,32 @@ class ScoreSection():
                     elif tie:
                         if obj.tie:
                             tie = False
-                    # If not a slurred/tied note, begins slurs/ties if needed and adds lyrics
+                    # If not a slurred/tied note, begins slurs/ties if needed
+                    # and adds lyrics
                     else:
                         if obj.slur and slurOn:
                             slur = True
                         if obj.tie and slurOn:
                             tie = True
                         try:
-                            l = lyrics.barlist[i]
+                            lyr = lyrics.barlist[i]
                         except IndexError:
                             break
-                        if l[-1] == "slurOff" or l[-2] == "slurOff":
+                        if lyr[-1] == "slurOff" or lyr[-2] == "slurOff":
                             slurOn = False
-                        elif l[-1] == "slurOn" or l[-2] == "slurOn":
+                        elif lyr[-1] == "slurOn" or lyr[-2] == "slurOn":
                             slurOn = True
-                        if l != 'skip':
-                            l[0] = l[0].replace('~', chr(0x203f))  # Turns ~ into undertie
-                            obj.add_lyric(l)
+                        if lyr != 'skip':
+                            # Turns ~ into undertie
+                            lyr[0] = lyr[0].replace('~', chr(0x203f))
+                            obj.add_lyric(lyr)
                         i += 1
 
 
 class Snippet(ScoreSection):
     """ Short section intended to be merged.
     Holds reference to the barlist to be merged into."""
+
     def __init__(self, name, merge_into):
         ScoreSection.__init__(self, name)
         self.merge_barlist = merge_into
@@ -368,6 +412,7 @@ class Snippet(ScoreSection):
 class LyricsSection(ScoreSection):
     """ Holds the lyrics information. Will eventually be merged to
     the corresponding note in the section set by the voice id. """
+
     def __init__(self, name, voice_id):
         ScoreSection.__init__(self, name)
         self.voice_id = voice_id
@@ -375,6 +420,7 @@ class LyricsSection(ScoreSection):
 
 class ScorePart(ScoreSection):
     """ object to keep track of part """
+
     def __init__(self, staves=0, part_id=None, to_part=None, name=''):
         ScoreSection.__init__(self, name)
         self.part_id = part_id
@@ -450,6 +496,7 @@ class ScorePart(ScoreSection):
 class Bar():
     """ Representing the bar/measure.
     Contains also information about how complete it is."""
+
     def __init__(self):
         self.obj_list = []
         self.list_full = False
@@ -521,6 +568,7 @@ class Bar():
 
 class BarMus():
     """ Common class for notes and rests. """
+
     def __init__(self, duration, voice=1):
         self.duration = duration
         self.type = None
@@ -574,6 +622,7 @@ class BarMus():
 
 class OctaveShift():
     """Class for octave shifts."""
+
     def __init__(self, plac, octdir, size):
         self.plac = plac
         self.octdir = octdir
@@ -582,6 +631,7 @@ class OctaveShift():
 
 class Dynamics():
     """Stores information about dynamics. """
+
     def __init__(self, sign, before=True):
         self.before = before
         self.sign = sign
@@ -609,6 +659,7 @@ class DynamicsDashes(Dynamics):
 
 class Tuplet():
     """Stores information about tuplet."""
+
     def __init__(self, fraction, ttype, nr, acttype, normtype):
         self.fraction = fraction
         self.ttype = ttype
@@ -616,8 +667,10 @@ class Tuplet():
         self.acttype = acttype
         self.normtype = normtype
 
+
 class Slur():
     """Stores information about slur."""
+
     def __init__(self, nr, slurtype):
         self.nr = nr
         self.slurtype = slurtype
@@ -630,6 +683,7 @@ class Slur():
 
 class BarNote(BarMus):
     """ object to keep track of note parameters """
+
     def __init__(self, pitch_note, alter, accidental, duration, voice=1):
         BarMus.__init__(self, duration, voice)
         self.base_note = pitch_note.upper()
@@ -678,7 +732,7 @@ class BarNote(BarMus):
     def set_grace(self, slash):
         self.grace = (1, slash)
 
-    def set_gliss(self, line, endtype = "start", nr=1):
+    def set_gliss(self, line, endtype="start", nr=1):
         if not line:
             line = "solid"
         self.gliss = (line, endtype, nr)
@@ -706,6 +760,7 @@ class BarNote(BarMus):
 
 class Unpitched(BarNote):
     """Object to keep track of unpitched notes."""
+
     def __init__(self, duration, step=None, voice=1):
         BarNote.__init__(self, 'B', 0, "", duration, voice=1)
         self.octave = 4
@@ -715,6 +770,7 @@ class Unpitched(BarNote):
 
 class BarRest(BarMus):
     """ object to keep track of different rests and skips """
+
     def __init__(self, duration, voice=1, show_type=True, skip=False, pos=0):
         BarMus.__init__(self, duration, voice)
         self.show_type = show_type
@@ -737,6 +793,7 @@ class BarRest(BarMus):
 
 class BarAttr():
     """ object that keep track of bar attributes, e.g. time sign, clef, key etc """
+
     def __init__(self):
         self.key = None
         self.time = 0
@@ -802,14 +859,17 @@ class BarAttr():
         if barattr.tempo is not None and (override or self.tempo is None):
             self.tempo = barattr.tempo
 
+
 class BarBackup():
     """ Object that stores duration for backup """
+
     def __init__(self, duration):
         self.duration = duration
 
 
 class TempoDir():
     """ Object that stores tempo direction information """
+
     def __init__(self, unit, unittype, beats, dots, text):
         if unittype:
             self.metr = unittype, beats
@@ -825,10 +885,10 @@ class TempoDir():
         if dots:
             import math
             den = int(math.pow(2, dots))
-            num = int(math.pow(2, dots+1)-1)
+            num = int(math.pow(2, dots + 1) - 1)
             u *= Fraction(num, den)
-        mult = 4*u
-        return float(Fraction(beats)*mult)
+        mult = 4 * u
+        return float(Fraction(beats) * mult)
 
 
 ##
@@ -844,6 +904,7 @@ def dur2lines(dur):
         return 3
     else:
         return 0
+
 
 def convert_barl(bl):
     if bl == '|':

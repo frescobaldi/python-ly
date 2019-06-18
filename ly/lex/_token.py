@@ -48,18 +48,19 @@ class Token(slexer.Token):
 
 class patternproperty(object):
     """Property that caches the return value of its function and returns that next time.
-    
+
     Use this if the rx attribute (the pattern string to match tokens for) of a Token subclass
     is already costly to create and you want it created lazily (i.e. only when parsing starts):
-    
+
     @patternproperty
     def rx():
         ...complicated function returning the regular expression string...
-    
+
     """
+
     def __init__(self, func):
         self.func = func
-        
+
     def __get__(self, instance, owner):
         try:
             return self.rx
@@ -75,12 +76,14 @@ class Unparsed(Token):
 # some token types with special behaviour:
 class Item(Token):
     """A token that decreases the argument count of the current parser."""
+
     def update_state(self, state):
         state.endArgument()
 
 
 class Leaver(Token):
     """A token that leaves the current parser."""
+
     def update_state(self, state):
         state.leave()
 
@@ -103,8 +106,8 @@ class Comment(Token):
 
 class LineComment(Comment):
     """Base class for items that are a whole line comment."""
-    
-    
+
+
 class BlockComment(Comment):
     """Base class for tokens that belong to a block/multiline comment."""
 
@@ -119,47 +122,48 @@ class BlockCommentEnd(BlockComment):
 
 class String(Token):
     """Base class for tokens that belong to a quote-delimited string."""
-    
-    
+
+
 class StringStart(String):
     """Base class for tokens that start a quote-delimited string."""
-    
-    
+
+
 class StringEnd(String):
     """Base class for tokens that end a quote-delimited string."""
-    
-    
+
+
 class Character(Token):
     """Base class for tokens that are an (escaped) character."""
-    
-    
+
+
 class Numeric(Token):
     """Base class for tokens that are a numerical value."""
-    
-    
+
+
 class Error(Token):
     """Base class for tokens that represent erroneous input."""
 
 
-# some mixin classes that make special handling of tokens possible besides correct parsing:
+# some mixin classes that make special handling of tokens possible besides
+# correct parsing:
 
 # MatchEnd and MatchStart can be used by parenthesis/brace matcher.
 # the matchname class attribute defines the type, so that it is independent
 # of the way other types could be nested.
 class MatchStart(object):
     """Mixin class for tokens that have a matching token forward in the text.
-    
+
     The matchname attribute should give a unique name.
-    
+
     """
     matchname = ""
 
 
 class MatchEnd(object):
     """Mixin class for tokens that have a matching token backward in the text.
-    
+
     The matchname attribute should give a unique name.
-    
+
     """
     matchname = ""
 
@@ -171,5 +175,3 @@ class Indent(object):
 
 class Dedent(object):
     """Mixin class for tokens that have the text on the next line indent less."""
-
-

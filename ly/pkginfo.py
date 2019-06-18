@@ -52,4 +52,3 @@ url = "https://github.com/wbsoft/python-ly"
 
 #: license
 license = "GPL"
-

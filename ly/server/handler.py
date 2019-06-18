@@ -33,8 +33,9 @@ import copy
 # Prototype (in JavaScript sense) from which each command copies its options
 default_opts = None
 
+
 class RequestHandler(BaseHTTPRequestHandler):
-    
+
     def create_command(self, cmd):
         """
         Parse one command from the JSON data, plus optionally some commands to
@@ -42,35 +43,35 @@ class RequestHandler(BaseHTTPRequestHandler):
         Raises exceptions upon faulty data.
         """
         from . import command
-        
+
         result = []
-        
+
         # set variables before executing the command
         if 'variables' in cmd:
             for v in cmd['variables']:
                 result.append(command.set_variable(
                     v + "=" + cmd['variables'][v]))
-        
+
         # instantiate the command.
-        if not 'command' in cmd:
-            raise ValueError("Malformed JSON data in request body (missing 'command' field).\n" +
-                            "Object:\n" + json.dumps(cmd))
+        if 'command' not in cmd:
+            raise ValueError(
+                "Malformed JSON data in request body (missing 'command' field).\n"
+                + "Object:\n"
+                + json.dumps(cmd))
         cmd_name = cmd['command'].replace('-', '_')
-        if not cmd_name in command.known_commands:
+        if cmd_name not in command.known_commands:
             raise ValueError("unknown command: " + cmd_name)
-        
+
         # add arguments to command if present.
         args = cmd.get('args', '')
         args = [args] if args else []
         try:
             result.append(getattr(command, cmd_name)(*args))
         except TypeError as ae:
-            raise ValueError("Error creating command {cmd} with args {args}.\n{msg}".format(
-                            cmd = cmd_name,
-                            args = ", ".join(args),
-                            msg = str(ae)))
+            raise ValueError(
+                "Error creating command {cmd} with args {args}.\n{msg}".format(
+                    cmd=cmd_name, args=", ".join(args), msg=str(ae)))
         return result
-        
 
     def process_options(self, opts):
         """
@@ -85,8 +86,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             else:
                 result.set_variable(opt, opts[opt])
         return result
-        
-        
+
     def process_json_request(self, request):
         """
         Configure the action(s) to be taken, based on the JSON object.
@@ -97,12 +97,12 @@ class RequestHandler(BaseHTTPRequestHandler):
         # set up an Options object and
         # override defaults with given options
         opts = self.process_options(request.get('options', []))
-        
+
         # set up commands
         commands = []
         for c in request['commands']:
-            commands.extend(self.create_command(c))        
-        
+            commands.extend(self.create_command(c))
+
         # create document from passed data
         import ly.document
         doc = ly.document.Document(request['data'], opts.mode)
@@ -117,31 +117,30 @@ class RequestHandler(BaseHTTPRequestHandler):
             'info': [],
             'exports': []
         }
-        
+
         # run commands, which modify data in-place
         for c in commands:
             c.run(opts, data)
-        
+
         data['doc']['content'] = data['doc']['content'].text()
         return data
 
-        
     def read_json_request(self):
         """
         Returns the message body parsed to a dictionary
-        from JSON data. Raises 
+        from JSON data. Raises
         - RuntimeWarning when no JSON data is present
         - ValueError when JSON parsing fails
         """
-        
+
         content_len = int(self.headers['content-length'])
         if content_len == 0:
-            #TODO: When testing is over remove (or comment out)
+            # TODO: When testing is over remove (or comment out)
             # the following two lines and raise the exception instead.
             from . import testjson
             return testjson.test_request
             raise RuntimeWarning("No JSON data in request body")
-        
+
         req_body = self.rfile.read(content_len)
         # Python2 has string, Python3 has bytestream
         if not isinstance(req_body, str):
@@ -152,21 +151,20 @@ class RequestHandler(BaseHTTPRequestHandler):
             request = json.loads(req_body)
         except Exception as e:
             raise ValueError("Malformed JSON data in request body:\n" + str(e))
-        if not 'commands' in request:
-            raise ValueError("Malformed JSON request. Missing 'commands' property")
-        if not 'data' in request:
+        if 'commands' not in request:
+            raise ValueError(
+                "Malformed JSON request. Missing 'commands' property")
+        if 'data' not in request:
             raise ValueError("Malformed JSON request. Missing 'data' property")
         return request
 
-
-    
     ########################
-    ### Request handlers ###
+    #   Request handlers   #
     ########################
 
     def do_POST(self):
         """
-        A POST request is expected to contain the task to be executed 
+        A POST request is expected to contain the task to be executed
         as a JSON object in the request body.
         The POST handler (currently) ignores the URL.
         """
@@ -178,7 +176,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             # use HTML templates
             self.send_error(400, format(e))
             return
-        
+
         # Send successful response
         self.send_response(200)
         self.send_header('Content-type', 'application/json')

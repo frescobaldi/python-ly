@@ -29,6 +29,7 @@ from __future__ import unicode_literals
 import ly.document
 import ly.lex.lilypond
 
+
 def replace_rest(cursor, replace_token):
     """Replace full rests (r) with optional token. """
     source = ly.document.Source(cursor, True, tokens_with_position=True)
@@ -37,6 +38,7 @@ def replace_rest(cursor, replace_token):
             if isinstance(token, ly.lex.lilypond.Rest):
                 if token == 'r':
                     d[token.pos:token.end] = replace_token
+
 
 def replace_fmrest(cursor, replace_token):
     """Replace full measure rests (R) with optional token. """
@@ -47,6 +49,7 @@ def replace_fmrest(cursor, replace_token):
                 if token == 'R':
                     d[token.pos:token.end] = replace_token
 
+
 def replace_spacer(cursor, replace_token):
     """Replace spacer rests (s) with optional token. """
     source = ly.document.Source(cursor, True, tokens_with_position=True)
@@ -54,6 +57,7 @@ def replace_spacer(cursor, replace_token):
         for token in source:
             if isinstance(token, ly.lex.lilypond.Spacer):
                 d[token.pos:token.end] = replace_token
+
 
 def replace_restcomm(cursor, replace_token):
     r"""Replace rests by rest command (\rest) with optional token. """
@@ -73,7 +77,7 @@ def replace_restcomm(cursor, replace_token):
                     rest_tokens.append(token)
                     yield rest_tokens
                     rest_tokens = None
-                    
+
     source = ly.document.Source(cursor, True, tokens_with_position=True)
     with cursor.document as d:
         for rt in get_comm_rests(source):
@@ -83,4 +87,3 @@ def replace_restcomm(cursor, replace_token):
             d[note.pos:note.end] = replace_token
             del d[space.pos:space.end]
             del d[comm.pos:comm.end]
-

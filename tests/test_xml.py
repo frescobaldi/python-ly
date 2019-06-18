@@ -12,9 +12,12 @@ import glob
 def test_all():
     """Test all files in test_xml_files"""
     filebase = os.path.join(os.path.dirname(__file__), 'test_xml_files')
-    # Help from https://www.mkyong.com/python/python-how-to-list-all-files-in-a-directory/
-    # Searches test_xml_files directory for all lilypond files and extracts their name (without .ly)
-    test_list = [re.search(r'([^/]*)\.ly', f).group(1) for f in glob.glob(filebase + "/*.ly")]
+    # help from https://www.mkyong.com/python/
+    #     python-how-to-list-all-files-in-a-directory/
+    # Searches test_xml_files directory for all lilypond files and extracts
+    # their name (without .ly)
+    test_list = [re.search(r'([^/]*)\.ly', f).group(1)
+                 for f in glob.glob(filebase + "/*.ly")]
     for test in test_list:
         print("Testing {}.ly...".format(test))
         compare_output(test)
@@ -27,16 +30,18 @@ def ly_to_xml(filename):
     with open(filename, 'r', encoding='utf-8') as lyfile:
         writer.parse_text(lyfile.read())
     xml = writer.musicxml()
-    return (ly.musicxml.create_musicxml.xml_decl_txt.format(encoding='utf-8') + "\n"
-        + ly.musicxml.create_musicxml.doctype_txt + "\n"
-        + xml.tostring(encoding='unicode'))
+    return (
+        ly.musicxml.create_musicxml.xml_decl_txt.format(encoding='utf-8')
+        + "\n" + ly.musicxml.create_musicxml.doctype_txt
+        + "\n" + xml.tostring(encoding='unicode'))
 
 
 def read_expected_xml(filename):
     """Return string with expected XML from file."""
     with open(filename, 'r', encoding='utf-8') as xmlfile:
         output = xmlfile.read()
-    # Replace date and python-ly version in XML file with today's date and current version
+    # Replace date and python-ly version in XML file with today's date and
+    # current version
     output = re.sub(r'\d{4}-\d{2}-\d{2}', str(datetime.date.today()), output)
     output = re.sub(r'python-ly \d*\.\d*\.\d*', "python-ly " + ly.pkginfo.version, output)
     return output
@@ -57,8 +62,12 @@ def compare_output(filename):
 def validate_xml(xml):
     """Validate XML against XSD file."""
     # see https://www.w3.org/2011/prov/track/issues/480
-    # and https://stackoverflow.com/questions/49534700/how-to-use-xlink-data-types-in-xsd
-    # and https://stackoverflow.com/questions/15830421/xml-unicode-strings-with-encoding-declaration-are-not-supported
+    # and
+    # https://stackoverflow.com/questions/
+    #         49534700/how-to-use-xlink-data-types-in-xsd
+    # and
+    # https://stackoverflow.com/questions/15830421/
+    #     xml-unicode-strings-with-encoding-declaration-are-not-supported
     xml = xml.encode('utf-8')
     xsdname = os.path.join(os.path.dirname(__file__), 'musicxml.xsd')
     xmlschema = etree.XMLSchema(file=xsdname)
@@ -84,5 +93,5 @@ def assert_multi_line_equal(first, second, msg=None):
 
 
 if __name__ == "__main__":
-    #sys.exit(main(sys.argv))
+    # sys.exit(main(sys.argv))
     test_all()

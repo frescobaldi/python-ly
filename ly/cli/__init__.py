@@ -20,4 +20,3 @@
 """
 The commandline interface of the 'ly' command.
 """
-
