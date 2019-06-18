@@ -44,7 +44,6 @@ class _command(object):
     yourself.
 
     """
-
     def __init__(self):
         pass
 
@@ -55,7 +54,7 @@ class _command(object):
     def get_absolute(opts, cursor):
         """Utility function to determine whether the first pitch in a relative should
         be regarded as absolute (LilyPond 2.18+ behaviour).
-
+        
         """
         if opts.rel_absolute is None:
             return ly.docinfo.DocInfo(cursor.document).version() >= (2, 18)
@@ -65,7 +64,6 @@ class _command(object):
 
 class set_variable(_command):
     """set a variable to a value"""
-
     def __init__(self, arg):
         self.name, self.value = arg.split('=', 1)
 
@@ -75,7 +73,6 @@ class set_variable(_command):
 
 class _info_command(_command):
     """base class for commands that print some output to stdout."""
-
     def run(self, opts, cursor, output):
         info = ly.docinfo.DocInfo(cursor.document)
         text = self.get_info(info)
@@ -95,21 +92,18 @@ class _info_command(_command):
 
 class mode(_info_command):
     """print mode to stdout"""
-
     def get_info(self, info):
         return info.mode()
 
 
 class version(_info_command):
     """print version to stdout"""
-
     def get_info(self, info):
         return info.version_string()
 
 
 class language(_info_command):
     """print language to stdout"""
-
     def get_info(self, info):
         return info.language()
 
@@ -121,7 +115,6 @@ class _edit_command(_command):
 
 class indent(_edit_command):
     """run the indenter"""
-
     def indenter(self, opts):
         """Get a ly.indent.Indenter initialized with our options."""
         i = ly.indent.Indenter()
@@ -135,14 +128,12 @@ class indent(_edit_command):
 
 class reformat(indent):
     """reformat the document"""
-
     def run(self, opts, cursor, output):
         ly.reformat.reformat(cursor, self.indenter(opts))
 
 
 class translate(_edit_command):
     """translate pitch names"""
-
     def __init__(self, language):
         if language not in ly.pitch.pitchInfo:
             raise ValueError()
@@ -151,52 +142,42 @@ class translate(_edit_command):
     def run(self, opts, cursor, output):
         import ly.pitch.translate
         try:
-            changed = ly.pitch.translate.translate(
-                cursor, self.language, opts.default_language)
+            changed = ly.pitch.translate.translate(cursor, self.language, opts.default_language)
         except ly.pitch.PitchNameNotAvailable:
             sys.stderr.write(
                 "warning: transate: pitch names not available in \"{0}\"\n"
-                "  skipping file: {1}\n".format(
-                    self.language, cursor.document.filename))
+                "  skipping file: {1}\n".format(self.language, cursor.document.filename))
             return
         if not changed:
             version = ly.docinfo.DocInfo(cursor.document).version()
-            ly.pitch.translate.insert_language(
-                cursor.document, self.language, version)
+            ly.pitch.translate.insert_language(cursor.document, self.language, version)
 
 
 class transpose(_edit_command):
     """transpose music"""
-
     def __init__(self, arg):
         result = []
         for pitch, octave in re.findall(r"([a-z]+)([,']*)", arg):
             r = ly.pitch.pitchReader("nederlands")(pitch)
             if r:
-                result.append(ly.pitch.Pitch(
-                    *r, octave=ly.pitch.octaveToNum(octave)))
+                result.append(ly.pitch.Pitch(*r, octave=ly.pitch.octaveToNum(octave)))
         self.from_pitch, self.to_pitch = result
 
     def run(self, opts, cursor, output):
         absolute = self.get_absolute(opts, cursor)
         import ly.pitch.transpose
-        transposer = ly.pitch.transpose.Transposer(
-            self.from_pitch, self.to_pitch)
+        transposer = ly.pitch.transpose.Transposer(self.from_pitch, self.to_pitch)
         try:
-            ly.pitch.transpose.transpose(
-                cursor, transposer, opts.default_language, absolute)
+            ly.pitch.transpose.transpose(cursor, transposer, opts.default_language, absolute)
         except ly.pitch.PitchNameNotAvailable:
-            language = ly.docinfo.DocInfo(
-                cursor.document).language() or opts.default_language
+            language = ly.docinfo.DocInfo(cursor.document).language() or opts.default_language
             sys.stderr.write(
                 "warning: transpose: pitch names not available in \"{0}\"\n"
-                "  skipping file: {1}\n".format(
-                    language, cursor.document.filename))
+                "  skipping file: {1}\n".format(language, cursor.document.filename))
 
 
 class rel2abs(_edit_command):
     """convert relative music to absolute"""
-
     def run(self, opts, cursor, output):
         absolute = self.get_absolute(opts, cursor)
         import ly.pitch.rel2abs
@@ -205,36 +186,29 @@ class rel2abs(_edit_command):
 
 class abs2rel(_edit_command):
     """convert absolute music to relative"""
-
     def run(self, opts, cursor, output):
         absolute = self.get_absolute(opts, cursor)
         import ly.pitch.abs2rel
-        ly.pitch.abs2rel.abs2rel(
-            cursor, opts.default_language, opts.rel_startpitch, absolute)
+        ly.pitch.abs2rel.abs2rel(cursor, opts.default_language, opts.rel_startpitch, absolute)
 
 
 class simplify_accidentals(_edit_command):
     """replace notes with accidentals as much as possible with their natural neighbors"""
-
     def run(self, opts, cursor, output):
         absolute = self.get_absolute(opts, cursor)
         import ly.pitch.transpose
         transposer = ly.pitch.transpose.Simplifier()
         try:
-            ly.pitch.transpose.transpose(
-                cursor, transposer, opts.default_language, absolute)
+            ly.pitch.transpose.transpose(cursor, transposer, opts.default_language, absolute)
         except ly.pitch.PitchNameNotAvailable:
-            language = ly.docinfo.DocInfo(
-                cursor.document).language() or opts.default_language
+            language = ly.docinfo.DocInfo(cursor.document).language() or opts.default_language
             sys.stderr.write(
                 "warning: simplify_accidentals: pitch names not available in \"{0}\"\n"
-                "  skipping file: {1}\n".format(
-                    language, cursor.document.filename))
+                "  skipping file: {1}\n".format(language, cursor.document.filename))
 
 
 class _export_command(_command):
     """Command that exports to a file."""
-
     def __init__(self, output=None):
         self.output = output
 
@@ -257,7 +231,6 @@ class musicxml(_export_command):
 
 class write(_command):
     """write the source file."""
-
     def __init__(self, output=None):
         self.output = output
 
@@ -278,7 +251,6 @@ class write(_command):
 
 class highlight(_export_command):
     """write syntax colored HTML."""
-
     def run(self, opts, cursor, output):
         import ly.colorize
         w = ly.colorize.HtmlWriter()
@@ -304,3 +276,4 @@ class highlight(_export_command):
 
 
 hl = highlight
+

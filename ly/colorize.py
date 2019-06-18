@@ -58,8 +58,7 @@ css_class = collections.namedtuple("css_class", "mode name base")
 
 
 class Mapper(dict):
-    """Maps token classes to arbitrary values,
-    which can be highlighting styles.
+    """Maps token classes to arbitrary values, which can be highlighting styles.
 
     Mapper behaves like a dict, you set items with a token class as key to an
     arbitrary value.
@@ -70,7 +69,6 @@ class Mapper(dict):
     up requests for other tokens.
 
     """
-
     def __getitem__(self, token):
         cls = type(token)
         try:
@@ -89,16 +87,13 @@ class Mapper(dict):
 
 
 def default_mapping():
-    """Return a good default mapping from token class(es)
-    to style and default style, per group.
-
-    """
+    """Return a good default mapping from token class(es) to style and default style, per group."""
     from ly.lex import lilypond
     from ly.lex import scheme
     from ly.lex import html
     from ly.lex import texinfo
-    # from ly.lex import latex
-    # from ly.lex import docbook
+    #from ly.lex import latex
+    #from ly.lex import docbook
     from ly.lex import mup
 
     return (
@@ -107,13 +102,11 @@ def default_mapping():
             style('command', 'function', (lilypond.Command, lilypond.Skip)),
             style('pitch', None, (lilypond.MusicItem,)),
             style('octave', None, (lilypond.Octave,)),
-            style('accidental', None,
-                  (lilypond.Accidental, lilypond.FigureAccidental)),
+            style('accidental', None, (lilypond.Accidental, lilypond.FigureAccidental)),
             style('duration', None, (lilypond.Duration,)),
             style('dynamic', None, (lilypond.Dynamic,)),
             style('check', None, (lilypond.OctaveCheck, lilypond.PipeSymbol)),
-            style('articulation', None,
-                  (lilypond.Direction, lilypond.Articulation)),
+            style('articulation', None, (lilypond.Direction, lilypond.Articulation)),
             style('fingering', None, (lilypond.Fingering,)),
             style('stringnumber', None, (lilypond.StringNumber,)),
             style('slur', None, (lilypond.Slur,)),
@@ -176,7 +169,7 @@ def default_mapping():
             style('macro', 'variable', (mup.Macro,)),
             style('preprocessor', 'keyword', (mup.Preprocessor,)),
         )),
-    )  # end of mapping
+    ) # end of mapping
 
 
 default_scheme = {
@@ -257,7 +250,7 @@ default_scheme = {
     },
     'mup': {
     },
-}  # end of default_css_styles
+} # end of default_css_styles
 
 
 def get_tokens(cursor):
@@ -329,9 +322,9 @@ def css_mapper(mapping=None):
     if mapping is None:
         mapping = default_mapping()
     return Mapper((cls, css_class(mode, style.name, style.base))
-                  for mode, styles in mapping
-                  for style in styles
-                  for cls in style.classes)
+                        for mode, styles in mapping
+                            for style in styles
+                                for cls in style.classes)
 
 
 def css_dict(css_style, scheme=default_scheme):
@@ -376,10 +369,7 @@ def css_group(selector, d):
 
 
 def format_css_span_class(css_style):
-    """Return a string like 'class="mode-style base"'
-    for the specified style.
-
-    """
+    """Return a string like 'class="mode-style base"' for the specified style."""
     c = css_style.mode + '-' + css_style.name
     if css_style.base:
         c += ' ' + css_style.base
@@ -388,21 +378,19 @@ def format_css_span_class(css_style):
 
 class css_style_attribute_formatter(object):
     """Return the inline style attribute for a specified style."""
-
     def __init__(self, scheme=default_scheme):
         self.scheme = scheme
 
     def __call__(self, css_style):
         d = css_dict(css_style, self.scheme)
         if d:
-            return 'style="{0}"'.format(
-                ' '.join(map(css_item, sorted(d.items()))))
+            return 'style="{0}"'.format(' '.join(map(css_item, sorted(d.items()))))
 
 
 def format_stylesheet(scheme=default_scheme):
     """Return a formatted stylesheet for the stylesheet scheme dictionary."""
     sheet = []
-    def key(i): return '' if i[0] is None else i[0]
+    key = lambda i: '' if i[0] is None else i[0]
     for mode, styles in sorted(scheme.items(), key=key):
         if styles:
             sheet.append('/* {0} */'.format(
@@ -434,7 +422,7 @@ def html_format_attrs(d):
 
     """
     return ''.join(' {0}="{1}"'.format(
-        k, html_escape_attr(format(v))) for k, v in d.items())
+            k, html_escape_attr(format(v))) for k, v in d.items())
 
 
 def html(cursor, mapper, span=format_css_span_class):
@@ -459,8 +447,7 @@ def html(cursor, mapper, span=format_css_span_class):
 
 
 def add_line_numbers(cursor, html, linenum_attrs=None, document_attrs=None):
-    """Combines the html (returned by html())
-    with the line numbers in a HTML table.
+    """Combines the html (returned by html()) with the line numbers in a HTML table.
 
     The linenum_attrs are put in the <td> tag for the line numbers. The
     default value is: {"style": "background: #eeeeee;"}. The document_attrs
@@ -470,23 +457,19 @@ def add_line_numbers(cursor, html, linenum_attrs=None, document_attrs=None):
     and the id for the document <td> is set to "document".
 
     """
-    linenum_attrs = dict(linenum_attrs) if linenum_attrs else {
-        "style": "background: #eeeeee;"}
+    linenum_attrs = dict(linenum_attrs) if linenum_attrs else {"style": "background: #eeeeee;"}
     document_attrs = dict(document_attrs) if document_attrs else {}
     linenum_attrs.setdefault('id', 'linenumbers')
     document_attrs.setdefault('id', 'document')
     linenum_attrs['valign'] = 'top'
     linenum_attrs['align'] = 'right'
-    linenum_attrs['style'] = linenum_attrs.get(
-        'style', '') + 'vertical-align: top; text-align: right;'
+    linenum_attrs['style'] = linenum_attrs.get('style', '') + 'vertical-align: top; text-align: right;'
     document_attrs['valign'] = 'top'
-    document_attrs['style'] = document_attrs.get(
-        'style', '') + 'vertical-align: top;'
+    document_attrs['style'] = document_attrs.get('style', '') + 'vertical-align: top;'
 
     start_num = cursor.document.index(cursor.start_block()) + 1
     end_num = cursor.document.index(cursor.end_block()) + 1
-    linenumbers = '<pre>{0}</pre>'.format(
-        '\n'.join(map(format, range(start_num, end_num))))
+    linenumbers = '<pre>{0}</pre>'.format('\n'.join(map(format, range(start_num, end_num))))
     body = '<pre>{0}</pre>'.format(html)
     return (
         '<table border="0" cellpadding="4" cellspacing="0">'
@@ -501,8 +484,7 @@ def add_line_numbers(cursor, html, linenum_attrs=None, document_attrs=None):
             html_format_attrs(document_attrs), body)
 
 
-def format_html_document(body, title="", stylesheet=None,
-                         stylesheet_ref=None, encoding='UTF-8'):
+def format_html_document(body, title="", stylesheet=None, stylesheet_ref=None, encoding='UTF-8'):
     """Return a complete HTML document.
 
     The body is put inside body tags unchanged.  The title is html-escaped.
@@ -516,25 +498,22 @@ def format_html_document(body, title="", stylesheet=None,
     """
     css = ""
     if stylesheet_ref:
-        css += '<link rel="stylesheet" type="text/css" href="{0}"/>\n'.format(
-            html_escape_attr(stylesheet_ref))
+        css += '<link rel="stylesheet" type="text/css" href="{0}"/>\n'.format(html_escape_attr(stylesheet_ref))
     if stylesheet:
         css += '<style type="text/css">\n{0}\n</style>\n'.format(stylesheet)
     return (
-        ('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" '
-         '"http://www.w3.org/TR/html4/strict.dtd">\n')
+        '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">\n'
         '<html><head>\n'
         '<title>{title}</title>\n'
-        ('<meta http-equiv="Content-Type" content="text/html; '
-         'charset={encoding}" />\n')
+        '<meta http-equiv="Content-Type" content="text/html; charset={encoding}" />\n'
         '{css}'
         '</head>\n'
         '<body>\n{body}</body>\n</html>\n').format(
-            title=html_escape(title),
-            encoding=encoding,
-            body=body,
-            css=css,
-    )
+            title = html_escape(title),
+            encoding = encoding,
+            body = body,
+            css = css,
+        )
 
 
 class HtmlWriter(object):
@@ -610,8 +589,7 @@ class HtmlWriter(object):
             wrap_type = '#' if self.wrapper_attribute == 'id' else '.'
             css.append(css_group(wrap_type + self.document_id, doc_style))
             if self.number_lines:
-                css.append(
-                    css_group(wrap_type + self.linenumbers_id, num_style))
+                css.append(css_group(wrap_type + self.linenumbers_id, num_style))
             css.append(format_stylesheet(self.css_scheme))
 
         body = html(cursor, self.css_mapper or css_mapper(), formatter)
@@ -630,5 +608,4 @@ class HtmlWriter(object):
             css = None
         else:
             css = '\n'.join(css)
-        return format_html_document(
-            body, self.title, css, self.stylesheet_ref, self.encoding)
+        return format_html_document(body, self.title, css, self.stylesheet_ref, self.encoding)

@@ -36,7 +36,7 @@ Server Options
   -t, --timeout TIME     If set, server shuts down automatically
                          after -t seconds of inactivity
                          NOT IMPLEMENTED YET!
-
+  
 Command Options
 ===============
 
@@ -67,19 +67,19 @@ The server accepts POST requests without (currently) making use of the URL path.
 As the request body it expects a single JSON string with the following elements:
 
   ``commands`` (mandatory)
-         An array with one or more commands to be executed subsequently.
+         An array with one or more commands to be executed subsequently. 
          Each entry contains:
-
-         ``command`` (mandatory):
+    
+         ``command`` (mandatory): 
                A name for the command. It has to be one out of the list of
                available commands below.
-
+        
          ``args`` (optional):
                 If a command requires arguments (e.g. the ``transpose`` command)
                 they are given as a single string value.
 
-         ``variables`` (optional):
-                A dictionary of variable assignments. Keys have to be from the
+         ``variables`` (optional): 
+                A dictionary of variable assignments. Keys have to be from the 
                 list below, and proper value types are checked. If one or more
                 variables are given they will be set *before* the command is
                 executed. A variable may be modified again before the execution
@@ -87,12 +87,12 @@ As the request body it expects a single JSON string with the following elements:
                 variable with a value of '' unsets the variable.
 
   ``options`` (optional)
-         A dictionary of option assignments. Keys have to be from the above list
-         of Command Options, taking the long name without the leading hyphens,
+         A dictionary of option assignments. Keys have to be from the above list 
+         of Command Options, taking the long name without the leading hyphens, 
          e.g. ``{ "encoding": "UTF-16" }``.
          If an option is given here it overrides the default option given on the
          command line, but only for the current command.
-
+         
   ``data`` (mandatory)
          A single string containing the LilyPond input document.
 
@@ -108,27 +108,27 @@ JSON object with the following elements:
   ``info``
          An array of entries with the result of "info" commands (see below).
          Each entry has a ``command`` and an ``info`` field.
-
+         
   ``doc``
          An object with two fields:
-
+         
          ``content``
                 A string with the content of the document with all "edit" commands applied
                 consecutively. (If no edit commands have been specified this contains the
                 original input.
-
+         
          ``commands``
                 An array with the names of the commands that have been applied.
-
+  
   ``exports``
          An array with entries for each applied "export" command.
          Each entry has the following fields:
-
+  
          ``doc``
                 A string with the content of the converted/exported document
-
+  
          ``command``
-                The name of the applied command
+                The name of the applied command 
 
 Commands
 --------
@@ -141,23 +141,23 @@ There are three types of commands whose results are handled independently:
     - "export" commands that convert the input to another format.
       Subsequent commands are not affected by the result of export commands.
 
-
+  
 Informative commands that return information and do not change the file:
 
   ``mode``
          print the mode (guessing if not given) of the document
-
+  
   ``version``
          print the LilyPond version, if set in the document
 
   ``language``
          print the pitch name language, if set in the document
-
+  
 Commands that modify the input:
 
   ``indent``
          re-indent the file
-
+  
   ``reformat``
          reformat the file
 
@@ -191,10 +191,10 @@ Variables
 The following variables can be set to influence the behaviour of commands.
 If there is a default value, it is written between brackets:
 
-  ``mode``
+  ``mode`` 
          mode of the input to read (default automatic) can be one
          of: lilypond, scheme, latex, html, docbook, texinfo.
-
+  
   ``encoding`` [UTF-8]
          encoding to read (also set by -e argument)
 
@@ -215,7 +215,7 @@ If there is a default value, it is written between brackets:
   ``full-html`` [``True``]
         if set to True a full document with syntax-highlighted HTML
         will be exported, otherwise only the bare content wrapped in an
-        element configured by the ``wrapper-`` variables.
+        element configured by the ``wrapper-`` variables.        
 
   ``stylesheet``
          filename to reference as an external stylesheet for
@@ -257,7 +257,7 @@ Here is the basic invocation, listening on port 5432::
 Specifying port and a timeout::
 
   ly-server -p 4000 -t 5000
-
+  
 Sample Requests
 ---------------
 
@@ -285,11 +285,11 @@ be in ``result['info']``, containing ``lilypond`` in the ``info`` field and
         ],
         'data' : "\\relative c' { c ( d e f ) }"
     }
-
+    
 And a more complex example. This will first transpose the document and then
 convert the transposed version independently to highlighted HTML and MusicXML.
 Additionally it will retrieve the mode. This time the result will be in all
-three places: the transposed document in ``doc.content``, the mode in
+three places: the transposed document in ``doc.content``, the mode in 
 ``info.info``, and HTML and MusicXML in ``exports[0].doc`` and ``exports[1].doc``.::
 
     {

@@ -115,8 +115,8 @@ class Mediator():
     def check_name(self, name, nr=1):
         n = self.get_var_byname(name)
         if n:
-            name = name + str(nr)
-            name = self.check_name(name, nr + 1)
+            name = name+str(nr)
+            name = self.check_name(name, nr+1)
         return name
 
     def get_var_byname(self, name):
@@ -128,7 +128,7 @@ class Mediator():
         parent = self.group
         self.group_num += 1
         self.group = xml_objs.ScorePartGroup(self.group_num, "bracket")
-        if parent:  # nested group
+        if parent: #nested group
             self.group.parent = parent
             parent.partlist.append(self.group)
         else:
@@ -180,8 +180,8 @@ class Mediator():
             self.voice = nr
         else:
             self.voice = get_voice(command)
-            if piano > 2:
-                self.voice += piano + 1
+            if piano>2:
+                self.voice += piano+1
 
     def revert_voicenr(self):
         self.voice = self.store_voicenr
@@ -233,7 +233,7 @@ class Mediator():
         if self.sections[-1].glob:
             self.score.merge_globally(self.sections[-1])
             self.score.glob_section.merge_voice(self.section[-1])
-        if len(self.sections) > 2:
+        if len(self.sections)>2:
             if not self.sections[-2].barlist:
                 self.sections.pop(-2)
                 self.check_voices()
@@ -248,8 +248,8 @@ class Mediator():
         """ Used for snippets. Merges all active snippets
         created after the stored voice number."""
         sect_len = len(self.sections)
-        if sect_len > 2:
-            if self.voice > 1:
+        if sect_len>2:
+            if self.voice>1:
                 for n in range(self.store_voicenr, self.voice):
                     self.check_voices()
                 if isinstance(self.sections[-1], xml_objs.Snippet):
@@ -263,7 +263,7 @@ class Mediator():
         the referenced voice."""
         if self.lyric[1] == 'middle':
             self.lyric[1] = 'end'
-        lyrics_section = self.lyric_sections['lyricsto' + voice_id]
+        lyrics_section = self.lyric_sections['lyricsto'+voice_id]
         voice_section = self.get_var_byname(lyrics_section.voice_id)
         if voice_section:
             voice_section.merge_lyrics(lyrics_section)
@@ -272,7 +272,7 @@ class Mediator():
 
     def check_part(self):
         """Adds the latest active section to the part."""
-        if len(self.sections) > 1:
+        if len(self.sections)>1:
             if self.score.is_empty():
                 self.new_part()
             if self.sections[-1].glob:
@@ -291,8 +291,8 @@ class Mediator():
         """Check done after simultanoues (<< >>) section."""
         if self.part:
             self.part.merge_voice(self.sections[-1])
-        elif len(self.sections) > 1:
-            self.sections[-2].merge_voice(self.sections[-1])
+        elif len(self.sections)>1:
+             self.sections[-2].merge_voice(self.sections[-1])
         self.sections.pop()
 
     def check_score(self):
@@ -448,8 +448,7 @@ class Mediator():
             self.current_note.set_staff(self.staff)
             if self.store_unset_staff:
                 if self.staff in self.staff_unset_notes:
-                    self.staff_unset_notes[self.staff].append(
-                        self.current_note)
+                    self.staff_unset_notes[self.staff].append(self.current_note)
                 else:
                     self.staff_unset_notes[self.staff] = [self.current_note]
         self.add_to_bar(self.current_note)
@@ -471,7 +470,7 @@ class Mediator():
     def check_duration(self, rest):
         """Check the duration for the current note."""
         dots, rs = self.duration_from_tokens(self.dur_tokens)
-        if rest and rs:  # special case of multibar rest
+        if rest and rs: # special case of multibar rest
             if not self.current_note.show_type or self.current_note.skip:
                 bs = self.current_note.duration
                 if rs == bs[1]:
@@ -553,8 +552,7 @@ class Mediator():
         if rtype == 'r':
             self.current_note = xml_objs.BarRest(dur, self.voice)
         elif rtype == 'R':
-            self.current_note = xml_objs.BarRest(
-                dur, self.voice, show_type=False)
+            self.current_note = xml_objs.BarRest(dur, self.voice, show_type=False)
         elif rtype == 's' or rtype == '\\skip' or rtype == '_':
             self.current_note = xml_objs.BarRest(dur, self.voice, skip=True)
         self.check_current_note(rest=True)
@@ -592,10 +590,8 @@ class Mediator():
                 ttype = "stop"
                 self.tupl_sum = 0
         if length:
-            acttype = normtype = durval2type(
-                self.calc_tupl_den(tfraction, length))
-            self.current_note.set_tuplet(
-                tfraction, ttype, nr, acttype, normtype)
+            acttype = normtype = durval2type(self.calc_tupl_den(tfraction, length))
+            self.current_note.set_tuplet(tfraction, ttype, nr, acttype, normtype)
         else:
             self.current_note.set_tuplet(tfraction, ttype, nr)
 
@@ -691,7 +687,7 @@ class Mediator():
             line = get_line_style(line)
         if self.current_chord:
             for n, c in enumerate(self.current_chord):
-                c.set_gliss(line, nr=n + 1)
+                c.set_gliss(line, nr=n+1)
         else:
             self.current_note.set_gliss(line)
         self.action_onnext.append(("end_gliss", (line, )))
@@ -704,13 +700,12 @@ class Mediator():
         note.set_gliss(line, endtype="stop", nr=n)
 
     def set_tremolo(self, trem_type='single', duration=0, repeats=0):
-        if self.current_note.tremolo[1]:  # tremolo already set
+        if self.current_note.tremolo[1]: #tremolo already set
             self.current_note.set_tremolo(trem_type)
         else:
             if repeats:
                 duration = int(self.dur_token)
-                bs, durtype = calc_trem_dur(
-                    repeats, self.current_note.duration, duration)
+                bs, durtype = calc_trem_dur(repeats, self.current_note.duration, duration)
                 self.current_note.duration = bs
                 self.current_note.type = durtype
             elif not duration:
@@ -861,7 +856,7 @@ class Mediator():
         if not tupl:
             a = 4
             if base:
-                b = 1 / base
+                b = 1/base
             else:
                 b = 1
                 print("Warning problem checking duration!")
@@ -871,13 +866,14 @@ class Mediator():
             for t in tupl:
                 num *= t.fraction[0]
                 den *= t.fraction[1]
-            a = 4 * den
-            b = (1 / base) * num
+            a = 4*den
+            b = (1/base)*num
         c = a * divs * scaling
         predur, mod = divmod(c, b)
         if mod > 0:
             mult = get_mult(a, b)
-            self.divisions = divs * mult
+            self.divisions = divs*mult
+
 
 
 ##
@@ -887,7 +883,6 @@ class Mediator():
 def getNoteName(index):
     noteNames = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
     return noteNames[index]
-
 
 def get_xml_alter(alter):
     """ Convert alter to the specified format,
@@ -899,7 +894,6 @@ def get_xml_alter(alter):
     else:
         return float(alter)
 
-
 def durval2type(durval):
     """Convert LilyPond duration to MusicXML duration type."""
     xml_types = [
@@ -907,29 +901,27 @@ def durval2type(durval):
         "half", "quarter", "eighth",
         "16th", "32nd", "64th",
         "128th", "256th", "512th", "1024th", "2048th"
-    ]  # Note: 2048 is supported by ly but not by MusicXML!
+    ] # Note: 2048 is supported by ly but not by MusicXML!
     try:
         type_index = ly.duration.durations.index(str(durval))
     except ValueError:
         type_index = 5
     return xml_types[type_index]
 
-
 def get_fifths(key, mode):
     fifths = 0
     sharpkeys = ['c', 'g', 'd', 'a', 'e', 'b', 'fis', 'cis', 'gis',
-                 'dis', 'ais', 'eis', 'bis', 'fisis', 'cisis']
+    'dis', 'ais', 'eis', 'bis', 'fisis', 'cisis']
     flatkeys = ['c', 'f', 'bes', 'es', 'as', 'des', 'ges', 'ces', 'fes',
-                'beses', 'eses', 'ases']
+    'beses', 'eses', 'ases']
     if key in sharpkeys:
         fifths = sharpkeys.index(key)
     elif key in flatkeys:
         fifths = -flatkeys.index(key)
-    if mode == 'minor':
-        return fifths - 3
-    elif mode == 'major':
+    if mode=='minor':
+        return fifths-3
+    elif mode=='major':
         return fifths
-
 
 def clefname2clef(clefname):
     """
@@ -938,38 +930,38 @@ def clefname2clef(clefname):
     Add it to the python dictionary below.
     """
     clef_dict = {
-        "treble": ('G', 2, 0),
-        "violin": ('G', 2, 0),
-        "G": ('G', 2, 0),
-        "bass": ('F', 4, 0),
-        "F": ('F', 4, 0),
-        "alto": ('C', 3, 0),
-        "C": ('C', 3, 0),
-        "tenor": ('C', 4, 0),
-        "treble_8": ('G', 2, -1),
-        "treble_15": ('G', 2, -2),
-        "bass_8": ('F', 4, -1),
-        "bass_15": ('F', 4, -2),
-        "treble^8": ('G', 2, 1),
-        "treble^15": ('G', 2, 2),
-        "bass^8": ('F', 4, 1),
-        "bass^15": ('F', 4, 2),
-        "percussion": ('percussion', 0, 0),
-        "tab": ('TAB', 5, 0),
-        "soprano": ('C', 1, 0),
-        "mezzosoprano": ('C', 2, 0),
-        "baritone": ('C', 5, 0),
-        "varbaritone": ('F', 3, 0),
-        "baritonevarF": ('F', 3, 0),
-        "french": ('G', 1, 0),
-        "subbass": ('F', 5, 0),
-        # From here on the clefs will end up with wrong symbols
-        "GG": ('G', 2, -1),
-        "tenorG": ('G', 2, -1),
-        "varC": ('C', 3, 0),
-        "altovarC": ('C', 3, 0),
-        "tenorvarC": ('C', 4, 0),
-        "baritonevarC": ('C', 5, 0),
+    "treble": ('G', 2, 0),
+    "violin": ('G', 2, 0),
+    "G": ('G', 2, 0),
+    "bass": ('F', 4, 0),
+    "F": ('F', 4, 0),
+    "alto": ('C', 3, 0),
+    "C": ('C', 3, 0),
+    "tenor": ('C', 4, 0),
+    "treble_8": ('G', 2, -1),
+    "treble_15": ('G', 2, -2),
+    "bass_8": ('F', 4, -1),
+    "bass_15": ('F', 4, -2),
+    "treble^8": ('G', 2, 1),
+    "treble^15": ('G', 2, 2),
+    "bass^8": ('F', 4, 1),
+    "bass^15": ('F', 4, 2),
+    "percussion": ('percussion', 0, 0),
+    "tab": ('TAB', 5, 0),
+    "soprano": ('C', 1, 0),
+    "mezzosoprano": ('C', 2, 0),
+    "baritone": ('C', 5, 0),
+    "varbaritone": ('F', 3, 0),
+    "baritonevarF": ('F', 3, 0),
+    "french": ('G', 1, 0),
+    "subbass": ('F', 5, 0),
+    # From here on the clefs will end up with wrong symbols
+    "GG": ('G', 2, -1),
+    "tenorG": ('G', 2, -1),
+    "varC": ('C', 3, 0),
+    "altovarC": ('C', 3, 0),
+    "tenorvarC": ('C', 4, 0),
+    "baritonevarC": ('C', 5, 0),
 
     }
     try:
@@ -978,16 +970,13 @@ def clefname2clef(clefname):
         clef = 0
     return clef
 
-
 def get_mult(num, den):
     simple = Fraction(num, den)
     return simple.denominator
 
-
 def get_voice(c):
     voices = ["voiceOne", "voiceTwo", "voiceThree", "voiceFour"]
-    return voices.index(c) + 1
-
+    return voices.index(c)+1
 
 def artic_token2xml_name(art_token):
     """
@@ -999,9 +988,9 @@ def artic_token2xml_name(art_token):
     Add it to the python dictionary below.
     """
     artic_dict = {
-        ".": "staccato", "-": "tenuto", ">": "accent",
-        "_": "detached-legato", "!": "staccatissimo",
-        "\\staccatissimo": "staccatissimo"
+    ".": "staccato", "-": "tenuto", ">": "accent",
+    "_": "detached-legato", "!": "staccatissimo",
+    "\\staccatissimo": "staccatissimo"
     }
     ornaments = ['\\trill', '\\prall', '\\mordent', '\\turn']
     others = ['\\fermata']
@@ -1014,7 +1003,6 @@ def artic_token2xml_name(art_token):
             return "other"
         else:
             return False
-
 
 def calc_trem_dur(repeats, base_scaling, duration):
     """ Calculate tremolo duration from number of
@@ -1030,25 +1018,23 @@ def calc_trem_dur(repeats, base_scaling, duration):
     new_type = xml_objs.durval2type(trem_length)
     return (new_base, scale), new_type
 
-
 def get_line_style(style):
     style_dict = {
-        "dashed-line": "dashed",
-        "dotted-line": "dotted",
-        "trill": "wavy",
-        "zigzag": "wavy"
+    "dashed-line": "dashed",
+    "dotted-line": "dotted",
+    "trill": "wavy",
+    "zigzag": "wavy"
     }
     try:
         return style_dict[style]
     except KeyError:
         return False
 
-
 def get_group_symbol(lily_sys_start):
     symbol_dict = {
         "SystemStartBrace": "brace",
         "SystemStartSquare": "square"
-    }
+        }
     try:
         return symbol_dict[lily_sys_start]
     except KeyError:

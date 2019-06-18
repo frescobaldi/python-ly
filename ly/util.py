@@ -35,13 +35,12 @@ _tens = (
     'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty',
     'Ninety')
 
-
 def int2text(number):
     """Converts an integer to the English language name of that integer.
-
+    
     E.g. converts 1 to "One". Supports numbers 0 to 999999.
     This can be used in LilyPond identifiers (that do not support digits).
-
+    
     """
     result = []
     if number >= 1000:
@@ -54,29 +53,26 @@ def int2text(number):
         result.append(_nums[number])
     else:
         tens, number = divmod(number, 10)
-        result.append(_tens[tens - 2] + _nums[number])
+        result.append(_tens[tens-2] + _nums[number])
     text = "".join(result)
     return text or 'Zero'
 
 
 # Thanks: http://billmill.org/python_roman.html
 _roman_numerals = (("M", 1000), ("CM", 900), ("D", 500), ("CD", 400),
-                   ("C", 100), ("XC", 90), ("L", 50), ("XL",
-                                                       40), ("X", 10), ("IX", 9), ("V", 5),
-                   ("IV", 4), ("I", 1))
-
+("C", 100), ("XC", 90), ("L", 50), ("XL", 40), ("X", 10), ("IX", 9), ("V", 5),
+("IV", 4), ("I", 1))
 
 def int2roman(n):
     """Convert an integer value to a roman number string.
-
+    
     E.g. 1 -> "I", 12 -> "XII", 2015 -> "MMXV"
-
+    
     n has to be > 1.
-
+    
     """
     if n < 1:
-        raise ValueError(
-            'Roman numerals must be positive integers, got %s' % n)
+        raise ValueError('Roman numerals must be positive integers, got %s' % n)
     roman = []
     for ltr, num in _roman_numerals:
         k, n = divmod(n, num)
@@ -86,13 +82,13 @@ def int2roman(n):
 
 def int2letter(number, chars=string.ascii_uppercase):
     """Converts an integer to one or more letters.
-
+    
     E.g. 1 -> A, 2 -> B, ... 26 -> Z, 27 -> AA, etc.
     Zero returns the empty string.
-
+    
     chars is the string to pick characters from, defaulting to
     string.ascii_uppercase.
-
+    
     """
     mod = len(chars)
     result = []
@@ -104,16 +100,16 @@ def int2letter(number, chars=string.ascii_uppercase):
 
 def mkid(*args):
     """Makes a lower-camel-case identifier of the strings in args.
-
+    
     All strings are concatenated with the first character of every string
     uppercased, except for the first character, which is lowercased.
-
+    
     Examples::
-
+    
         mkid("Violin") ==> "violin"
         mkid("soprano", "verse") ==> "sopranoVerse"
         mkid("scoreOne", "choirII") ==> "scoreOneChoirII"
-
+    
     """
     result = []
     for a in args[:1]:
@@ -123,3 +119,5 @@ def mkid(*args):
         result.append(a[:1].upper())
         result.append(a[1:])
     return "".join(result)
+
+

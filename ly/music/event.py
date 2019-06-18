@@ -28,11 +28,13 @@ from __future__ import unicode_literals
 class Events(object):
     """Traverses a music tree and records music events from it."""
     unfold_repeats = False
-
+    
     def read(self, node, time=0, scaling=1):
         """Read events from the node and all its child nodes; return time."""
         return self.traverse(node, time, scaling)
-
+    
     def traverse(self, node, time, scaling):
         """Traverse node and call event handlers; record and return the time."""
         return node.events(self, time, scaling)
+
+

@@ -26,8 +26,7 @@ of some modules:
   * ly.slexer: generic tools to build parsers using regular expressions
   * ly.node: a generic list-like node object to build tree structures with
   * ly.document: a tokenized text document (LilyPond file)
-  * ly.docinfo: harvests and caches various
-    information from a LilyPond document
+  * ly.docinfo: harvests and caches various information from a LilyPond document
   * ly.lex: a parser for LilyPond, Scheme, and other formats, using slexer
   * ly.music: a tree structure of the contents of a document
   * ly.pitch: functions for translating, transposing etc
@@ -44,7 +43,7 @@ A LilyPond document (source file) is held by a ly.document.Document. The
 Document class automatically parses and tokenizes the text, also when its
 contents are changed.
 
-A music tree can be built from a document using the ly.music module.
+A music tree can be built from a document using the ly.music module. 
 In the near future, music trees can be built from scratch and also generate
 LilyPond output from scratch. At that moment, ly.dom is deprecated.
 
@@ -53,3 +52,4 @@ the tokens in the document, but in the future they will work on the music tree.
 
 
 """
+

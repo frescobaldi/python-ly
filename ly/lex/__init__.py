@@ -123,8 +123,8 @@ class Parser(slexer.Parser):
     argcount = 0
     default = Unparsed
     mode = None
-
-    def __init__(self, argcount=None):
+    
+    def __init__(self, argcount = None):
         if argcount is not None:
             self.argcount = argcount
 
@@ -147,7 +147,7 @@ class State(slexer.State):
                 if p.argcount > 0:
                     p.argcount -= 1
                 return
-
+    
     def mode(self):
         """Returns the mode attribute of the first parser (from current parser) that has it."""
         for parser in self.state[::-1]:
@@ -156,7 +156,7 @@ class State(slexer.State):
 
 
 class Fridge(slexer.Fridge):
-    def __init__(self, stateClass=State):
+    def __init__(self, stateClass = State):
         super(Fridge, self).__init__(stateClass)
 
 
@@ -168,3 +168,5 @@ def state(mode):
 def guessState(text):
     """Returns a State instance, guessing the type of text."""
     return State(modes[guessMode(text)]())
+
+

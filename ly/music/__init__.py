@@ -107,3 +107,5 @@ def document(doc):
     """Return a music.items.Document instance for the ly.document.Document."""
     from . import items
     return items.Document(doc)
+
+

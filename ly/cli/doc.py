@@ -48,12 +48,12 @@ Arguments
 The command is one argument with semicolon-separated commands. In most cases
 you'll quote the command so that it is seen as one argument.
 
-You can specify more than one LilyPond file. If you want to process many
-files and write the results of the operations on each file to a separate
-output file, you can use two special characters in the output filename: a
-'*' will be replaced with the full path name of the current input file
-(without extension), and a '?' will be replaced with the input filename
-(without path and extension). If you don't want to have '*' or '?' replaced
+You can specify more than one LilyPond file. If you want to process many 
+files and write the results of the operations on each file to a separate 
+output file, you can use two special characters in the output filename: a 
+'*' will be replaced with the full path name of the current input file 
+(without extension), and a '?' will be replaced with the input filename 
+(without path and extension). If you don't want to have '*' or '?' replaced 
 in the output filename, you can set ``-d replace-pattern=false``.
 
 If you don't specify input or output filenames, standard input is read and
@@ -62,24 +62,24 @@ standard output is written to.
 
 Commands
 --------
-
+  
 Informative commands that write information to standard output and do not
 change the file:
 
   ``mode``
          print the mode (guessing if not given) of the document
-
+  
   ``version``
          print the LilyPond version, if set in the document
 
   ``language``
          print the pitch name language, if set in the document
-
+  
 Commands that change the file:
 
   ``indent``
          re-indent the file
-
+  
   ``reformat``
          reformat the file
 
@@ -136,7 +136,7 @@ If there is a default value, it is written between brackets:
   ``mode``
          mode of the file to read (default automatic) can be one
          of: lilypond, scheme, latex, html, docbook, texinfo.
-
+  
   ``output`` [-]
          the output filename (also set by -o argument)
 
@@ -163,7 +163,7 @@ If there is a default value, it is written between brackets:
 
   ``rel-startpitch`` [``true``]
          whether to write relative music with a startpitch
-
+  
   ``rel-absolute``
          whether to assume that the first pitch in a relative expression without
          specified startpitch is absolute. If ``false``, it is assumed to be
@@ -180,7 +180,7 @@ If there is a default value, it is written between brackets:
   ``full-html`` [``True``]
         if set to True a full document with syntax-highlighted HTML
         will be exported, otherwise only the bare content wrapped in an
-        element configured by the ``wrapper-`` variables.
+        element configured by the ``wrapper-`` variables.        
 
   ``stylesheet``
          filename to reference as an external stylesheet for

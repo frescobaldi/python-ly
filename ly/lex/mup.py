@@ -47,14 +47,12 @@ class String(_token.String):
 
 class StringQuotedStart(String, _token.StringStart):
     rx = r'"'
-
     def update_state(self, state):
         state.enter(ParseString())
-
+        
 
 class StringQuotedEnd(String, _token.StringEnd):
     rx = r'"'
-
     def update_state(self, state):
         state.leave()
         state.endArgument()
@@ -70,8 +68,8 @@ class Macro(_token.Token):
 
 class Preprocessor(_token.Token):
     rx = (r'\b('
-          'if|then|else|endif|define|undef|ifdef|ifndef'
-          r')\b|@')
+        'if|then|else|endif|define|undef|ifdef|ifndef'
+        r')\b|@')
 
 
 class ParseMup(Parser):
@@ -90,3 +88,4 @@ class ParseString(Parser):
         StringQuotedEnd,
         StringQuoteEscape,
     )
+

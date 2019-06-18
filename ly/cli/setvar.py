@@ -42,7 +42,7 @@ def _check_int(name, value):
     if value.isdigit():
         return int(value)
     raise ValueError("{name}: not an integer value: {value}".format(
-        name=name, value=value))
+            name=name, value=value))
 
 
 def mode(arg):
@@ -144,20 +144,19 @@ def number_lines(arg):
 
 
 def wrapper_tag(arg):
-    if arg not in ['div', 'pre', 'code', 'id']:
+    if not arg in ['div', 'pre', 'code', 'id']:
         raise ValueError("unknown wrapper tag: {tag}".format(
             tag=arg))
     return arg
 
 
 def wrapper_attribute(arg):
-    if arg not in ['id', 'class']:
-        raise ValueError(
-            "wrapper attribute must be 'id' or 'class', found {attr}".format(
-                attr=arg))
+    if not arg in ['id', 'class']:
+        raise ValueError("wrapper attribute must be 'id' or 'class', found {attr}".format(
+            attr=arg))
     return arg
 
-
+    
 def document_id(arg):
     return arg or None
 

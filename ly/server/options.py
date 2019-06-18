@@ -25,20 +25,18 @@ from __future__ import unicode_literals
 
 from ly.cli import setvar
 
-
 class ServerOptions(object):
     """
     Options configuring the server itself, not the individual commands
     """
-
+    
     def __init__(self):
         self.port = 5432
         self.timeout = 0
-
+    
 
 class Options(object):
     """Store all the startup options and their defaults."""
-
     def __init__(self):
         self.mode = None
         self.in_place = False
@@ -49,11 +47,11 @@ class Options(object):
         self.backup_suffix = '~'
         self.with_filename = None
         self.default_language = "nederlands"
-
+        
         self.indent_width = 2
         self.indent_tabs = False
         self.tab_width = 8
-
+        
         self.full_html = True
         self.inline_style = False
         self.stylesheet = None
@@ -73,4 +71,4 @@ class Options(object):
             value = func(value)
         except ValueError as e:
             raise ValueError(format(e))
-        setattr(self, name, value)
+        setattr(self, name, value)    

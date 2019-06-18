@@ -36,7 +36,7 @@ from . import create_musicxml
 from . import ly2xml_mediator
 from . import xml_objs
 
-# excluded from parsing
+#excluded from parsing
 excl_list = ['Version', 'Midi', 'Layout']
 
 
@@ -46,7 +46,7 @@ group_contexts = ['StaffGroup', 'ChoirStaff']
 pno_contexts = ['PianoStaff', 'GrandStaff']
 
 staff_contexts = ['Staff', 'RhythmicStaff', 'TabStaff',
-                  'DrumStaff', 'VaticanaStaff', 'MensuralStaff']
+    'DrumStaff', 'VaticanaStaff', 'MensuralStaff']
 
 part_contexts = pno_contexts + staff_contexts
 
@@ -54,7 +54,6 @@ part_contexts = pno_contexts + staff_contexts
 class End():
     """ Extra class that gives information about the end of Container
     elements in the node list. """
-
     def __init__(self, node):
         self.node = node
 
@@ -90,8 +89,7 @@ class ParseSource():
         self.slurcount = 0
         self.slurnr = 0
         self.phrslurnr = 0
-        # Variables to keep track of place in music, and place of barlines
-        # (made with \bar)
+        # Variables to keep track of place in music, and place of barlines (made with \bar)
         self.voice = 0
         self.time = 0
         self.measure = 1
@@ -99,10 +97,10 @@ class ParseSource():
 
     def parse_text(self, ly_text, filename=None):
         """Parse the LilyPond source specified as text.
-
+        
         If you specify a filename, it can be used to resolve \\include commands
         correctly.
-
+        
         """
         doc = ly.document.Document(ly_text)
         doc.filename = filename
@@ -110,19 +108,18 @@ class ParseSource():
 
     def parse_document(self, ly_doc, relative_first_pitch_absolute=False):
         """Parse the LilyPond source specified as a ly.document document.
-
+        
         If relative_first_pitch_absolute is set to True, the first pitch in a
         \relative expression without startpitch is considered to be absolute
         (LilyPond 2.18+ behaviour).
-
+        
         """
         # The document is copied and the copy is converted to absolute mode to
         # facilitate the export. The original document is unchanged.
         doc = ly_doc.copy()
         import ly.pitch.rel2abs
         cursor = ly.document.Cursor(doc)
-        ly.pitch.rel2abs.rel2abs(
-            cursor, first_pitch_absolute=relative_first_pitch_absolute)
+        ly.pitch.rel2abs.rel2abs(cursor, first_pitch_absolute=relative_first_pitch_absolute)
         mustree = ly.music.document(doc)
         self.parse_tree(mustree)
 
@@ -137,7 +134,7 @@ class ParseSource():
             mus_nodes = self.iter_score(score, mustree)
         else:
             mus_nodes = self.find_score_sub(mustree)
-        self.mediator.new_section("fallback")  # fallback/default section
+        self.mediator.new_section("fallback") #fallback/default section
         self.parse_nodes(mus_nodes)
 
     def parse_nodes(self, nodes):
@@ -146,7 +143,7 @@ class ParseSource():
         if nodes:
             for m in nodes:
                 # print(m)
-                func_name = m.__class__.__name__  # get instance name
+                func_name = m.__class__.__name__ #get instance name
                 if func_name not in excl_list:
                     try:
                         func_call = getattr(self, func_name)
@@ -213,8 +210,7 @@ class ParseSource():
     def Context(self, context):
         r""" \context """
         self.in_context = True
-        self.check_context(context.context(),
-                           context.context_id(), context.token)
+        self.check_context(context.context(), context.context_id(), context.token)
 
     def check_context(self, context, context_id=None, token=""):
         """Check context and do appropriate action (e.g. create new part)."""
@@ -232,9 +228,8 @@ class ParseSource():
         elif context in staff_contexts:
             if self.piano_staff:
                 if self.piano_staff > 1:
-                    self.mediator.set_voicenr(nr=self.piano_staff + 3)
-                self.mediator.new_section(
-                    'piano-staff' + str(self.piano_staff))
+                    self.mediator.set_voicenr(nr=self.piano_staff+3)
+                self.mediator.new_section('piano-staff'+str(self.piano_staff))
                 self.mediator.set_staffnr(self.piano_staff)
                 self.piano_staff += 1
             else:
@@ -252,9 +247,7 @@ class ParseSource():
         elif context == 'Devnull':
             self.mediator.new_section('devnull', True)
         elif context == 'Lyrics':
-            # The way lyrics are implemented, they don't need a new section
-            # here (prevents irrelevant warning)
-            pass
+            pass  # The way lyrics are implemented, they don't need a new section here (prevents irrelevant warning)
         else:
             print("Context not implemented:", context)
 
@@ -301,7 +294,7 @@ class ParseSource():
 
     def Note(self, note):
         """ notename, e.g. c, cis, a bes ... """
-        # print(note.token)
+        #print(note.token)
         self.time += note.length()
         if note.length():
             if self.relative and not self.rel_pitch_isset:
@@ -319,8 +312,7 @@ class ParseSource():
                 if self.mediator.current_chord:
                     self.mediator.new_chord(note, chord_base=False)
                 else:
-                    self.mediator.new_chord(
-                        note, note.parent().duration, self.relative)
+                    self.mediator.new_chord(note, note.parent().duration, self.relative)
                     self.check_tuplet()
                 # chord as grace note
                 if self.grace_seq:
@@ -348,8 +340,7 @@ class ParseSource():
         self.check_tuplet()
         if self.grace_seq:
             self.mediator.new_grace()
-        if self.trem_rep and not self.look_ahead(
-                note, ly.music.items.Duration):
+        if self.trem_rep and not self.look_ahead(note, ly.music.items.Duration):
             self.mediator.set_tremolo(trem_type='start', repeats=self.trem_rep)
 
     def check_tuplet(self):
@@ -360,18 +351,17 @@ class ParseSource():
             for td in self.tuplet:
                 if nested:
                     self.mediator.change_to_tuplet(td['fraction'], td['ttype'],
-                                                   td['nr'], td['length'])
+                                                td['nr'], td['length'])
                 else:
                     self.mediator.change_to_tuplet(td['fraction'], td['ttype'],
-                                                   td['nr'])
+                                                td['nr'])
                 td['ttype'] = ""
             self.mediator.check_divs()
 
     def Duration(self, duration):
         """A written duration"""
         if self.tempo:
-            self.mediator.new_tempo(
-                duration.token, duration.tokens, *self.tempo)
+            self.mediator.new_tempo(duration.token, duration.tokens, *self.tempo)
             self.tempo = ()
         elif self.tremolo:
             self.mediator.set_tremolo(duration=int(duration.token))
@@ -382,8 +372,7 @@ class ParseSource():
         else:
             self.mediator.new_duration_token(duration.token, duration.tokens)
             if self.trem_rep:
-                self.mediator.set_tremolo(
-                    trem_type='start', repeats=self.trem_rep)
+                self.mediator.set_tremolo(trem_type='start', repeats=self.trem_rep)
 
     def Tempo(self, tempo):
         """ Tempo direction, e g '4 = 80' """
@@ -462,11 +451,11 @@ class ParseSource():
 
     def PhrasingSlur(self, phrslur):
         r"""A \( or \)."""
-        if phrslur.token == r'\(':
+        if phrslur.token == '\(':
             self.slurcount += 1
             self.phrslurnr = self.slurcount
             self.mediator.set_slur(self.phrslurnr, "start")
-        elif phrslur.token == r'\)':
+        elif phrslur.token == '\)':
             self.mediator.set_slur(self.phrslurnr, "stop")
             self.slurcount -= 1
 
@@ -478,8 +467,7 @@ class ParseSource():
         self.grace_seq = True
 
     def TimeSignature(self, timeSign):
-        self.mediator.new_time(timeSign.numerator(),
-                               timeSign.fraction(), self.numericTime)
+        self.mediator.new_time(timeSign.numerator(), timeSign.fraction(), self.numericTime)
 
     def Repeat(self, repeat):
         if repeat.specifier() == 'volta':
@@ -526,8 +514,7 @@ class ParseSource():
         elif command.token == '\\defaultTimeSignature':
             self.numericTime = False
         elif command.token.find('voice') == 1:
-            self.mediator.set_voicenr(
-                command.token[1:], piano=self.piano_staff)
+            self.mediator.set_voicenr(command.token[1:], piano=self.piano_staff)
         elif command.token == '\\glissando':
             try:
                 self.mediator.new_gliss(self.override_dict["Glissando.style"])
@@ -555,18 +542,16 @@ class ParseSource():
     def String(self, string):
         prev = self.get_previous_node(string)
         # If a \bar is found in the first voice (not at the beginning of a measure):
-        # Record its position and style-type, and create appropriate barline
+        #     Record its position and style-type, and create appropriate barline
         if self.voice == 1 and prev and prev.token == '\\bar' and self.time != 0:
-            self.barline_locations.append(
-                [self.measure, self.time, string.value()])
+            self.barline_locations.append([self.measure, self.time, string.value()])
             self.mediator.create_barline(string.value())
             self.time = 0
             self.measure += 1
 
     def LyricsTo(self, lyrics_to):
         r"""A \lyricsto expression. """
-        self.mediator.new_lyric_section(
-            'lyricsto' + lyrics_to.context_id(), lyrics_to.context_id())
+        self.mediator.new_lyric_section('lyricsto'+lyrics_to.context_id(), lyrics_to.context_id())
         self.sims_and_seqs.append('lyrics')
 
     def LyricText(self, lyrics_text):
@@ -640,7 +625,7 @@ class ParseSource():
                 self.mediator.change_tuplet_type(len(self.tuplet) - 1, "stop")
             self.tuplet.pop()
             self.fraction = None
-        elif isinstance(end.node, ly.music.items.Grace):  # Grace
+        elif isinstance(end.node, ly.music.items.Grace): #Grace
             self.grace_seq = False
         elif end.node.token == '\\repeat':
             if end.node.specifier() == 'volta':
@@ -682,7 +667,7 @@ class ParseSource():
         elif end.node.token == '{':
             if self.sims_and_seqs:
                 self.sims_and_seqs.pop()
-        elif end.node.token == '<':  # chord
+        elif end.node.token == '<': #chord
             self.mediator.chord_end()
         elif end.node.token == '\\lyricsto':
             self.mediator.check_lyrics(end.node.context_id())
@@ -709,7 +694,7 @@ class ParseSource():
         parent = node.parent()
         i = parent.index(node)
         if i > 0:
-            return parent[i - 1]
+            return parent[i-1]
         else:
             return False
 
@@ -729,8 +714,7 @@ class ParseSource():
     def get_score(self, node):
         """ Returns (first) Score node or false if no Score is found. """
         for n in node:
-            if isinstance(n, ly.music.items.Score) or isinstance(
-                    n, ly.music.items.Book):
+            if isinstance(n, ly.music.items.Score) or isinstance(n, ly.music.items.Book):
                 return n
         return False
 
@@ -743,8 +727,7 @@ class ParseSource():
         Furthermore \repeat unfold expressions are unfolded.
         """
         for s in scorenode:
-            if isinstance(
-                    s, ly.music.items.Repeat) and s.specifier() == 'unfold':
+            if isinstance(s, ly.music.items.Repeat) and s.specifier() == 'unfold':
                 for u in self.unfold_repeat(s, s.repeat_count(), doc):
                     yield u
             else:

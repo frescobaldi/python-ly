@@ -27,7 +27,6 @@ that you can use some of the submodules for generic MusicXML creation and manipu
 
 from __future__ import unicode_literals
 
-
 def writer():
     """Convert LilyPond text to MusicXML
 
@@ -44,3 +43,5 @@ def writer():
 
     from . import lymus2musxml
     return lymus2musxml.ParseSource()
+
+
