@@ -4,4 +4,6 @@ tests:
     - python
   script:
     - pip3 install -r requirements.txt
+    - pip3 install -r dev-only-reqs.txt
+    - pycodestyle *.py
     - python3 -m tests.test_xml
