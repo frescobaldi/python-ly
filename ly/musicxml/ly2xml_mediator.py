@@ -40,6 +40,12 @@ class Mediator():
 
     def __init__(self):
         """ create global lists """
+        # the order of flats (or sharps backwards)
+        self.note_order = ['B', 'E', 'A', 'D', 'G', 'C', 'F']
+        # the current number of fifths in key (ex: -3 indicates 3 flats in the key)
+        self.current_fifths = 0
+        # keeps track of the most recent number of flats/sharps applied to all notes (ex: 'B':-2 is double flat B)
+        self.current_notes = {'B': 0, 'E': 0, 'A': 0, 'D': 0, 'G': 0, 'C': 0, 'F': 0}
         self.score = xml_objs.Score()
         self.sections = []
         self.permanent_sections = []
@@ -308,11 +314,37 @@ class Mediator():
             self.part.barlist.extend(self.get_first_var())
         self.score.merge_globally(self.score.glob_section, override=True)
 
+    def set_notes_in_key(self, fifths):
+        """Define the notes in the current key"""
+        for n in self.note_order:  # return all notes to natural by default
+            self.current_notes[n] = 0
+        if fifths < 0:  # flat key
+            for f in self.note_order[0:abs(fifths)]:
+                self.current_notes[f] = -1
+        elif fifths > 0:  # sharp key
+            for s in self.note_order[fifths:7]:
+                self.current_notes[s] = 1
+
+    def is_acc_needed(self, name, alter):
+        """Check if a given note (name and alter) needs an accidental"""
+        if self.tied:  # subsequent tied notes never need accidentals
+            return False
+        for note in self.current_notes:  # iterate through the keys of this dictionary
+            if name == note:
+                if self.current_notes[note] == alter:  # ex: if the input note is B flat and B flat is in the key or the previous B in this measure was B flat
+                    return False
+                else:  # ex: if the input note is B flat and B flat is not in the key and the previous B in this measure was not B flat
+                    self.current_notes[note] = alter  # change the most recent alter associated with note
+                    return True
+        print("Warning: Invalid note checked for accidental!")
+        return False
+
     def get_first_var(self):
         if self.sections:
             return self.sections[0].barlist
 
     def new_bar(self, fill_prev=True):
+        self.set_notes_in_key(self.current_fifths)
         if self.bar and fill_prev:
             self.bar.list_full = True
         self.current_attr = xml_objs.BarAttr()
@@ -340,6 +372,8 @@ class Mediator():
         self.bar.add(barline)
 
     def new_key(self, key_name, mode):
+        self.current_fifths = get_fifths(key_name, mode)
+        self.set_notes_in_key(self.current_fifths)
         if self.bar is None:
             self.new_bar()
         if self.bar.has_music():
@@ -411,9 +445,11 @@ class Mediator():
         p = getNoteName(note.pitch.note)
         alt = get_xml_alter(note.pitch.alter)
         try:
-            acc = note.accidental_token
+            acc = note.accidental_token  # special accidentals (?, !)
         except AttributeError:
-            acc = ""
+            acc = None
+        if acc is None and self.is_acc_needed(p, alt):  # check if a normal accidental should be printed
+            acc = 'normal'
         dura = note.duration
         return xml_objs.BarNote(p, alt, acc, dura, self.voice)
 
