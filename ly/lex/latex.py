@@ -32,5 +32,3 @@ class ParseLaTeX(Parser):
     items = (
         _token.Space,
     )
-
-

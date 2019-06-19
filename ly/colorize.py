@@ -69,6 +69,7 @@ class Mapper(dict):
     up requests for other tokens.
 
     """
+
     def __getitem__(self, token):
         cls = type(token)
         try:
@@ -92,8 +93,8 @@ def default_mapping():
     from ly.lex import scheme
     from ly.lex import html
     from ly.lex import texinfo
-    #from ly.lex import latex
-    #from ly.lex import docbook
+    # from ly.lex import latex
+    # from ly.lex import docbook
     from ly.lex import mup
 
     return (
@@ -169,7 +170,7 @@ def default_mapping():
             style('macro', 'variable', (mup.Macro,)),
             style('preprocessor', 'keyword', (mup.Preprocessor,)),
         )),
-    ) # end of mapping
+    )  # end of mapping
 
 
 default_scheme = {
@@ -250,7 +251,7 @@ default_scheme = {
     },
     'mup': {
     },
-} # end of default_css_styles
+}  # end of default_css_styles
 
 
 def get_tokens(cursor):
@@ -322,9 +323,9 @@ def css_mapper(mapping=None):
     if mapping is None:
         mapping = default_mapping()
     return Mapper((cls, css_class(mode, style.name, style.base))
-                        for mode, styles in mapping
-                            for style in styles
-                                for cls in style.classes)
+                  for mode, styles in mapping
+                  for style in styles
+                  for cls in style.classes)
 
 
 def css_dict(css_style, scheme=default_scheme):
@@ -378,6 +379,7 @@ def format_css_span_class(css_style):
 
 class css_style_attribute_formatter(object):
     """Return the inline style attribute for a specified style."""
+
     def __init__(self, scheme=default_scheme):
         self.scheme = scheme
 
@@ -390,7 +392,7 @@ class css_style_attribute_formatter(object):
 def format_stylesheet(scheme=default_scheme):
     """Return a formatted stylesheet for the stylesheet scheme dictionary."""
     sheet = []
-    key = lambda i: '' if i[0] is None else i[0]
+    def key(i): return '' if i[0] is None else i[0]
     for mode, styles in sorted(scheme.items(), key=key):
         if styles:
             sheet.append('/* {0} */'.format(
@@ -509,10 +511,10 @@ def format_html_document(body, title="", stylesheet=None, stylesheet_ref=None, e
         '{css}'
         '</head>\n'
         '<body>\n{body}</body>\n</html>\n').format(
-            title = html_escape(title),
-            encoding = encoding,
-            body = body,
-            css = css,
+            title=html_escape(title),
+            encoding=encoding,
+            body=body,
+            css=css,
         )
 
 

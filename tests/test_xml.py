@@ -28,8 +28,8 @@ def ly_to_xml(filename):
         writer.parse_text(lyfile.read())
     xml = writer.musicxml()
     return (ly.musicxml.create_musicxml.xml_decl_txt.format(encoding='utf-8') + "\n"
-        + ly.musicxml.create_musicxml.doctype_txt + "\n"
-        + xml.tostring(encoding='unicode'))
+            + ly.musicxml.create_musicxml.doctype_txt + "\n"
+            + xml.tostring(encoding='unicode'))
 
 
 def read_expected_xml(filename):
@@ -84,5 +84,5 @@ def assert_multi_line_equal(first, second, msg=None):
 
 
 if __name__ == "__main__":
-    #sys.exit(main(sys.argv))
+    # sys.exit(main(sys.argv))
     test_all()

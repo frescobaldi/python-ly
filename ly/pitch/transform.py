@@ -27,7 +27,7 @@ import ly.lex.lilypond
 
 
 def retrograde(cursor, language="nederlands"):
-    """Reverses pitches."""    
+    """Reverses pitches."""
     source = ly.document.Source(cursor, True, tokens_with_position=True)
 
     pitches = ly.pitch.PitchIterator(source, language)
@@ -35,18 +35,19 @@ def retrograde(cursor, language="nederlands"):
 
     plist = [p for p in psource if isinstance(p, ly.pitch.Pitch)]
     rlist = [r.copy() for r in reversed(plist)]
-    
+
     with cursor.document as d:
         for p, r in zip(plist, rlist):
-            p.note = r.note   
-            p.alter = r.alter            
-            p.octave = r.octave          
+            p.note = r.note
+            p.alter = r.alter
+            p.octave = r.octave
             pitches.write(p)
+
 
 def inversion(cursor, language="nederlands"):
     """Inversion of the intervals between pitches."""
     import ly.pitch.transpose
-     
+
     source = ly.document.Source(cursor, True, tokens_with_position=True)
 
     pitches = ly.pitch.PitchIterator(source, language)
@@ -64,9 +65,7 @@ def inversion(cursor, language="nederlands"):
                 prev_note = p.copy()
                 p.note = refp.note
                 p.alter = refp.alter
-                p.octave = refp.octave               
+                p.octave = refp.octave
                 transposer.transpose(p)
                 refp = p
                 pitches.write(p)
-                
-     

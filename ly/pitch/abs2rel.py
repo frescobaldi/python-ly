@@ -30,44 +30,44 @@ import ly.lex.lilypond
 
 def abs2rel(cursor, language="nederlands", startpitch=True, first_pitch_absolute=False):
     """Converts pitches from absolute to relative.
-    
+
     language: language to start reading pitch names in
-    
+
     startpitch: if True, write a starting pitch before the opening bracket of
         a relative expression.
-        
+
     first_pitch_absolute: this option only makes sense when startpitch is False.
         If first_pitch_absolute is True, the first pitch of a \\relative
         expression is written as absolute. This mimics the behaviour of
         LilyPond >= 2.18. (In fact, the starting pitch is then assumed to be f.)
-        
+
         If False, the first pitch is written as relative to c'
         (LilyPond < 2.18 behaviour).
-    
+
     Existing \\relative expressions are not changed.
-    
+
     """
     start = cursor.start
     cursor.start = 0
-    
+
     source = ly.document.Source(cursor, True, tokens_with_position=True)
 
     pitches = ly.pitch.PitchIterator(source, language)
     psource = pitches.pitches()
-    
+
     if start > 0:
         # consume tokens before the selection, following the language
         t = source.consume(pitches.tokens(), start)
         if t:
             psource = itertools.chain((t,), psource)
-    
+
     # this class dispatches the tokens. we can't use a generator function
     # as that doesn't like to be called again while there is already a body
     # running.
     class gen(object):
         def __iter__(self):
             return self
-        
+
         def __next__(self):
             t = next(psource)
             while isinstance(t, (ly.lex.Space, ly.lex.Comment)):
@@ -76,15 +76,15 @@ def abs2rel(cursor, language="nederlands", startpitch=True, first_pitch_absolute
                 relative()
                 t = next(psource)
             elif isinstance(t, ly.lex.lilypond.ChordMode):
-                consume() # do not change chords
+                consume()  # do not change chords
                 t = next(psource)
             elif isinstance(t, ly.lex.lilypond.MarkupScore):
                 consume()
                 t = next(psource)
             return t
-        
+
         next = __next__
-            
+
     tsource = gen()
 
     def getpitches(iterable):
@@ -100,21 +100,21 @@ def abs2rel(cursor, language="nederlands", startpitch=True, first_pitch_absolute
             yield t
             if source.state.depth() < depth:
                 return
-    
+
     def consume():
         """Consume tokens from context() returning the last token, if any."""
         t = None
         for t in context():
             pass
         return t
-    
+
     def relative():
         r"""Consume the whole \relative expression without doing anything. """
         # skip pitch argument
         t = next(tsource)
         if isinstance(t, ly.pitch.Pitch):
             t = next(tsource)
-        
+
         while True:
             # eat stuff like \new Staff == "bla" \new Voice \notes etc.
             if isinstance(source.state.parser(), ly.lex.lilypond.ParseTranslator):
@@ -123,10 +123,10 @@ def abs2rel(cursor, language="nederlands", startpitch=True, first_pitch_absolute
                 t = next(tsource)
             else:
                 break
-        
+
         if t in ('{', '<<', '<'):
             consume()
-    
+
     # Do it!
     with cursor.document as document:
         for t in tsource:
@@ -169,5 +169,3 @@ def abs2rel(cursor, language="nederlands", startpitch=True, first_pitch_absolute
                         # remember the first pitch of a chord
                         if chord == []:
                             chord.append(p)
-
-

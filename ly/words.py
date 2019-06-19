@@ -30,26 +30,26 @@ lilypond_keywords = (
     'consists',
     'defaultchild',
     'denies',
-    #'description',
-    #'grobdescriptions',
-    'hide', # since 2.18
+    # 'description',
+    # 'grobdescriptions',
+    'hide',  # since 2.18
     'include',
-    #'invalid',
+    # 'invalid',
     'language',
     'name',
-    #'objectid',
-    'omit', # since 2.18
+    # 'objectid',
+    'omit',  # since 2.18
     'once',
     'set',
     'unset',
     'override',
     'revert',
     'remove',
-    'temporary', # since 2.18
-    #'sequential',
-    #'simultaneous',
-    #'type',
-    'undo', # since 2.18 (not mentioned in the command index)
+    'temporary',  # since 2.18
+    # 'sequential',
+    # 'simultaneous',
+    # 'type',
+    'undo',  # since 2.18 (not mentioned in the command index)
     'version',
     'score',
     'book',
@@ -64,22 +64,22 @@ lilypond_keywords = (
 
 
 lilypond_music_commands = (
-    'absolute', # since 2.18
+    'absolute',  # since 2.18
     'acciaccatura',
-    'accidentalStyle', # since 2.16
-    'addChordShape', # since 2.16
+    'accidentalStyle',  # since 2.16
+    'addChordShape',  # since 2.16
     'addInstrumentDefinition',
     'addlyrics',
     'addQuote',
     'afterGrace',
-    #'afterGraceFraction', # this is a parser variable
+    # 'afterGraceFraction', # this is a parser variable
     'aikenHeads',
     'aikenHeadsMinor',
     'allowPageTurn',
-    'alterBroken', # since 2.18 (?)
+    'alterBroken',  # since 2.18 (?)
     'alternative',
-    #'AncientRemoveEmptyStaffContext',
-    'appendToTag', # since 2.16
+    # 'AncientRemoveEmptyStaffContext',
+    'appendToTag',  # since 2.16
     'applyContext',
     'applyMusic',
     'applyOutput',
@@ -123,21 +123,21 @@ lilypond_music_commands = (
     'cavum',
     'change',
     'chordmode',
-    #'chordNameSeparator',
-    #'chordPrefixSpacer',
-    #'chordRootNamer',
-    'chordRepeats', # since 2.16
+    # 'chordNameSeparator',
+    # 'chordPrefixSpacer',
+    # 'chordRootNamer',
+    'chordRepeats',  # since 2.16
     'chords',
     'clef',
     'cm',
-    'compoundMeter', # since 2.16
+    'compoundMeter',  # since 2.16
     'compressFullBarRests',
     'context',
     'cr',
     'cresc',
     'crescHairpin',
     'crescTextCresc',
-    'crossStaff', # since 2.16
+    'crossStaff',  # since 2.16
     'cueClef',  # since 2.16
     'cueClefUnset',  # since 2.16
     'cueDuring',
@@ -154,7 +154,7 @@ lilypond_music_commands = (
     'default',
     'defaultNoteHeads',  # since 2.16
     'defaultTimeSignature',
-    'defineBarLine', # since 2.18
+    'defineBarLine',  # since 2.18
     'deminutum',
     'denies',
     'descendens',
@@ -251,11 +251,11 @@ lilypond_music_commands = (
     'majorSevenSymbol',
     'makeClusters',
     'mark',
-    'markLengthOff', # since 2.18
+    'markLengthOff',  # since 2.18
     'markLengthOn',  # since 2.18
     'markup',
-    'markuplines', # deprecated, till 2.14
-    'markuplist', # from 2.16
+    'markuplines',  # deprecated, till 2.14
+    'markuplist',  # from 2.16
     'maxima',
     'melisma',
     'melismaEnd',
@@ -317,7 +317,7 @@ lilypond_music_commands = (
     'predefinedFretboardsOff',
     'predefinedFretboardsOn',
     'pt',
-    'pushToTag', # since 2.16
+    'pushToTag',  # since 2.16
     'quilisma',
     'quoteDuring',
     'relative',
@@ -342,14 +342,14 @@ lilypond_music_commands = (
     'sff',
     'sfp',
     'sfz',
-    'shape', # since 2.16
+    'shape',  # since 2.16
     'shiftDurations',
     'shiftOff',
     'shiftOn',
     'shiftOnn',
     'shiftOnnn',
     'showStaffSwitch',
-    'single', # since 2.18
+    'single',  # since 2.18
     'skip',
     'skipTypesetting',
     'slurDashed',
@@ -383,7 +383,7 @@ lilypond_music_commands = (
     'stopStaff',
     'stopTextSpan',
     'stopTrillSpan',
-    'stringTuning', # since 2.16
+    'stringTuning',  # since 2.16
     'strokeFingerOrientations',
     'stropha',
     'sustainOff',
@@ -409,12 +409,12 @@ lilypond_music_commands = (
     'times',
     'timing',
     'tiny',
-    'tocItem', # since ?
+    'tocItem',  # since ?
     'transpose',
     'transposedCueDuring',
     'transposition',
     'treCorde',
-    'tuplet', # since 2.18
+    'tuplet',  # since 2.18
     'tupletDown',
     'tupletNeutral',
     'tupletUp',
@@ -470,7 +470,7 @@ ornaments = (
     'reverseturn',
     'trill',
 )
-   
+
 
 fermatas = (
     'shortfermata',
@@ -513,171 +513,171 @@ ancient_scripts = (
 
 
 modes = (
-    'major',     
-    'minor',     
-    'ionian',    
-    'dorian',    
-    'phrygian',  
-    'lydian',    
+    'major',
+    'minor',
+    'ionian',
+    'dorian',
+    'phrygian',
+    'lydian',
     'mixolydian',
-    'aeolian',   
-    'locrian',   
+    'aeolian',
+    'locrian',
 )
 
 
 markupcommands_nargs = (
-# no arguments
-(
-    'doubleflat',
-    'doublesharp',
-    'eyeglasses',
-    'flat',
-    'natural',
-    'null',
-    'semiflat',
-    'semisharp',
-    'sesquiflat',
-    'sesquisharp',
-    'sharp',
-    'strut',
-    'table-of-contents'
-),
-# one argument
-(
-    'backslashed-digit',
-    'bold',
-    'box',
-    'bracket',
-    'caps',
-    'center-align',
-    'center-column',
-    'char',
-    'circle',
-    'column',
-    'concat',
-    'dir-column',
-    'draw-dashed-line', # since 2.18
-    'draw-dotted-line', # since 2.18
-    'draw-line',
-    'dynamic',
-    'fill-line',
-    'finger',
-    'fontCaps',
-    'fret-diagram',
-    'fret-diagram-terse',
-    'fret-diagram-verbose',
-    'fromproperty',
-    'harp-pedal',
-    'hbracket',
-    'hspace',
-    'huge',
-    'italic',
-    'justify',
-    'justify-field',
-    'justify-string',
-    'large',
-    'larger',
-    'left-align',
-    'left-brace',
-    'left-column',
-    'line',
-    'lookup',
-    'markalphabet',
-    'markletter',
-    'medium',
-    'musicglyph',
-    'normalsize',
-    'normal-size-sub',
-    'normal-size-super',
-    'normal-text',
-    'number',
-    'oval', # since 2.18
-    'postscript',
-    'right-align',
-    'right-brace',
-    'right-column',
-    'roman',
-    'rounded-box',
-    'sans',
-    'score',
-    'simple',
-    'slashed-digit',
-    'small',
-    'smallCaps',
-    'smaller',
-    'stencil',
-    'sub',
-    'super',
-    'teeny',
-    'text',
-    'tied-lyric',
-    'tiny',
-    'transparent',
-    'triangle',
-    'typewriter',
-    'underline',
-    'upright',
-    'vcenter',
-    'vspace',
-    'verbatim-file',
-    'whiteout',
-    'wordwrap',
-    'wordwrap-field',
-    'wordwrap-string',
-),
-# two arguments
-(
-    'abs-fontsize',
-    'auto-footnote', # since 2.16
-    'combine',
-    'customTabClef',
-    'fontsize',
-    'footnote',
-    'fraction',
-    'halign',
-    'hcenter-in',
-    'lower',
-    'magnify',
-    'note',
-    'on-the-fly',
-    'override',
-    'pad-around',
-    'pad-markup',
-    'pad-x',
-    'page-link',
-    'path',     # added in LP 2.13.31
-    'raise',
-    'rotate',
-    'scale',
-    'translate',
-    'translate-scaled',
-    'with-color',
-    'with-link',
-    'with-url',
-    'woodwind-diagram',
-),
-# three arguments
-(
-    'arrow-head',
-    'beam',
-    'draw-circle',
-    'eps-file',
-    'filled-box',
-    'general-align',
-    'note-by-number',
-    'pad-to-box',
-    'page-ref',
-    'with-dimensions',
-),
-# four arguments
-(
-    'pattern',
-    'put-adjacent',
-),
-# five arguments,
-(
-    'fill-with-pattern',
-),
+    # no arguments
+    (
+        'doubleflat',
+        'doublesharp',
+        'eyeglasses',
+        'flat',
+        'natural',
+        'null',
+        'semiflat',
+        'semisharp',
+        'sesquiflat',
+        'sesquisharp',
+        'sharp',
+        'strut',
+        'table-of-contents'
+        ),
+    # one argument
+    (
+        'backslashed-digit',
+        'bold',
+        'box',
+        'bracket',
+        'caps',
+        'center-align',
+        'center-column',
+        'char',
+        'circle',
+        'column',
+        'concat',
+        'dir-column',
+        'draw-dashed-line',  # since 2.18
+        'draw-dotted-line',  # since 2.18
+        'draw-line',
+        'dynamic',
+        'fill-line',
+        'finger',
+        'fontCaps',
+        'fret-diagram',
+        'fret-diagram-terse',
+        'fret-diagram-verbose',
+        'fromproperty',
+        'harp-pedal',
+        'hbracket',
+        'hspace',
+        'huge',
+        'italic',
+        'justify',
+        'justify-field',
+        'justify-string',
+        'large',
+        'larger',
+        'left-align',
+        'left-brace',
+        'left-column',
+        'line',
+        'lookup',
+        'markalphabet',
+        'markletter',
+        'medium',
+        'musicglyph',
+        'normalsize',
+        'normal-size-sub',
+        'normal-size-super',
+        'normal-text',
+        'number',
+        'oval',  # since 2.18
+        'postscript',
+        'right-align',
+        'right-brace',
+        'right-column',
+        'roman',
+        'rounded-box',
+        'sans',
+        'score',
+        'simple',
+        'slashed-digit',
+        'small',
+        'smallCaps',
+        'smaller',
+        'stencil',
+        'sub',
+        'super',
+        'teeny',
+        'text',
+        'tied-lyric',
+        'tiny',
+        'transparent',
+        'triangle',
+        'typewriter',
+        'underline',
+        'upright',
+        'vcenter',
+        'vspace',
+        'verbatim-file',
+        'whiteout',
+        'wordwrap',
+        'wordwrap-field',
+        'wordwrap-string',
+        ),
+    # two arguments
+    (
+        'abs-fontsize',
+        'auto-footnote',  # since 2.16
+        'combine',
+        'customTabClef',
+        'fontsize',
+        'footnote',
+        'fraction',
+        'halign',
+        'hcenter-in',
+        'lower',
+        'magnify',
+        'note',
+        'on-the-fly',
+        'override',
+        'pad-around',
+        'pad-markup',
+        'pad-x',
+        'page-link',
+        'path',     # added in LP 2.13.31
+        'raise',
+        'rotate',
+        'scale',
+        'translate',
+        'translate-scaled',
+        'with-color',
+        'with-link',
+        'with-url',
+        'woodwind-diagram',
+        ),
+    # three arguments
+    (
+        'arrow-head',
+        'beam',
+        'draw-circle',
+        'eps-file',
+        'filled-box',
+        'general-align',
+        'note-by-number',
+        'pad-to-box',
+        'page-ref',
+        'with-dimensions',
+        ),
+    # four arguments
+    (
+        'pattern',
+        'put-adjacent',
+        ),
+    # five arguments,
+    (
+        'fill-with-pattern',
+        ),
 )
 
 
@@ -708,15 +708,15 @@ contexts = (
     'GrandStaff',
     'GregorianTranscriptionStaff',
     'GregorianTranscriptionVoice',
-    'KievanStaff', # since 2.16
-    'KievanVoice', # since 2.16
+    'KievanStaff',  # since 2.16
+    'KievanVoice',  # since 2.16
     'Lyrics',
     'MensuralStaff',
     'MensuralVoice',
     'NoteNames',
     'NullVoice',     # since 2.18
-    'PetrucciStaff', # since 2.16
-    'PetrucciVoice', # since 2.16
+    'PetrucciStaff',  # since 2.16
+    'PetrucciVoice',  # since 2.16
     'PianoStaff',
     'RhythmicStaff',
     'Score',
@@ -784,7 +784,7 @@ midi_instruments = (
     'contrabass',
     'tremolo strings',
     'pizzicato strings',
-    'orchestral harp', # till LilyPond 2.12 was this erroneously called: 'orchestral strings'
+    'orchestral harp',  # till LilyPond 2.12 was this erroneously called: 'orchestral strings'
     'timpani',
     # (49-56 ensemble)
     'string ensemble 1',
@@ -905,7 +905,7 @@ midi_instruments = (
 )
 
 
-#scheme_functions = (
+# scheme_functions = (
 #    'set-accidental-style',
 #    'set-global-staff-size',
 #    'set-octavation',
@@ -934,7 +934,7 @@ midi_instruments = (
 #    'color?',
 #    'rgb-color',
 #    'x11-color',
-#)
+# )
 
 
 scheme_values = (
@@ -982,7 +982,7 @@ headervariables = (
     'texidoc',
     'footer',
 )
-    
+
 
 papervariables = (
     # fixed vertical
@@ -991,7 +991,7 @@ papervariables = (
     'bottom-margin',
     'ragged-bottom',
     'ragged-last-bottom',
-    
+
     # horizontal
     'paper-width',
     'line-width',
@@ -1007,17 +1007,17 @@ papervariables = (
     'horizontal-shift',
     'indent',
     'short-indent',
-    
+
     # flex vertical
-    'markup-system-spacing', # the distance between a (title or top-level) markup and the system that follows it.
+    'markup-system-spacing',  # the distance between a (title or top-level) markup and the system that follows it.
     'score-markup-spacing',  # the distance between the last system of a score and the (title or top-level) markup that follows it.
     'score-system-spacing',  # the distance between the last system of a score and the first system of the score that follows it, when no (title or top-level) markup exists between them.
-    'system-system-spacing', # the distance between two systems in the same score.
-    'markup-markup-spacing', # the distance between two (title or top-level) markups.
+    'system-system-spacing',  # the distance between two systems in the same score.
+    'markup-markup-spacing',  # the distance between two (title or top-level) markups.
     'last-bottom-spacing',   # the distance from the last system or top-level markup on a page to the bottom of the printable area (i.e. the top of the bottom margin).
     'top-system-spacing',    # the distance from the top of the printable area (i.e. the bottom of the top margin) to the first system on a page, when there is no (title or top-level) markup between the two.
     'top-markup-spacing',    # the distance from the top of the printable area (i.e. the bottom of the top margin) to the first (title or top-level) markup on a page, when there is no system between the two.
-    
+
     # line breaking
     'max-systems-per-page',
     'min-systems-per-page',
@@ -1029,23 +1029,23 @@ papervariables = (
     'blank-last-page-force',         # The penalty for ending the score on an odd-numbered page.
     'blank-page-force',              # The penalty for having a blank page in the middle of a score. This is not used by ly:optimal-breaking since it will never consider blank pages in the middle of a score.
     'page-breaking',                 # The page-breaking algorithm to use. Choices are ly:minimal-breaking, ly:page-turn-breaking, and ly:optimal-breaking.
-    'page-breaking-system-system-spacing', # Tricks the page breaker into thinking that system-system-spacing is set to something different than it really is. For example, if page-breaking-system-system-spacing #'padding is set to something substantially larger than system-system-spacing #'padding, then the page-breaker will put fewer systems on each page. Default: unset.
+    'page-breaking-system-system-spacing',  # Tricks the page breaker into thinking that system-system-spacing is set to something different than it really is. For example, if page-breaking-system-system-spacing #'padding is set to something substantially larger than system-system-spacing #'padding, then the page-breaker will put fewer systems on each page. Default: unset.
     'page-count',                    # The number of pages to be used for a score, unset by default.
-    
+
     # page numbering
     'auto-first-page-number',
     'first-page-number',
     'print-first-page-number',
     'print-page-number',
-    
+
     # misc
     'page-spacing-weight',
     'print-all-headers',
     'system-separator-markup',
-    
+
     # debugging
     'annotate-spacing',
-    
+
     # different markups
     'bookTitleMarkup',
     'evenFooterMarkup',
@@ -1055,15 +1055,15 @@ papervariables = (
     'scoreTitleMarkup',
     'tocItemMarkup',
     'tocTitleMarkup',
-    
+
     # fonts
     'fonts',
-    
+
     # undocumented?
-    #'blank-after-score-page-force',
-    #'force-assignment',
-    #'input-encoding',
-    #'output-scale',
+    # 'blank-after-score-page-force',
+    # 'force-assignment',
+    # 'input-encoding',
+    # 'output-scale',
 )
 
 
@@ -1131,7 +1131,7 @@ clefs_plain = (
     'varpercussion',    # since 2.19
     'violin',
 )
-    
+
 
 clefs = clefs_plain + (
     'treble_8',
@@ -1164,5 +1164,3 @@ mark_formatters = (
     'format-mark-circle-letters',
     'format-mark-circle-numbers',
 )
-
-
