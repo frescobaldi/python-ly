@@ -32,4 +32,3 @@ class ParseDocBook(Parser):
     items = (
         _token.Space,
     )
-

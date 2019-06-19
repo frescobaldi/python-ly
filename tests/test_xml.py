@@ -6,11 +6,15 @@ from lxml import etree
 import os
 import re
 import ly.pkginfo
+import glob
 
 
 def test_all():
     """Test all files in test_xml_files"""
-    test_list = ['glissando', 'tie', 'merge_voice', 'variable', 'dynamics', 'tuplet', 'pickup', 'lyrics', 'barlines']
+    filebase = os.path.join(os.path.dirname(__file__), 'test_xml_files')
+    # Help from https://www.mkyong.com/python/python-how-to-list-all-files-in-a-directory/
+    # Searches test_xml_files directory for all lilypond files and extracts their name (without .ly)
+    test_list = [re.search(r'([^/]*)\.ly', f).group(1) for f in glob.glob(filebase + "/*.ly")]
     for test in test_list:
         print("Testing {}.ly...".format(test))
         compare_output(test)
@@ -24,13 +28,13 @@ def ly_to_xml(filename):
         writer.parse_text(lyfile.read())
     xml = writer.musicxml()
     return (ly.musicxml.create_musicxml.xml_decl_txt.format(encoding='utf-8') + "\n"
-        + ly.musicxml.create_musicxml.doctype_txt + "\n"
-        + xml.tostring(encoding='unicode'))
+            + ly.musicxml.create_musicxml.doctype_txt + "\n"
+            + xml.tostring(encoding='unicode'))
 
 
 def read_expected_xml(filename):
     """Return string with expected XML from file."""
-    with open(filename, 'r') as xmlfile:
+    with open(filename, 'r', encoding='utf-8') as xmlfile:
         output = xmlfile.read()
     # Replace date and python-ly version in XML file with today's date and current version
     output = re.sub(r'\d{4}-\d{2}-\d{2}', str(datetime.date.today()), output)
@@ -80,5 +84,5 @@ def assert_multi_line_equal(first, second, msg=None):
 
 
 if __name__ == "__main__":
-    #sys.exit(main(sys.argv))
+    # sys.exit(main(sys.argv))
     test_all()

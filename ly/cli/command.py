@@ -44,6 +44,7 @@ class _command(object):
     yourself.
 
     """
+
     def __init__(self):
         pass
 
@@ -54,7 +55,7 @@ class _command(object):
     def get_absolute(opts, cursor):
         """Utility function to determine whether the first pitch in a relative should
         be regarded as absolute (LilyPond 2.18+ behaviour).
-        
+
         """
         if opts.rel_absolute is None:
             return ly.docinfo.DocInfo(cursor.document).version() >= (2, 18)
@@ -64,6 +65,7 @@ class _command(object):
 
 class set_variable(_command):
     """set a variable to a value"""
+
     def __init__(self, arg):
         self.name, self.value = arg.split('=', 1)
 
@@ -73,6 +75,7 @@ class set_variable(_command):
 
 class _info_command(_command):
     """base class for commands that print some output to stdout."""
+
     def run(self, opts, cursor, output):
         info = ly.docinfo.DocInfo(cursor.document)
         text = self.get_info(info)
@@ -92,18 +95,21 @@ class _info_command(_command):
 
 class mode(_info_command):
     """print mode to stdout"""
+
     def get_info(self, info):
         return info.mode()
 
 
 class version(_info_command):
     """print version to stdout"""
+
     def get_info(self, info):
         return info.version_string()
 
 
 class language(_info_command):
     """print language to stdout"""
+
     def get_info(self, info):
         return info.language()
 
@@ -115,6 +121,7 @@ class _edit_command(_command):
 
 class indent(_edit_command):
     """run the indenter"""
+
     def indenter(self, opts):
         """Get a ly.indent.Indenter initialized with our options."""
         i = ly.indent.Indenter()
@@ -128,12 +135,14 @@ class indent(_edit_command):
 
 class reformat(indent):
     """reformat the document"""
+
     def run(self, opts, cursor, output):
         ly.reformat.reformat(cursor, self.indenter(opts))
 
 
 class translate(_edit_command):
     """translate pitch names"""
+
     def __init__(self, language):
         if language not in ly.pitch.pitchInfo:
             raise ValueError()
@@ -155,6 +164,7 @@ class translate(_edit_command):
 
 class transpose(_edit_command):
     """transpose music"""
+
     def __init__(self, arg):
         result = []
         for pitch, octave in re.findall(r"([a-z]+)([,']*)", arg):
@@ -178,6 +188,7 @@ class transpose(_edit_command):
 
 class rel2abs(_edit_command):
     """convert relative music to absolute"""
+
     def run(self, opts, cursor, output):
         absolute = self.get_absolute(opts, cursor)
         import ly.pitch.rel2abs
@@ -186,6 +197,7 @@ class rel2abs(_edit_command):
 
 class abs2rel(_edit_command):
     """convert absolute music to relative"""
+
     def run(self, opts, cursor, output):
         absolute = self.get_absolute(opts, cursor)
         import ly.pitch.abs2rel
@@ -194,6 +206,7 @@ class abs2rel(_edit_command):
 
 class simplify_accidentals(_edit_command):
     """replace notes with accidentals as much as possible with their natural neighbors"""
+
     def run(self, opts, cursor, output):
         absolute = self.get_absolute(opts, cursor)
         import ly.pitch.transpose
@@ -209,6 +222,7 @@ class simplify_accidentals(_edit_command):
 
 class _export_command(_command):
     """Command that exports to a file."""
+
     def __init__(self, output=None):
         self.output = output
 
@@ -231,6 +245,7 @@ class musicxml(_export_command):
 
 class write(_command):
     """write the source file."""
+
     def __init__(self, output=None):
         self.output = output
 
@@ -251,6 +266,7 @@ class write(_command):
 
 class highlight(_export_command):
     """write syntax colored HTML."""
+
     def run(self, opts, cursor, output):
         import ly.colorize
         w = ly.colorize.HtmlWriter()
@@ -276,4 +292,3 @@ class highlight(_export_command):
 
 
 hl = highlight
-

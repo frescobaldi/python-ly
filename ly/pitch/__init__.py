@@ -73,11 +73,12 @@ pitchInfo['catalan'] = pitchInfo['italiano']
 
 class PitchNameNotAvailable(Exception):
     """Exception raised when there is no name for a pitch.
-    
+
     Can occur when translating pitch names, if the target language e.g.
     does not have quarter-tone names.
-    
+
     """
+
     def __init__(self, language):
         super(PitchNameNotAvailable, self).__init__()
         self.language = language
@@ -85,21 +86,22 @@ class PitchNameNotAvailable(Exception):
 
 class Pitch(object):
     """A pitch with note, alter and octave attributes.
-    
+
     Attributes may be manipulated directly.
-    
+
     """
+
     def __init__(self, note=0, alter=0, octave=0, accidental="", octavecheck=None):
         self.note = note                # base note (c, d, e, f, g, a, b)
-                                        # as integer (0 to 6)
+        # as integer (0 to 6)
         self.alter = alter              # # = .5; b = -.5; natural = 0
         self.octave = octave            # '' = 2; ,, = -2
         self.accidental = accidental    # "", "?" or "!"
         self.octavecheck = octavecheck  # a number is an octave check
-    
+
     def __repr__(self):
         return '<Pitch {0}>'.format(self.output())
-    
+
     def output(self, language="nederlands"):
         """Returns our string representation."""
         res = []
@@ -110,7 +112,7 @@ class Pitch(object):
             res.append('=')
             res.append(octaveToString(self.octavecheck))
         return ''.join(res)
-        
+
     @classmethod
     def c1(cls):
         """Returns a pitch c'."""
@@ -129,11 +131,11 @@ class Pitch(object):
     def copy(self):
         """Returns a new instance with our attributes."""
         return self.__class__(self.note, self.alter, self.octave)
-        
+
     def makeAbsolute(self, lastPitch):
         """Makes ourselves absolute, i.e. sets our octave from lastPitch."""
         self.octave += lastPitch.octave - (self.note - lastPitch.note + 3) // 7
-        
+
     def makeRelative(self, lastPitch):
         """Makes ourselves relative, i.e. changes our octave from lastPitch."""
         self.octave -= lastPitch.octave - (self.note - lastPitch.note + 3) // 7
@@ -141,12 +143,13 @@ class Pitch(object):
 
 class PitchWriter(object):
     language = "unknown"
+
     def __init__(self, names, accs, replacements=()):
         self.names = names
         self.accs = accs
         self.replacements = replacements
 
-    def __call__(self, note, alter = 0):
+    def __call__(self, note, alter=0):
         """
         Returns a string representing the pitch in our language.
         Raises PitchNameNotAvailable if the requested pitch
@@ -171,7 +174,7 @@ class PitchReader(object):
         self.accs = list(accs)
         self.replacements = replacements
         self.rx = re.compile("({0})({1})?$".format("|".join(names),
-            "|".join(acc for acc in accs if acc)))
+                                                   "|".join(acc for acc in accs if acc)))
 
     def __call__(self, text):
         for s, r in self.replacements:
@@ -189,22 +192,22 @@ class PitchReader(object):
             # HACK: were we using (rarely used) long english syntax?
             text = text.replace('flat', 'f').replace('sharp', 's')
         return False
-            
-            
+
+
 def octaveToString(octave):
     """Converts numeric octave to a string with apostrophes or commas.
-    
+
     0 -> "" ; 1 -> "'" ; -1 -> "," ; etc.
-    
+
     """
     return octave < 0 and ',' * -octave or "'" * octave
 
 
 def octaveToNum(octave):
     """Converts string octave to an integer:
-    
+
     "" -> 0 ; "," -> -1 ; "'''" -> 3 ; etc.
-    
+
     """
     return octave.count("'") - octave.count(",")
 
@@ -234,30 +237,30 @@ def pitchWriter(language):
 
 class PitchIterator(object):
     """Iterate over notes or pitches in a source."""
-    
+
     def __init__(self, source, language="nederlands"):
         """Initialize with a ly.document.Source.
-        
+
         The language is by default set to "nederlands".
-        
+
         """
         self.source = source
         self.setLanguage(language)
-    
+
     def setLanguage(self, lang):
         r"""Changes the pitch name language to use.
-        
+
         Called internally when \language or \include tokens are encountered
         with a valid language name/file.
-        
+
         Sets the language attribute to the language name and the read attribute
         to an instance of ly.pitch.PitchReader.
-        
+
         """
         if lang in pitchInfo.keys():
             self.language = lang
             return True
-    
+
     def tokens(self):
         """Yield all the tokens from the source, following the language."""
         for t in self.source:
@@ -271,17 +274,17 @@ class PitchIterator(object):
                                 yield LanguageName(lang, t.pos)
                             break
                         yield t
-    
+
     def read(self, token):
         """Reads the token and returns (note, alter) or None."""
         return pitchReader(self.language)(token)
-    
+
     def pitches(self):
         """Yields all tokens, but collects Note and Octave tokens.
-        
+
         When a Note is encountered, also reads octave and octave check and then
         a Pitch is yielded instead of the tokens.
-        
+
         """
         tokens = self.tokens()
         for t in tokens:
@@ -290,13 +293,13 @@ class PitchIterator(object):
                 if not p:
                     break
                 p = Pitch(*p)
-                
+
                 p.note_token = t
                 p.octave_token = None
                 p.accidental_token = None
                 p.octavecheck_token = None
-                
-                t = None # prevent hang in this loop
+
+                t = None  # prevent hang in this loop
                 for t in tokens:
                     if isinstance(t, ly.lex.lilypond.Octave):
                         p.octave = octaveToNum(t)
@@ -314,21 +317,21 @@ class PitchIterator(object):
                     break
             else:
                 yield t
-        
+
     def position(self, t):
         """Returns the cursor position for the given token or Pitch."""
         if isinstance(t, Pitch):
             t = t.note_token
         return self.source.position(t)
-    
+
     def write(self, pitch, language=None):
         """Output a changed Pitch.
-        
+
         The Pitch is written in the Source's document.
-        
+
         To use this method reliably, you must instantiate the PitchIterator
         with a ly.document.Source that has tokens_with_position set to True.
-        
+
         """
         document = self.source.document
         pwriter = pitchWriter(language or self.language)
@@ -364,5 +367,3 @@ class PitchIterator(object):
 class LanguageName(ly.lex.Token):
     """A Token that denotes a language name."""
     pass
-
-

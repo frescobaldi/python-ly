@@ -21,7 +21,7 @@
 Formatting tools to improve the readability of a ly.document.Document without
 changing the semantic meaning of the LilyPond source.
 
-Basically the tools only change whitespace to make the source-code more 
+Basically the tools only change whitespace to make the source-code more
 readable.
 
 See also ly.indent.
@@ -36,14 +36,14 @@ import ly.lex
 
 def break_indenters(cursor):
     """Add newlines around indent and dedent tokens where needed.
-    
-    If there is stuff after a { or << (that's not closed on the same line) 
-    it is put on a new line, and if there if stuff before a } or >>, the } 
+
+    If there is stuff after a { or << (that's not closed on the same line)
+    it is put on a new line, and if there if stuff before a } or >>, the }
     or >> is put on a new line.
-    
-    It is necessary to run the indenter again over the same part of the 
+
+    It is necessary to run the indenter again over the same part of the
     document, as it will look garbled with the added newlines.
-    
+
     """
     with cursor.document as d:
         for b in cursor.blocks():
@@ -79,7 +79,7 @@ def move_long_comments(cursor):
                 and isinstance(tokens[1], (
                     ly.lex.lilypond.LineComment,
                     ly.lex.scheme.LineComment))
-                and tokens[1][:3] in ('%%%', ';;;')):
+                    and tokens[1][:3] in ('%%%', ';;;')):
                 del d[d.position(b):d.position(b) + tokens[1].pos]
 
 
@@ -105,6 +105,3 @@ def reformat(cursor, indenter):
     indenter.indent(cursor)
     move_long_comments(cursor)
     remove_trailing_whitespace(cursor)
-
-
-

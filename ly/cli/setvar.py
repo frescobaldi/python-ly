@@ -144,19 +144,19 @@ def number_lines(arg):
 
 
 def wrapper_tag(arg):
-    if not arg in ['div', 'pre', 'code', 'id']:
+    if arg not in ['div', 'pre', 'code', 'id']:
         raise ValueError("unknown wrapper tag: {tag}".format(
             tag=arg))
     return arg
 
 
 def wrapper_attribute(arg):
-    if not arg in ['id', 'class']:
+    if arg not in ['id', 'class']:
         raise ValueError("wrapper attribute must be 'id' or 'class', found {attr}".format(
             attr=arg))
     return arg
 
-    
+
 def document_id(arg):
     return arg or None
 

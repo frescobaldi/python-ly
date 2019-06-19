@@ -36,7 +36,7 @@ import ly.lex.lilypond
 
 
 durations = ['\\maxima', '\\longa', '\\breve',
-    '1', '2', '4', '8', '16', '32', '64', '128', '256', '512', '1024', '2048']
+             '1', '2', '4', '8', '16', '32', '64', '128', '256', '512', '1024', '2048']
 
 
 def remove_dups(iterable):
@@ -45,6 +45,7 @@ def remove_dups(iterable):
     for i in iterable:
         yield '' if i == old else i
         old = i
+
 
 # decribes a musical item that has a duration
 music_item = collections.namedtuple('music_item', (
@@ -78,19 +79,20 @@ _stay = (
     ly.lex.lilypond.Tie,
 )
 
+
 def music_tokens(source, command=False, chord=False):
     r"""DEPRECATED. Yield lists of tokens describing rests, skips or pitches.
-    
+
     source is a ly.document.Source instance following the state.
-    
+
     The following keyword arguments can be used:
-    
+
     - command: whether to allow pitches in \\relative, \\transpose, etc.
     - chord: whether to allow pitches inside chords.
-    
+
     This function is deprecated and will be removed.
     You should use music_items() instead.
-    
+
     """
     skip_parsers = ()
     if not command:
@@ -111,41 +113,42 @@ def music_tokens(source, command=False, chord=False):
                     break
                 elif not isinstance(token, (ly.lex.Space, ly.lex.Numeric)):
                     break
-        
+
         while isinstance(token, _start):
-            l = [token]
+            lis = [token]
             for token in source:
                 if isinstance(token, ly.lex.Space):
                     continue
                 if not isinstance(token, _stay):
-                    yield l
+                    yield lis
                     break
-                l.append(token)
+                lis.append(token)
             else:
-                yield l
+                yield lis
                 break
+
 
 def music_items(cursor, command=False, chord=False, partial=ly.document.INSIDE):
     r"""Yield music_item instances describing rests, skips or pitches.
-    
+
     cursor is a ly.document.Cursor instance.
-    
+
     The following keyword arguments can be used:
-    
+
     - command: whether to allow pitches in \\relative, \\transpose, etc.
     - chord: whether to allow pitches inside chords.
     - partial: ly.document.INSIDE (default), PARTIAL or OUTSIDE.
       See the documentation of ly.document.Source.__init__().
-    
+
     """
     skip_parsers = ()
     if not command:
         skip_parsers += (ly.lex.lilypond.ParsePitchCommand,)
     if not chord:
         skip_parsers += (ly.lex.lilypond.ParseChord,)
-    
+
     source = ly.document.Source(cursor, True, partial=partial, tokens_with_position=True)
-    
+
     def mk_item(l):
         """Convert a list of tokens to a music_item instance."""
         tokens = []
@@ -166,36 +169,36 @@ def music_items(cursor, command=False, chord=False, partial=ly.document.INSIDE):
                     break
             insert_pos = t.end
         return music_item(tokens, dur_tokens, may_remove, insert_pos, pos, end)
-        
+
     for token in source:
         if isinstance(source.state.parser(), skip_parsers):
             continue
         # make sure to skip the duration tokens in a \tuplet command
         if token == '\\tuplet':
-            l = [token]
+            lis = [token]
             for token in source:
                 if isinstance(token, ly.lex.lilypond.Duration):
-                    l.append(token)
+                    lis.append(token)
                     for token in source:
                         if not isinstance(token, ly.lex.lilypond.Duration):
                             break
-                        l.append(token)
+                        lis.append(token)
                     break
                 elif isinstance(token, ly.lex.Numeric):
-                    l.append(token)
+                    lis.append(token)
                 elif not isinstance(token, ly.lex.Space):
                     break
-            yield mk_item(l)
-        
+            yield mk_item(lis)
+
         length_seen = False
         while isinstance(token, _start):
-            l = [token]
+            lis = [token]
             if isinstance(token, ly.lex.lilypond.Length):
                 length_seen = True
             for token in source:
                 if isinstance(token, ly.lex.lilypond.Length):
                     if length_seen is True:
-                        yield mk_item(l)
+                        yield mk_item(lis)
                         length_seen = False
                         break
                     else:
@@ -209,28 +212,30 @@ def music_items(cursor, command=False, chord=False, partial=ly.document.INSIDE):
                             break
                     continue
                 elif not isinstance(token, _stay):
-                    yield mk_item(l)
+                    yield mk_item(lis)
                     length_seen = False
                     break
-                l.append(token)
+                lis.append(token)
             else:
-                yield mk_item(l)
+                yield mk_item(lis)
                 break
+
 
 def preceding_duration(cursor):
     """Return a preceding duration before the cursor, or an empty list."""
     tokens = ly.document.Runner.at(cursor).backward()
     for t in tokens:
         if isinstance(t, ly.lex.lilypond.Duration):
-            l = [t]
+            lis = [t]
             for t in tokens:
                 if isinstance(t, ly.lex.lilypond.Duration):
-                    l.append(t)
+                    lis.append(t)
                 elif not isinstance(t, ly.lex.Space):
                     break
-            l.reverse()
-            return l
+            lis.reverse()
+            return lis
     return []
+
 
 def rhythm_double(cursor):
     """Doubles all duration values."""
@@ -247,6 +252,7 @@ def rhythm_double(cursor):
                             d[token.pos:token.end] = durations[i - 1]
                     break
 
+
 def rhythm_halve(cursor):
     """Halves all duration values."""
     with cursor.document as d:
@@ -262,6 +268,7 @@ def rhythm_halve(cursor):
                             d[token.pos:token.end] = durations[i + 1]
                     break
 
+
 def rhythm_dot(cursor):
     """Add a dot to all durations."""
     with cursor.document as d:
@@ -270,6 +277,7 @@ def rhythm_dot(cursor):
                 if isinstance(token, ly.lex.lilypond.Length):
                     d[token.end:token.end] = "."
                     break
+
 
 def rhythm_undot(cursor):
     """Remove one dot from all durations."""
@@ -280,6 +288,7 @@ def rhythm_undot(cursor):
                     del d[token.pos:token.end]
                     break
 
+
 def rhythm_remove_scaling(cursor):
     """Remove the scaling (like ``*3``, ``*1/3``) from all durations."""
     with cursor.document as d:
@@ -287,7 +296,8 @@ def rhythm_remove_scaling(cursor):
             for token in item.dur_tokens:
                 if isinstance(token, ly.lex.lilypond.Scaling):
                     del d[token.pos:token.end]
-            
+
+
 def rhythm_remove_fraction_scaling(cursor):
     """Remove the scaling containing fractions (like ``*1/3``) from all durations."""
     with cursor.document as d:
@@ -296,12 +306,14 @@ def rhythm_remove_fraction_scaling(cursor):
                 if isinstance(token, ly.lex.lilypond.Scaling) and '/' in token:
                     del d[token.pos:token.end]
 
+
 def rhythm_remove(cursor):
     """Remove all durations."""
     with cursor.document as d:
         for item in music_items(cursor):
             if item.dur_tokens and item.may_remove:
                 del d[item.dur_tokens[0].pos:item.dur_tokens[-1].end]
+
 
 def rhythm_implicit(cursor):
     """Remove reoccurring durations."""
@@ -319,6 +331,7 @@ def rhythm_implicit(cursor):
                         del d[item.dur_tokens[0].pos:item.dur_tokens[-1].end]
                     prev = item.dur_tokens
 
+
 def rhythm_implicit_per_line(cursor):
     """Remove reoccurring durations, but always write one on a new line."""
     items = music_items(cursor)
@@ -331,7 +344,7 @@ def rhythm_implicit_per_line(cursor):
     with cursor.document as d:
         for item in items:
             if not set(item.tokens) & set(('\\tempo', '\\tuplet', '\\partial')):
-                block = d.block( (item.dur_tokens or item.tokens) [0].pos)
+                block = d.block((item.dur_tokens or item.tokens)[0].pos)
                 if block != previous_block:
                     if not item.dur_tokens:
                         d[item.insert_pos:item.insert_pos] = ''.join(prev)
@@ -342,6 +355,7 @@ def rhythm_implicit_per_line(cursor):
                     if item.dur_tokens == prev and item.may_remove:
                         del d[item.dur_tokens[0].pos:item.dur_tokens[-1].end]
                     prev = item.dur_tokens
+
 
 def rhythm_explicit(cursor):
     """Make all durations explicit."""
@@ -359,11 +373,12 @@ def rhythm_explicit(cursor):
                 else:
                     d[item.insert_pos:item.insert_pos] = ''.join(prev)
 
+
 def rhythm_overwrite(cursor, durations):
     """Apply a list of durations to the cursor's range.
-    
+
     The durations list looks like ["4", "8", "", "16.",] etc.
-    
+
     """
     durations_source = remove_dups(itertools.cycle(durations))
     with cursor.document as d:
@@ -371,6 +386,7 @@ def rhythm_overwrite(cursor, durations):
             pos = item.insert_pos
             end = item.dur_tokens[-1].end if item.dur_tokens else pos
             d[pos:end] = next(durations_source)
+
 
 def rhythm_extract(cursor):
     """Return a list of the durations from the cursor's range."""
@@ -383,4 +399,3 @@ def rhythm_extract(cursor):
     if durations and not durations[0]:
         durations[0] = preceding_duration(cursor) or ['4']
     return ["".join(tokens) for tokens in durations]
-

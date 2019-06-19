@@ -47,7 +47,7 @@ def remove(cursor):
                     else:
                         del d[cur.pos:cur.end]
                 elif isinstance(nxt, ly.lex.Space):
-                    # delete if followed by a space 
+                    # delete if followed by a space
                     del d[cur.pos:cur.end]
                 else:
                     # replace "|" with a space
@@ -57,13 +57,14 @@ def remove(cursor):
 
 class event(object):
     """A limited event type at a certain time."""
+
     def __init__(self):
         self._nodes = []
         self.cadenza = None
         self.barcheck = False
         self.timesig = None
         self.partial = None
-    
+
     def append(self, node):
         self._nodes.append(node)
 
@@ -87,10 +88,10 @@ def insert(cursor, music=None):
     if music is None:
         import ly.music
         music = ly.music.document(cursor.document)
-    
+
     if len(music) == 0:
         return
-    
+
     if cursor.start:
         n = music.node(cursor.start, 1)
         nodes = itertools.chain((n,), n.forward())
@@ -99,19 +100,20 @@ def insert(cursor, music=None):
     if cursor.end is None:
         iter_nodes = iter
     else:
-        predicate = lambda node: node.position < cursor.end
+        def predicate(node): return node.position < cursor.end
+
         def iter_nodes(it):
             return itertools.takewhile(predicate, it)
-    
+
     # make time-based lists of events
     event_lists = []
-    
+
     def do_topnode(node):
         if not isinstance(node, ly.music.items.Music):
             for n in node:
                 do_topnode(n)
             return
-        
+
         def do_node(node, time, scaling):
             if isinstance(node, (ly.music.items.Durable, ly.music.items.UserCommand)):
                 if node.position >= cursor.start:
@@ -140,20 +142,18 @@ def insert(cursor, music=None):
             else:
                 do_topnode(node)
             return time
-        
+
         events = collections.defaultdict(event)
         do_node(node, 0, 1)
         event_lists.append(sorted(events.items()))
-    
+
     do_topnode(nodes)
-    
+
     for event_list in event_lists:
-        
+
         # default to 4/4 without pickup
         measure_length = 1
         measure_pos = 0
-        
+
         for time, evt in event_list:
             print(time, evt)
-
-

@@ -53,12 +53,14 @@ from __future__ import print_function
 
 from fractions import Fraction
 
+
 class IterateXmlObjs():
     """
     A ly.musicxml.xml_objs.Score object is iterated and the Music XML node tree
     is constructed.
 
     """
+
     def __init__(self, score, musxml, div):
         """Create the basic score information, and initiate the
         iteration of the parts."""
@@ -176,11 +178,11 @@ class IterateXmlObjs():
         divdur = self.count_duration(obj.duration, self.divisions)
         if isinstance(obj, Unpitched):
             self.musxml.new_unpitched_note(obj.base_note, obj.octave, obj.type, divdur,
-                obj.voice, obj.dot, obj.chord, obj.grace)
+                                           obj.voice, obj.dot, obj.chord, obj.grace)
         else:
             self.musxml.new_note(obj.base_note, obj.octave, obj.type, divdur,
-                obj.alter, obj.accidental_token, obj.voice, obj.dot, obj.chord,
-                obj.grace)
+                                 obj.alter, obj.accidental_token, obj.voice, obj.dot, obj.chord,
+                                 obj.grace)
         for t in obj.tie:
             self.musxml.tie_note(t)
         for s in obj.slur:
@@ -214,7 +216,7 @@ class IterateXmlObjs():
             self.musxml.add_skip(divdur)
         else:
             self.musxml.new_rest(divdur, obj.type, obj.pos,
-            obj.dot, obj.voice)
+                                 obj.dot, obj.voice)
 
     def count_duration(self, base_scaling, divs):
         base = base_scaling[0]
@@ -226,6 +228,7 @@ class IterateXmlObjs():
 
 class Score():
     """Object that keep track of a whole score."""
+
     def __init__(self):
         self.partlist = []
         self.title = None
@@ -255,6 +258,7 @@ class Score():
 
         """
         ind = "  "
+
         def debug_part(p):
             print("Score part:"+p.name)
             for n, b in enumerate(p.barlist):
@@ -281,6 +285,7 @@ class Score():
 
 class ScorePartGroup():
     """Object to keep track of part group."""
+
     def __init__(self, num, bracket):
         self.bracket = bracket
         self.partlist = []
@@ -300,6 +305,7 @@ class ScorePartGroup():
 
 class ScoreSection():
     """ object to keep track of music section """
+
     def __init__(self, name, glob=False):
         self.name = name
         self.barlist = []
@@ -344,22 +350,23 @@ class ScoreSection():
                         if obj.tie and slurOn:
                             tie = True
                         try:
-                            l = lyrics.barlist[i]
+                            lyr = lyrics.barlist[i]
                         except IndexError:
                             break
-                        if l[-1] == "slurOff" or l[-2] == "slurOff":
+                        if lyr[-1] == "slurOff" or lyr[-2] == "slurOff":
                             slurOn = False
-                        elif l[-1] == "slurOn" or l[-2] == "slurOn":
+                        elif lyr[-1] == "slurOn" or lyr[-2] == "slurOn":
                             slurOn = True
-                        if l != 'skip':
-                            l[0] = l[0].replace('~', chr(0x203f))  # Turns ~ into undertie
-                            obj.add_lyric(l)
+                        if lyr != 'skip':
+                            lyr[0] = lyr[0].replace('~', chr(0x203f))  # Turns ~ into undertie
+                            obj.add_lyric(lyr)
                         i += 1
 
 
 class Snippet(ScoreSection):
     """ Short section intended to be merged.
     Holds reference to the barlist to be merged into."""
+
     def __init__(self, name, merge_into):
         ScoreSection.__init__(self, name)
         self.merge_barlist = merge_into
@@ -368,6 +375,7 @@ class Snippet(ScoreSection):
 class LyricsSection(ScoreSection):
     """ Holds the lyrics information. Will eventually be merged to
     the corresponding note in the section set by the voice id. """
+
     def __init__(self, name, voice_id):
         ScoreSection.__init__(self, name)
         self.voice_id = voice_id
@@ -375,6 +383,7 @@ class LyricsSection(ScoreSection):
 
 class ScorePart(ScoreSection):
     """ object to keep track of part """
+
     def __init__(self, staves=0, part_id=None, to_part=None, name=''):
         ScoreSection.__init__(self, name)
         self.part_id = part_id
@@ -450,6 +459,7 @@ class ScorePart(ScoreSection):
 class Bar():
     """ Representing the bar/measure.
     Contains also information about how complete it is."""
+
     def __init__(self):
         self.obj_list = []
         self.list_full = False
@@ -521,6 +531,7 @@ class Bar():
 
 class BarMus():
     """ Common class for notes and rests. """
+
     def __init__(self, duration, voice=1):
         self.duration = duration
         self.type = None
@@ -574,6 +585,7 @@ class BarMus():
 
 class OctaveShift():
     """Class for octave shifts."""
+
     def __init__(self, plac, octdir, size):
         self.plac = plac
         self.octdir = octdir
@@ -582,6 +594,7 @@ class OctaveShift():
 
 class Dynamics():
     """Stores information about dynamics. """
+
     def __init__(self, sign, before=True):
         self.before = before
         self.sign = sign
@@ -609,6 +622,7 @@ class DynamicsDashes(Dynamics):
 
 class Tuplet():
     """Stores information about tuplet."""
+
     def __init__(self, fraction, ttype, nr, acttype, normtype):
         self.fraction = fraction
         self.ttype = ttype
@@ -616,8 +630,10 @@ class Tuplet():
         self.acttype = acttype
         self.normtype = normtype
 
+
 class Slur():
     """Stores information about slur."""
+
     def __init__(self, nr, slurtype):
         self.nr = nr
         self.slurtype = slurtype
@@ -630,6 +646,7 @@ class Slur():
 
 class BarNote(BarMus):
     """ object to keep track of note parameters """
+
     def __init__(self, pitch_note, alter, accidental, duration, voice=1):
         BarMus.__init__(self, duration, voice)
         self.base_note = pitch_note.upper()
@@ -678,7 +695,7 @@ class BarNote(BarMus):
     def set_grace(self, slash):
         self.grace = (1, slash)
 
-    def set_gliss(self, line, endtype = "start", nr=1):
+    def set_gliss(self, line, endtype="start", nr=1):
         if not line:
             line = "solid"
         self.gliss = (line, endtype, nr)
@@ -706,6 +723,7 @@ class BarNote(BarMus):
 
 class Unpitched(BarNote):
     """Object to keep track of unpitched notes."""
+
     def __init__(self, duration, step=None, voice=1):
         BarNote.__init__(self, 'B', 0, "", duration, voice=1)
         self.octave = 4
@@ -715,6 +733,7 @@ class Unpitched(BarNote):
 
 class BarRest(BarMus):
     """ object to keep track of different rests and skips """
+
     def __init__(self, duration, voice=1, show_type=True, skip=False, pos=0):
         BarMus.__init__(self, duration, voice)
         self.show_type = show_type
@@ -737,6 +756,7 @@ class BarRest(BarMus):
 
 class BarAttr():
     """ object that keep track of bar attributes, e.g. time sign, clef, key etc """
+
     def __init__(self):
         self.key = None
         self.time = 0
@@ -802,14 +822,17 @@ class BarAttr():
         if barattr.tempo is not None and (override or self.tempo is None):
             self.tempo = barattr.tempo
 
+
 class BarBackup():
     """ Object that stores duration for backup """
+
     def __init__(self, duration):
         self.duration = duration
 
 
 class TempoDir():
     """ Object that stores tempo direction information """
+
     def __init__(self, unit, unittype, beats, dots, text):
         if unittype:
             self.metr = unittype, beats
@@ -844,6 +867,7 @@ def dur2lines(dur):
         return 3
     else:
         return 0
+
 
 def convert_barl(bl):
     if bl == '|':

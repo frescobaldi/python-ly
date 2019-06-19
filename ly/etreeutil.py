@@ -31,9 +31,9 @@ def isblank(s):
 
 def indent(elem, indent_string="  ", level=0):
     """Indent the XML in element.
-    
+
     Text content that is already non-whitespace is not changed.
-    
+
     """
     # based on http://effbot.org/zone/element-lib.htm#prettyprint
     i = "\n" + indent_string * level
@@ -49,5 +49,3 @@ def indent(elem, indent_string="  ", level=0):
     else:
         if level and isblank(elem.tail):
             elem.tail = i
-
-

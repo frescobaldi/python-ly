@@ -22,12 +22,12 @@ The items a music expression is constructed with in a tree structure.
 
 Whitespace and comments are left out.
 
-All nodes (instances of Item) have a 'position' attribute that indicates 
-where the item starts in the source text. Almost all items have the token 
-that starts the expression in the 'token' attribute and possibly other 
-tokens in the 'tokens' attribute, as a tuple. 
+All nodes (instances of Item) have a 'position' attribute that indicates
+where the item starts in the source text. Almost all items have the token
+that starts the expression in the 'token' attribute and possibly other
+tokens in the 'tokens' attribute, as a tuple.
 
-The 'end_position()' method returns the position where the node (including 
+The 'end_position()' method returns the position where the node (including
 its child nodes) ends.
 
 You can get the whole tree structure of a LilyPond document by instantiating
@@ -53,15 +53,15 @@ from ly.lex import scheme
 
 class Item(ly.node.WeakNode):
     """Represents any item in the music of a document.
-    
+
     This can be just a token, or an interpreted construct such as a note,
     rest or sequential or simultaneous construct , etc.
-    
+
     Some Item instances just have one responsible token, but others have a
     list or tuple to tokens.
-    
+
     An Item also has a pointer to the Document it originates from.
-    
+
     """
     document = None
     tokens = ()
@@ -71,16 +71,16 @@ class Item(ly.node.WeakNode):
     def __repr__(self):
         s = ' ' + repr(self.token[:]) if self.token else ''
         return '<{0}{1}>'.format(self.__class__.__name__, s)
-    
+
     def plaintext(self):
         """Return a plaintext value for this node.
-        
+
         This only makes sense for items like Markup or String. For other types,
         an empty string is returned
-        
+
         """
         return ""
-     
+
     def end_position(self):
         """Return the end position of this node."""
         def ends():
@@ -100,21 +100,21 @@ class Item(ly.node.WeakNode):
                 elif isinstance(i, lex.Token):
                     yield i.end
         return max(ends())
-    
+
     def events(self, e, time, scaling):
         """Let the event.Events instance handle the events. Return the time."""
         return time
-    
+
     def length(self):
         """Return the musical duration."""
         return 0
-    
+
     def iter_toplevel_items(self):
         """Yield the toplevel items of our Document node in backward direction.
-        
-        Iteration starts with the node just before the node "self" is a 
+
+        Iteration starts with the node just before the node "self" is a
         descendant of.
-        
+
         """
         node = self
         for doc in self.ancestors():
@@ -123,12 +123,12 @@ class Item(ly.node.WeakNode):
             node = doc
         else:
             return
-        
+
         # now, doc is the Document node, and node is the child of the Document
         # node we are a (far) descendant of
         for i in node.backward():
             yield i
-        
+
         # look in parent Document before the place we were included
         while doc.include_node:
             p = doc.include_node.parent()
@@ -138,7 +138,7 @@ class Item(ly.node.WeakNode):
                 doc = p
             else:
                 break
-                
+
     def iter_toplevel_items_include(self):
         r"""Same as iter_toplevel_items(), but follows \include commands."""
         def follow(it):
@@ -151,13 +151,13 @@ class Item(ly.node.WeakNode):
                 else:
                     yield i
         return follow(self.iter_toplevel_items())
-    
+
     def music_parent(self):
         """Walk up the parent tree until Music is found; return the outermost Music node.
-        
+
         Returns None is the node does not belong to any music expression (e.g.
         a toplevel Markup or Scheme object).
-        
+
         """
         node = self
         mus = isinstance(node, Music)
@@ -167,12 +167,12 @@ class Item(ly.node.WeakNode):
                 return node
             mus = pmus
             node = p
-    
+
     def music_children(self, depth=-1):
         """Yield all the children that are new music expressions
-        
+
         (i.e. that are inside other constructions).
-        
+
         """
         def find(node, depth):
             if depth != 0:
@@ -188,16 +188,16 @@ class Item(ly.node.WeakNode):
                             for i in find(i, depth-1):
                                 yield i
         return find(self, depth)
-    
+
     def has_output(self, _seen_docs=None):
         """Return True if this node has toplevel music, markup, book etc.
-        
+
         I.e. returns True when LilyPond would likely generate output. Usually
         you'll call this method on a Document, Score, BookPart or Book node.
-        
-        You should not supply the _seen_docs argument; it is used internally 
+
+        You should not supply the _seen_docs argument; it is used internally
         to avoid traversing recursively nested include files.
-        
+
         """
         if _seen_docs is None:
             _seen_docs = set()
@@ -216,7 +216,7 @@ class Item(ly.node.WeakNode):
 
 class Document(Item):
     """A toplevel item representing a ly.document.Document."""
-    
+
     def __init__(self, doc):
         super(Document, self).__init__()
         self.document = doc
@@ -229,7 +229,7 @@ class Document(Item):
         from .read import Reader
         r = Reader(s)
         self.extend(r.read())
-    
+
     def node(self, position, depth=-1):
         """Return the node at or just before the specified position."""
         def bisect(n, depth):
@@ -250,60 +250,60 @@ class Document(Item):
                 return n
             return bisect(n[pos], depth - 1)
         return bisect(self, depth)
-    
+
     def music_events_til_position(self, position):
         """Return a list of tuples.
-        
-        Every tuple is a (parent, nodes, scaling). If an empty list is 
+
+        Every tuple is a (parent, nodes, scaling). If an empty list is
         returned, there is no music expression at this position.
-        
+
         """
         node = self.node(position)
         # be nice and allow including an assignment
         if (isinstance(node, Assignment) and node.parent() is self
-            and isinstance(node.value(), Music)):
+                and isinstance(node.value(), Music)):
             return [(node, [], 1)]
-        
+
         if isinstance(node.parent(), Chord):
             node = node.parent()
-        
-        l = []
+
+        lis = []
         mus = isinstance(node, (Music, Durable))
         if mus:
-            l.append((node, [], 1))
+            lis.append((node, [], 1))
         for p in node.ancestors():
             pmus = isinstance(p, Music)
             end = node.end_position()
             if pmus:
                 if position > end:
                     preceding, s = p.preceding(node.next_sibling())
-                    l = [(p, preceding, s)]
+                    lis = [(p, preceding, s)]
                 elif position == end:
                     preceding, s = p.preceding(node)
-                    l = [(p, preceding + [node], s)]
+                    lis = [(p, preceding + [node], s)]
                 else:
                     preceding, s = p.preceding(node)
-                    l.append((p, preceding, s))
+                    lis.append((p, preceding, s))
             elif mus:
                 # we are at the musical top
                 if position > end:
                     return []
                 elif position == end:
-                    l = [(p, [node], 1)]
+                    lis = [(p, [node], 1)]
                 else:
-                    l.append((p, [], 1))
+                    lis.append((p, [], 1))
                 break
             node = p
             mus = pmus
-        l.reverse()
-        return l
-    
+        lis.reverse()
+        return lis
+
     def time_position(self, position):
         """Return the time position in the music at the specified cursor position.
-        
-        The value is a fraction. If None is returned, we are not in a music 
+
+        The value is a fraction. If None is returned, we are not in a music
         expression.
-        
+
         """
         events = self.music_events_til_position(position)
         if events:
@@ -316,26 +316,26 @@ class Document(Item):
                 for n in nodes:
                     time = e.traverse(n, time, scaling)
             return time
-    
+
     def time_length(self, start, end):
         """Return the length of the music between start and end positions.
-        
+
         Returns None if start and end are not in the same expression.
-        
+
         """
         def mk_list(evts):
             """Make a flat list of all the events."""
-            l = []
+            lis = []
             scaling = 1
             for p, nodes, s in evts:
                 scaling *= s
                 for n in nodes:
-                    l.append((n, scaling))
-            return l
-        
+                    lis.append((n, scaling))
+            return lis
+
         if start > end:
             start, end = end, start
-        
+
         start_evts = self.music_events_til_position(start)
         if start_evts:
             end_evts = self.music_events_til_position(end)
@@ -361,15 +361,15 @@ class Document(Item):
                 for evt, s in end_evts[i::]:
                     end_time = e.traverse(evt, end_time, s)
                 return end_time - time
-        
+
     def substitute_for_node(self, node):
         """Returns a node that replaces the specified node (e.g. in music).
-        
+
         For example: a variable reference returns its value.
         Returns nothing if the node is not substitutable.
         Returns the node itself if it was substitutable, but the substitution
         failed.
-        
+
         """
         if isinstance(node, UserCommand):
             value = node.value()
@@ -378,9 +378,9 @@ class Document(Item):
             return node
         elif isinstance(node, Include):
             return self.get_included_document_node(node) or node
-        
+
         # maybe other substitutions
-    
+
     def iter_music(self, node=None):
         """Iter over the music, following references to other assignments."""
         for n in node or self:
@@ -388,7 +388,7 @@ class Document(Item):
             yield n
             for n in self.iter_music(n):
                 yield n
-    
+
     def get_included_document_node(self, node):
         """Return a Document for the Include node. May return None."""
         try:
@@ -404,7 +404,7 @@ class Document(Item):
                     docnode.include_path = self.include_path
                     node._document = docnode
             return node._document
-    
+
     def resolve_filename(self, filename):
         """Resolve filename against our document and include_path."""
         import os
@@ -422,21 +422,21 @@ class Document(Item):
             fullpath = os.path.join(p, filename)
             if os.path.exists(fullpath):
                 return fullpath
-    
+
     def get_music(self, filename):
         """Return the music Document for the specified filename.
-        
-        This implementation loads a ly.document.Document using utf-8 
-        encoding. Inherit from this class to implement other loading 
+
+        This implementation loads a ly.document.Document using utf-8
+        encoding. Inherit from this class to implement other loading
         mechanisms or caching.
-        
+
         """
         import ly.document
         return type(self)(ly.document.Document.load(filename))
 
 
 class Token(Item):
-    """Any token that is not otherwise recognized""" 
+    """Any token that is not otherwise recognized"""
 
 
 class Container(Item):
@@ -449,13 +449,13 @@ class Duration(Item):
 
 class Durable(Item):
     """An Item that has a musical duration, in the duration attribute."""
-    duration = 0, 1 # two Fractions: (base, scaling)
-    
+    duration = 0, 1  # two Fractions: (base, scaling)
+
     def length(self):
         """Return the musical duration (our base * our scaling)."""
         base, scaling = self.duration
         return base * scaling
-    
+
     def events(self, e, time, scaling):
         """Let the event.Events instance handle the events. Return the time."""
         return time + self.duration[0] * self.duration[1] * scaling
@@ -496,26 +496,27 @@ class DrumNote(Durable):
 
 class Music(Container):
     """Any music expression, to be inherited of."""
+
     def events(self, e, time, scaling):
         """Let the event.Events instance handle the events. Return the time."""
         for node in self:
             time = e.traverse(node, time, scaling)
         return time
-    
+
     def length(self):
         """Return the musical duration."""
         from . import event
         return event.Events().read(self)
-    
+
     def preceding(self, node=None):
         """Return a two-tuple (nodes, scaling).
-        
+
         The nodes are the nodes in time before the node (which must be a
         child), and the scaling is the scaling this node applies (normally 1).
-        
+
         If node is None, all nodes that would precede a fictive node at the
         end are returned.
-        
+
         """
         i = self.index(node) if node else None
         return self[:i:], 1
@@ -524,7 +525,7 @@ class Music(Container):
 class MusicList(Music):
     """A music expression, either << >> or { }."""
     simultaneous = False
-    
+
     def events(self, e, time, scaling):
         """Let the event.Events instance handle the events. Return the time."""
         if self.simultaneous:
@@ -536,13 +537,13 @@ class MusicList(Music):
 
     def preceding(self, node=None):
         """Return a two-tuple (nodes, scaling).
-        
+
         The nodes are the nodes in time before the node (which must be a
         child), and the scaling is the scaling this node applies (normally 1).
-        
+
         If node is None, all nodes that would precede a fictive node at the
         end are returned.
-        
+
         """
         if self.simultaneous:
             return [], 1
@@ -551,55 +552,55 @@ class MusicList(Music):
 
 class Tag(Music):
     r"""A \tag, \keepWithTag or \removeWithTag command."""
-    
+
     def events(self, e, time, scaling):
         """Let the event.Events instance handle the events. Return the time."""
         for node in self[-1:]:
             time = e.traverse(node, time, scaling)
         return time
-        
+
     def preceding(self, node=None):
         """Return a two-tuple (nodes, scaling).
-        
+
         The nodes are the nodes in time before the node (which must be a
         child), and the scaling is the scaling this node applies (normally 1).
-        
+
         If node is None, all nodes that would precede a fictive node at the
         end are returned.
-        
+
         """
         return [], 1
 
 
 class Scaler(Music):
     r"""A music construct that scales the duration of its contents.
-    
+
     In the numerator and denominator attributes the values specified for
     LilyPond are stored, e.g. with \times 3/2 { c d e }, the numerator is
     integer 3 and the denominator is integer 2. Note that for \tuplet and
     \times the meaning of these numbers is reversed.
-    
+
     The algebraic scaling is stored in the scaling attribute.
-    
+
     """
     scaling = 1
-    
+
     numerator = 0
     denominator = 0
-    
+
     def events(self, e, time, scaling):
         """Let the event.Events instance handle the events. Return the time."""
         return super(Scaler, self).events(e, time, scaling * self.scaling)
-    
+
     def preceding(self, node=None):
         """Return a two-tuple (nodes, scaling).
-        
+
         The nodes are the nodes in time before the node (which must be a
         child), and the scaling is the scaling this node applies.
-        
+
         If node is None, all nodes that would precede a fictive node at the
         end are returned.
-        
+
         """
         i = self.index(node) if node else None
         return self[:i:], self.scaling
@@ -607,20 +608,20 @@ class Scaler(Music):
 
 class Grace(Music):
     """Music that has grace timing, i.e. 0 as far as computation is concerned."""
-    
+
     def events(self, e, time, scaling):
         """Let the event.Events instance handle the events. Return the time."""
         return super(Grace, self).events(e, time, 0)
-    
+
     def preceding(self, node=None):
         """Return a two-tuple (nodes, scaling).
-        
+
         The nodes are the nodes in time before the node (which must be a
         child), and the scaling is 0 for (because we have grace notes).
-        
+
         If node is None, all nodes that would precede a fictive node at the
         end are returned.
-        
+
         """
         i = self.index(node) if node else None
         return self[:i:], 0
@@ -628,29 +629,30 @@ class Grace(Music):
 
 class AfterGrace(Music):
     r"""The \afterGrace function with its two arguments.
-    
+
     Only the duration of the first is counted.
-    
+
     """
 
 
 class PartCombine(Music):
     r"""The \partcombine command with 2 music arguments."""
+
     def events(self, e, time, scaling):
         """Let the event.Events instance handle the events. Return the time."""
         if len(self):
             time = max(e.traverse(node, time, scaling) for node in self)
         return time
-    
+
     def preceding(self, node=None):
         """Return a two-tuple (nodes, scaling).
-        
+
         The nodes are the nodes in time before the node (which must be a
         child), and the scaling is the scaling this node applies (normally 1).
-        
+
         If node is None, all nodes that would precede a fictive node at the
         end are returned.
-        
+
         """
         return [], 1
 
@@ -671,13 +673,14 @@ class Transpose(Music):
 
 class Repeat(Music):
     r"""A \repeat expression."""
+
     def specifier(self):
         if isinstance(self._specifier, Scheme):
             return self._specifier.get_string()
         elif isinstance(self._specifier, String):
             return self._specifier.value()
         return self._specifier
-    
+
     def repeat_count(self):
         if isinstance(self._repeat_count, Scheme):
             return self._repeat_count.get_int() or 1
@@ -691,7 +694,7 @@ class Repeat(Music):
         else:
             alt = None
             children = self[:]
-        
+
         if e.unfold_repeats or self.specifier() != "volta":
             count = self.repeat_count()
             if alt and len(alt) and len(alt[0]):
@@ -744,7 +747,7 @@ class LyricMode(InputMode):
 class LyricsTo(InputMode):
     r"""A \lyricsto expression."""
     _context_id = None
-    
+
     def context_id(self):
         if isinstance(self._context_id, String):
             return self._context_id.value()
@@ -763,9 +766,9 @@ class LyricItem(Item):
 
 class ChordSpecifier(Item):
     """Chord specifications after a note in chord mode.
-    
+
     Has children of Note or ChordItem class.
-    
+
     """
 
 
@@ -782,10 +785,10 @@ class Translator(Item):
     r"""Base class for a \change, \new, or \context music expression."""
     _context = None
     _context_id = None
-    
+
     def context(self):
         return self._context
-    
+
     def context_id(self):
         """The context id, if specified after an equal sign."""
         if isinstance(self._context_id, String):
@@ -803,19 +806,19 @@ class Change(Translator):
 
 class Tempo(Item):
     duration = 0, 1
-    
+
     def fraction(self):
         """Return the note value as a fraction given before the equal sign."""
         base, scaling = self.duration   # (scaling will normally be 1)
         return base * scaling
-            
+
     def text(self):
         """Return the text, if set. Can be Markup, Scheme, or String."""
         for i in self:
             if isinstance(i, (Markup, Scheme, String)):
                 return i
             return
-    
+
     def tempo(self):
         """Return a list of integer values describing the tempo or range."""
         nodes = iter(self)
@@ -841,15 +844,15 @@ class TimeSignature(Item):
     def measure_length(self):
         """The length of one measure in this time signature as a Fraction."""
         return self._num * self._fraction
-    
+
     def numerator(self):
         """The upper number (e.g. for 3/2 it returns 3)."""
         return self._num
-    
+
     def fraction(self):
         """The lower number as a Fraction (e.g. for 3/2 it returns 1/2)."""
         return self._fraction
-    
+
     def beatstructure(self):
         """The scheme expressions denoting the beat structure, if specified."""
         return self._beatstructure
@@ -868,20 +871,21 @@ class Partial(Item):
 class Clef(Item):
     r"""A \clef item."""
     _specifier = None
-    
+
     def specifier(self):
         if isinstance(self._specifier, String):
             return self._specifier.value()
         return self._specifier
 
-        
+
 class KeySignature(Item):
     r"""A \key pitch \mode command."""
+
     def pitch(self):
         """The ly.pitch.Pitch that denotes the pitch."""
         for i in self.find(Note):
             return i.pitch
-    
+
     def mode(self):
         """The mode, e.g. "major", "minor", etc."""
         for i in self.find(Command):
@@ -941,16 +945,17 @@ class Command(Item):
 
 class UserCommand(Music):
     """A user command, most probably referring to music."""
+
     def name(self):
         """Return the name of this user command (without the leading backslash)."""
         return self.token[1:]
-    
+
     def value(self):
         """Find the value assigned to this variable."""
         for i in self.iter_toplevel_items_include():
             if isinstance(i, Assignment) and i.name() == self.name():
                 return i.value()
-    
+
     def events(self, e, time, scaling):
         """Let the event.Events instance handle the events. Return the time."""
         value = self.value()
@@ -961,6 +966,7 @@ class UserCommand(Music):
 
 class Version(Item):
     r"""A \version command."""
+
     def version_string(self):
         """The version as a string."""
         for i in self:
@@ -977,6 +983,7 @@ class Version(Item):
 
 class Include(Item):
     r"""An \include command (not changing the language)."""
+
     def filename(self):
         """Returns the filename."""
         for i in self:
@@ -993,6 +1000,7 @@ class Language(Item):
 
 class Markup(Item):
     r"""A command starting markup (\markup, -lines and -list)."""
+
     def plaintext(self):
         """Return the plain text value of this node."""
         return ' '.join(n.plaintext() for n in self)
@@ -1000,12 +1008,13 @@ class Markup(Item):
 
 class MarkupCommand(Item):
     r"""A markup command, such as \italic etc."""
+
     def plaintext(self):
         """Return the plain text value of this node."""
         if self.token == '\\concat':
             joiner = ''
-        #elif 'column' in self.token:
-            #joiner = '\n'
+        # elif 'column' in self.token:
+            # joiner = '\n'
         else:
             joiner = ' '
         if len(self) == 1 and isinstance(self[0], MarkupList):
@@ -1017,10 +1026,11 @@ class MarkupCommand(Item):
 
 class MarkupUserCommand(Item):
     """A user-defined markup command"""
+
     def name(self):
         """Return the name of this user command (without the leading backslash)."""
         return self.token[1:]
-    
+
     def value(self):
         """Find the value assigned to this variable."""
         for i in self.iter_toplevel_items_include():
@@ -1048,6 +1058,7 @@ class MarkupScore(Item):
 
 class MarkupList(Item):
     r"""The group of markup items inside { and }. NOTE: *not* a \markuplist."""
+
     def plaintext(self):
         """Return the plain text value of this node."""
         return ' '.join(n.plaintext() for n in self)
@@ -1055,16 +1066,18 @@ class MarkupList(Item):
 
 class MarkupWord(Item):
     """A MarkupWord token."""
+
     def plaintext(self):
         return self.token
 
 
 class Assignment(Item):
     """A variable = value construct."""
+
     def name(self):
         """The variable name."""
         return self.token
-    
+
     def value(self):
         """The assigned value."""
         if len(self):
@@ -1109,12 +1122,13 @@ class With(Container):
 
 class Set(Item):
     r"""A \set command."""
+
     def context(self):
         """The context, if specified."""
         for t in self.tokens:
             if isinstance(t, lilypond.ContextName):
                 return t
-    
+
     def property(self):
         """The property."""
         for t in self.tokens:
@@ -1123,7 +1137,7 @@ class Set(Item):
         for t in self.tokens[::-1]:
             if isinstance(t, lilypond.Name):
                 return t
-        
+
     def value(self):
         """The value, given as argument. This is simply the child element."""
         for i in self:
@@ -1132,12 +1146,13 @@ class Set(Item):
 
 class Unset(Item):
     """An \\unset command."""
+
     def context(self):
         """The context, if specified."""
         for t in self.tokens:
             if isinstance(t, lilypond.ContextName):
                 return t
-    
+
     def property(self):
         """The property."""
         for t in self.tokens:
@@ -1150,11 +1165,12 @@ class Unset(Item):
 
 class Override(Item):
     r"""An \override command."""
+
     def context(self):
         for i in self:
             if isinstance(i.token, lilypond.ContextName):
                 return i.token
-    
+
     def grob(self):
         for i in self:
             if isinstance(i.token, lilypond.GrobName):
@@ -1163,11 +1179,12 @@ class Override(Item):
 
 class Revert(Item):
     r"""A \revert command."""
+
     def context(self):
         for i in self:
             if isinstance(i.token, lilypond.ContextName):
                 return i.token
-    
+
     def grob(self):
         for i in self:
             if isinstance(i.token, lilypond.GrobName):
@@ -1184,12 +1201,12 @@ class PathItem(Item):
 
 class String(Item):
     """A double-quoted string."""
-    
+
     def plaintext(self):
         """Return the plaintext value of this string, without escapes and quotes."""
         # TEMP use the value(), must become token independent.
         return self.value()
-    
+
     def value(self):
         return ''.join(
             t[1:] if isinstance(t, lex.Character) and t.startswith('\\') else t
@@ -1198,6 +1215,7 @@ class String(Item):
 
 class Number(Item):
     """A numerical value, directly entered."""
+
     def value(self):
         if isinstance(self.token, lilypond.IntegerValue):
             return int(self.token)
@@ -1211,27 +1229,28 @@ class Number(Item):
 
 class Scheme(Item):
     """A Scheme expression inside LilyPond."""
+
     def plaintext(self):
         """A crude way to get the plain text in this node."""
         # TEMP use get_string()
         return self.get_string()
-    
+
     def get_pair_ints(self):
         """Very basic way to get two integers specified as a pair."""
         result = [int(i.token) for i in self.find(SchemeItem) if i.token.isdigit()]
         if len(result) >= 2:
             return tuple(result[:2])
-    
+
     def get_list_ints(self):
         """A basic way to get a list of integer values."""
         return [int(i.token) for i in self.find(SchemeItem) if i.token.isdigit()]
-    
+
     def get_int(self):
         """A basic way to get one integer value."""
         for i in self.find(SchemeItem):
             if i.token.isdigit():
                 return int(i.token)
-    
+
     def get_fraction(self):
         """A basic way to get one (may be fractional) numerical value."""
         for i in self.find(SchemeItem):
@@ -1239,7 +1258,7 @@ class Scheme(Item):
                 return int(i.token)
             elif isinstance(i.token, scheme.Fraction):
                 return Fraction(i.token)
-    
+
     def get_string(self):
         """A basic way to get a quoted string value (without the quotes)."""
         return ''.join(i.value() for i in self.find(String))
@@ -1266,6 +1285,3 @@ class SchemeQuote(Item):
 
 class SchemeLily(Container):
     """A music expression inside #{ and #}."""
-
-
-

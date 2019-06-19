@@ -35,12 +35,12 @@ durations = [
 
 def tostring(dur, dots=0, factor=1):
     r"""Returns the LilyPond string representation of a given logarithmic duration.
-    
+
     Supports values from -3 up to and including 11.
     -2 = '\longa', 0  = '1' (whole note), etc.
-    
+
     Adds the number of dots (defaults to 0) and the fraction factor if given.
-    
+
     """
     s = durations[dur + 3] + '.' * dots
     if factor != 1:
@@ -97,5 +97,3 @@ def format_fraction(value):
         return "{0}/{1}".format(value.numerator, value.denominator)
     else:
         return "{0}/1".format(value)
-
-
