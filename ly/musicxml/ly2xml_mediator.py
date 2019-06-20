@@ -40,12 +40,10 @@ class Mediator():
 
     def __init__(self):
         """ create global lists """
-        # the order of flats (or sharps backwards)
-        self.note_order = ['B', 'E', 'A', 'D', 'G', 'C', 'F']
-        # the current number of fifths in key (ex: -3 indicates 3 flats in the key)
-        self.current_fifths = 0
+        # the current number of flats/sharps in key (ex: -3 indicates 3 flats in the key)
+        self.num_accidentals_in_key = 0
         # keeps track of the most recent number of flats/sharps applied to all notes (ex: 'B':-2 is double flat B)
-        self.current_notes = {'B': 0, 'E': 0, 'A': 0, 'D': 0, 'G': 0, 'C': 0, 'F': 0}
+        self.current_accidentals_dict = {'C': 0, 'D': 0, 'E': 0, 'F': 0, 'G': 0, 'A': 0, 'B': 0}
         self.score = xml_objs.Score()
         self.sections = []
         self.permanent_sections = []
@@ -314,27 +312,34 @@ class Mediator():
             self.part.barlist.extend(self.get_first_var())
         self.score.merge_globally(self.score.glob_section, override=True)
 
-    def set_notes_in_key(self, fifths):
-        """Define the notes in the current key"""
-        for n in self.note_order:  # return all notes to natural by default
-            self.current_notes[n] = 0
+    def reset_current_accidentals_dict(self, fifths):
+        """Resets self.current_accidentals_dict to only include the accidentals in the current key"""
+        ORDER_OF_FIFTHS = ('B', 'E', 'A', 'D', 'G', 'C', 'F')
+        for n in ORDER_OF_FIFTHS:  # return all notes to natural by default
+            self.current_accidentals_dict[n] = 0
         if fifths < 0:  # flat key
-            for f in self.note_order[0:abs(fifths)]:
-                self.current_notes[f] = -1
+            for f in ORDER_OF_FIFTHS[:fifths]:
+                self.current_accidentals_dict[f] = -1
         elif fifths > 0:  # sharp key
-            for s in self.note_order[fifths:7]:
-                self.current_notes[s] = 1
+            for s in ORDER_OF_FIFTHS[fifths:]:
+                self.current_accidentals_dict[s] = 1
 
     def is_acc_needed(self, name, alter):
-        """Check if a given note (name and alter) needs an accidental"""
+        """
+        Check if a given note needs an accidental
+        given the current state of accidentals
+
+        name is the name of the note ('A', 'B', 'C', 'D', 'E', 'F', 'G')
+        alter is a number representing the flat/sharp status of the note (-1 is flat, +1 is sharp, 0 is natural)
+        """
         if self.tied:  # subsequent tied notes never need accidentals
             return False
-        for note in self.current_notes:  # iterate through the keys of this dictionary
+        for note in self.current_accidentals_dict:
             if name == note:
-                if self.current_notes[note] == alter:  # ex: if the input note is B flat and B flat is in the key or the previous B in this measure was B flat
+                if self.current_accidentals_dict[note] == alter:
                     return False
-                else:  # ex: if the input note is B flat and B flat is not in the key and the previous B in this measure was not B flat
-                    self.current_notes[note] = alter  # change the most recent alter associated with note
+                else:
+                    self.current_accidentals_dict[note] = alter
                     return True
         print("Warning: Invalid note checked for accidental!")
         return False
@@ -344,7 +349,7 @@ class Mediator():
             return self.sections[0].barlist
 
     def new_bar(self, fill_prev=True):
-        self.set_notes_in_key(self.current_fifths)
+        self.reset_current_accidentals_dict(self.num_accidentals_in_key)
         if self.bar and fill_prev:
             self.bar.list_full = True
         self.current_attr = xml_objs.BarAttr()
@@ -372,8 +377,8 @@ class Mediator():
         self.bar.add(barline)
 
     def new_key(self, key_name, mode):
-        self.current_fifths = get_fifths(key_name, mode)
-        self.set_notes_in_key(self.current_fifths)
+        self.num_accidentals_in_key = get_fifths(key_name, mode)
+        self.reset_current_accidentals_dict(self.num_accidentals_in_key)
         if self.bar is None:
             self.new_bar()
         if self.bar.has_music():
@@ -947,6 +952,7 @@ def durval2type(durval):
 
 
 def get_fifths(key, mode):
+    """Returns current number of sharps/flats in the key (negative = flats, positive = sharps)"""
     fifths = 0
     sharpkeys = ['c', 'g', 'd', 'a', 'e', 'b', 'fis', 'cis', 'gis',
                  'dis', 'ais', 'eis', 'bis', 'fisis', 'cisis']
