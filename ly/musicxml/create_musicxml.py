@@ -139,12 +139,12 @@ class CreateMusicXML():
         if dot:
             for i in range(dot):
                 self.add_dot()
-        if alter or acc_token:
+        if acc_token:
             if acc_token == '!':  # cautionary
                 self.add_accidental(alter, caut=True)
             elif acc_token == '?':  # parentheses
                 self.add_accidental(alter, parenth=True)
-            else:
+            elif acc_token == 'normal':
                 self.add_accidental(alter)
 
     def new_unpitched_note(self, step, octave, durtype, divdur, voice=1,

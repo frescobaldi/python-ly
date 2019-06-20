@@ -51,7 +51,6 @@
         <duration>1</duration>
         <voice>1</voice>
         <type>quarter</type>
-        <accidental>flat</accidental>
       </note>
       <note>
         <pitch>
@@ -62,7 +61,6 @@
         <duration>1</duration>
         <voice>1</voice>
         <type>quarter</type>
-        <accidental>flat</accidental>
       </note>
       <note>
         <pitch>
@@ -113,7 +111,6 @@
         <duration>1</duration>
         <voice>1</voice>
         <type>quarter</type>
-        <accidental>flat</accidental>
       </note>
       <note>
         <pitch>
@@ -133,7 +130,6 @@
         <duration>1</duration>
         <voice>1</voice>
         <type>quarter</type>
-        <accidental>flat</accidental>
       </note>
       <note>
         <pitch>
@@ -144,7 +140,6 @@
         <duration>1</duration>
         <voice>1</voice>
         <type>quarter</type>
-        <accidental>flat</accidental>
       </note>
       <backup>
         <duration>4</duration>
