@@ -492,6 +492,25 @@ class CreateMusicXML():
         """Create node attributes """
         self.bar_attr = etree.SubElement(self.current_bar, "attributes")
 
+    def add_harmony(self, rt, rt_a=0, bs=False, bs_a=0, txt=""):
+        """Create harmony element"""
+        harmony = etree.SubElement(self.current_bar, "harmony")
+        root = etree.SubElement(harmony, "root")
+        root_step = etree.SubElement(root, "root-step")
+        root_step.text = rt
+        if rt_a != 0:
+            root_alter = etree.SubElement(root, "root-alter")
+            root_alter.text = str(rt_a)
+        kind = etree.SubElement(harmony, "kind", text=txt)
+        kind.text = "major"  # this is just a placeholder in order to make this a valid xml
+        if bs:
+            bass = etree.SubElement(harmony, "bass")
+            bass_step = etree.SubElement(bass, "bass-step")
+            bass_step.text = bs
+            if bs_a != 0:
+                bass_alter = etree.SubElement(bass, "bass-alter")
+                bass_alter.text = str(bs_a)
+
     def add_divisions(self, div):
         division = etree.SubElement(self.bar_attr, "divisions")
         division.text = str(div)

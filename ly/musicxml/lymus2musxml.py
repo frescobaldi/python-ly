@@ -90,11 +90,13 @@ class ParseSource():
         self.slurcount = 0
         self.slurnr = 0
         self.phrslurnr = 0
-        # Variables to keep track of place in music, and place of barlines (made with \bar)
+        # Variables to keep track of place in music, and place of \bar barlines and chord symbols
+        self.prev_note_dur = 0
+        self.total_time = 0
         self.voice = 0
-        self.time = 0
-        self.measure = 1
-        self.barline_locations = []
+        self.time_since_bar = 0
+        self.barline_locations = {}
+        self.chord_locations = {}
 
     def parse_text(self, ly_text, filename=None):
         """Parse the LilyPond source specified as text.
@@ -239,7 +241,8 @@ class ParseSource():
             self.mediator.add_staff_id(context_id)
         elif context == 'Voice':
             self.voice += 1
-            self.measure = 1
+            self.total_time = 0
+            self.time_since_bar = 0
             self.sims_and_seqs.append('voice')
             if context_id:
                 self.mediator.new_section(context_id)
@@ -249,6 +252,8 @@ class ParseSource():
             self.mediator.new_section('devnull', True)
         elif context == 'Lyrics':
             pass  # The way lyrics are implemented, they don't need a new section here (prevents irrelevant warning)
+        elif context == 'ChordNames':
+            pass  # Without using ChordMode to write actual chords, ChordNames doesn't need a new section
         else:
             print("Context not implemented:", context)
 
@@ -260,11 +265,9 @@ class ParseSource():
         Only operates after the first voice
         """
         if self.voice != 1:
-            for b in self.barline_locations:
-                if self.measure == b[0] and self.time == b[1]:
-                    self.mediator.create_barline(b[2])
-                    self.time = 0
-                    self.measure += 1
+            if self.total_time in self.barline_locations:
+                self.mediator.create_barline(self.barline_locations[self.total_time])
+                self.time_since_bar = 0
 
     def VoiceSeparator(self, voice_sep):
         self.mediator.new_snippet('sim')
@@ -277,9 +280,8 @@ class ParseSource():
 
     def PipeSymbol(self, barcheck):
         """ PipeSymbol = | """
-        if self.time != 0:  # Avoids making blank measures
-            self.time = 0
-            self.measure += 1
+        if self.time_since_bar != 0:  # Avoids making blank measures
+            self.time_since_bar = 0
             self.mediator.new_bar()
 
     def Clef(self, clef):
@@ -293,48 +295,95 @@ class ParseSource():
         r"""A \relative music expression."""
         self.relative = True
 
+    def ChordSpecifier(self, specifier):
+        """
+        A ChordSpecifier occurs with : or / in ChordMode
+
+        Function modifies current chord symbol in self.chord_locations
+        to include additional text and bass note
+        """
+        for item in specifier:
+            if isinstance(item, ly.music.items.Note):
+                self.chord_locations[self.total_time - self.prev_note_dur]["bass"] = item.token.capitalize()[0]
+                self.chord_locations[self.total_time - self.prev_note_dur]["bass-alter"] = int(item.pitch.alter * 2)
+            elif item.token != ":" and item.token != "/":  # TODO: represent chords more precisely
+                self.chord_locations[self.total_time - self.prev_note_dur]["text"] += item.token
+
+    def ChordItem(self, item):
+        """A ChordItem :, /, m, maj, etc."""
+        pass
+
+    def check_for_chord(self, note):
+        """
+        Checks the current note to see if a chord symbol is needed above
+        Adds one to current note if needed
+        Based on whether a chord symbol was defined at this point in the music
+        Only operates for the first voice
+        """
+        if self.voice == 1:
+            if (self.total_time - note.length()) in self.chord_locations:
+                chord_dict = self.chord_locations[self.total_time - note.length()]
+                self.mediator.current_note.set_harmony(chord_dict["root"], chord_dict["root-alter"],
+                                                       chord_dict["bass"], chord_dict["bass-alter"],
+                                                       chord_dict["text"])
+
     def Note(self, note):
         """ notename, e.g. c, cis, a bes ... """
         # print(note.token)
-        self.time += note.length()
         if note.length():
-            if self.relative and not self.rel_pitch_isset:
-                self.mediator.new_note(note, False)
-                self.mediator.set_relative(note)
-                self.rel_pitch_isset = True
-            else:
-                self.mediator.new_note(note, self.relative)
-            self.check_note(note)
-        else:
-            if isinstance(note.parent(), ly.music.items.Relative):
-                self.mediator.set_relative(note)
-                self.rel_pitch_isset = True
-            elif isinstance(note.parent(), ly.music.items.Chord):
-                if self.mediator.current_chord:
-                    self.mediator.new_chord(note, chord_base=False)
+            self.prev_note_dur = note.length()
+        # if the note is a bass note in a chord symbol, break out of function
+        if not isinstance(note.parent(), ly.music.items.ChordSpecifier):
+            if note.length() and self.alt_mode != "chord":
+                self.time_since_bar += note.length()
+                self.total_time += note.length()
+                if self.relative and not self.rel_pitch_isset:
+                    self.mediator.new_note(note, False)
+                    self.mediator.set_relative(note)
+                    self.rel_pitch_isset = True
                 else:
-                    self.mediator.new_chord(note, note.parent().duration, self.relative)
-                    self.check_tuplet()
-                # chord as grace note
-                if self.grace_seq:
-                    self.mediator.new_chord_grace()
-        # After every note in voices past 1, check if a barline is needed
-        self.check_for_barline()
+                    self.mediator.new_note(note, self.relative)
+                self.check_note(note)
+                self.check_for_barline()
+                self.check_for_chord(note)
+            else:
+                if self.alt_mode == "chord":  # if chord symbols are being written, record location of chord
+                    self.chord_locations[self.total_time] = {"root": note.token.capitalize()[0], "root-alter": int(note.pitch.alter * 2),
+                                                             "bass": False, "bass-alter": 0, "text": ""}
+                    self.total_time += note.length()
+                elif isinstance(note.parent(), ly.music.items.Relative):
+                    self.mediator.set_relative(note)
+                    self.rel_pitch_isset = True
+                elif isinstance(note.parent(), ly.music.items.Chord):
+                    if self.mediator.current_chord:
+                        self.mediator.new_chord(note, chord_base=False)
+                    else:
+                        self.mediator.new_chord(note, note.parent().duration, self.relative)
+                        self.check_tuplet()
+                    # chord as grace note
+                    if self.grace_seq:
+                        self.mediator.new_chord_grace()
 
     def Unpitched(self, unpitched):
         """A note without pitch, just a standalone duration."""
+        self.total_time += skip.length()
+        self.time_since_bar += skip.length()
         if unpitched.length():
             if self.alt_mode == 'drum':
                 self.mediator.new_iso_dura(unpitched, self.relative, True)
             else:
                 self.mediator.new_iso_dura(unpitched, self.relative)
             self.check_note(unpitched)
+        self.check_for_barline()
 
     def DrumNote(self, drumnote):
         """A note in DrumMode."""
+        self.total_time += skip.length()
+        self.time_since_bar += skip.length()
         if drumnote.length():
             self.mediator.new_note(drumnote, is_unpitched=True)
             self.check_note(drumnote)
+        self.check_for_barline()
 
     def check_note(self, note):
         """Generic check for all notes, both pitched and unpitched."""
@@ -371,9 +420,10 @@ class ParseSource():
             self.mediator.set_tuplspan_dur(duration.token, duration.tokens)
             self.tupl_span = False
         else:
-            self.mediator.new_duration_token(duration.token, duration.tokens)
-            if self.trem_rep:
-                self.mediator.set_tremolo(trem_type='start', repeats=self.trem_rep)
+            if self.alt_mode != "chord":
+                self.mediator.new_duration_token(duration.token, duration.tokens)
+                if self.trem_rep:
+                    self.mediator.set_tremolo(trem_type='start', repeats=self.trem_rep)
 
     def Tempo(self, tempo):
         """ Tempo direction, e g '4 = 80' """
@@ -388,16 +438,23 @@ class ParseSource():
 
     def Rest(self, rest):
         r""" rest, r or R. Note: NOT by command, i.e. \rest """
+        self.total_time += rest.length()
+        self.time_since_bar += rest.length()
         if rest.token == 'R':
             self.scale = 'R'
         self.mediator.new_rest(rest)
+        self.check_for_barline()
 
     def Skip(self, skip):
         r""" invisible rest/spacer rest (s or command \skip)"""
-        if 'lyrics' in self.sims_and_seqs:
-            self.mediator.new_lyrics_item(skip.token)
-        else:
-            self.mediator.new_rest(skip)
+        self.total_time += skip.length()
+        self.time_since_bar += skip.length()
+        if self.alt_mode != "chord":
+            if 'lyrics' in self.sims_and_seqs:
+                self.mediator.new_lyrics_item(skip.token)
+            else:
+                self.mediator.new_rest(skip)
+            self.check_for_barline()
 
     def Scaler(self, scaler):
         r"""
@@ -544,11 +601,10 @@ class ParseSource():
         prev = self.get_previous_node(string)
         # If a \bar is found in the first voice (not at the beginning of a measure):
         #     Record its position and style-type, and create appropriate barline
-        if self.voice == 1 and prev and prev.token == '\\bar' and self.time != 0:
-            self.barline_locations.append([self.measure, self.time, string.value()])
+        if self.voice == 1 and prev and prev.token == '\\bar' and self.time_since_bar != 0:
+            self.barline_locations[self.total_time] = string.value()
             self.mediator.create_barline(string.value())
-            self.time = 0
-            self.measure += 1
+            self.time_since_bar = 0
 
     def LyricsTo(self, lyrics_to):
         r"""A \lyricsto expression. """
@@ -678,6 +734,8 @@ class ParseSource():
             self.with_contxt = None
         elif end.node.token == '\\drums':
             self.mediator.check_part()
+        elif end.node.token == '\\chordmode':
+            self.alt_mode = None
         elif isinstance(end.node, ly.music.items.Relative):
             self.relative = False
             self.rel_pitch_isset = False
