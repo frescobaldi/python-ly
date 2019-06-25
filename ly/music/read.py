@@ -318,6 +318,8 @@ class Reader(object):
         item = self.factory(ChordSpecifier, position=t.pos)
         item.append(self.factory(ChordItem, t))
         for t in self.consume():
+            if t == '\n':  # line breaks should separate chords
+                break
             if isinstance(t, lilypond.ChordItem):
                 item.append(self.factory(ChordItem, t))
             elif isinstance(t, lilypond.Note):

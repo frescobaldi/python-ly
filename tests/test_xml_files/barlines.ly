@@ -10,7 +10,7 @@ keyTime = {
 Soprano = \relative c'' {
   \voiceOne
   \keyTime
-    g4 g \bar "'" g g \bar "||"
+    r4 r \bar "'" g g \bar "||"
   | g g \bar "" g g \bar "!"
   | g g \bar "|" g g \bar "."
   | g g \bar ".|" g g \bar ".."
@@ -18,7 +18,7 @@ Soprano = \relative c'' {
   \bar "|."
 }
 
-Alto = \relative c'' {
+Alto = \relative c' {
   \voiceTwo
   \keyTime
     e4 e e e
