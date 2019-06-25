@@ -494,6 +494,16 @@ class CreateMusicXML():
 
     def add_harmony(self, rt, rt_a=0, bs=False, bs_a=0, txt=""):
         """Create harmony element"""
+        CHORD_DICT = {"": "major", "m": "minor", "aug": "augmented", "dim": "diminished",
+                      "7": "dominant", "maj7": "major-seventh", "m7": "minor-seventh",
+                      "dim7": "diminished-seventh", "aug7": "augmented-seventh", "m7.5-": "half-diminished",
+                      "m7+": "major-minor", "6": "major-sixth", "m6": "minor-sixth", "9": "dominant-ninth",
+                      "maj9": "major-ninth", "m9": "minor-ninth", "11": "dominant-11th", "maj11": "major-11th",
+                      "m11": "minor-11th", "13": "dominant-13th", "maj13": "major-13th", "m13": "minor-13th",
+                      "sus2": "suspended-second", "sus4": "suspended-fourth", "m5": "minor", "5": "major",
+                      "maj": "major-seventh", "13.11": "dominant-thirteenth", "maj13.11": "major-13th",
+                      "m13.11": "minor-13th"}
+        use_symbols = {"use-symbols": "yes"}
         harmony = etree.SubElement(self.current_bar, "harmony")
         root = etree.SubElement(harmony, "root")
         root_step = etree.SubElement(root, "root-step")
@@ -501,8 +511,12 @@ class CreateMusicXML():
         if rt_a != 0:
             root_alter = etree.SubElement(root, "root-alter")
             root_alter.text = str(rt_a)
-        kind = etree.SubElement(harmony, "kind", text=txt)
-        kind.text = "major"  # this is just a placeholder in order to make this a valid xml
+        if txt in CHORD_DICT:
+            kind = etree.SubElement(harmony, "kind", use_symbols)
+            kind.text = CHORD_DICT[txt]
+        else:
+            kind = etree.SubElement(harmony, "kind", text=txt)
+            kind.text = "major"  # this is just a placeholder in order to make this a valid xml
         if bs:
             bass = etree.SubElement(harmony, "bass")
             bass_step = etree.SubElement(bass, "bass-step")

@@ -306,7 +306,7 @@ class ParseSource():
             if isinstance(item, ly.music.items.Note):
                 self.chord_locations[self.total_time - self.prev_note_dur]["bass"] = item.token.capitalize()[0]
                 self.chord_locations[self.total_time - self.prev_note_dur]["bass-alter"] = int(item.pitch.alter * 2)
-            elif item.token != ":" and item.token != "/":  # TODO: represent chords more precisely
+            elif item.token != ":" and item.token != "/":
                 self.chord_locations[self.total_time - self.prev_note_dur]["text"] += item.token
 
     def ChordItem(self, item):
@@ -348,7 +348,8 @@ class ParseSource():
                 self.check_for_chord(note)
             else:
                 if self.alt_mode == "chord":  # if chord symbols are being written, record location of chord
-                    self.chord_locations[self.total_time] = {"root": note.token.capitalize()[0], "root-alter": int(note.pitch.alter * 2),
+                    self.chord_locations[self.total_time] = {"root": note.token.capitalize()[0],
+                                                             "root-alter": int(note.pitch.alter * 2),
                                                              "bass": False, "bass-alter": 0, "text": ""}
                     self.total_time += note.length()
                 elif isinstance(note.parent(), ly.music.items.Relative):
@@ -366,8 +367,8 @@ class ParseSource():
 
     def Unpitched(self, unpitched):
         """A note without pitch, just a standalone duration."""
-        self.total_time += skip.length()
-        self.time_since_bar += skip.length()
+        self.total_time += unpitched.length()
+        self.time_since_bar += unpitched.length()
         if unpitched.length():
             if self.alt_mode == 'drum':
                 self.mediator.new_iso_dura(unpitched, self.relative, True)
@@ -375,15 +376,17 @@ class ParseSource():
                 self.mediator.new_iso_dura(unpitched, self.relative)
             self.check_note(unpitched)
         self.check_for_barline()
+        self.check_for_chord(unpitched)
 
     def DrumNote(self, drumnote):
         """A note in DrumMode."""
-        self.total_time += skip.length()
-        self.time_since_bar += skip.length()
+        self.total_time += drumnote.length()
+        self.time_since_bar += drumnote.length()
         if drumnote.length():
             self.mediator.new_note(drumnote, is_unpitched=True)
             self.check_note(drumnote)
         self.check_for_barline()
+        self.check_for_chord(drumnote)
 
     def check_note(self, note):
         """Generic check for all notes, both pitched and unpitched."""
@@ -444,6 +447,7 @@ class ParseSource():
             self.scale = 'R'
         self.mediator.new_rest(rest)
         self.check_for_barline()
+        self.check_for_chord(rest)
 
     def Skip(self, skip):
         r""" invisible rest/spacer rest (s or command \skip)"""
@@ -455,6 +459,7 @@ class ParseSource():
             else:
                 self.mediator.new_rest(skip)
             self.check_for_barline()
+            self.check_for_chord(skip)
 
     def Scaler(self, scaler):
         r"""

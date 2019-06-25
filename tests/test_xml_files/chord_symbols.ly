@@ -72,13 +72,13 @@ Chords = \relative c' {
  \chordmode {
 
 a1
-b4 s cs2
+b4:aug7 s cs2
 s1
 df/es
 f:maj7/g
 g:m6
 a:sus4
-b:maj9
+b:maj11
 
    }
 }
