@@ -503,7 +503,6 @@ class CreateMusicXML():
                       "sus2": "suspended-second", "sus4": "suspended-fourth", "m5": "minor", "5": "major",
                       "maj": "major-seventh", "13.11": "dominant-thirteenth", "maj13.11": "major-13th",
                       "m13.11": "minor-13th"}
-        use_symbols = {"use-symbols": "yes"}
         harmony = etree.SubElement(self.current_bar, "harmony")
         root = etree.SubElement(harmony, "root")
         root_step = etree.SubElement(root, "root-step")
@@ -512,7 +511,7 @@ class CreateMusicXML():
             root_alter = etree.SubElement(root, "root-alter")
             root_alter.text = str(rt_a)
         if txt in CHORD_DICT:
-            kind = etree.SubElement(harmony, "kind", use_symbols)
+            kind = etree.SubElement(harmony, "kind", text=txt)
             kind.text = CHORD_DICT[txt]
         else:
             kind = etree.SubElement(harmony, "kind", text=txt)

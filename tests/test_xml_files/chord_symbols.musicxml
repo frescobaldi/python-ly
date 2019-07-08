@@ -5,7 +5,7 @@
   <identification>
     <encoding>
       <software>python-ly 0.9.5</software>
-      <encoding-date>2019-06-25</encoding-date>
+      <encoding-date>2019-07-08</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -37,7 +37,7 @@
         <root>
           <root-step>A</root-step>
         </root>
-        <kind use-symbols="yes">major</kind>
+        <kind text="">major</kind>
       </harmony>
       <note>
         <pitch>
@@ -66,7 +66,7 @@
         <root>
           <root-step>B</root-step>
         </root>
-        <kind use-symbols="yes">augmented-seventh</kind>
+        <kind text="aug7">augmented-seventh</kind>
       </harmony>
       <note>
         <pitch>
@@ -91,7 +91,7 @@
           <root-step>C</root-step>
           <root-alter>1</root-alter>
         </root>
-        <kind use-symbols="yes">major</kind>
+        <kind text="">major</kind>
       </harmony>
       <note>
         <pitch>
@@ -180,7 +180,7 @@
           <root-step>D</root-step>
           <root-alter>-1</root-alter>
         </root>
-        <kind use-symbols="yes">major</kind>
+        <kind text="">major</kind>
         <bass>
           <bass-step>E</bass-step>
           <bass-alter>1</bass-alter>
@@ -240,7 +240,7 @@
         <root>
           <root-step>F</root-step>
         </root>
-        <kind use-symbols="yes">major-seventh</kind>
+        <kind text="maj7">major-seventh</kind>
         <bass>
           <bass-step>G</bass-step>
         </bass>
@@ -299,7 +299,7 @@
         <root>
           <root-step>G</root-step>
         </root>
-        <kind use-symbols="yes">minor-sixth</kind>
+        <kind text="m6">minor-sixth</kind>
       </harmony>
       <note>
         <pitch>
@@ -355,7 +355,7 @@
         <root>
           <root-step>A</root-step>
         </root>
-        <kind use-symbols="yes">suspended-fourth</kind>
+        <kind text="sus4">suspended-fourth</kind>
       </harmony>
       <note>
         <pitch>
@@ -411,7 +411,7 @@
         <root>
           <root-step>B</root-step>
         </root>
-        <kind use-symbols="yes">major-11th</kind>
+        <kind text="maj11">major-11th</kind>
       </harmony>
       <note>
         <pitch>

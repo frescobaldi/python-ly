@@ -3,49 +3,43 @@
 \language "english"
 
 keyTime = {
-    \time 4/4
+    \time 5/4
     \numericTimeSignature
+    \partial 4
 }
 
 Soprano = \relative c'' {
   \voiceOne
   \keyTime
-    r4 r \bar "'" g g \bar "||"
-  | g g \bar "" g g \bar "!"
-  | g g \bar "|" g g \bar "."
-  | g g \bar ".|" g g \bar ".."
-  | g g \bar ";" g g
-  \bar "|."
+    << { c4 } \\ { a4 } >>
+    r4 r g g g
+    << { c1 <c a>4 c1 \bar "||" <c a>4 } \\ { g1 <g e>4 g1 g8( g) } >>
+    \bar "|."
 }
 
 Alto = \relative c' {
   \voiceTwo
   \keyTime
-    e4 e e e
-  | e e e e
-  | e e e e
-  | e e e e
-  | e e e e
+    s4
+    s1*5/2
 }
 
 Tenor = \relative c {
   \voiceOne
   \keyTime
-    c4 c c c
-  | c c c c
-  | c c c c
-  | c c c c
-  | c c c c
+    c4
+    c c c c c
+    c c c c c
+    c c c c c
 }
 
 Bass = \relative c {
   \voiceTwo
   \keyTime
-    a4 a a a
-  | a a a a
-  | a a a a
-  | a a a a
-  | a a a a
+    a4
+    a a a a a
+    a a a a a
+    a a a a a
 }
 
 \score

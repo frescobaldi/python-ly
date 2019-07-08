@@ -4,8 +4,8 @@
 <score-partwise version="3.0">
   <identification>
     <encoding>
-      <software>python-ly 0.9.4</software>
-      <encoding-date>2016-03-28</encoding-date>
+      <software>python-ly 0.9.5</software>
+      <encoding-date>2019-06-26</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -87,6 +87,8 @@
           <dashes type="start" />
         </direction-type>
       </direction>
+    </measure>
+    <measure number="2">
       <direction placement="below">
         <direction-type>
           <dashes type="stop" />
