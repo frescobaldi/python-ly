@@ -62,6 +62,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>tick</bar-style>
@@ -107,6 +110,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>light-light</bar-style>
@@ -152,6 +158,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>none</bar-style>
@@ -197,6 +206,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>dashed</bar-style>
@@ -242,6 +254,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>regular</bar-style>
@@ -287,6 +302,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>heavy</bar-style>
@@ -332,6 +350,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>heavy-light</bar-style>
@@ -377,6 +398,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>heavy-heavy</bar-style>
@@ -422,6 +446,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>dotted</bar-style>
@@ -467,6 +494,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>light-heavy</bar-style>
@@ -525,6 +555,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>tick</bar-style>
@@ -570,6 +603,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>light-light</bar-style>
@@ -615,6 +651,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>none</bar-style>
@@ -660,6 +699,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>dashed</bar-style>
@@ -705,6 +747,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>regular</bar-style>
@@ -750,6 +795,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>heavy</bar-style>
@@ -795,6 +843,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>heavy-light</bar-style>
@@ -840,6 +891,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>heavy-heavy</bar-style>
@@ -885,6 +939,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>dotted</bar-style>
@@ -930,6 +987,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>light-heavy</bar-style>

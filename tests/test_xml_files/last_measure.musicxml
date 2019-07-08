@@ -5,7 +5,7 @@
   <identification>
     <encoding>
       <software>python-ly 0.9.5</software>
-      <encoding-date>2019-06-13</encoding-date>
+      <encoding-date>2019-06-28</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -50,6 +50,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>1</duration>
+      </backup>
     </measure>
     <measure number="2">
       <note>
@@ -75,6 +78,9 @@
         <type>half</type>
         <dot />
       </note>
+      <backup>
+        <duration>3</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>light-heavy</bar-style>
@@ -115,6 +121,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>1</duration>
+      </backup>
     </measure>
     <measure number="2">
       <note>
@@ -140,6 +149,9 @@
         <type>half</type>
         <dot />
       </note>
+      <backup>
+        <duration>3</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>light-heavy</bar-style>

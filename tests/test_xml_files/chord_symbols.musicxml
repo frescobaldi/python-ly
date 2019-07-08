@@ -60,6 +60,9 @@
         <voice>2</voice>
         <type>whole</type>
       </note>
+      <backup>
+        <duration>4</duration>
+      </backup>
     </measure>
     <measure number="2">
       <harmony>
@@ -501,6 +504,9 @@
         <voice>2</voice>
         <type>whole</type>
       </note>
+      <backup>
+        <duration>4</duration>
+      </backup>
     </measure>
     <measure number="2">
       <note>
