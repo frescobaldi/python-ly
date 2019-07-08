@@ -31,6 +31,7 @@ from __future__ import print_function
 
 import ly.document
 import ly.music
+from fractions import Fraction
 
 from . import create_musicxml
 from . import ly2xml_mediator
@@ -76,6 +77,10 @@ class ParseSource():
         self.piano_staff = 0
         self.numericTime = False
         self.voice_sep = False
+        self.voice_sep_start_total_time = 0
+        self.voice_sep_start_time_since_bar = 0
+        self.voice_sep_length = 0
+        self.voice_sep_first_meas = False
         self.sims_and_seqs = []
         self.override_dict = {}
         self.ottava = False
@@ -91,9 +96,11 @@ class ParseSource():
         self.slurnr = 0
         self.phrslurnr = 0
         # Variables to keep track of place in music, and place of \bar barlines and chord symbols
+        self.time_sig = Fraction(1, 1)
+        self.partial = 0
+        self.first_meas = False
         self.prev_note_dur = 0
         self.total_time = 0
-        self.voice = 0
         self.time_since_bar = 0
         self.barline_locations = {}
         self.chord_locations = {}
@@ -198,6 +205,10 @@ class ParseSource():
             if self.look_ahead(musicList, ly.music.items.VoiceSeparator):
                 self.mediator.new_snippet('sim-snip')
                 self.voice_sep = True
+                # Store information at beginning of voice separator
+                self.voice_sep_start_total_time = self.total_time
+                self.voice_sep_start_time_since_bar = self.time_since_bar
+                self.voice_sep_first_meas = self.first_meas
             else:
                 self.mediator.new_section('simultan')
                 self.sims_and_seqs.append('sim')
@@ -238,9 +249,12 @@ class ParseSource():
             else:
                 if token != '\\context' or self.mediator.part_not_empty():
                     self.mediator.new_part(context_id)
+                self.mediator.set_voicenr(nr=1)
             self.mediator.add_staff_id(context_id)
+            self.total_time = 0
+            self.time_since_bar = 0
+            self.first_meas = True
         elif context == 'Voice':
-            self.voice += 1
             self.total_time = 0
             self.time_since_bar = 0
             self.sims_and_seqs.append('voice')
@@ -248,6 +262,7 @@ class ParseSource():
                 self.mediator.new_section(context_id)
             else:
                 self.mediator.new_section('voice')
+            self.first_meas = True
         elif context == 'Devnull':
             self.mediator.new_section('devnull', True)
         elif context == 'Lyrics':
@@ -257,21 +272,14 @@ class ParseSource():
         else:
             print("Context not implemented:", context)
 
-    def check_for_barline(self):
-        """
-        Checks at the current location in music to see if a barline is needed
-        Creates a barline if needed
-        Based on whether the first voice had a barline at the current location
-        Only operates after the first voice
-        """
-        if self.voice != 1:
-            if self.total_time in self.barline_locations:
-                self.mediator.create_barline(self.barline_locations[self.total_time])
-                self.time_since_bar = 0
-
     def VoiceSeparator(self, voice_sep):
         self.mediator.new_snippet('sim')
         self.mediator.set_voicenr(add=True)
+        if self.voice_sep:
+            # Reset time info
+            self.total_time = self.total_time - self.voice_sep_length
+            self.time_since_bar = self.voice_sep_start_time_since_bar
+            self.first_meas = self.voice_sep_first_meas
 
     def Change(self, change):
         r""" A \change music expression. Changes the staff number. """
@@ -280,9 +288,7 @@ class ParseSource():
 
     def PipeSymbol(self, barcheck):
         """ PipeSymbol = | """
-        if self.time_since_bar != 0:  # Avoids making blank measures
-            self.time_since_bar = 0
-            self.mediator.new_bar()
+        pass  # Barlines are automatically generated at correct locations by check_for_barline()
 
     def Clef(self, clef):
         r""" Clef \clef"""
@@ -318,25 +324,105 @@ class ParseSource():
         Checks the current note to see if a chord symbol is needed above
         Adds one to current note if needed
         Based on whether a chord symbol was defined at this point in the music
-        Only operates for the first voice
+        Removes current chord symbol from dictionary of chord symbols to ensure the symbol is only placed once
         """
-        if self.voice == 1:
+        if isinstance(note.parent(), ly.music.items.Chord):
+            if (self.total_time - note.parent().duration[0]) in self.chord_locations:
+                chord_dict = self.chord_locations[self.total_time - note.parent().duration[0]]
+                self.mediator.current_note.set_harmony(chord_dict["root"], chord_dict["root-alter"],
+                                                       chord_dict["bass"], chord_dict["bass-alter"],
+                                                       chord_dict["text"])
+                self.chord_locations.pop(self.total_time - note.parent().duration[0])
+        else:
             if (self.total_time - note.length()) in self.chord_locations:
                 chord_dict = self.chord_locations[self.total_time - note.length()]
                 self.mediator.current_note.set_harmony(chord_dict["root"], chord_dict["root-alter"],
                                                        chord_dict["bass"], chord_dict["bass-alter"],
                                                        chord_dict["text"])
+                self.chord_locations.pop(self.total_time - note.length())
+
+    def check_for_barline(self, node=None):
+        """
+        Checks at the current location in music to see if a barline is needed
+        Creates a barline if needed
+        """
+        # Prevent a regular bar from being made and then a \bar being made
+        if node and self.get_next_node(node):
+            if self.get_next_node(node).token == "\\bar":
+                return False
+        # Create a \bar if found in same location in earlier part
+        if self.total_time in self.barline_locations and self.time_since_bar != 0:
+            self.mediator.create_barline(self.barline_locations[self.total_time])
+            # Reset time since bar if the \bar coincides with actual end of measure
+            if self.first_meas and self.partial != 0:
+                if self.time_since_bar == self.partial:
+                    self.time_since_bar = 0
+                    self.first_meas = False
+            else:
+                if self.time_since_bar == self.time_sig:
+                    self.time_since_bar = 0
+            return True
+        # Create regular measure if there has been enough time since prev bar
+        if self.first_meas and self.partial != 0:
+            if self.time_since_bar == self.partial:
+                self.time_since_bar = 0
+                self.mediator.new_bar()
+                self.first_meas = False
+                return True
+        else:
+            if self.time_since_bar == self.time_sig:
+                self.time_since_bar = 0
+                self.mediator.new_bar()
+                return True
+        return False
+
+    def update_time_and_check(self, mus_obj):
+        """
+        Takes a note, rest, skip, etc. and updates total_time and time_since_bar accordingly
+        Also records chord symbol locations when in 'chord' alt_mode
+        After updating times, checks for barlines and/or chord symbols when applicable
+        """
+        if mus_obj.length():
+            self.prev_note_dur = mus_obj.length()
+            # When in chord alt_mode, record chord symb locations
+            if self.alt_mode == "chord":
+                if not isinstance(mus_obj, ly.music.items.Skip):
+                    self.chord_locations[self.total_time] = {"root": mus_obj.token.capitalize()[0],
+                                                             "root-alter": int(mus_obj.pitch.alter * 2),
+                                                             "bass": False, "bass-alter": 0, "text": ""}
+                self.total_time += mus_obj.length()
+            # When not in chord alt_mode, treat notes as notes
+            else:
+                self.time_since_bar += mus_obj.length()
+                self.total_time += mus_obj.length()
+                # Check for bar unless final note in voice separator (in which case, wait until after)
+                if not self.voice_sep:
+                    self.check_for_barline(mus_obj)
+                else:
+                    node = mus_obj
+                    while True:
+                        if not self.get_next_node(node):
+                            break
+                        elif isinstance(self.get_next_node(node), ly.music.items.Durable):
+                            self.check_for_barline(mus_obj)
+                            break
+                        else:
+                            node = self.get_next_node(node)
+                self.check_for_chord(mus_obj)
+        # First note of chord is used to update time and check for chord symbols,
+        #     but must wait for end of chord to check for barlines (see End() )
+        elif isinstance(mus_obj.parent(), ly.music.items.Chord):
+            self.prev_note_dur = mus_obj.parent().duration[0]
+            self.time_since_bar += mus_obj.parent().duration[0]
+            self.total_time += mus_obj.parent().duration[0]
+            self.check_for_chord(mus_obj)
 
     def Note(self, note):
         """ notename, e.g. c, cis, a bes ... """
         # print(note.token)
-        if note.length():
-            self.prev_note_dur = note.length()
         # if the note is a bass note in a chord symbol, break out of function
         if not isinstance(note.parent(), ly.music.items.ChordSpecifier):
             if note.length() and self.alt_mode != "chord":
-                self.time_since_bar += note.length()
-                self.total_time += note.length()
                 if self.relative and not self.rel_pitch_isset:
                     self.mediator.new_note(note, False)
                     self.mediator.set_relative(note)
@@ -344,14 +430,10 @@ class ParseSource():
                 else:
                     self.mediator.new_note(note, self.relative)
                 self.check_note(note)
-                self.check_for_barline()
-                self.check_for_chord(note)
+                self.update_time_and_check(note)
             else:
                 if self.alt_mode == "chord":  # if chord symbols are being written, record location of chord
-                    self.chord_locations[self.total_time] = {"root": note.token.capitalize()[0],
-                                                             "root-alter": int(note.pitch.alter * 2),
-                                                             "bass": False, "bass-alter": 0, "text": ""}
-                    self.total_time += note.length()
+                    self.update_time_and_check(note)
                 elif isinstance(note.parent(), ly.music.items.Relative):
                     self.mediator.set_relative(note)
                     self.rel_pitch_isset = True
@@ -361,32 +443,27 @@ class ParseSource():
                     else:
                         self.mediator.new_chord(note, note.parent().duration, self.relative)
                         self.check_tuplet()
+                        self.update_time_and_check(note)
                     # chord as grace note
                     if self.grace_seq:
                         self.mediator.new_chord_grace()
 
     def Unpitched(self, unpitched):
         """A note without pitch, just a standalone duration."""
-        self.total_time += unpitched.length()
-        self.time_since_bar += unpitched.length()
         if unpitched.length():
             if self.alt_mode == 'drum':
                 self.mediator.new_iso_dura(unpitched, self.relative, True)
             else:
                 self.mediator.new_iso_dura(unpitched, self.relative)
             self.check_note(unpitched)
-        self.check_for_barline()
-        self.check_for_chord(unpitched)
+        self.update_time_and_check(unpitched)
 
     def DrumNote(self, drumnote):
         """A note in DrumMode."""
-        self.total_time += drumnote.length()
-        self.time_since_bar += drumnote.length()
         if drumnote.length():
             self.mediator.new_note(drumnote, is_unpitched=True)
             self.check_note(drumnote)
-        self.check_for_barline()
-        self.check_for_chord(drumnote)
+        self.update_time_and_check(drumnote)
 
     def check_note(self, note):
         """Generic check for all notes, both pitched and unpitched."""
@@ -441,25 +518,40 @@ class ParseSource():
 
     def Rest(self, rest):
         r""" rest, r or R. Note: NOT by command, i.e. \rest """
-        self.total_time += rest.length()
-        self.time_since_bar += rest.length()
         if rest.token == 'R':
             self.scale = 'R'
         self.mediator.new_rest(rest)
-        self.check_for_barline()
-        self.check_for_chord(rest)
+        self.update_time_and_check(rest)
 
     def Skip(self, skip):
         r""" invisible rest/spacer rest (s or command \skip)"""
-        self.total_time += skip.length()
-        self.time_since_bar += skip.length()
-        if self.alt_mode != "chord":
-            if 'lyrics' in self.sims_and_seqs:
-                self.mediator.new_lyrics_item(skip.token)
-            else:
+        if self.alt_mode == 'lyric':
+            self.mediator.new_lyrics_item(skip.token)
+        elif self.alt_mode == "chord":
+            self.total_time += skip.length()
+        else:
+            if not self.break_skip_at_barline(skip):
                 self.mediator.new_rest(skip)
-            self.check_for_barline()
-            self.check_for_chord(skip)
+                self.update_time_and_check(skip)
+
+    def break_skip_at_barline(self, skip):
+        r"""
+        When a skip is longer than one measure, break skip into measure length pieces
+        NOTES: This only works with barlines at ends of complete measures (not \bar)
+               Length of skip must be a multiple of the length of one measure
+        """
+        if skip.length() > self.time_sig:
+            for i in range(skip.length() // self.time_sig):
+                self.mediator.current_is_rest = True
+                self.mediator.clear_chord()
+                self.mediator.current_note = xml_objs.BarRest((self.time_sig, Fraction(1, 1)), self.mediator.voice, skip=True)
+                self.mediator.check_current_note(rest=True)
+                self.total_time += self.time_sig
+                self.time_since_bar += self.time_sig
+                self.check_for_barline()
+            return True
+        else:
+            return False
 
     def Scaler(self, scaler):
         r"""
@@ -500,7 +592,7 @@ class ParseSource():
 
     def Partial(self, partial):
         r""" \partial # """
-        pass
+        self.partial = partial.partial_length()
 
     def Slur(self, slur):
         """ Slur, '(' = start, ')' = stop. """
@@ -530,6 +622,7 @@ class ParseSource():
         self.grace_seq = True
 
     def TimeSignature(self, timeSign):
+        self.time_sig = timeSign.measure_length()
         self.mediator.new_time(timeSign.numerator(), timeSign.fraction(), self.numericTime)
 
     def Repeat(self, repeat):
@@ -604,12 +697,10 @@ class ParseSource():
 
     def String(self, string):
         prev = self.get_previous_node(string)
-        # If a \bar is found in the first voice (not at the beginning of a measure):
-        #     Record its position and style-type, and create appropriate barline
-        if self.voice == 1 and prev and prev.token == '\\bar' and self.time_since_bar != 0:
+        # If a new \bar is found: record its position and style-type, and create appropriate barline
+        if prev and prev.token == '\\bar':
             self.barline_locations[self.total_time] = string.value()
-            self.mediator.create_barline(string.value())
-            self.time_since_bar = 0
+            self.check_for_barline()
 
     def LyricsTo(self, lyrics_to):
         r"""A \lyricsto expression. """
@@ -722,6 +813,8 @@ class ParseSource():
                 self.mediator.check_voices_by_nr()
                 self.mediator.revert_voicenr()
                 self.voice_sep = False
+                self.voice_sep_length = 0
+                self.check_for_barline(end.node)
             elif not self.piano_staff:
                 self.mediator.check_simultan()
                 if self.sims_and_seqs:
@@ -729,8 +822,27 @@ class ParseSource():
         elif end.node.token == '{':
             if self.sims_and_seqs:
                 self.sims_and_seqs.pop()
+            if self.voice_sep:
+                self.voice_sep_length = self.total_time - self.voice_sep_start_total_time
+            if end.node.parent().token in ["\\notemode", "\\notes", "\\chordmode", "\\chords",
+                                           "\\drummode", "\\drums", "\\figuremode", "\\figures",
+                                           "\\lyricmode", "\\lyrics", "\\addlyrics"]:
+                self.alt_mode = None
         elif end.node.token == '<':  # chord
             self.mediator.chord_end()
+            # Check for bar unless final note in voice separator (in which case, wait until after)
+            if not self.voice_sep:
+                self.check_for_barline(end.node)
+            else:
+                node = end.node
+                while True:
+                    if not self.get_next_node(node):
+                        break
+                    elif isinstance(self.get_next_node(node), ly.music.items.Durable):
+                        self.check_for_barline(end.node)
+                        break
+                    else:
+                        node = self.get_next_node(node)
         elif end.node.token == '\\lyricsto':
             self.mediator.check_lyrics(end.node.context_id())
             self.sims_and_seqs.pop()
@@ -739,8 +851,6 @@ class ParseSource():
             self.with_contxt = None
         elif end.node.token == '\\drums':
             self.mediator.check_part()
-        elif end.node.token == '\\chordmode':
-            self.alt_mode = None
         elif isinstance(end.node, ly.music.items.Relative):
             self.relative = False
             self.rel_pitch_isset = False
@@ -753,13 +863,23 @@ class ParseSource():
     ##
 
     def get_previous_node(self, node):
-        """ Returns the nodes previous node
+        """ Returns the node's previous node
         or false if the node is first in its branch. """
         parent = node.parent()
         i = parent.index(node)
         if i > 0:
             return parent[i-1]
         else:
+            return False
+
+    def get_next_node(self, node):
+        """ Returns the node's next node
+        or false if the node is last in its branch. """
+        parent = node.parent()
+        i = parent.index(node)
+        try:
+            return parent[i+1]
+        except IndexError:
             return False
 
     def simple_node_gen(self, node):

@@ -107,7 +107,7 @@ class Mediator():
         snippet = xml_objs.Snippet(name, self.insert_into)
         self.insert_into = snippet
         self.sections.append(snippet)
-        self.permanent_sections.append(section)
+        self.permanent_sections.append(snippet)
         self.bar = None
 
     def new_lyric_section(self, name, voice_id):
@@ -297,7 +297,8 @@ class Mediator():
             self.part.merge_voice(self.sections[-1])
         elif len(self.sections) > 1:
             self.sections[-2].merge_voice(self.sections[-1])
-        self.sections.pop()
+        if len(self.sections) > 0:
+            self.sections.pop()
 
     def check_score(self):
         """
@@ -318,10 +319,10 @@ class Mediator():
         for n in ORDER_OF_FIFTHS:  # return all notes to natural by default
             self.current_accidentals_dict[n] = 0
         if fifths < 0:  # flat key
-            for f in ORDER_OF_FIFTHS[:fifths]:
+            for f in ORDER_OF_FIFTHS[:abs(fifths)]:
                 self.current_accidentals_dict[f] = -1
         elif fifths > 0:  # sharp key
-            for s in ORDER_OF_FIFTHS[fifths:]:
+            for s in ORDER_OF_FIFTHS[-fifths:]:
                 self.current_accidentals_dict[s] = 1
 
     def is_acc_needed(self, name, alter):

@@ -334,7 +334,7 @@ class ScoreSection():
         tie = False    # Indicates whether the current note is tied
         for bar in self.barlist:
             for obj in bar.obj_list:
-                if isinstance(obj, BarNote) and obj.voice == 1:
+                if isinstance(obj, BarNote) and obj.voice == 1 and not obj.chord:
                     # Ends open slurs/ties
                     if slur and tie:
                         if obj.slur:
