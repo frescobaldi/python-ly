@@ -172,8 +172,6 @@ class IterateXmlObjs():
             for t in obj.tuplet:
                 self.musxml.tuplet_note(t.fraction, obj.duration, t.ttype, t.nr,
                                         self.divisions, t.acttype, t.normtype)
-        if obj.staff and not obj.skip:
-            self.musxml.add_staff(obj.staff)
         if obj.other_notation:
             self.musxml.add_named_notation(obj.other_notation)
 
@@ -182,11 +180,11 @@ class IterateXmlObjs():
         divdur = self.count_duration(obj.duration, self.divisions)
         if isinstance(obj, Unpitched):
             self.musxml.new_unpitched_note(obj.base_note, obj.octave, obj.type, divdur,
-                                           obj.voice, obj.dot, obj.chord, obj.grace)
+                                           obj.voice, obj.dot, obj.chord, obj.grace, obj.staff)
         else:
             self.musxml.new_note(obj.base_note, obj.octave, obj.type, divdur,
                                  obj.alter, obj.accidental_token, obj.voice, obj.dot, obj.chord,
-                                 obj.grace)
+                                 obj.grace, obj.staff)
         for t in obj.tie:
             self.musxml.tie_note(t)
         for s in obj.slur:
@@ -220,7 +218,7 @@ class IterateXmlObjs():
             self.musxml.add_skip(divdur)
         else:
             self.musxml.new_rest(divdur, obj.type, obj.pos,
-                                 obj.dot, obj.voice)
+                                 obj.dot, obj.voice, obj.staff)
 
     def count_duration(self, base_scaling, divs):
         base = base_scaling[0]
@@ -491,9 +489,9 @@ class Bar():
                     b += obj.duration[0]
                     s *= obj.duration[1]
             elif isinstance(obj, BarBackup):
-                b = 0  # prevents multiple BarBackups from being made in same measure
-                break
-        if b != 0:  # prevents the pickup measure from already having a blank BarBackup
+                b -= obj.duration[0]
+                s /= obj.duration[1]
+        if b > 0:  # prevents the pickup measure from already having a blank BarBackup
             self.add(BarBackup((b, s)))
 
     def is_skip(self, obj_list=None):

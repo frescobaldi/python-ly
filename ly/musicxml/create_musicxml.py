@@ -124,7 +124,7 @@ class CreateMusicXML():
     ##
 
     def new_note(self, step, octave, durtype, divdur, alter=0,
-                 acc_token=0, voice=1, dot=0, chord=0, grace=(0, 0)):
+                 acc_token=0, voice=1, dot=0, chord=0, grace=(0, 0), staff=0):
         """Create all nodes needed for a normal note. """
         self.create_note()
         if grace[0]:
@@ -146,9 +146,11 @@ class CreateMusicXML():
                 self.add_accidental(alter, parenth=True)
             elif acc_token == 'normal':
                 self.add_accidental(alter)
+        if staff:
+            self.add_staff(staff)
 
     def new_unpitched_note(self, step, octave, durtype, divdur, voice=1,
-                           dot=0, chord=0, grace=(0, 0)):
+                           dot=0, chord=0, grace=(0, 0), staff=0):
         """Create all nodes needed for an unpitched note. """
         self.create_note()
         if grace[0]:
@@ -163,6 +165,8 @@ class CreateMusicXML():
         if dot:
             for i in range(dot):
                 self.add_dot()
+        if staff:
+            self.add_staff(staff)
 
     def tuplet_note(self, fraction, bs, ttype, nr, divs, atyp='', ntyp=''):
         """Convert current note to tuplet """
@@ -191,7 +195,7 @@ class CreateMusicXML():
         self.add_notations()
         self.add_tied(tie_type)
 
-    def new_rest(self, duration, durtype, pos, dot, voice):
+    def new_rest(self, duration, durtype, pos, dot, voice, staff):
         """Create all nodes needed for a rest. """
         self.create_note()
         if pos:
@@ -205,6 +209,8 @@ class CreateMusicXML():
         if dot:
             for i in range(dot):
                 self.add_dot()
+        if staff:
+            self.add_staff(staff)
 
     def new_articulation(self, artic):
         """Add specified articulation. """

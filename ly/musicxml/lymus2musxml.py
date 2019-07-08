@@ -241,8 +241,7 @@ class ParseSource():
             self.mediator.new_group()
         elif context in staff_contexts:
             if self.piano_staff:
-                if self.piano_staff > 1:
-                    self.mediator.set_voicenr(nr=self.piano_staff+3)
+                self.mediator.set_voicenr(nr=1)
                 self.mediator.new_section('piano-staff'+str(self.piano_staff))
                 self.mediator.set_staffnr(self.piano_staff)
                 self.piano_staff += 1
