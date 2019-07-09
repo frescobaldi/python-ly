@@ -827,7 +827,8 @@ class Reader(object):
             item = self.factory(LyricText, t)
             self.add_duration(item)
             return item
-        elif isinstance(t, lilypond.Lyric) or t == '\\slurOff' or t == '\\slurOn':
+        elif isinstance(t, lilypond.Lyric) or t in ['\\slurOff', '\\slurOn', '\\switchMel', '\\switchSop',
+                                                    '\\switchAlto', '\\switchOne', '\\switchTwo']:
             return self.factory(LyricItem, t)
         else:
             item, source = self.test_music_list(t)

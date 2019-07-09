@@ -204,10 +204,8 @@ class IterateXmlObjs():
         if obj.lyric:
             for l in obj.lyric:
                 # Allows a lyric to have the extend tag if necessary
-                if l[-1] == "extend":
-                    self.musxml.add_lyric(l[0], l[1], l[2], l[-1])
-                elif l[-2] == "extend":
-                    self.musxml.add_lyric(l[0], l[1], l[2], l[-2])
+                if "extend" in l:
+                    self.musxml.add_lyric(l[0], l[1], l[2], "extend")
                 else:
                     self.musxml.add_lyric(l[0], l[1], l[2])
 
@@ -326,43 +324,89 @@ class ScoreSection():
 
     def merge_lyrics(self, lyrics):
         """Merge in lyrics in music section."""
-        i = 0
-        slurOn = True  # Indicates whether subsequent slurred notes should be skipped
-        slur = False   # Indicates whether the current note is slurred
-        tie = False    # Indicates whether the current note is tied
+        first_voice = []   # Stores the notes in the first voice
+        second_voice = []  # Stores the notes in the second voice
+        first_idx = 0      # Stores the current index in the first_voice list
+        second_idx = 0     # Stores the current index in the second_voice list
+        time = 0           # Stores the current time in the music
+        lyrics_idx = 0     # Stores the current index in the lyrics list
+        slurOn = True      # Indicates whether subsequent slurred notes should be skipped
+        slur = False       # Indicates whether the current note is slurred
+        tie = False        # Indicates whether the current note is tied
+        voice = 1          # Indicates which voice the notes should be assigned to
+        prev_time = -1     # Stores the start time of the previously placed lyric
+        # Create separate lists of first and second voice notes (Does not currently support more voices in first staff)
         for bar in self.barlist:
             for obj in bar.obj_list:
-                if isinstance(obj, BarNote) and obj.voice == 1 and not obj.chord:
-                    # Ends open slurs/ties
-                    if slur and tie:
-                        if obj.slur:
-                            slur = False
-                        elif obj.tie:
-                            tie = False
-                    elif slur:
-                        if obj.slur:
-                            slur = False
-                    elif tie:
-                        if obj.tie:
-                            tie = False
-                    # If not a slurred/tied note, begins slurs/ties if needed and adds lyrics
+                if isinstance(obj, BarMus) and not obj.chord:
+                    if obj.voice == 1:
+                        first_voice.append((obj, time))
+                    elif obj.voice == 2:
+                        second_voice.append((obj, time))
                     else:
-                        if obj.slur and slurOn:
-                            slur = True
-                        if obj.tie and slurOn:
-                            tie = True
+                        print("Warning: Voice too high for lyric placement")
+                    time += obj.duration[0] * obj.duration[1]
+                elif isinstance(obj, BarBackup):
+                    time -= obj.duration[0] * obj.duration[1]
+        while(True):
+            # Update position in first and second voice lists (break if the necessary list (current voice) ends)
+            try:
+                while(not first_voice[first_idx][1] > prev_time):
+                    first_idx += 1
+                first_obj = first_voice[first_idx]
+            except IndexError:
+                first_obj = None
+            try:
+                while(not second_voice[second_idx][1] > prev_time):
+                    second_idx += 1
+                second_obj = second_voice[second_idx]
+            except IndexError:
+                second_obj = None
+            if voice == 1:
+                if first_obj is None:
+                    break
+                else:
+                    obj = first_obj
+            elif voice == 2:
+                if second_obj is None:
+                    break
+                else:
+                    obj = second_obj
+            prev_time = obj[1]
+            # After finding the proper note, add the lyric and update status of voice, slurs, and ties
+            if isinstance(obj[0], BarNote):
+                if not (slur and slurOn) and not (tie and slurOn):
+                    try:
+                        lyr = lyrics.barlist[lyrics_idx]
+                    except IndexError:
+                        break
+                    if lyr[0] is None:  # Handles case where a placeholder lyric is at the beginning to store slurOff, voiceTwo, etc.
+                        lyrics_idx += 1
                         try:
-                            lyr = lyrics.barlist[i]
+                            lyr = lyrics.barlist[lyrics_idx]
                         except IndexError:
                             break
-                        if lyr[-1] == "slurOff" or lyr[-2] == "slurOff":
+                    if lyr != 'skip':
+                        lyr[0] = lyr[0].replace('~', chr(0x203f))  # Turns ~ into undertie
+                        obj[0].add_lyric(lyr)
+                    try:
+                        prev_lyr = lyrics.barlist[lyrics_idx-1]
+                    except IndexError:
+                        prev_lyr = None
+                    if prev_lyr is not None:
+                        if "slurOff" in prev_lyr:
                             slurOn = False
-                        elif lyr[-1] == "slurOn" or lyr[-2] == "slurOn":
+                        elif "slurOn" in prev_lyr:
                             slurOn = True
-                        if lyr != 'skip':
-                            lyr[0] = lyr[0].replace('~', chr(0x203f))  # Turns ~ into undertie
-                            obj.add_lyric(lyr)
-                        i += 1
+                        if "voiceOne" in prev_lyr:
+                            voice = 1
+                        elif "voiceTwo" in prev_lyr:
+                            voice = 2
+                    lyrics_idx += 1
+                if obj[0].slur:
+                    slur = not slur
+                if obj[0].tie:
+                    tie = not tie
 
 
 class Snippet(ScoreSection):
