@@ -388,6 +388,7 @@ class ScoreSection():
                             break
                     if lyr != 'skip':
                         lyr[0] = lyr[0].replace('~', chr(0x203f))  # Turns ~ into undertie
+                        lyr[0] = lyr[0].replace('_', ' ')  # Ex: Hello_I -> Hello I (but on one note)
                         obj[0].add_lyric(lyr)
                     try:
                         prev_lyr = lyrics.barlist[lyrics_idx-1]
@@ -403,9 +404,9 @@ class ScoreSection():
                         elif "voiceTwo" in prev_lyr:
                             voice = 2
                     lyrics_idx += 1
-                if obj[0].slur:
+                for s in obj[0].slur:
                     slur = not slur
-                if obj[0].tie:
+                for t in obj[0].tie:
                     tie = not tie
 
 
