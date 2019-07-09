@@ -495,6 +495,10 @@ class Mediator():
                     self.staff_unset_notes[self.staff] = [self.current_note]
         self.add_to_bar(self.current_note)
 
+    def check_chord_note_for_staff(self, chord_note):
+        if self.staff:
+            chord_note.set_staff(self.staff)
+
     def set_octave(self, relative):
         """Set octave by getting the octave of an absolute note + 3."""
         p = self.current_lynote.pitch.copy()
@@ -557,6 +561,7 @@ class Mediator():
         self.prev_chord_pitch = p
         chord_note.chord = True
         self.bar.add(chord_note)
+        self.check_chord_note_for_staff(chord_note)
         return chord_note
 
     def copy_prev_chord(self, duration):

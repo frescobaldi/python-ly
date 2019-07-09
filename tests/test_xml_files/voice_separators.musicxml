@@ -50,6 +50,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
     </measure>
     <measure number="2">
       <note>
@@ -175,6 +178,9 @@
         <voice>2</voice>
         <type>whole</type>
       </note>
+      <backup>
+        <duration>8</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>light-light</bar-style>
@@ -227,6 +233,9 @@
           <slur number="1" type="stop" />
         </notations>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>light-heavy</bar-style>
@@ -267,6 +276,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
     </measure>
     <measure number="2">
       <note>
@@ -534,6 +546,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>8</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>light-light</bar-style>
@@ -561,6 +576,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
       <attributes />
       <barline location="right">
         <bar-style>light-heavy</bar-style>

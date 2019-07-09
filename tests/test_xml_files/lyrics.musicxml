@@ -5,7 +5,7 @@
   <identification>
     <encoding>
       <software>python-ly 0.9.5</software>
-      <encoding-date>2019-06-14</encoding-date>
+      <encoding-date>2019-06-28</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -134,6 +134,9 @@
         <voice>2</voice>
         <type>quarter</type>
       </note>
+      <backup>
+        <duration>8</duration>
+      </backup>
     </measure>
     <measure number="2">
       <note>
@@ -671,6 +674,9 @@
         <voice>2</voice>
         <type>eighth</type>
       </note>
+      <backup>
+        <duration>8</duration>
+      </backup>
     </measure>
     <measure number="2">
       <note>
