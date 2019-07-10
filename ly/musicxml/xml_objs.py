@@ -186,7 +186,8 @@ class IterateXmlObjs():
                                  obj.alter, obj.accidental_token, obj.voice, obj.dot, obj.chord,
                                  obj.grace, obj.staff)
         for t in obj.tie:
-            self.musxml.tie_note(t)
+            if not obj.chord:
+                self.musxml.tie_note(t)
         for s in obj.slur:
             self.musxml.add_slur(s.nr, s.slurtype)
         for a in obj.artic:
