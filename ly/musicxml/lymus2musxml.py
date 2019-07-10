@@ -529,15 +529,18 @@ class ParseSource():
         elif self.alt_mode == "chord":
             self.total_time += skip.length()
         else:
-            self.break_skip_at_barline(skip)
+            if not self.break_skip_at_barline(skip):
+                self.mediator.new_rest(skip)
+                self.update_time_and_check(skip)
 
     def break_skip_at_barline(self, skip):
         r"""
         When a skip is longer than one measure, break skip into measure length pieces
         NOTES: This only works with barlines at ends of complete measures (not \bar)
         """
+        is_split = False
         length = skip.length()
-        if self.first_meas and length > self.partial:
+        if self.first_meas and self.partial != 0 and length > self.partial:
             self.mediator.current_is_rest = True
             self.mediator.clear_chord()
             self.mediator.current_note = xml_objs.BarRest((self.partial, Fraction(1, 1)), self.mediator.voice, skip=True)
@@ -546,6 +549,7 @@ class ParseSource():
             self.time_since_bar += self.partial
             self.check_for_barline()
             length -= self.partial
+            is_split = True
         if length > self.time_sig:
             for i in range(length // self.time_sig):
                 self.mediator.current_is_rest = True
@@ -556,12 +560,8 @@ class ParseSource():
                 self.time_since_bar += self.time_sig
                 self.check_for_barline()
             length -= (length // self.time_sig) * self.time_sig
-        if length != 0:
-            self.mediator.current_note = xml_objs.BarRest((length, Fraction(1, 1)), self.mediator.voice, skip=True)
-            self.mediator.check_current_note(rest=True)
-            self.total_time += length
-            self.time_since_bar += length
-            self.check_for_barline()
+            is_split = True
+        return is_split
 
     def Scaler(self, scaler):
         r"""
