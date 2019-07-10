@@ -345,7 +345,7 @@ class ParseSource():
         Checks at the current location in music to see if a barline is needed
         Creates a barline if needed
         """
-        # Prevent a regular bar from being made and then a \bar being made
+        # Prevent a bar from being made and then a \bar being made
         if node and self.get_next_node(node):
             if self.get_next_node(node).token == "\\bar":
                 return False
@@ -710,7 +710,7 @@ class ParseSource():
         # If a new \bar is found: record its position and style-type, and create appropriate barline
         if prev and prev.token == '\\bar':
             self.barline_locations[self.total_time] = string.value()
-            self.check_for_barline()
+            self.check_for_barline(string)
 
     def LyricsTo(self, lyrics_to):
         r"""A \lyricsto expression. """
