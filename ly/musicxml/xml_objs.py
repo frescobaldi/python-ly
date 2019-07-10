@@ -404,6 +404,8 @@ class ScoreSection():
                         elif "voiceTwo" in prev_lyr:
                             voice = 2
                     lyrics_idx += 1
+                # for loops cover the case where a note has multiple slur objects
+                #    for example: the note (a) has an opening and closing slur, meaning slur should remain False
                 for s in obj[0].slur:
                     slur = not slur
                 for t in obj[0].tie:
