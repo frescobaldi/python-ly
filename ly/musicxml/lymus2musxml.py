@@ -529,18 +529,25 @@ class ParseSource():
         elif self.alt_mode == "chord":
             self.total_time += skip.length()
         else:
-            if not self.break_skip_at_barline(skip):
-                self.mediator.new_rest(skip)
-                self.update_time_and_check(skip)
+            self.break_skip_at_barline(skip)
 
     def break_skip_at_barline(self, skip):
         r"""
         When a skip is longer than one measure, break skip into measure length pieces
         NOTES: This only works with barlines at ends of complete measures (not \bar)
-               Length of skip must be a multiple of the length of one measure
         """
-        if skip.length() > self.time_sig:
-            for i in range(skip.length() // self.time_sig):
+        length = skip.length()
+        if self.first_meas and length > self.partial:
+            self.mediator.current_is_rest = True
+            self.mediator.clear_chord()
+            self.mediator.current_note = xml_objs.BarRest((self.partial, Fraction(1, 1)), self.mediator.voice, skip=True)
+            self.mediator.check_current_note(rest=True)
+            self.total_time += self.partial
+            self.time_since_bar += self.partial
+            self.check_for_barline()
+            length -= self.partial
+        if length > self.time_sig:
+            for i in range(length // self.time_sig):
                 self.mediator.current_is_rest = True
                 self.mediator.clear_chord()
                 self.mediator.current_note = xml_objs.BarRest((self.time_sig, Fraction(1, 1)), self.mediator.voice, skip=True)
@@ -548,9 +555,13 @@ class ParseSource():
                 self.total_time += self.time_sig
                 self.time_since_bar += self.time_sig
                 self.check_for_barline()
-            return True
-        else:
-            return False
+            length -= (length // self.time_sig) * self.time_sig
+        if length != 0:
+            self.mediator.current_note = xml_objs.BarRest((length, Fraction(1, 1)), self.mediator.voice, skip=True)
+            self.mediator.check_current_note(rest=True)
+            self.total_time += length
+            self.time_since_bar += length
+            self.check_for_barline()
 
     def Scaler(self, scaler):
         r"""
