@@ -265,14 +265,15 @@ class Mediator():
     def check_lyrics(self, voice_id):
         """Check the finished lyrics section and merge it into
         the referenced voice."""
-        if self.lyric[1] == 'middle':
+        if self.lyric is not None and self.lyric[1] == 'middle':
             self.lyric[1] = 'end'
         lyrics_section = self.lyric_sections['lyricsto'+voice_id]
-        voice_section = self.get_var_byname(lyrics_section.voice_id)
+        voice_section = self.sections[-1]
         if voice_section:
             voice_section.merge_lyrics(lyrics_section)
         else:
             print("Warning can't merge in lyrics!", voice_section)
+        self.lyric = None  # Clear final lyric
 
     def check_part(self):
         """Adds the latest active section to the part."""
@@ -855,6 +856,9 @@ class Mediator():
         self.lyric_nr = num
 
     def new_lyrics_text(self, txt):
+        if not txt:
+            txt = "ERR"
+            print("Warning: Lyric text not readable, marked with ERR!")
         if self.lyric:
             if self.lyric_syll:
                 if self.lyric[1] in ['begin', 'middle']:
@@ -877,9 +881,25 @@ class Mediator():
         elif item == '__':
             self.lyric.append("extend")
         elif item == '\\slurOff':
-            self.lyric.append("slurOff")
+            if not self.lyric:
+                self.insert_into.barlist.append([None, "slurOff"])
+            else:
+                self.lyric.append("slurOff")
         elif item == '\\slurOn':
-            self.lyric.append("slurOn")
+            if not self.lyric:
+                self.insert_into.barlist.append([None, "slurOn"])
+            else:
+                self.lyric.append("slurOn")
+        elif item in ['\\switchSop', '\\switchOne', '\\switchMel']:
+            if not self.lyric:
+                self.insert_into.barlist.append([None, "voiceOne"])
+            else:
+                self.lyric.append("voiceOne")
+        elif item in ['\\switchAlto', '\\switchTwo']:
+            if not self.lyric:
+                self.insert_into.barlist.append([None, "voiceTwo"])
+            else:
+                self.lyric.append("voiceTwo")
         elif item == '\\skip' or item == '_':
             self.insert_into.barlist.append("skip")
 
