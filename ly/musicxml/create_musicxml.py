@@ -498,7 +498,7 @@ class CreateMusicXML():
         """Create node attributes """
         self.bar_attr = etree.SubElement(self.current_bar, "attributes")
 
-    def add_harmony(self, rt, rt_a=0, bs=False, bs_a=0, txt=""):
+    def add_harmony(self, rt, rt_a=0, bs=False, bs_a=0, txt="", ofst=0):
         """Create harmony element"""
         CHORD_DICT = {"": "major", "m": "minor", "aug": "augmented", "dim": "diminished",
                       "7": "dominant", "maj7": "major-seventh", "m7": "minor-seventh",
@@ -529,6 +529,9 @@ class CreateMusicXML():
             if bs_a != 0:
                 bass_alter = etree.SubElement(bass, "bass-alter")
                 bass_alter.text = str(bs_a)
+        if ofst:
+            offset = etree.SubElement(harmony, "offset")
+            offset.text = str(ofst)
 
     def add_divisions(self, div):
         division = etree.SubElement(self.bar_attr, "divisions")
