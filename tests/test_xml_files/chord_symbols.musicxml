@@ -5,7 +5,7 @@
   <identification>
     <encoding>
       <software>python-ly 0.9.5</software>
-      <encoding-date>2019-07-08</encoding-date>
+      <encoding-date>2019-07-10</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -33,12 +33,6 @@
           <line>2</line>
         </clef>
       </attributes>
-      <harmony>
-        <root>
-          <root-step>A</root-step>
-        </root>
-        <kind text="">major</kind>
-      </harmony>
       <note>
         <pitch>
           <step>C</step>
@@ -128,41 +122,27 @@
       </note>
     </measure>
     <measure number="3">
+      <harmony>
+        <root>
+          <root-step>B</root-step>
+        </root>
+        <kind text="">major</kind>
+      </harmony>
+      <harmony>
+        <root>
+          <root-step>B</root-step>
+        </root>
+        <kind text="sus2">suspended-second</kind>
+        <offset>1</offset>
+      </harmony>
       <note>
         <pitch>
           <step>C</step>
           <octave>5</octave>
         </pitch>
-        <duration>1</duration>
+        <duration>4</duration>
         <voice>1</voice>
-        <type>quarter</type>
-      </note>
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>5</octave>
-        </pitch>
-        <duration>1</duration>
-        <voice>1</voice>
-        <type>quarter</type>
-      </note>
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>5</octave>
-        </pitch>
-        <duration>1</duration>
-        <voice>1</voice>
-        <type>quarter</type>
-      </note>
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>5</octave>
-        </pitch>
-        <duration>1</duration>
-        <voice>1</voice>
-        <type>quarter</type>
+        <type>whole</type>
       </note>
       <backup>
         <duration>4</duration>
@@ -537,9 +517,36 @@
           <step>C</step>
           <octave>3</octave>
         </pitch>
-        <duration>4</duration>
+        <duration>1</duration>
         <voice>1</voice>
-        <type>whole</type>
+        <type>quarter</type>
+      </note>
+      <note>
+        <pitch>
+          <step>C</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+      </note>
+      <note>
+        <pitch>
+          <step>C</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+      </note>
+      <note>
+        <pitch>
+          <step>C</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>quarter</type>
       </note>
       <backup>
         <duration>4</duration>
