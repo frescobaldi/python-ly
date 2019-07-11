@@ -124,7 +124,7 @@ class CreateMusicXML():
     ##
 
     def new_note(self, step, octave, durtype, divdur, alter=0,
-                 acc_token=0, voice=1, dot=0, chord=0, grace=(0, 0), staff=0):
+                 acc_token=0, voice=1, dot=0, chord=0, grace=(0, 0), staff=0, beam=False):
         """Create all nodes needed for a normal note. """
         self.create_note()
         if grace[0]:
@@ -148,6 +148,8 @@ class CreateMusicXML():
                 self.add_accidental(alter)
         if staff:
             self.add_staff(staff)
+        if beam:
+            self.add_beam(1, beam)
 
     def new_unpitched_note(self, step, octave, durtype, divdur, voice=1,
                            dot=0, chord=0, grace=(0, 0), staff=0):
@@ -361,7 +363,7 @@ class CreateMusicXML():
 
     def add_beam(self, nr, beam_type):
         """Add beam. """
-        beam_node = etree.SubElement(self.current_notation, "beam", number=str(nr))
+        beam_node = etree.SubElement(self.current_note, "beam", number=str(nr))
         beam_node.text = beam_type
 
     def add_tie(self, tie_type):

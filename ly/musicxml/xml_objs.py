@@ -184,7 +184,7 @@ class IterateXmlObjs():
         else:
             self.musxml.new_note(obj.base_note, obj.octave, obj.type, divdur,
                                  obj.alter, obj.accidental_token, obj.voice, obj.dot, obj.chord,
-                                 obj.grace, obj.staff)
+                                 obj.grace, obj.staff, obj.beam)
         for t in obj.tie:
             self.musxml.tie_note(t)
         for s in obj.slur:
@@ -727,6 +727,7 @@ class BarNote(BarMus):
         self.adv_ornament = None
         self.fingering = None
         self.lyric = None
+        self.beam = False
 
     def set_duration(self, duration, durtype=''):
         self.duration = duration
@@ -782,6 +783,9 @@ class BarNote(BarMus):
 
     def change_lyric_nr(self, index, nr):
         self.lyric[index][2] = nr
+
+    def set_beam(self, beam):
+        self.beam = beam
 
 
 class Unpitched(BarNote):

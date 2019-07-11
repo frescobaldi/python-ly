@@ -95,6 +95,7 @@ class ParseSource():
         self.slurcount = 0
         self.slurnr = 0
         self.phrslurnr = 0
+        self.beam = False
         # Variables to keep track of place in music, and place of \bar barlines and chord symbols
         self.time_sig = Fraction(1, 1)
         self.partial = 0
@@ -471,6 +472,8 @@ class ParseSource():
             self.mediator.new_grace()
         if self.trem_rep and not self.look_ahead(note, ly.music.items.Duration):
             self.mediator.set_tremolo(trem_type='start', repeats=self.trem_rep)
+        if self.beam:
+            self.mediator.current_note.set_beam('continue')  # Note: may be overriden by 'end' if next element is ']'
 
     def check_tuplet(self):
         """Generic tuplet check."""
@@ -587,7 +590,13 @@ class ParseSource():
         pass
 
     def Beam(self, beam):
-        pass
+        """ Beam, '[' = begin, ']' = end. """
+        if beam.token == '[':
+            self.mediator.current_note.set_beam('begin')
+            self.beam = True
+        elif beam.token == ']':
+            self.mediator.current_note.set_beam('end')
+            self.beam = False
 
     def Partial(self, partial):
         r""" \partial # """
