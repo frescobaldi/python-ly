@@ -550,7 +550,7 @@ class ParseSource():
             self.check_for_barline()
             length -= self.partial
             is_split = True
-        if length > self.time_sig:
+        if length > self.time_sig or is_split and length == self.time_sig:
             for i in range(length // self.time_sig):
                 self.mediator.current_is_rest = True
                 self.mediator.clear_chord()
