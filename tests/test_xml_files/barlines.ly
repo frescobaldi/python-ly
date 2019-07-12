@@ -14,7 +14,7 @@ Soprano = \relative c'' {
   | g g \bar "" g g \bar "!"
   | g g \bar "|" g g \bar "."
   | g g \bar ".|" g g \bar ".."
-  | g g \bar ";" g g
+  | g g \bar ";" \bar ";" g g \bar ";"
   \bar "|."
 }
 

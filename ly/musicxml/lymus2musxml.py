@@ -345,7 +345,7 @@ class ParseSource():
         Checks at the current location in music to see if a barline is needed
         Creates a barline if needed
         """
-        # Prevent a regular bar from being made and then a \bar being made
+        # Prevent a bar from being made and then a \bar being made
         if node and self.get_next_node(node):
             if self.get_next_node(node).token == "\\bar":
                 return False
@@ -537,10 +537,21 @@ class ParseSource():
         r"""
         When a skip is longer than one measure, break skip into measure length pieces
         NOTES: This only works with barlines at ends of complete measures (not \bar)
-               Length of skip must be a multiple of the length of one measure
         """
-        if skip.length() > self.time_sig:
-            for i in range(skip.length() // self.time_sig):
+        is_split = False
+        length = skip.length()
+        if self.first_meas and self.partial != 0 and length > self.partial:
+            self.mediator.current_is_rest = True
+            self.mediator.clear_chord()
+            self.mediator.current_note = xml_objs.BarRest((self.partial, Fraction(1, 1)), self.mediator.voice, skip=True)
+            self.mediator.check_current_note(rest=True)
+            self.total_time += self.partial
+            self.time_since_bar += self.partial
+            self.check_for_barline()
+            length -= self.partial
+            is_split = True
+        if length > self.time_sig or is_split and length == self.time_sig:
+            for i in range(length // self.time_sig):
                 self.mediator.current_is_rest = True
                 self.mediator.clear_chord()
                 self.mediator.current_note = xml_objs.BarRest((self.time_sig, Fraction(1, 1)), self.mediator.voice, skip=True)
@@ -548,9 +559,9 @@ class ParseSource():
                 self.total_time += self.time_sig
                 self.time_since_bar += self.time_sig
                 self.check_for_barline()
-            return True
-        else:
-            return False
+            length -= (length // self.time_sig) * self.time_sig
+            is_split = True
+        return is_split
 
     def Scaler(self, scaler):
         r"""
@@ -699,7 +710,7 @@ class ParseSource():
         # If a new \bar is found: record its position and style-type, and create appropriate barline
         if prev and prev.token == '\\bar':
             self.barline_locations[self.total_time] = string.value()
-            self.check_for_barline()
+            self.check_for_barline(string)
 
     def LyricsTo(self, lyrics_to):
         r"""A \lyricsto expression. """
