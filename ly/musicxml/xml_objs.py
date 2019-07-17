@@ -143,10 +143,10 @@ class IterateXmlObjs():
         self._add_dynamics([d for d in obj.dynamic if d.before])
         if obj.oct_shift and not obj.oct_shift.octdir == 'stop':
             self.musxml.add_octave_shift(obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
-        if obj.harmony:
-            self.musxml.add_harmony(obj.harmony.root, obj.harmony.root_alter,
-                                    obj.harmony.bass, obj.harmony.bass_alter,
-                                    obj.harmony.text)
+        if len(obj.harmony) != 0:
+            for h in obj.harmony:
+                self.musxml.add_harmony(h.root, h.root_alter, h.bass, h.bass_alter, h.text,
+                                        self.count_duration((h.offset, 1), self.divisions))
 
     def after_note(self, obj):
         """Xml-nodes after note."""
@@ -593,7 +593,7 @@ class BarMus():
         self.other_notation = None
         self.dynamic = []
         self.oct_shift = None
-        self.harmony = None
+        self.harmony = []
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.duration)
@@ -625,8 +625,8 @@ class BarMus():
     def set_oct_shift(self, plac, octdir, size):
         self.oct_shift = OctaveShift(plac, octdir, size)
 
-    def set_harmony(self, root, root_alter=0, bass=False, bass_alter=0, text=""):
-        self.harmony = Harmony(root, root_alter, bass, bass_alter, text)
+    def add_harmony(self, root, root_alter=0, bass=False, bass_alter=0, text="", offset=0):
+        self.harmony.append(Harmony(root, root_alter, bass, bass_alter, text, offset))
 
     def has_attr(self):
         return False
@@ -639,12 +639,13 @@ class BarMus():
 
 class Harmony():
     """Class for harmony objects (chord name representations)"""
-    def __init__(self, root, root_alter=0, bass=False, bass_alter=0, text=""):
+    def __init__(self, root, root_alter=0, bass=False, bass_alter=0, text="", offset=0):
         self.root = root
         self.root_alter = root_alter
         self.bass = bass
         self.bass_alter = bass_alter
         self.text = text
+        self.offset = offset
 
 
 class OctaveShift():

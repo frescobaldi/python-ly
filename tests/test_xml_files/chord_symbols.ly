@@ -14,7 +14,7 @@ Soprano = \relative c'' {
 
   c1
 | c4 c4 c4 c4
-| c4 c4 c4 c4
+| c1
 | c4 c4 c4 c4
 | c4 c4 c4 c4
 | c4 c4 c4 c4
@@ -44,7 +44,7 @@ Tenor = \relative c {
 
   c1
 | c1
-| c1
+| c4 c4 c4 c4
 | c1
 | c1
 | c1
@@ -71,10 +71,10 @@ Bass = \relative c {
 Chords = \relative c' {
  \chordmode {
 
-a1
-b4:aug7 s cs2
 s1
-df/es
+b4:aug7 s cs2
+b4 b4:sus2 s2
+df1/es
 f:maj7/g
 g:m6
 a:sus4

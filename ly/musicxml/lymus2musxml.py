@@ -321,25 +321,33 @@ class ParseSource():
 
     def check_for_chord(self, note):
         """
-        Checks the current note to see if a chord symbol is needed above
+        Checks the current note to see if any chord symbols are needed above
         Adds one to current note if needed
-        Based on whether a chord symbol was defined at this point in the music
-        Removes current chord symbol from dictionary of chord symbols to ensure the symbol is only placed once
+        Based on whether a chord symbol was defined during the duration of the note in the music
+        Removes any used chord symbols from dictionary of chord symbols to ensure the symbol is only placed once
         """
+        pos_to_pop = []  # Stores any chord symbol positions used during this note
         if isinstance(note.parent(), ly.music.items.Chord):
-            if (self.total_time - note.parent().duration[0]) in self.chord_locations:
-                chord_dict = self.chord_locations[self.total_time - note.parent().duration[0]]
-                self.mediator.current_note.set_harmony(chord_dict["root"], chord_dict["root-alter"],
-                                                       chord_dict["bass"], chord_dict["bass-alter"],
-                                                       chord_dict["text"])
-                self.chord_locations.pop(self.total_time - note.parent().duration[0])
+            length = note.parent().duration[0]
         else:
-            if (self.total_time - note.length()) in self.chord_locations:
-                chord_dict = self.chord_locations[self.total_time - note.length()]
-                self.mediator.current_note.set_harmony(chord_dict["root"], chord_dict["root-alter"],
+            length = note.length()
+        for pos, chord_dict in self.chord_locations.items():
+            # Check if the chord symbol at pos, is at the beginning of the note
+            if pos == self.total_time - length:
+                pos_to_pop.append(pos)
+                self.mediator.current_note.add_harmony(chord_dict["root"], chord_dict["root-alter"],
                                                        chord_dict["bass"], chord_dict["bass-alter"],
                                                        chord_dict["text"])
-                self.chord_locations.pop(self.total_time - note.length())
+            # Check if the chord symbol at pos, is anytime else during the note
+            # (adds offset equal to time from beginning of note to pos)
+            elif pos > self.total_time - length and pos < self.total_time:
+                pos_to_pop.append(pos)
+                self.mediator.current_note.add_harmony(chord_dict["root"], chord_dict["root-alter"],
+                                                       chord_dict["bass"], chord_dict["bass-alter"],
+                                                       chord_dict["text"], pos - (self.total_time - length))
+        # Remove any used chord symbols from self.chord_locations
+        for pos in pos_to_pop:
+            self.chord_locations.pop(pos)
 
     def check_for_barline(self, node=None):
         """
