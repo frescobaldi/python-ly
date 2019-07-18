@@ -172,11 +172,7 @@ class CreateMusicXML():
 
     def tuplet_note(self, fraction, bs, ttype, nr, divs, atyp='', ntyp=''):
         """Convert current note to tuplet """
-        base = self.mult * bs[0]
-        scaling = bs[1]
-        a = divs*4*fraction[1]
-        b = (1/base)*fraction[0]
-        duration = (a/b)*scaling
+        duration = bs[0] * bs[1] * divs * 4
         self.change_div_duration(duration)
         from fractions import Fraction
         self.mult = Fraction(fraction[1], fraction[0])

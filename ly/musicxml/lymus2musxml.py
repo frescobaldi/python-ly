@@ -429,6 +429,8 @@ class ParseSource():
         """ notename, e.g. c, cis, a bes ... """
         # print(note.token)
         # if the note is a bass note in a chord symbol, break out of function
+        if len(self.tuplet) != 0:
+            note.duration = (Fraction(self.tuplet[0]["length"] / self.tuplet[0]["fraction"][0]), note.duration[1])
         if not isinstance(note.parent(), ly.music.items.ChordSpecifier):
             if note.length() and self.alt_mode != "chord":
                 if self.relative and not self.rel_pitch_isset:
