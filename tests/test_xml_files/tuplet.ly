@@ -1,7 +1,6 @@
 \version "2.18.2"
 
 StanzaOne = \lyricmode {
-  \set stanza = "1."
   La di la di la
   la di la di la di la di la di
   la di la di la di la.
