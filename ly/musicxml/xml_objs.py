@@ -115,7 +115,6 @@ class IterateXmlObjs():
                         self.new_xml_note(obj)
                     elif isinstance(obj, BarRest):
                         self.new_xml_rest(obj)
-                    self.gener_xml_mus(obj)
                     self.after_note(obj)
                 elif isinstance(obj, BarBackup):
                     divdur = self.count_duration(obj.duration, self.divisions)
@@ -202,6 +201,7 @@ class IterateXmlObjs():
             self.musxml.add_gliss(obj.gliss[0], obj.gliss[1], obj.gliss[2])
         if obj.fingering:
             self.musxml.add_fingering(obj.fingering)
+        self.gener_xml_mus(obj)  # Notations must be added before lyrics to have a valid XML
         if obj.lyric:
             for l in obj.lyric:
                 # Allows a lyric to have the extend tag if necessary
@@ -218,6 +218,7 @@ class IterateXmlObjs():
         else:
             self.musxml.new_rest(divdur, obj.type, obj.pos,
                                  obj.dot, obj.voice, obj.staff)
+        self.gener_xml_mus(obj)
 
     def count_duration(self, base_scaling, divs):
         base = base_scaling[0]
