@@ -31,6 +31,7 @@ from __future__ import print_function
 
 import ly.document
 import ly.music
+from ly.pitch.transpose import Transposer
 from fractions import Fraction
 
 from . import create_musicxml
@@ -96,6 +97,7 @@ class ParseSource():
         self.slurnr = 0
         self.phrslurnr = 0
         self.beam = False
+        self.transposer = None
         # Variables to keep track of place in music, and place of \bar barlines and chord symbols
         self.time_sig = Fraction(1, 1)
         self.partial = 0
@@ -295,11 +297,29 @@ class ParseSource():
         self.mediator.new_clef(clef.specifier())
 
     def KeySignature(self, key):
-        self.mediator.new_key(key.pitch().output(), key.mode())
+        r"""
+        A new key signature (\key and \major, \minor, etc.)
+
+        The key's pitch is transposed if the key is after a \transpose
+        using a copy of the pitch (to prevent a reused key from being modified multiple times)
+        """
+        pitch_copy = key.pitch().copy()
+        if self.transposer is not None:
+            self.transposer.transpose(pitch_copy)
+        self.mediator.new_key(pitch_copy.output(), key.mode())
 
     def Relative(self, relative):
         r"""A \relative music expression."""
         self.relative = True
+
+    def Transpose(self, transpose):
+        r""" A \transpose music expression. """
+        self.transposer = Transposer(transpose[0].pitch, transpose[1].pitch)
+
+    def transpose_note(self, note):
+        """ If music should be transposed, adjust note pitch accordingly, key changes handled in KeySignature() """
+        if not isinstance(note.parent(), ly.music.items.KeySignature) and self.transposer is not None:
+            self.transposer.transpose(note.pitch)
 
     def ChordSpecifier(self, specifier):
         """
@@ -434,6 +454,7 @@ class ParseSource():
         """ notename, e.g. c, cis, a bes ... """
         # print(note.token)
         self.adjust_tuplet_length(note)
+        self.transpose_note(note)
         # if the note is a bass note in a chord symbol, break out of function
         if not isinstance(note.parent(), ly.music.items.ChordSpecifier):
             if note.length() and self.alt_mode != "chord":
@@ -865,6 +886,8 @@ class ParseSource():
                                            "\\drummode", "\\drums", "\\figuremode", "\\figures",
                                            "\\lyricmode", "\\lyrics", "\\addlyrics"]:
                 self.alt_mode = None
+            elif end.node.parent().token == '\\transpose':
+                self.transposer = None
         elif end.node.token == '<':  # chord
             self.mediator.chord_end()
             # Check for bar unless final note in voice separator (in which case, wait until after)
