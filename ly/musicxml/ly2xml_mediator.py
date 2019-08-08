@@ -50,6 +50,7 @@ class Mediator():
         """ default and initial values """
         self.insert_into = None
         self.current_note = None
+        self.prev_note = None
         self.current_lynote = None
         self.current_is_rest = False
         self.action_onnext = []
@@ -416,9 +417,11 @@ class Mediator():
         self.current_is_rest = False
         self.clear_chord()
         if is_unpitched:
+            self.prev_note = self.current_note
             self.current_note = self.create_unpitched(note)
             self.check_current_note(is_unpitched=True)
         else:
+            self.prev_note = self.current_note
             self.current_note = self.create_barnote_from_note(note)
             self.current_lynote = note
             self.check_current_note(rel)
@@ -541,6 +544,7 @@ class Mediator():
         self.do_action_onnext(self.current_chord[-1])
 
     def new_chordbase(self, note, duration, rel=False):
+        self.prev_note = self.current_note
         self.current_note = self.create_barnote_from_note(note)
         self.current_note.set_duration(duration)
         self.current_lynote = note
@@ -576,6 +580,7 @@ class Mediator():
             cn.set_duration(duration)
             cn.set_durtype(durval2type(self.dur_token))
             if i == 0:
+                self.prev_note = self.current_note
                 self.current_note = cn
             self.current_chord.append(cn)
             if self.tied:
@@ -598,10 +603,13 @@ class Mediator():
         rtype = rest.token
         dur = rest.duration
         if rtype == 'r':
+            self.prev_note = self.current_note
             self.current_note = xml_objs.BarRest(dur, self.voice)
         elif rtype == 'R':
+            self.prev_note = self.current_note
             self.current_note = xml_objs.BarRest(dur, self.voice, show_type=False)
         elif rtype == 's' or rtype == '\\skip' or rtype == '_':
+            self.prev_note = self.current_note
             self.current_note = xml_objs.BarRest(dur, self.voice, skip=True)
         self.check_current_note(rest=True)
 
@@ -610,6 +618,7 @@ class Mediator():
         dur = self.current_note.duration
         voice = self.current_note.voice
         pos = [self.current_note.base_note, self.current_note.octave]
+        self.prev_note = self.current_note
         self.current_note = xml_objs.BarRest(dur, voice, pos=pos)
         self.check_duration(rest=True)
         self.bar.obj_list.pop()
