@@ -489,7 +489,7 @@ class ParseSource():
                     self.mediator.current_note.set_beam("continue")
             # Beams started with [
             elif self.beam == "Manual":
-                if self.mediator.current_note.beam == False:
+                if not self.mediator.current_note.beam:
                     self.mediator.current_note.set_beam("continue")
             # No ongoing beams
             elif self.beam is None and self.auto_beam:
