@@ -777,16 +777,6 @@
         <duration>2</duration>
         <voice>1</voice>
         <type>16th</type>
-        <beam number="1">continue</beam>
-      </note>
-      <note>
-        <pitch>
-          <step>G</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>2</duration>
-        <voice>1</voice>
-        <type>16th</type>
         <beam number="1">end</beam>
       </note>
       <note>
@@ -797,6 +787,17 @@
         <duration>2</duration>
         <voice>1</voice>
         <type>16th</type>
+        <beam number="1">begin</beam>
+      </note>
+      <note>
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>16th</type>
+        <beam number="1">end</beam>
       </note>
       <note>
         <pitch>
@@ -842,7 +843,7 @@
         <duration>2</duration>
         <voice>1</voice>
         <type>16th</type>
-        <beam number="1">continue</beam>
+        <beam number="1">end</beam>
       </note>
       <note>
         <pitch>
@@ -852,7 +853,6 @@
         <duration>2</duration>
         <voice>1</voice>
         <type>16th</type>
-        <beam number="1">end</beam>
       </note>
     </measure>
     <measure number="9">

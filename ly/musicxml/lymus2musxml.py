@@ -98,6 +98,7 @@ class ParseSource():
         self.phrslurnr = 0
         self.auto_beam = True
         self.beam = None  # Values include None, "Normal", and "Manual" (for beams made with [])
+        self.prev_beam_type = None
         self.shortest_length_in_beam = Fraction(1, 4)
         self.beam_ends = []
         self.beam_exceptions = {}
@@ -497,6 +498,7 @@ class ParseSource():
                 if not self.note_ends_on_beam_end(time_after_note):
                     self.mediator.current_note.set_beam("begin")
                     self.beam = "Normal"
+                    self.prev_beam_type = "Normal"
                 else:
                     self.shortest_length_in_beam = Fraction(1, 4)
         # Quarter note or longer ends ongoing beam
@@ -724,6 +726,7 @@ class ParseSource():
                 self.mediator.current_note.set_beam("continue")
                 print("Warning: Multiple beam starts in a row without a beam end!")
             self.beam = "Manual"
+            self.prev_beam_type = "Manual"
             self.shortest_length_in_beam = Fraction(1, 4)
         elif beam.token == "]":
             if self.beam == "Manual":
@@ -898,7 +901,7 @@ class ParseSource():
                 self.mediator.unset_tuplspan_dur()
                 self.tupl_span = False
         elif command.token == '\\noBeam':
-            if self.beam == "Normal":
+            if self.prev_beam_type == "Normal":  # noBeam does not apply to [] beams
                 if self.mediator.prev_note is not None:
                     if self.mediator.prev_note.beam == 'continue':
                         self.mediator.prev_note.set_beam('end')
