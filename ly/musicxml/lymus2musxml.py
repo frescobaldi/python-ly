@@ -101,7 +101,7 @@ class ParseSource():
         self.prev_beam_type = None
         self.shortest_length_in_beam = Fraction(1, 4)
         self.beam_ends = []
-        self.beam_exceptions = {}
+        self.beam_exceptions = []
         self.base_moment = Fraction(1, 4)
         self.transposer = None
         # Variables to keep track of place in music, and place of \bar barlines and chord symbols
@@ -458,9 +458,9 @@ class ParseSource():
 
     def note_ends_on_beam_end(self, time_after_note):
         """ Return True/False based on whether time_after_note is a beam end (exception or otherwise) """
-        for exception_denominator, exception_ends in self.beam_exceptions.items():
-            if Fraction(1, exception_denominator) >= self.shortest_length_in_beam:
-                if time_after_note in exception_ends:
+        for exception in self.beam_exceptions:  # In order from greatest denominator to least
+            if Fraction(1, exception['denominator']) >= self.shortest_length_in_beam:
+                if time_after_note in exception['ends']:
                     return True
                 return False
         return time_after_note in self.beam_ends
@@ -791,31 +791,31 @@ class ParseSource():
             self.beam_ends = [Fraction(3, 8), Fraction(3, 4), Fraction(1, 1)]
         else:
             self.beam_ends = self.generate_beam_ends(denominator, 1, numerator)
-        # Generate beam_exceptions (a dictionary of lowest denominators pointing to associated beam ends arrays)
-        self.beam_exceptions = {}
+        # Generate beam_exceptions (an array of dictionaries containing a lowest denominator and its associated beam ends array)
+        self.beam_exceptions = []
         if denominator == 8:
             if numerator == 3:
-                self.beam_exceptions[8] = self.generate_beam_ends(8, 3, 1)
+                self.beam_exceptions.append({"denominator": 8, "ends": self.generate_beam_ends(8, 3, 1)})
         elif denominator == 2:
             if numerator == 2:
-                self.beam_exceptions[32] = self.generate_beam_ends(32, 8, 4)
+                self.beam_exceptions.append({"denominator": 32, "ends": self.generate_beam_ends(32, 8, 4)})
             elif numerator == 3:
-                self.beam_exceptions[32] = self.generate_beam_ends(32, 8, 6)
+                self.beam_exceptions.append({"denominator": 32, "ends": self.generate_beam_ends(32, 8, 6)})
             elif numerator == 4:
-                self.beam_exceptions[16] = self.generate_beam_ends(16, 4, 8)
+                self.beam_exceptions.append({"denominator": 16, "ends": self.generate_beam_ends(16, 4, 8)})
         elif denominator == 4:
             if numerator == 3:
-                self.beam_exceptions[12] = self.generate_beam_ends(12, 3, 3)
-                self.beam_exceptions[8] = self.generate_beam_ends(8, 6, 1)
+                self.beam_exceptions.append({"denominator": 12, "ends": self.generate_beam_ends(12, 3, 3)})
+                self.beam_exceptions.append({"denominator": 8, "ends": self.generate_beam_ends(8, 6, 1)})
             elif numerator == 4:
-                self.beam_exceptions[12] = self.generate_beam_ends(12, 3, 4)
-                self.beam_exceptions[8] = self.generate_beam_ends(8, 4, 2)
+                self.beam_exceptions.append({"denominator": 12, "ends": self.generate_beam_ends(12, 3, 4)})
+                self.beam_exceptions.append({"denominator": 8, "ends": self.generate_beam_ends(8, 4, 2)})
             elif numerator == 6:
-                self.beam_exceptions[16] = self.generate_beam_ends(16, 4, 6)
+                self.beam_exceptions.append({"denominator": 16, "ends": self.generate_beam_ends(16, 4, 6)})
             elif numerator == 9:
-                self.beam_exceptions[32] = self.generate_beam_ends(32, 8, 8)
+                self.beam_exceptions.append({"denominator": 32, "ends": self.generate_beam_ends(32, 8, 8)})
             elif numerator == 12:
-                self.beam_exceptions[32] = self.generate_beam_ends(32, 8, 12)
+                self.beam_exceptions.append({"denominator": 32, "ends": self.generate_beam_ends(32, 8, 12)})
 
     def TimeSignature(self, timeSign):
         self.get_beat_structure_from_time_sig(timeSign.numerator(), timeSign.fraction().denominator)
