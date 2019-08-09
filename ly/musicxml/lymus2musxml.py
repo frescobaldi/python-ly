@@ -395,6 +395,7 @@ class ParseSource():
             else:
                 if self.time_since_bar == self.time_sig:
                     self.time_since_bar = 0
+            self.end_beam(current=True)
             return True
         # Create regular measure if there has been enough time since prev bar
         if self.first_meas and self.partial != 0:
@@ -402,11 +403,13 @@ class ParseSource():
                 self.time_since_bar = 0
                 self.mediator.new_bar()
                 self.first_meas = False
+                self.end_beam(current=True)
                 return True
         else:
             if self.time_since_bar == self.time_sig:
                 self.time_since_bar = 0
                 self.mediator.new_bar()
+                self.end_beam(current=True)
                 return True
         return False
 
@@ -456,6 +459,22 @@ class ParseSource():
         if len(self.tuplet) != 0:
             obj.duration = (Fraction(self.tuplet[0]["length"] / self.tuplet[0]["fraction"][0]), obj.duration[1])
 
+    def end_beam(self, current=False):
+        """ Ends an ongoing beam (prev_note if current is False, current_note otherwise) """
+        if current:
+            if hasattr(self.mediator.current_note, "beam"):
+                if self.mediator.current_note.beam == "continue":
+                    self.mediator.current_note.set_beam("end")
+                elif self.mediator.current_note.beam == "begin":
+                    self.mediator.current_note.set_beam(False)
+        elif hasattr(self.mediator.prev_note, "beam"):
+            if self.mediator.prev_note.beam == "continue":
+                self.mediator.prev_note.set_beam("end")
+            elif self.mediator.prev_note.beam == "begin":
+                self.mediator.prev_note.set_beam(False)
+        self.beam = None
+        self.shortest_length_in_beam = Fraction(1, 4)
+
     def note_ends_on_beam_end(self, time_after_note):
         """ Return True/False based on whether time_after_note is a beam end (exception or otherwise) """
         for exception in self.beam_exceptions:  # In order from greatest denominator to least
@@ -503,12 +522,7 @@ class ParseSource():
                     self.shortest_length_in_beam = Fraction(1, 4)
         # Quarter note or longer ends ongoing beam
         else:
-            if self.beam is not None:
-                if self.mediator.prev_note.beam == "continue":
-                    self.mediator.prev_note.set_beam("end")
-                elif self.mediator.prev_note.beam == "begin":
-                    self.mediator.prev_note.set_beam(False)
-                self.beam = None
+            self.end_beam()
 
     def Note(self, note):
         """ notename, e.g. c, cis, a bes ... """
@@ -619,21 +633,14 @@ class ParseSource():
         """ tie ~ """
         self.mediator.tie_to_next()
 
-    def end_beam_at_rest(self):
-        """ Ends an ongoing beam (used by skips and rests) """
-        if self.beam is not None:
-            self.mediator.current_note.set_beam('end')
-            self.beam = None
-            self.shortest_length_in_beam = Fraction(1, 4)
-
     def Rest(self, rest):
         r""" rest, r or R. Note: NOT by command, i.e. \rest """
         self.adjust_tuplet_length(rest)
         if rest.token == 'R':
             self.scale = 'R'
-        self.end_beam_at_rest()
         self.mediator.new_rest(rest)
         self.update_time_and_check(rest)
+        self.end_beam()
 
     def Skip(self, skip):
         r""" invisible rest/spacer rest (s or command \skip)"""
@@ -643,7 +650,6 @@ class ParseSource():
         elif self.alt_mode == "chord":
             self.total_time += skip.length()
         else:
-            self.end_beam_at_rest()
             self.break_skip_at_barline(skip)
 
     def place_skip(self, length):
@@ -651,11 +657,13 @@ class ParseSource():
         if length != 0:
             self.mediator.current_is_rest = True
             self.mediator.clear_chord()
+            self.mediator.prev_note = self.mediator.current_note
             self.mediator.current_note = xml_objs.BarRest((length, Fraction(1, 1)), self.mediator.voice, skip=True)
             self.mediator.check_current_note(rest=True)
             self.total_time += length
             self.time_since_bar += length
             self.check_for_barline()
+            self.end_beam()
 
     def break_skip_at_barline(self, skip):
         r"""
@@ -731,17 +739,12 @@ class ParseSource():
         if beam.token == "[":
             self.mediator.current_note.set_beam("begin")
             if self.beam == "Normal":
-                if self.mediator.prev_note is not None:
-                    if self.mediator.prev_note.beam == "continue":
-                        self.mediator.prev_note.set_beam("end")
-                    elif self.mediator.prev_note.beam == "begin":
-                        self.mediator.prev_note.set_beam(False)
+                self.end_beam()
             elif self.beam == "Manual":  # Should never be True
                 self.mediator.current_note.set_beam("continue")
                 print("Warning: Multiple beam starts in a row without a beam end!")
             self.beam = "Manual"
             self.prev_beam_type = "Manual"
-            self.shortest_length_in_beam = Fraction(1, 4)
         elif beam.token == "]":
             if self.beam == "Manual":
                 self.mediator.current_note.set_beam("end")
@@ -916,14 +919,8 @@ class ParseSource():
                 self.tupl_span = False
         elif command.token == '\\noBeam':
             if self.prev_beam_type == "Normal":  # noBeam does not apply to [] beams
-                if self.mediator.prev_note is not None:
-                    if self.mediator.prev_note.beam == 'continue':
-                        self.mediator.prev_note.set_beam('end')
-                    elif self.mediator.prev_note.beam == 'begin':
-                        self.mediator.prev_note.set_beam(False)
+                self.end_beam()
                 self.mediator.current_note.set_beam(False)
-                self.beam = None
-                self.shortest_length_in_beam = Fraction(1, 4)
         elif command.token == '\\autoBeamOn':
             self.auto_beam = True
         elif command.token == '\\autoBeamOff':
