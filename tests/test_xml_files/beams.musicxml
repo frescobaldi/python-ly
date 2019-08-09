@@ -5,7 +5,7 @@
   <identification>
     <encoding>
       <software>python-ly 0.9.5</software>
-      <encoding-date>2019-08-08</encoding-date>
+      <encoding-date>2019-08-09</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -757,27 +757,19 @@
         <duration>2</duration>
         <voice>1</voice>
         <type>16th</type>
-        <beam number="1">continue</beam>
-      </note>
-      <note>
-        <pitch>
-          <step>G</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>2</duration>
-        <voice>1</voice>
-        <type>16th</type>
-        <beam number="1">continue</beam>
-      </note>
-      <note>
-        <pitch>
-          <step>G</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>2</duration>
-        <voice>1</voice>
-        <type>16th</type>
         <beam number="1">end</beam>
+      </note>
+      <forward>
+        <duration>2</duration>
+      </forward>
+      <note>
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>16th</type>
       </note>
       <note>
         <pitch>

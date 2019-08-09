@@ -622,7 +622,7 @@ class ParseSource():
     def end_beam_at_rest(self):
         """ Ends an ongoing beam (used by skips and rests) """
         if self.beam is not None:
-            self.mediator.prev_note.set_beam('end')
+            self.mediator.current_note.set_beam('end')
             self.beam = None
             self.shortest_length_in_beam = Fraction(1, 4)
 
@@ -631,9 +631,9 @@ class ParseSource():
         self.adjust_tuplet_length(rest)
         if rest.token == 'R':
             self.scale = 'R'
+        self.end_beam_at_rest()
         self.mediator.new_rest(rest)
         self.update_time_and_check(rest)
-        self.end_beam_at_rest()
 
     def Skip(self, skip):
         r""" invisible rest/spacer rest (s or command \skip)"""
@@ -643,40 +643,54 @@ class ParseSource():
         elif self.alt_mode == "chord":
             self.total_time += skip.length()
         else:
-            if not self.break_skip_at_barline(skip):
-                self.mediator.new_rest(skip)
-                self.update_time_and_check(skip)
-        self.end_beam_at_rest()
+            self.end_beam_at_rest()
+            self.break_skip_at_barline(skip)
+
+    def place_skip(self, length):
+        """ Manually place a skip of specified length, updating relevant information """
+        if length != 0:
+            self.mediator.current_is_rest = True
+            self.mediator.clear_chord()
+            self.mediator.current_note = xml_objs.BarRest((length, Fraction(1, 1)), self.mediator.voice, skip=True)
+            self.mediator.check_current_note(rest=True)
+            self.total_time += length
+            self.time_since_bar += length
+            self.check_for_barline()
 
     def break_skip_at_barline(self, skip):
         r"""
-        When a skip is longer than one measure, break skip into measure length pieces
-        NOTES: This only works with barlines at ends of complete measures (not \bar)
+        When a skip goes over any measure breaks (\bar, regular bar, pickup bar), break skip into measure length pieces
+        Handle any remaining skip length after last break
         """
-        is_split = False
-        length = skip.length()
-        if self.first_meas and self.partial != 0 and length > self.partial:
-            self.mediator.current_is_rest = True
-            self.mediator.clear_chord()
-            self.mediator.current_note = xml_objs.BarRest((self.partial, Fraction(1, 1)), self.mediator.voice, skip=True)
-            self.mediator.check_current_note(rest=True)
-            self.total_time += self.partial
-            self.time_since_bar += self.partial
-            self.check_for_barline()
-            length -= self.partial
-            is_split = True
-        if length > self.time_sig or is_split and length == self.time_sig:
-            for i in range(length // self.time_sig):
-                self.mediator.current_is_rest = True
-                self.mediator.clear_chord()
-                self.mediator.current_note = xml_objs.BarRest((self.time_sig, Fraction(1, 1)), self.mediator.voice, skip=True)
-                self.mediator.check_current_note(rest=True)
-                self.total_time += self.time_sig
-                self.time_since_bar += self.time_sig
-                self.check_for_barline()
-            length -= (length // self.time_sig) * self.time_sig
-            is_split = True
-        return is_split
+        break_locations = []
+        remaining_length = skip.length()
+        partial = 0
+        prev_break = 0
+        # Get break locations from \bar positions
+        for bar_location in self.barline_locations:
+            if bar_location > self.total_time and bar_location <= self.total_time + remaining_length:
+                break_locations.append(bar_location - self.total_time)
+        # Get break location from pickup measure if needed
+        if self.first_meas and self.partial != 0 and remaining_length >= self.partial:
+            break_locations.append(self.partial)
+            remaining_length -= self.partial
+            partial = self.partial
+        # Get break locations from full measure lengths
+        if remaining_length >= self.time_sig:
+            for i in range(remaining_length // self.time_sig):
+                break_locations.append(partial + self.time_sig * (i + 1))
+        break_locations.sort()
+        # Place skips for each (unique) break location
+        for break_loc in break_locations:
+            skip_length = break_loc - prev_break
+            self.place_skip(skip_length)
+            prev_break = break_loc
+        # Place a skip for any remaining length after the last break
+        if len(break_locations) > 0:
+            final_skip_length = skip.length() - break_locations[-1]
+        else:
+            final_skip_length = skip.length()  # Skip was not broken, so entire skip still needs placement
+        self.place_skip(final_skip_length)
 
     def Scaler(self, scaler):
         r"""
