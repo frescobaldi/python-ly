@@ -460,20 +460,21 @@ class ParseSource():
             obj.duration = (Fraction(self.tuplet[0]["length"] / self.tuplet[0]["fraction"][0]), obj.duration[1])
 
     def end_beam(self, current=False):
-        """ Ends an ongoing beam (prev_note if current is False, current_note otherwise) """
-        if current:
-            if hasattr(self.mediator.current_note, "beam"):
-                if self.mediator.current_note.beam == "continue":
-                    self.mediator.current_note.set_beam("end")
-                elif self.mediator.current_note.beam == "begin":
-                    self.mediator.current_note.set_beam(False)
-        elif hasattr(self.mediator.prev_note, "beam"):
-            if self.mediator.prev_note.beam == "continue":
-                self.mediator.prev_note.set_beam("end")
-            elif self.mediator.prev_note.beam == "begin":
-                self.mediator.prev_note.set_beam(False)
-        self.beam = None
-        self.shortest_length_in_beam = Fraction(1, 4)
+        """ Ends an ongoing beam not started with [ (prev_note if current is False, current_note otherwise) """
+        if self.prev_beam_type != "Manual":
+            if current:
+                if hasattr(self.mediator.current_note, "beam"):
+                    if self.mediator.current_note.beam == "continue":
+                        self.mediator.current_note.set_beam("end")
+                    elif self.mediator.current_note.beam == "begin":
+                        self.mediator.current_note.set_beam(False)
+            elif hasattr(self.mediator.prev_note, "beam"):
+                if self.mediator.prev_note.beam == "continue":
+                    self.mediator.prev_note.set_beam("end")
+                elif self.mediator.prev_note.beam == "begin":
+                    self.mediator.prev_note.set_beam(False)
+            self.beam = None
+            self.shortest_length_in_beam = Fraction(1, 4)
 
     def note_ends_on_beam_end(self, time_after_note):
         """ Return True/False based on whether time_after_note is a beam end (exception or otherwise) """
@@ -738,9 +739,8 @@ class ParseSource():
         """ Beam, "[" = begin, "]" = end. """
         if beam.token == "[":
             self.mediator.current_note.set_beam("begin")
-            if self.beam == "Normal":
-                self.end_beam()
-            elif self.beam == "Manual":  # Should never be True
+            self.end_beam()
+            if self.beam == "Manual":  # Should never be True
                 self.mediator.current_note.set_beam("continue")
                 print("Warning: Multiple beam starts in a row without a beam end!")
             self.beam = "Manual"
@@ -918,8 +918,8 @@ class ParseSource():
                 self.mediator.unset_tuplspan_dur()
                 self.tupl_span = False
         elif command.token == '\\noBeam':
+            self.end_beam()
             if self.prev_beam_type == "Normal":  # noBeam does not apply to [] beams
-                self.end_beam()
                 self.mediator.current_note.set_beam(False)
         elif command.token == '\\autoBeamOn':
             self.auto_beam = True
