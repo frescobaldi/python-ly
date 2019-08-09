@@ -21,7 +21,11 @@ Soprano = \relative c'' {
   g16 g g g g g s g g[ g] \noBeam g g r g g g \noBeam
   g16 g \autoBeamOff g g g g[ g] g g g[ \autoBeamOn g] g g8 g
   \set Timing.baseMoment = #(ly:make-moment 1 1) \set Timing.beatStructure = #'(1)
-  g8 \autoBeamOff g r g g g g g
+  g8 \autoBeamOff g r g g g g g \autoBeamOn
+  \set Timing.baseMoment = #(ly:make-moment 1 4) \set Timing.beatStructure = #'(2 3)
+  g8 g g g g g g g
+  \set Timing.beatStructure = #'(2 1)
+  g8 g g g g g g g
 }
 
 \score
