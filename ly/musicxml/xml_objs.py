@@ -583,12 +583,13 @@ class Bar():
 class BarMus():
     """ Common class for notes and rests. """
 
-    def __init__(self, duration, voice=1):
+    def __init__(self, duration, voice=1, voice_name=None):
         self.duration = duration
         self.type = None
         self.tuplet = []
         self.dot = 0
         self.voice = voice
+        self.voice_name = voice_name
         self.staff = 0
         self.chord = False
         self.other_notation = None
@@ -713,8 +714,8 @@ class Slur():
 class BarNote(BarMus):
     """ object to keep track of note parameters """
 
-    def __init__(self, pitch_note, alter, accidental, duration, voice=1):
-        BarMus.__init__(self, duration, voice)
+    def __init__(self, pitch_note, alter, accidental, duration, voice=1, voice_name=None):
+        BarMus.__init__(self, duration, voice, voice_name)
         self.base_note = pitch_note.upper()
         self.alter = alter
         self.octave = None
@@ -794,8 +795,8 @@ class BarNote(BarMus):
 class Unpitched(BarNote):
     """Object to keep track of unpitched notes."""
 
-    def __init__(self, duration, step=None, voice=1):
-        BarNote.__init__(self, 'B', 0, "", duration, voice=1)
+    def __init__(self, duration, step=None, voice=1, voice_name=None):
+        BarNote.__init__(self, 'B', 0, "", duration, voice, voice_name)
         self.octave = 4
         if step:
             self.base_note = step.upper()
@@ -804,8 +805,8 @@ class Unpitched(BarNote):
 class BarRest(BarMus):
     """ object to keep track of different rests and skips """
 
-    def __init__(self, duration, voice=1, show_type=True, skip=False, pos=0):
-        BarMus.__init__(self, duration, voice)
+    def __init__(self, duration, voice=1, voice_name=None, show_type=True, skip=False, pos=0):
+        BarMus.__init__(self, duration, voice, voice_name)
         self.show_type = show_type
         self.type = None
         self.skip = skip

@@ -80,6 +80,7 @@ class ParseSource():
         self.voice_sep = False
         self.voice_sep_start_total_time = 0
         self.voice_sep_start_time_since_bar = 0
+        self.voice_sep_start_voice_name = None
         self.voice_sep_length = 0
         self.voice_sep_first_meas = False
         self.sims_and_seqs = []
@@ -218,6 +219,8 @@ class ParseSource():
                 self.voice_sep_start_total_time = self.total_time
                 self.voice_sep_start_time_since_bar = self.time_since_bar
                 self.voice_sep_first_meas = self.first_meas
+                self.voice_sep_start_voice_name = self.mediator.voice_name
+                self.mediator.voice_name = None
             else:
                 self.mediator.new_section('simultan')
                 self.sims_and_seqs.append('sim')
@@ -267,6 +270,7 @@ class ParseSource():
             self.time_since_bar = 0
             self.sims_and_seqs.append('voice')
             if context_id:
+                self.mediator.voice_name = context_id
                 self.mediator.new_section(context_id)
             else:
                 self.mediator.new_section('voice')
@@ -283,11 +287,13 @@ class ParseSource():
     def VoiceSeparator(self, voice_sep):
         self.mediator.new_snippet('sim')
         self.mediator.set_voicenr(add=True)
-        if self.voice_sep:
+        if self.voice_sep and self.get_next_node(voice_sep).token != "\\\\":
             # Reset time info
             self.total_time = self.total_time - self.voice_sep_length
             self.time_since_bar = self.voice_sep_start_time_since_bar
             self.first_meas = self.voice_sep_first_meas
+        else:
+            self.mediator.voices_skipped += 1
 
     def Change(self, change):
         r""" A \change music expression. Changes the staff number. """
@@ -659,7 +665,7 @@ class ParseSource():
             self.mediator.current_is_rest = True
             self.mediator.clear_chord()
             self.mediator.prev_note = self.mediator.current_note
-            self.mediator.current_note = xml_objs.BarRest((length, Fraction(1, 1)), self.mediator.voice, skip=True)
+            self.mediator.current_note = xml_objs.BarRest((length, Fraction(1, 1)), voice=self.mediator.voice, voice_name=self.mediator.voice_name, skip=True)
             self.mediator.check_current_note(rest=True)
             self.total_time += length
             self.time_since_bar += length
@@ -1060,6 +1066,9 @@ class ParseSource():
                 self.voice_sep = False
                 self.voice_sep_length = 0
                 self.check_for_barline(end.node)
+                self.mediator.voices_skipped = 0
+                self.mediator.voice_name = self.voice_sep_start_voice_name
+                self.voice_sep_start_voice_name = None
             elif not self.piano_staff:
                 self.mediator.check_simultan()
                 if self.sims_and_seqs:

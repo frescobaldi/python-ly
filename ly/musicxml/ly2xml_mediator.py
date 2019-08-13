@@ -60,6 +60,8 @@ class Mediator():
         self.dots = 0
         self.tied = False
         self.voice = 1
+        self.voices_skipped = 0
+        self.voice_name = None
         self.staff = 0
         self.part = None
         self.group = None
@@ -255,7 +257,7 @@ class Mediator():
         sect_len = len(self.sections)
         if sect_len > 2:
             if self.voice > 1:
-                for n in range(self.store_voicenr, self.voice):
+                for n in range(self.store_voicenr, self.voice - self.voices_skipped):
                     self.check_voices()
                 if isinstance(self.sections[-1], xml_objs.Snippet):
                     self.add_snippet(self.sections[-1].name)
@@ -448,7 +450,7 @@ class Mediator():
     def create_unpitched(self, unpitched):
         """Create a xml_objs.Unpitched from ly.music.items.Unpitched."""
         dura = unpitched.duration
-        return xml_objs.Unpitched(dura)
+        return xml_objs.Unpitched(dura, voice=self.voice, voice_name=self.voice_name)
 
     def create_barnote_from_note(self, note):
         """Create a xml_objs.BarNote from ly.music.items.Note."""
@@ -461,7 +463,7 @@ class Mediator():
         if acc is None and self.is_acc_needed(p, alt):  # check if a normal accidental should be printed
             acc = 'normal'
         dura = note.duration
-        return xml_objs.BarNote(p, alt, acc, dura, self.voice)
+        return xml_objs.BarNote(p, alt, acc, dura, self.voice, self.voice_name)
 
     def copy_barnote_basics(self, bar_note):
         """Create a copy of a xml_objs.BarNote."""
@@ -470,7 +472,8 @@ class Mediator():
         acc = bar_note.accidental_token
         dura = bar_note.duration
         voc = bar_note.voice
-        copy = xml_objs.BarNote(p, alt, acc, dura, voc)
+        voc_name = bar_note.voice_name
+        copy = xml_objs.BarNote(p, alt, acc, dura, voc, voc_name)
         copy.octave = bar_note.octave
         copy.chord = bar_note.chord
         return copy
@@ -604,22 +607,23 @@ class Mediator():
         dur = rest.duration
         if rtype == 'r':
             self.prev_note = self.current_note
-            self.current_note = xml_objs.BarRest(dur, self.voice)
+            self.current_note = xml_objs.BarRest(dur, self.voice, self.voice_name)
         elif rtype == 'R':
             self.prev_note = self.current_note
-            self.current_note = xml_objs.BarRest(dur, self.voice, show_type=False)
+            self.current_note = xml_objs.BarRest(dur, self.voice, self.voice_name, show_type=False)
         elif rtype == 's' or rtype == '\\skip' or rtype == '_':
             self.prev_note = self.current_note
-            self.current_note = xml_objs.BarRest(dur, self.voice, skip=True)
+            self.current_note = xml_objs.BarRest(dur, self.voice, self.voice_name, skip=True)
         self.check_current_note(rest=True)
 
     def note2rest(self):
         """Note used as rest position transformed to rest."""
         dur = self.current_note.duration
-        voice = self.current_note.voice
+        voc = self.current_note.voice
+        voc_name = self.current_note.voice_name
         pos = [self.current_note.base_note, self.current_note.octave]
         self.prev_note = self.current_note
-        self.current_note = xml_objs.BarRest(dur, voice, pos=pos)
+        self.current_note = xml_objs.BarRest(dur, voice=voc, voice_name=voc_name, pos=pos)
         self.check_duration(rest=True)
         self.bar.obj_list.pop()
         self.bar.add(self.current_note)
@@ -628,11 +632,12 @@ class Mediator():
         """ create multiple whole bar rests """
         dur = self.current_note.duration
         voc = self.current_note.voice
+        voc_name = self.current_note.voice_name
         st = self.current_note.show_type
         sk = self.current_note.skip
         for i in range(1, int(multp)):
             self.new_bar()
-            rest_copy = xml_objs.BarRest(dur, voice=voc, show_type=st, skip=sk)
+            rest_copy = xml_objs.BarRest(dur, voice=voc, voice_name=voc_name, show_type=st, skip=sk)
             self.add_to_bar(rest_copy)
 
     def change_to_tuplet(self, tfraction, ttype, nr, length=None):
