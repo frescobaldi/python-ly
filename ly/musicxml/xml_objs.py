@@ -326,92 +326,99 @@ class ScoreSection():
 
     def merge_lyrics(self, lyrics):
         """Merge in lyrics in music section."""
-        first_voice = []   # Stores the notes in the first voice
-        second_voice = []  # Stores the notes in the second voice
-        first_idx = 0      # Stores the current index in the first_voice list
-        second_idx = 0     # Stores the current index in the second_voice list
-        time = 0           # Stores the current time in the music
-        lyrics_idx = 0     # Stores the current index in the lyrics list
-        slurOn = True      # Indicates whether subsequent slurred notes should be skipped
-        slur = False       # Indicates whether the current note is slurred
-        tie = False        # Indicates whether the current note is tied
-        voice = 1          # Indicates which voice the notes should be assigned to
-        prev_time = -1     # Stores the start time of the previously placed lyric
-        # Create separate lists of first and second voice notes (Does not currently support more voices in first staff)
+        current_voice = lyrics.voice_id  # Indicates which voice the notes should be assigned to
+        voices = {}                      # Stores the notes in each voice (name (ex: "SopranoVoice") or number (ex: "3"))
+        indices = {}                     # Stores the current index in each voice's note list
+        objects = {}                     # Stores the current object (containing the note and time) in each voice
+        time = 0                         # Stores the current time in the music
+        lyrics_idx = 0                   # Stores the current index in the lyrics list
+        ignore_slur = False              # Indicates whether subsequent slurred/tied notes should have lyrics (no if False)
+        slurs = {}                       # Indicates whether the current note is slurred for each voice {"voice": bool}
+        ties = {}                        # Indicates whether the current note is tied for each voice {"voice": bool}
+        prev_time = -1                   # Stores the start time of the previously placed lyric
+        note_used = True                 # Indicates whether the current note has had a lyric (or skip) assigned
+        # Create dictionary of lists for each voice's notes
         for bar in self.barlist:
             for obj in bar.obj_list:
                 if isinstance(obj, BarMus) and not obj.chord:
-                    if obj.voice == 1:
-                        first_voice.append((obj, time))
-                    elif obj.voice == 2:
-                        second_voice.append((obj, time))
-                    else:
-                        print("Warning: Voice too high for lyric placement")
+                    if obj.voice_name is not None:  # Note is associated with a voice name
+                        if obj.voice_name not in voices:
+                            voices[obj.voice_name] = []
+                        voices[obj.voice_name].append({"note": obj, "time": time})
+                    else:  # Note is associated with a voice number (likely inside a voice separator, still a string like "3")
+                        if str(obj.voice) not in voices:
+                            voices[str(obj.voice)] = []
+                        voices[str(obj.voice)].append({"note": obj, "time": time})
                     time += obj.duration[0] * obj.duration[1]
                 elif isinstance(obj, BarBackup):
                     time -= obj.duration[0] * obj.duration[1]
+        # Initialize the needed keys for indices and objects
+        for voice in voices:
+            if voice not in indices:
+                indices[voice] = 0
+                objects[voice] = None
+                slurs[voice] = False
+                ties[voice] = False
         while(True):
-            # Update position in first and second voice lists (break if the necessary list (current voice) ends)
-            try:
-                while(not first_voice[first_idx][1] > prev_time):
-                    first_idx += 1
-                first_obj = first_voice[first_idx]
-            except IndexError:
-                first_obj = None
-            try:
-                while(not second_voice[second_idx][1] > prev_time):
-                    second_idx += 1
-                second_obj = second_voice[second_idx]
-            except IndexError:
-                second_obj = None
-            if voice == 1:
-                if first_obj is None:
+            # Update position and slur/tie status in all voice's note lists (break if the necessary list (current voice) ends)
+            if note_used:
+                for voice, notes in voices.items():
+                    try:
+                        while(not notes[indices[voice]]["time"] > prev_time):
+                            # Adjust the status of slurs and ties
+                            if isinstance(notes[indices[voice]]["note"], BarNote):
+                                # For loops cover the case where a note has multiple slur objects
+                                #    ex: the note `(a)` has an opening and closing slur, meaning slur should remain False
+                                for s in notes[indices[voice]]["note"].slur:
+                                    if not s.phrasing:  # Phrasing slurs don't affect lyric placement
+                                        slurs[voice] = not slurs[voice]
+                                for t in notes[indices[voice]]["note"].tie:
+                                    ties[voice] = not ties[voice]
+                            indices[voice] += 1
+                        # Store current note in voice
+                        objects[voice] = notes[indices[voice]]
+                    except IndexError:
+                        objects[voice] = None
+                # Choose needed note
+                obj = objects[current_voice]
+                if obj is None:
                     break
-                else:
-                    obj = first_obj
-            elif voice == 2:
-                if second_obj is None:
-                    break
-                else:
-                    obj = second_obj
-            prev_time = obj[1]
+                prev_time = obj["time"]
+                note_used = False
             # After finding the proper note, add the lyric and update status of voice, slurs, and ties
-            if isinstance(obj[0], BarNote):
-                if not (slur and slurOn) and not (tie and slurOn):
+            if isinstance(obj["note"], BarNote):
+                if ignore_slur or (not slurs[current_voice] and not ties[current_voice]):
+                    # Handles normal lyrics
                     try:
                         lyr = lyrics.barlist[lyrics_idx]
                     except IndexError:
                         break
-                    if lyr[0] is None:  # Handles case where a placeholder lyric is at the beginning to store slurOff, voiceTwo, etc.
-                        lyrics_idx += 1
-                        try:
-                            lyr = lyrics.barlist[lyrics_idx]
-                        except IndexError:
-                            break
-                    if lyr != 'skip':
-                        lyr[0] = lyr[0].replace('~', chr(0x203f))  # Turns ~ into undertie
-                        lyr[0] = lyr[0].replace('_', ' ')  # Ex: Hello_I -> Hello I (but on one note)
-                        obj[0].add_lyric(lyr)
+                    if lyr[-1] != "command":
+                        if lyr != 'skip':
+                            lyr[0] = lyr[0].replace('~', chr(0x203f))  # Turns ~ into undertie
+                            lyr[0] = lyr[0].replace('_', ' ')  # Ex: Hello_I -> Hello I (but on one note)
+                            obj["note"].add_lyric(lyr)
+                        note_used = True
+                    # Handles case where previous lyric is a command (ex: ["switchVoice", "Alto", "command"])
                     try:
                         prev_lyr = lyrics.barlist[lyrics_idx-1]
                     except IndexError:
                         prev_lyr = None
-                    if prev_lyr is not None:
-                        if "slurOff" in prev_lyr:
-                            slurOn = False
-                        elif "slurOn" in prev_lyr:
-                            slurOn = True
-                        if "voiceOne" in prev_lyr:
-                            voice = 1
-                        elif "voiceTwo" in prev_lyr:
-                            voice = 2
+                    if prev_lyr is not None and prev_lyr[-1] == "command":
+                        if "ignoreMelismata" == prev_lyr[0]:
+                            ignore_slur = prev_lyr[1]
+                        elif "switchVoice" == prev_lyr[0]:
+                            if prev_lyr[1] in voices:
+                                current_voice = prev_lyr[1]
+                            else:
+                                print("Warning: Voice", prev_lyr[1], "is not a valid voice for lyric assignment!")
+                        else:
+                            print("Warning: Unknown voice command!")
                     lyrics_idx += 1
-                # for loops cover the case where a note has multiple slur objects
-                #    for example: the note (a) has an opening and closing slur, meaning slur should remain False
-                for s in obj[0].slur:
-                    slur = not slur
-                for t in obj[0].tie:
-                    tie = not tie
+                else:
+                    note_used = True  # No lyric needed for slurred/tied note
+            else:
+                note_used = True  # No lyric needed for non-note objects
 
 
 class Snippet(ScoreSection):

@@ -872,6 +872,13 @@ class ParseSource():
             prev_end += self.base_moment * num
             self.beam_ends.append(prev_end)
 
+    def set_ignore_melismata(self, ignore):
+        """ Sends command within lyrics to ignore beams (True) or skip over them (False). """
+        if ignore:
+            self.mediator.new_lyrics_item(["ignoreMelismata", True, "command"])
+        else:
+            self.mediator.new_lyrics_item(["ignoreMelismata", False, "command"])
+
     def Set(self, cont_set):
         r"""A \set command."""
         if isinstance(cont_set.value(), ly.music.items.Scheme):
@@ -896,6 +903,19 @@ class ParseSource():
         # TODO: Add functionality for setting custom beam exceptions (currently just clears beam_exceptions, as this is common)
         elif cont_set.property() == 'beamExceptions':
             self.beam_exceptions = {}
+        elif cont_set.property() == 'associatedVoice':
+            self.mediator.new_lyrics_item(["switchVoice", cont_set.value().value(), "command"])
+        elif cont_set.property() == 'ignoreMelismata':
+            self.set_ignore_melismata(cont_set.value().get_bool())
+        else:
+            print("Warning: Set", cont_set.property(), "failed!")
+
+    def Unset(self, cont_unset):
+        r""" A \unset command. """
+        if cont_unset.property() == 'ignoreMelismata':
+            self.mediator.new_lyrics_item(["ignoreMelismata", False, "command"])
+        else:
+            print("Warning: Unset", cont_unset.property(), "failed!")
 
     def Command(self, command):
         r""" \bar, \rest etc """

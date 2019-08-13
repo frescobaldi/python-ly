@@ -894,28 +894,12 @@ class Mediator():
                 self.lyric_syll = True
         elif item == '__':
             self.lyric.append("extend")
-        elif item == '\\slurOff':
-            if not self.lyric:
-                self.insert_into.barlist.append([None, "slurOff"])
-            else:
-                self.lyric.append("slurOff")
-        elif item == '\\slurOn':
-            if not self.lyric:
-                self.insert_into.barlist.append([None, "slurOn"])
-            else:
-                self.lyric.append("slurOn")
-        elif item in ['\\switchSop', '\\switchOne', '\\switchMel']:
-            if not self.lyric:
-                self.insert_into.barlist.append([None, "voiceOne"])
-            else:
-                self.lyric.append("voiceOne")
-        elif item in ['\\switchAlto', '\\switchTwo']:
-            if not self.lyric:
-                self.insert_into.barlist.append([None, "voiceTwo"])
-            else:
-                self.lyric.append("voiceTwo")
         elif item == '\\skip' or item == '_':
             self.insert_into.barlist.append("skip")
+        elif isinstance(item, list) and item[-1] == "command":
+            self.insert_into.barlist.append(item)  # Item should be of form ["commandName", args, "command"]
+        else:
+            print("Warning: Lyric item", str(item), "not implemented!")
 
     def duration_from_tokens(self, tokens):
         """Calculate dots and multibar rests from tokens."""
