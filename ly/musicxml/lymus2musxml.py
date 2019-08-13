@@ -463,26 +463,22 @@ class ParseSource():
         """ Ends an ongoing beam not started with [ (prev_note if current is False, current_note otherwise) """
         if self.prev_beam_type != "Manual":
             if current:
-                if hasattr(self.mediator.current_note, "beam"):
-                    if self.mediator.current_note.beam == "continue":
-                        self.mediator.current_note.set_beam("end")
-                    elif self.mediator.current_note.beam == "begin":
-                        self.mediator.current_note.set_beam(False)
-            elif hasattr(self.mediator.prev_note, "beam"):
-                if self.mediator.prev_note.beam == "continue":
-                    self.mediator.prev_note.set_beam("end")
-                elif self.mediator.prev_note.beam == "begin":
-                    self.mediator.prev_note.set_beam(False)
+                note = self.mediator.current_note
+            else:
+                note = self.mediator.prev_note
+            if hasattr(note, "beam"):
+                if note.beam == "continue":
+                    note.set_beam("end")
+                elif note.beam == "begin":
+                    note.set_beam(False)
             self.beam = None
             self.shortest_length_in_beam = Fraction(1, 4)
 
     def note_ends_on_beam_end(self, time_after_note):
         """ Return True/False based on whether time_after_note is a beam end (exception or otherwise) """
-        for exception in self.beam_exceptions:  # In order from greatest denominator to least
-            if Fraction(1, exception['denominator']) >= self.shortest_length_in_beam:
-                if time_after_note in exception['ends']:
-                    return True
-                return False
+        for exception in self.beam_exceptions:  # In order from least to greatest fractions
+            if exception['fraction'] >= self.shortest_length_in_beam:
+                return time_after_note in exception['ends']
         return time_after_note in self.beam_ends
 
     def update_beams(self, note):
@@ -742,7 +738,7 @@ class ParseSource():
             self.end_beam()
             if self.beam == "Manual":  # Should never be True
                 self.mediator.current_note.set_beam("continue")
-                print("Warning: Multiple beam starts in a row without a beam end!")
+                print("Warning: Beam start does not have corresponding beam end!")
             self.beam = "Manual"
             self.prev_beam_type = "Manual"
         elif beam.token == "]":
@@ -750,7 +746,7 @@ class ParseSource():
                 self.mediator.current_note.set_beam("end")
                 self.beam = None
             else:  # Should never be True
-                print("Warning: Multiple beam ends in a row without a beam start!")
+                print("Warning: Beam end does not have corresponding beam start!")
 
     def Partial(self, partial):
         r""" \partial # """
@@ -783,56 +779,65 @@ class ParseSource():
     def Grace(self, grace):
         self.grace_seq = True
 
-    def generate_beam_ends(self, denominator, count_by, num_ends):
-        """ Given a denominator and a regular pattern of beats to count by, return an array of the intended beam end locations """
+    def generate_beam_ends(self, fraction, beat_pattern):
+        """ Given a denominator and a pattern of beats to count by (array), return an array of the intended beam end locations """
         beam_ends = []
-        fraction = Fraction(1, denominator)
-        for i in range(1, num_ends + 1):
-            beam_ends.append(i * count_by * fraction)
+        prev_beam_end = 0
+        for beat in beat_pattern:
+            beam_end = prev_beam_end + beat * fraction
+            beam_ends.append(beam_end)
+            prev_beam_end = beam_end
         return beam_ends
 
     def get_beat_structure_from_time_sig(self, numerator, denominator):
         """
         Get the beat structure and exceptions from a given key signature (numerator and denominator)
+
         Rules derived from Lilypond's `/scm/time-signature-settings.scm` see http://lilypond.org/doc/v2.19/Documentation/notation/beams#setting-automatic-beam-behavior
         """
-        # Generate default beam_ends (an array of beam end locations (fractions))
+        # Generate beam_ends (default) (an array of beam end locations (fractions))
         self.beam_ends = []
-        if numerator > 3 and numerator % 3 == 0:
-            self.beam_ends = self.generate_beam_ends(denominator, 3, numerator // 3)
-        elif denominator == 8 and numerator == 4:
-            self.beam_ends = [Fraction(1, 4), Fraction(1, 2)]
-        elif denominator == 8 and numerator == 5:
-            self.beam_ends = [Fraction(3, 8), Fraction(5, 8)]
-        elif denominator == 8 and numerator == 8:
-            self.beam_ends = [Fraction(3, 8), Fraction(3, 4), Fraction(1, 1)]
-        else:
-            self.beam_ends = self.generate_beam_ends(denominator, 1, numerator)
-        # Generate beam_exceptions (an array of dictionaries containing a lowest denominator and its associated beam ends array)
+        fraction = Fraction(1, denominator)
+        beat_pattern = []
+        if numerator > 3 and numerator % 3 == 0:   # numerators like 6, 9, 12,...
+            for i in range(numerator // 3):
+                beat_pattern.append(3)
+            self.beam_ends = self.generate_beam_ends(Fraction(1, denominator), beat_pattern)
+        elif numerator == 4 and denominator == 8:  # 4/8
+            beat_pattern = [2, 2]
+        elif numerator == 5 and denominator == 8:  # 5/8
+            beat_pattern = [3, 2]
+        elif numerator == 8 and denominator == 8:  # 8/8
+            beat_pattern = [3, 3, 2]
+        else:                                      # all other time signatures
+            for i in range(numerator):
+                beat_pattern.append(1)
+        self.beam_ends = self.generate_beam_ends(fraction, beat_pattern)
+        # Generate beam_exceptions (an array of dictionaries containing a lowest fraction and its associated beam ends array) sorted by fraction
         self.beam_exceptions = []
-        if denominator == 8:
-            if numerator == 3:
-                self.beam_exceptions.append({"denominator": 8, "ends": self.generate_beam_ends(8, 3, 1)})
-        elif denominator == 2:
-            if numerator == 2:
-                self.beam_exceptions.append({"denominator": 32, "ends": self.generate_beam_ends(32, 8, 4)})
-            elif numerator == 3:
-                self.beam_exceptions.append({"denominator": 32, "ends": self.generate_beam_ends(32, 8, 6)})
-            elif numerator == 4:
-                self.beam_exceptions.append({"denominator": 16, "ends": self.generate_beam_ends(16, 4, 8)})
-        elif denominator == 4:
-            if numerator == 3:
-                self.beam_exceptions.append({"denominator": 12, "ends": self.generate_beam_ends(12, 3, 3)})
-                self.beam_exceptions.append({"denominator": 8, "ends": self.generate_beam_ends(8, 6, 1)})
-            elif numerator == 4:
-                self.beam_exceptions.append({"denominator": 12, "ends": self.generate_beam_ends(12, 3, 4)})
-                self.beam_exceptions.append({"denominator": 8, "ends": self.generate_beam_ends(8, 4, 2)})
-            elif numerator == 6:
-                self.beam_exceptions.append({"denominator": 16, "ends": self.generate_beam_ends(16, 4, 6)})
-            elif numerator == 9:
-                self.beam_exceptions.append({"denominator": 32, "ends": self.generate_beam_ends(32, 8, 8)})
-            elif numerator == 12:
-                self.beam_exceptions.append({"denominator": 32, "ends": self.generate_beam_ends(32, 8, 12)})
+        exception_rules = {}
+        if numerator == 2 and denominator == 2:     # 2/2
+            exception_rules[Fraction(1, 32)] = [8, 8, 8, 8]
+        elif numerator == 3 and denominator == 2:   # 3/2
+            exception_rules[Fraction(1, 32)] = [8, 8, 8, 8, 8, 8]
+        elif numerator == 3 and denominator == 4:   # 3/4
+            exception_rules[Fraction(1, 8)] = [6]
+            exception_rules[Fraction(1, 12)] = [3, 3, 3]
+        elif numerator == 3 and denominator == 8:   # 3/8
+            exception_rules[Fraction(1, 8)] = [3]
+        elif numerator == 4 and denominator == 2:   # 4/2
+            exception_rules[Fraction(1, 16)] = [4, 4, 4, 4, 4, 4, 4, 4]
+        elif numerator == 4 and denominator == 4:   # 4/4
+            exception_rules[Fraction(1, 8)] = [4, 4]
+            exception_rules[Fraction(1, 12)] = [3, 3, 3, 3]
+        elif numerator == 6 and denominator == 4:   # 6/4
+            exception_rules[Fraction(1, 16)] = [4, 4, 4, 4, 4, 4]
+        elif numerator == 9 and denominator == 4:   # 9/4
+            exception_rules[Fraction(1, 32)] = [8, 8, 8, 8, 8, 8, 8, 8]
+        elif numerator == 12 and denominator == 4:  # 12/4
+            exception_rules[Fraction(1, 32)] = [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]
+        for fract in sorted(exception_rules.keys()):
+            self.beam_exceptions.append({"fraction": fract, "ends": self.generate_beam_ends(fract, exception_rules[fract])})
 
     def TimeSignature(self, timeSign):
         self.get_beat_structure_from_time_sig(timeSign.numerator(), timeSign.fraction().denominator)
@@ -859,13 +864,6 @@ class ParseSource():
     def set_base_moment(self, numer_denom):
         self.base_moment = Fraction(numer_denom[0], numer_denom[1])
 
-    def set_beat_structure(self, beat_list):
-        self.beam_ends = []
-        prev_end = 0
-        for num in beat_list:
-            prev_end += self.base_moment * num
-            self.beam_ends.append(prev_end)
-
     def Set(self, cont_set):
         r"""A \set command."""
         if isinstance(cont_set.value(), ly.music.items.Scheme):
@@ -886,10 +884,10 @@ class ParseSource():
         if cont_set.property() == 'baseMoment':
             self.set_base_moment(cont_set.value().get_list_ints())
         elif cont_set.property() == 'beatStructure':
-            self.set_beat_structure(cont_set.value().get_list_ints())
+            self.beam_ends = self.generate_beam_ends(self.base_moment, cont_set.value().get_list_ints())
         # TODO: Add functionality for setting custom beam exceptions (currently just clears beam_exceptions, as this is common)
         elif cont_set.property() == 'beamExceptions':
-            self.beam_exceptions = {}
+            self.beam_exceptions = []
 
     def Command(self, command):
         r""" \bar, \rest etc """
