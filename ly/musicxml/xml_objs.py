@@ -701,9 +701,10 @@ class Tuplet():
 class Slur():
     """Stores information about slur."""
 
-    def __init__(self, nr, slurtype):
+    def __init__(self, nr, slurtype, phrasing):
         self.nr = nr
         self.slurtype = slurtype
+        self.phrasing = phrasing
 
 
 ##
@@ -748,8 +749,8 @@ class BarNote(BarMus):
     def set_tie(self, tie_type):
         self.tie.append(tie_type)
 
-    def set_slur(self, nr, slur_type):
-        self.slur.append(Slur(nr, slur_type))
+    def set_slur(self, nr, slur_type, phrasing):
+        self.slur.append(Slur(nr, slur_type, phrasing))
 
     def add_articulation(self, art_name):
         self.artic.append(art_name)

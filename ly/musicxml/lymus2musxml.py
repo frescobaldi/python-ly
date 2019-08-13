@@ -777,9 +777,9 @@ class ParseSource():
         if phrslur.token == r'\(':
             self.slurcount += 1
             self.phrslurnr = self.slurcount
-            self.mediator.set_slur(self.phrslurnr, "start")
+            self.mediator.set_slur(self.phrslurnr, "start", True)
         elif phrslur.token == r'\)':
-            self.mediator.set_slur(self.phrslurnr, "stop")
+            self.mediator.set_slur(self.phrslurnr, "stop", True)
             self.slurcount -= 1
 
     def Dynamic(self, dynamic):
