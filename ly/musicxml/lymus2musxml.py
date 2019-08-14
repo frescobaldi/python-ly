@@ -80,6 +80,7 @@ class ParseSource():
         self.voice_sep = False
         self.voice_sep_start_total_time = 0
         self.voice_sep_start_time_since_bar = 0
+        self.voice_sep_start_voice_name = None
         self.voice_sep_length = 0
         self.voice_sep_first_meas = False
         self.sims_and_seqs = []
@@ -96,7 +97,13 @@ class ParseSource():
         self.slurcount = 0
         self.slurnr = 0
         self.phrslurnr = 0
-        self.beam = False
+        self.auto_beam = True
+        self.beam = None  # Values include None, "Normal", and "Manual" (for beams made with [])
+        self.prev_beam_type = None
+        self.shortest_length_in_beam = Fraction(1, 4)
+        self.beam_ends = []
+        self.beam_exceptions = []
+        self.base_moment = Fraction(1, 4)
         self.transposer = None
         # Variables to keep track of place in music, and place of \bar barlines and chord symbols
         self.time_sig = Fraction(1, 1)
@@ -212,6 +219,8 @@ class ParseSource():
                 self.voice_sep_start_total_time = self.total_time
                 self.voice_sep_start_time_since_bar = self.time_since_bar
                 self.voice_sep_first_meas = self.first_meas
+                self.voice_sep_start_voice_name = self.mediator.voice_name
+                self.mediator.voice_name = None
             else:
                 self.mediator.new_section('simultan')
                 self.sims_and_seqs.append('sim')
@@ -261,6 +270,7 @@ class ParseSource():
             self.time_since_bar = 0
             self.sims_and_seqs.append('voice')
             if context_id:
+                self.mediator.voice_name = context_id
                 self.mediator.new_section(context_id)
             else:
                 self.mediator.new_section('voice')
@@ -278,10 +288,13 @@ class ParseSource():
         self.mediator.new_snippet('sim')
         self.mediator.set_voicenr(add=True)
         if self.voice_sep:
-            # Reset time info
-            self.total_time = self.total_time - self.voice_sep_length
-            self.time_since_bar = self.voice_sep_start_time_since_bar
-            self.first_meas = self.voice_sep_first_meas
+            # Reset time information after last \\ (voice separator), if multiple \\ occur in a row, skip voices
+            if self.get_next_node(voice_sep).token == r"\\":  # Multiple \\
+                self.mediator.voices_skipped += 1
+            else:  # Last \\
+                self.total_time = self.total_time - self.voice_sep_length
+                self.time_since_bar = self.voice_sep_start_time_since_bar
+                self.first_meas = self.voice_sep_first_meas
 
     def Change(self, change):
         r""" A \change music expression. Changes the staff number. """
@@ -389,6 +402,7 @@ class ParseSource():
             else:
                 if self.time_since_bar == self.time_sig:
                     self.time_since_bar = 0
+            self.end_beam(current=True)
             return True
         # Create regular measure if there has been enough time since prev bar
         if self.first_meas and self.partial != 0:
@@ -396,11 +410,13 @@ class ParseSource():
                 self.time_since_bar = 0
                 self.mediator.new_bar()
                 self.first_meas = False
+                self.end_beam(current=True)
                 return True
         else:
             if self.time_since_bar == self.time_sig:
                 self.time_since_bar = 0
                 self.mediator.new_bar()
+                self.end_beam(current=True)
                 return True
         return False
 
@@ -450,6 +466,68 @@ class ParseSource():
         if len(self.tuplet) != 0:
             obj.duration = (Fraction(self.tuplet[0]["length"] / self.tuplet[0]["fraction"][0]), obj.duration[1])
 
+    def end_beam(self, current=False):
+        """ Ends an ongoing beam not started with [ (prev_note if current is False, current_note otherwise) """
+        if self.prev_beam_type != "Manual":
+            if current:
+                note = self.mediator.current_note
+            else:
+                note = self.mediator.prev_note
+            if hasattr(note, "beam"):
+                if note.beam == "continue":
+                    note.set_beam("end")
+                elif note.beam == "begin":
+                    note.set_beam(False)
+            self.beam = None
+            self.shortest_length_in_beam = Fraction(1, 4)
+
+    def note_ends_on_beam_end(self, time_after_note):
+        """ Return True/False based on whether time_after_note is a beam end (exception or otherwise) """
+        for exception in self.beam_exceptions:  # In order from least to greatest fractions
+            if exception['fraction'] >= self.shortest_length_in_beam:
+                return time_after_note in exception['ends']
+        return time_after_note in self.beam_ends
+
+    def update_beams(self, note):
+        """
+        Based on lilypond automatic beaming rules found at `/scm/time-signature-settings.scm` within the lilypond repository
+        See also: http://lilypond.org/doc/v2.19/Documentation/notation/beams#setting-automatic-beam-behavior
+
+        Given a note:
+        Begins beam when not currently beamed, auto beam is on, and note is not on specified beam end
+        Continues exisiting beam when note doesn't end on a specified beam end
+        Ends beam when current note is a quarter or longer or note ends on specified beam end
+        """
+        time_after_note = self.time_since_bar + note.length()
+        # Only beam notes shorter than a quarter
+        if note.length() < Fraction(1, 4):
+            # Beams started without [
+            if self.beam == "Normal":
+                if self.shortest_length_in_beam > note.length():
+                    self.shortest_length_in_beam = note.length()
+                if self.note_ends_on_beam_end(time_after_note):
+                    self.mediator.current_note.set_beam("end")
+                    self.beam = None
+                    self.shortest_length_in_beam = Fraction(1, 4)
+                else:
+                    self.mediator.current_note.set_beam("continue")
+            # Beams started with [
+            elif self.beam == "Manual":
+                if not self.mediator.current_note.beam:
+                    self.mediator.current_note.set_beam("continue")
+            # No ongoing beams
+            elif self.beam is None and self.auto_beam:
+                self.shortest_length_in_beam = note.length()
+                if not self.note_ends_on_beam_end(time_after_note):
+                    self.mediator.current_note.set_beam("begin")
+                    self.beam = "Normal"
+                    self.prev_beam_type = "Normal"
+                else:
+                    self.shortest_length_in_beam = Fraction(1, 4)
+        # Quarter note or longer ends ongoing beam
+        else:
+            self.end_beam()
+
     def Note(self, note):
         """ notename, e.g. c, cis, a bes ... """
         # print(note.token)
@@ -465,6 +543,7 @@ class ParseSource():
                 else:
                     self.mediator.new_note(note, self.relative)
                 self.check_note(note)
+                self.update_beams(note)
                 self.update_time_and_check(note)
             else:
                 if self.alt_mode == "chord":  # if chord symbols are being written, record location of chord
@@ -473,11 +552,14 @@ class ParseSource():
                     self.mediator.set_relative(note)
                     self.rel_pitch_isset = True
                 elif isinstance(note.parent(), ly.music.items.Chord):
+                    # Secondary note in chord
                     if self.mediator.current_chord:
                         self.mediator.new_chord(note, chord_base=False)
+                    # First note in chord
                     else:
                         self.mediator.new_chord(note, note.parent().duration, self.relative)
                         self.check_tuplet()
+                        self.update_beams(note.parent())
                         self.update_time_and_check(note)
                     # chord as grace note
                     if self.grace_seq:
@@ -492,6 +574,7 @@ class ParseSource():
             else:
                 self.mediator.new_iso_dura(unpitched, self.relative)
             self.check_note(unpitched)
+            self.update_beams(unpitched)
         self.update_time_and_check(unpitched)
 
     def DrumNote(self, drumnote):
@@ -500,6 +583,7 @@ class ParseSource():
         if drumnote.length():
             self.mediator.new_note(drumnote, is_unpitched=True)
             self.check_note(drumnote)
+            self.update_beams(drumnote)
         self.update_time_and_check(drumnote)
 
     def check_note(self, note):
@@ -509,8 +593,6 @@ class ParseSource():
             self.mediator.new_grace()
         if self.trem_rep and not self.look_ahead(note, ly.music.items.Duration):
             self.mediator.set_tremolo(trem_type='start', repeats=self.trem_rep)
-        if self.beam:
-            self.mediator.current_note.set_beam('continue')  # Note: may be overriden by 'end' if next element is ']'
 
     def check_tuplet(self):
         """Generic tuplet check."""
@@ -562,6 +644,7 @@ class ParseSource():
             self.scale = 'R'
         self.mediator.new_rest(rest)
         self.update_time_and_check(rest)
+        self.end_beam()
 
     def Skip(self, skip):
         r""" invisible rest/spacer rest (s or command \skip)"""
@@ -578,11 +661,13 @@ class ParseSource():
         if length != 0:
             self.mediator.current_is_rest = True
             self.mediator.clear_chord()
-            self.mediator.current_note = xml_objs.BarRest((length, Fraction(1, 1)), self.mediator.voice, skip=True)
+            self.mediator.prev_note = self.mediator.current_note
+            self.mediator.current_note = xml_objs.BarRest((length, Fraction(1, 1)), voice=self.mediator.voice, voice_name=self.mediator.voice_name, skip=True)
             self.mediator.check_current_note(rest=True)
             self.total_time += length
             self.time_since_bar += length
             self.check_for_barline()
+            self.end_beam()
 
     def break_skip_at_barline(self, skip):
         r"""
@@ -654,13 +739,21 @@ class ParseSource():
         pass
 
     def Beam(self, beam):
-        """ Beam, '[' = begin, ']' = end. """
-        if beam.token == '[':
-            self.mediator.current_note.set_beam('begin')
-            self.beam = True
-        elif beam.token == ']':
-            self.mediator.current_note.set_beam('end')
-            self.beam = False
+        """ Beam, "[" = begin, "]" = end. """
+        if beam.token == "[":
+            self.mediator.current_note.set_beam("begin")
+            self.end_beam()
+            if self.beam == "Manual":  # Should never be True
+                self.mediator.current_note.set_beam("continue")
+                print("Warning: Beam start does not have corresponding beam end!")
+            self.beam = "Manual"
+            self.prev_beam_type = "Manual"
+        elif beam.token == "]":
+            if self.beam == "Manual":
+                self.mediator.current_note.set_beam("end")
+                self.beam = None
+            else:  # Should never be True
+                print("Warning: Beam end does not have corresponding beam start!")
 
     def Partial(self, partial):
         r""" \partial # """
@@ -681,9 +774,9 @@ class ParseSource():
         if phrslur.token == r'\(':
             self.slurcount += 1
             self.phrslurnr = self.slurcount
-            self.mediator.set_slur(self.phrslurnr, "start")
+            self.mediator.set_slur(self.phrslurnr, "start", True)
         elif phrslur.token == r'\)':
-            self.mediator.set_slur(self.phrslurnr, "stop")
+            self.mediator.set_slur(self.phrslurnr, "stop", True)
             self.slurcount -= 1
 
     def Dynamic(self, dynamic):
@@ -693,7 +786,68 @@ class ParseSource():
     def Grace(self, grace):
         self.grace_seq = True
 
+    def generate_beam_ends(self, fraction, beat_pattern):
+        """ Given a denominator and a pattern of beats to count by (array), return an array of the intended beam end locations """
+        beam_ends = []
+        prev_beam_end = 0
+        for beat in beat_pattern:
+            beam_end = prev_beam_end + beat * fraction
+            beam_ends.append(beam_end)
+            prev_beam_end = beam_end
+        return beam_ends
+
+    def get_beat_structure_from_time_sig(self, numerator, denominator):
+        """
+        Get the beat structure and exceptions from a given key signature (numerator and denominator)
+
+        Rules derived from Lilypond's `/scm/time-signature-settings.scm` see http://lilypond.org/doc/v2.19/Documentation/notation/beams#setting-automatic-beam-behavior
+        """
+        # Generate beam_ends (default) (an array of beam end locations (fractions))
+        self.beam_ends = []
+        fraction = Fraction(1, denominator)
+        beat_pattern = []
+        if numerator > 3 and numerator % 3 == 0:   # numerators like 6, 9, 12,...
+            for i in range(numerator // 3):
+                beat_pattern.append(3)
+            self.beam_ends = self.generate_beam_ends(Fraction(1, denominator), beat_pattern)
+        elif numerator == 4 and denominator == 8:  # 4/8
+            beat_pattern = [2, 2]
+        elif numerator == 5 and denominator == 8:  # 5/8
+            beat_pattern = [3, 2]
+        elif numerator == 8 and denominator == 8:  # 8/8
+            beat_pattern = [3, 3, 2]
+        else:                                      # all other time signatures
+            for i in range(numerator):
+                beat_pattern.append(1)
+        self.beam_ends = self.generate_beam_ends(fraction, beat_pattern)
+        # Generate beam_exceptions (an array of dictionaries containing a lowest fraction and its associated beam ends array) sorted by fraction
+        self.beam_exceptions = []
+        exception_rules = {}
+        if numerator == 2 and denominator == 2:     # 2/2
+            exception_rules[Fraction(1, 32)] = [8, 8, 8, 8]
+        elif numerator == 3 and denominator == 2:   # 3/2
+            exception_rules[Fraction(1, 32)] = [8, 8, 8, 8, 8, 8]
+        elif numerator == 3 and denominator == 4:   # 3/4
+            exception_rules[Fraction(1, 8)] = [6]
+            exception_rules[Fraction(1, 12)] = [3, 3, 3]
+        elif numerator == 3 and denominator == 8:   # 3/8
+            exception_rules[Fraction(1, 8)] = [3]
+        elif numerator == 4 and denominator == 2:   # 4/2
+            exception_rules[Fraction(1, 16)] = [4, 4, 4, 4, 4, 4, 4, 4]
+        elif numerator == 4 and denominator == 4:   # 4/4
+            exception_rules[Fraction(1, 8)] = [4, 4]
+            exception_rules[Fraction(1, 12)] = [3, 3, 3, 3]
+        elif numerator == 6 and denominator == 4:   # 6/4
+            exception_rules[Fraction(1, 16)] = [4, 4, 4, 4, 4, 4]
+        elif numerator == 9 and denominator == 4:   # 9/4
+            exception_rules[Fraction(1, 32)] = [8, 8, 8, 8, 8, 8, 8, 8]
+        elif numerator == 12 and denominator == 4:  # 12/4
+            exception_rules[Fraction(1, 32)] = [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]
+        for fract in sorted(exception_rules.keys()):
+            self.beam_exceptions.append({"fraction": fract, "ends": self.generate_beam_ends(fract, exception_rules[fract])})
+
     def TimeSignature(self, timeSign):
+        self.get_beat_structure_from_time_sig(timeSign.numerator(), timeSign.fraction().denominator)
         self.time_sig = timeSign.measure_length()
         self.mediator.new_time(timeSign.numerator(), timeSign.fraction(), self.numericTime)
 
@@ -714,6 +868,23 @@ class ParseSource():
         r"""A \with ... construct."""
         self.with_contxt = cont_with.parent().context()
 
+    def set_base_moment(self, numer_denom):
+        self.base_moment = Fraction(numer_denom[0], numer_denom[1])
+
+    def set_beat_structure(self, beat_list):
+        self.beam_ends = []
+        prev_end = 0
+        for num in beat_list:
+            prev_end += self.base_moment * num
+            self.beam_ends.append(prev_end)
+
+    def set_ignore_melismata(self, ignore):
+        """ Sends command within lyrics to ignore beams (True) or skip over them (False). """
+        if ignore:
+            self.mediator.new_lyrics_item(["ignoreMelismata", True, "command"])
+        else:
+            self.mediator.new_lyrics_item(["ignoreMelismata", False, "command"])
+
     def Set(self, cont_set):
         r"""A \set command."""
         if isinstance(cont_set.value(), ly.music.items.Scheme):
@@ -731,6 +902,26 @@ class ParseSource():
             self.mediator.set_by_property(cont_set.property(), val)
         elif cont_set.context() in group_contexts:
             self.mediator.set_by_property(cont_set.property(), val, group=True)
+        if cont_set.property() == 'baseMoment':
+            self.set_base_moment(cont_set.value().get_list_ints())
+        elif cont_set.property() == 'beatStructure':
+            self.beam_ends = self.generate_beam_ends(self.base_moment, cont_set.value().get_list_ints())
+        # TODO: Add functionality for setting custom beam exceptions (currently just clears beam_exceptions, as this is common)
+        elif cont_set.property() == 'beamExceptions':
+            self.beam_exceptions = []
+        elif cont_set.property() == 'associatedVoice':
+            self.mediator.new_lyrics_item(["switchVoice", cont_set.value().value(), "command"])
+        elif cont_set.property() == 'ignoreMelismata':
+            self.set_ignore_melismata(cont_set.value().get_bool())
+        else:
+            print("Warning: Set", cont_set.property(), "failed!")
+
+    def Unset(self, cont_unset):
+        r""" A \unset command. """
+        if cont_unset.property() == 'ignoreMelismata':
+            self.mediator.new_lyrics_item(["ignoreMelismata", False, "command"])
+        else:
+            print("Warning: Unset", cont_unset.property(), "failed!")
 
     def Command(self, command):
         r""" \bar, \rest etc """
@@ -758,6 +949,14 @@ class ParseSource():
             if self.tupl_span:
                 self.mediator.unset_tuplspan_dur()
                 self.tupl_span = False
+        elif command.token == '\\noBeam':
+            self.end_beam()
+            if self.prev_beam_type == "Normal":  # noBeam does not apply to [] beams
+                self.mediator.current_note.set_beam(False)
+        elif command.token == '\\autoBeamOn':
+            self.auto_beam = True
+        elif command.token == '\\autoBeamOff':
+            self.auto_beam = False
         else:
             if command.token not in excls:
                 print("Unknown command:", command.token)
@@ -834,11 +1033,17 @@ class ParseSource():
             self.override_dict[self.override_key] = item.token
         elif self.schm_assignm:
             self.mediator.set_by_property(self.schm_assignm, item.token)
+        elif self.look_behind(item, ly.music.items.Set):
+            pass  # See Set()
         else:
             print("SchemeItem not implemented:", item.token)
 
     def SchemeQuote(self, quote):
         """A ' in scheme."""
+        pass
+
+    def SchemeList(self, slist):
+        """ A (...) inside scheme (handled eslewhere on a case-by-case basis). """
         pass
 
     def End(self, end):
@@ -887,6 +1092,9 @@ class ParseSource():
                 self.voice_sep = False
                 self.voice_sep_length = 0
                 self.check_for_barline(end.node)
+                self.mediator.voices_skipped = 0
+                self.mediator.voice_name = self.voice_sep_start_voice_name
+                self.voice_sep_start_voice_name = None
             elif not self.piano_staff:
                 self.mediator.check_simultan()
                 if self.sims_and_seqs:

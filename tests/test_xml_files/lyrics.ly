@@ -4,21 +4,18 @@ slurOff = { \set ignoreMelismata = ##t }
 slurOn = { \unset ignoreMelismata }
 
 StanzaOne = \lyricmode {
-  \set stanza = "1."  
   La _ di __ \slurOff la di \slurOn da
   Ba dum dun
   Li -- del -- li zap
 }
 
 StanzaTwo = \lyricmode {
-  \set stanza = "2."
   \slurOn This is a __ song for 
   cool peo -- ple
   \slurOff Just a test for us \slurOn
 }
 
 StanzaThree = \lyricmode {
-  \set stanza = "3."
   \slurOn This is a \slurOff tune for \slurOn
   some peo -- ple
   Just a test for us
