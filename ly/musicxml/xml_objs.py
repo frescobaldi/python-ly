@@ -341,14 +341,13 @@ class ScoreSection():
         for bar in self.barlist:
             for obj in bar.obj_list:
                 if isinstance(obj, BarMus) and not obj.chord:
-                    if obj.voice_name is not None:  # Note is associated with a voice name
-                        if obj.voice_name not in voices:
-                            voices[obj.voice_name] = []
-                        voices[obj.voice_name].append({"note": obj, "time": time})
-                    else:  # Note is associated with a voice number (likely inside a voice separator, still a string like "3")
-                        if str(obj.voice) not in voices:
-                            voices[str(obj.voice)] = []
-                        voices[str(obj.voice)].append({"note": obj, "time": time})
+                    # Get the name of the voice, if there is no voice name (likely inside a voice separator), then use the voice number as a string
+                    voc_name = obj.voice_name
+                    if voc_name is None:
+                        voc_name = str(obj.voice)
+                    if voc_name not in voices:
+                        voices[voc_name] = []
+                    voices[voc_name].append({"note": obj, "time": time})
                     time += obj.duration[0] * obj.duration[1]
                 elif isinstance(obj, BarBackup):
                     time -= obj.duration[0] * obj.duration[1]

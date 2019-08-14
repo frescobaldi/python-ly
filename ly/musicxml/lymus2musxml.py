@@ -287,13 +287,14 @@ class ParseSource():
     def VoiceSeparator(self, voice_sep):
         self.mediator.new_snippet('sim')
         self.mediator.set_voicenr(add=True)
-        if self.voice_sep and self.get_next_node(voice_sep).token != "\\\\":
-            # Reset time info
-            self.total_time = self.total_time - self.voice_sep_length
-            self.time_since_bar = self.voice_sep_start_time_since_bar
-            self.first_meas = self.voice_sep_first_meas
-        else:
-            self.mediator.voices_skipped += 1
+        if self.voice_sep:
+            # Reset time information after last \\ (voice separator), if multiple \\ occur in a row, skip voices
+            if self.get_next_node(voice_sep).token == r"\\":  # Multiple \\
+                self.mediator.voices_skipped += 1
+            else:  # Last \\
+                self.total_time = self.total_time - self.voice_sep_length
+                self.time_since_bar = self.voice_sep_start_time_since_bar
+                self.first_meas = self.voice_sep_first_meas
 
     def Change(self, change):
         r""" A \change music expression. Changes the staff number. """
