@@ -80,6 +80,7 @@ class ParseSource():
         self.voice_sep = False
         self.voice_sep_start_total_time = 0
         self.voice_sep_start_time_since_bar = 0
+        self.voice_sep_start_voice_name = None
         self.voice_sep_length = 0
         self.voice_sep_first_meas = False
         self.sims_and_seqs = []
@@ -218,6 +219,8 @@ class ParseSource():
                 self.voice_sep_start_total_time = self.total_time
                 self.voice_sep_start_time_since_bar = self.time_since_bar
                 self.voice_sep_first_meas = self.first_meas
+                self.voice_sep_start_voice_name = self.mediator.voice_name
+                self.mediator.voice_name = None
             else:
                 self.mediator.new_section('simultan')
                 self.sims_and_seqs.append('sim')
@@ -267,6 +270,7 @@ class ParseSource():
             self.time_since_bar = 0
             self.sims_and_seqs.append('voice')
             if context_id:
+                self.mediator.voice_name = context_id
                 self.mediator.new_section(context_id)
             else:
                 self.mediator.new_section('voice')
@@ -284,10 +288,13 @@ class ParseSource():
         self.mediator.new_snippet('sim')
         self.mediator.set_voicenr(add=True)
         if self.voice_sep:
-            # Reset time info
-            self.total_time = self.total_time - self.voice_sep_length
-            self.time_since_bar = self.voice_sep_start_time_since_bar
-            self.first_meas = self.voice_sep_first_meas
+            # Reset time information after last \\ (voice separator), if multiple \\ occur in a row, skip voices
+            if self.get_next_node(voice_sep).token == r"\\":  # Multiple \\
+                self.mediator.voices_skipped += 1
+            else:  # Last \\
+                self.total_time = self.total_time - self.voice_sep_length
+                self.time_since_bar = self.voice_sep_start_time_since_bar
+                self.first_meas = self.voice_sep_first_meas
 
     def Change(self, change):
         r""" A \change music expression. Changes the staff number. """
@@ -655,7 +662,7 @@ class ParseSource():
             self.mediator.current_is_rest = True
             self.mediator.clear_chord()
             self.mediator.prev_note = self.mediator.current_note
-            self.mediator.current_note = xml_objs.BarRest((length, Fraction(1, 1)), self.mediator.voice, skip=True)
+            self.mediator.current_note = xml_objs.BarRest((length, Fraction(1, 1)), voice=self.mediator.voice, voice_name=self.mediator.voice_name, skip=True)
             self.mediator.check_current_note(rest=True)
             self.total_time += length
             self.time_since_bar += length
@@ -767,9 +774,9 @@ class ParseSource():
         if phrslur.token == r'\(':
             self.slurcount += 1
             self.phrslurnr = self.slurcount
-            self.mediator.set_slur(self.phrslurnr, "start")
+            self.mediator.set_slur(self.phrslurnr, "start", True)
         elif phrslur.token == r'\)':
-            self.mediator.set_slur(self.phrslurnr, "stop")
+            self.mediator.set_slur(self.phrslurnr, "stop", True)
             self.slurcount -= 1
 
     def Dynamic(self, dynamic):
@@ -864,6 +871,20 @@ class ParseSource():
     def set_base_moment(self, numer_denom):
         self.base_moment = Fraction(numer_denom[0], numer_denom[1])
 
+    def set_beat_structure(self, beat_list):
+        self.beam_ends = []
+        prev_end = 0
+        for num in beat_list:
+            prev_end += self.base_moment * num
+            self.beam_ends.append(prev_end)
+
+    def set_ignore_melismata(self, ignore):
+        """ Sends command within lyrics to ignore beams (True) or skip over them (False). """
+        if ignore:
+            self.mediator.new_lyrics_item(["ignoreMelismata", True, "command"])
+        else:
+            self.mediator.new_lyrics_item(["ignoreMelismata", False, "command"])
+
     def Set(self, cont_set):
         r"""A \set command."""
         if isinstance(cont_set.value(), ly.music.items.Scheme):
@@ -888,6 +909,19 @@ class ParseSource():
         # TODO: Add functionality for setting custom beam exceptions (currently just clears beam_exceptions, as this is common)
         elif cont_set.property() == 'beamExceptions':
             self.beam_exceptions = []
+        elif cont_set.property() == 'associatedVoice':
+            self.mediator.new_lyrics_item(["switchVoice", cont_set.value().value(), "command"])
+        elif cont_set.property() == 'ignoreMelismata':
+            self.set_ignore_melismata(cont_set.value().get_bool())
+        else:
+            print("Warning: Set", cont_set.property(), "failed!")
+
+    def Unset(self, cont_unset):
+        r""" A \unset command. """
+        if cont_unset.property() == 'ignoreMelismata':
+            self.mediator.new_lyrics_item(["ignoreMelismata", False, "command"])
+        else:
+            print("Warning: Unset", cont_unset.property(), "failed!")
 
     def Command(self, command):
         r""" \bar, \rest etc """
@@ -1058,6 +1092,9 @@ class ParseSource():
                 self.voice_sep = False
                 self.voice_sep_length = 0
                 self.check_for_barline(end.node)
+                self.mediator.voices_skipped = 0
+                self.mediator.voice_name = self.voice_sep_start_voice_name
+                self.voice_sep_start_voice_name = None
             elif not self.piano_staff:
                 self.mediator.check_simultan()
                 if self.sims_and_seqs:

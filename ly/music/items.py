@@ -1270,6 +1270,14 @@ class Scheme(Item):
             if tokens[1].isdigit() and tokens[2].isdigit():
                 return Fraction(int(tokens[1]), int(tokens[2]))
 
+    def get_bool(self):
+        """A basic way to get a boolean."""
+        for i in self.find(SchemeItem):
+            if i.token == "#f":
+                return False
+            elif i.token == "#t":
+                return True
+
 
 class SchemeItem(Item):
     """Any scheme token."""
