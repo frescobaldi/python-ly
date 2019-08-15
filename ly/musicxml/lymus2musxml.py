@@ -1093,6 +1093,7 @@ class ParseSource():
             elif end.node.context() in group_contexts:
                 self.mediator.close_group()
             elif end.node.context() in staff_contexts:
+                self.numericTime = False
                 if not self.piano_staff:
                     self.mediator.check_part()
             elif end.node.context() in pno_contexts:
