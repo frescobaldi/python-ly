@@ -988,6 +988,8 @@ def get_fifths(key, mode):
         fifths = -flatkeys.index(key)
     if mode == 'minor':
         return fifths-3
+    elif mode == 'dorian':
+        return fifths-2
     elif mode == 'major':
         return fifths
 
