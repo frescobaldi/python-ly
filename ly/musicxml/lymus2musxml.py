@@ -231,7 +231,11 @@ class ParseSource():
         self.mediator.clear_chord()
 
     def Q(self, q):
+        """ q, A copy of the previous chord's pitches (has its own length) """
+        self.adjust_tuplet_length(q)
         self.mediator.copy_prev_chord(q.duration)
+        self.check_note(q)
+        self.update_time_and_check(q)
 
     def Context(self, context):
         r""" \context """
@@ -463,6 +467,8 @@ class ParseSource():
 
     def adjust_tuplet_length(self, obj):
         r""" Adjusts the length of notes within a \tuplet """
+        if isinstance(obj.parent(), ly.music.items.Chord):  # Adjust length of total chord not singular note in chord
+            obj = obj.parent()
         if len(self.tuplet) != 0:
             obj.duration = (Fraction(self.tuplet[0]["length"] / self.tuplet[0]["fraction"][0]), obj.duration[1])
 
@@ -643,6 +649,7 @@ class ParseSource():
         if rest.token == 'R':
             self.scale = 'R'
         self.mediator.new_rest(rest)
+        self.check_note(rest)
         self.update_time_and_check(rest)
         self.end_beam()
 
