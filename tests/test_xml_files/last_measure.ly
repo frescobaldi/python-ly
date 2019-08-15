@@ -2,7 +2,6 @@
 
 keyTime = {
     \time 4/4
-    \numericTimeSignature
     \partial 4
 }
 
