@@ -281,8 +281,9 @@ class ParseSource():
             self.first_meas = True
         elif context == 'Devnull':
             self.mediator.new_section('devnull', True)
-        elif context == 'Lyrics':
-            pass  # The way lyrics are implemented, they don't need a new section here (prevents irrelevant warning)
+        elif context == 'Lyrics':  # The way lyrics are implemented, they don't need a new section here (prevents irrelevant warning)
+            if self.alt_mode == 'lyric':
+                print("Warning: Nested lyric sections are not supported!")  # TODO: Support nested lyrics
         elif context == 'ChordNames':
             pass  # Without using ChordMode to write actual chords, ChordNames doesn't need a new section
         else:
@@ -1113,7 +1114,7 @@ class ParseSource():
                 self.mediator.voices_skipped = 0
                 self.mediator.voice_name = self.voice_sep_start_voice_name
                 self.voice_sep_start_voice_name = None
-            elif not self.piano_staff:
+            elif not self.piano_staff and not self.alt_mode == 'lyric':  # Simultaneous lyric sections not currently supported
                 self.mediator.check_simultan()
                 if self.sims_and_seqs:
                     self.sims_and_seqs.pop()
