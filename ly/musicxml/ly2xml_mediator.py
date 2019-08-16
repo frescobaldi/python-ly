@@ -588,7 +588,10 @@ class Mediator():
             prev_chord = self.q_chord
         for i, pc in enumerate(prev_chord):
             cn = self.copy_barnote_basics(pc)
-            cn.set_duration(duration)
+            pc_dot = 0
+            if duration == pc.duration:  # Carry over dots from prev chord if this copy has same duration
+                pc_dot = pc.dot
+            cn.set_duration(duration, dot=pc_dot)
             cn.set_durtype(durval2type(self.dur_token))
             if i == 0:
                 self.prev_note = self.current_note

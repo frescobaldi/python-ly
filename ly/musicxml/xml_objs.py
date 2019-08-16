@@ -740,9 +740,9 @@ class BarNote(BarMus):
         self.lyric = None
         self.beam = False
 
-    def set_duration(self, duration, durtype=''):
+    def set_duration(self, duration, durtype='', dot=0):
         self.duration = duration
-        self.dot = 0
+        self.dot = dot
         if durtype:
             self.type = durtype
 
