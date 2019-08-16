@@ -469,7 +469,15 @@ class Mediator():
         """Create a copy of a xml_objs.BarNote."""
         p = bar_note.base_note
         alt = bar_note.alter
-        acc = bar_note.accidental_token
+        try:
+            if bar_note.accidental_token != 'normal':
+                acc = bar_note.accidental_token  # special accidentals (?, !)
+            else:
+                acc = None
+        except AttributeError:
+            acc = None
+        if acc is None and self.is_acc_needed(p, alt):  # check if a normal accidental should be printed
+            acc = 'normal'
         dura = bar_note.duration
         voc = bar_note.voice
         voc_name = bar_note.voice_name
