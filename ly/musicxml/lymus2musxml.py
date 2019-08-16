@@ -114,6 +114,7 @@ class ParseSource():
         self.time_since_bar = 0
         self.barline_locations = {}
         self.chord_locations = {}
+        self.prev_len_before_tuplet = 0
 
     def parse_text(self, ly_text, filename=None):
         """Parse the LilyPond source specified as text.
@@ -468,6 +469,7 @@ class ParseSource():
 
     def adjust_tuplet_length(self, obj):
         r""" Adjusts the length of notes within a \tuplet """
+        self.prev_len_before_tuplet = obj.length()
         if isinstance(obj.parent(), ly.music.items.Chord):  # Adjust length of total chord not singular note in chord
             obj = obj.parent()
         if len(self.tuplet) != 0:
@@ -507,7 +509,8 @@ class ParseSource():
         """
         time_after_note = self.time_since_bar + note.length()
         # Only beam notes shorter than a quarter
-        if note.length() < Fraction(1, 4):
+        #     Note: quarter note tuplets should not be beamed
+        if (note.length() < Fraction(1, 4) and not self.tuplet) or (self.prev_len_before_tuplet < Fraction(1, 4) and self.tuplet):
             # Beams started without [
             if self.beam == "Normal":
                 if self.shortest_length_in_beam > note.length():
