@@ -236,6 +236,7 @@ class ParseSource():
         self.adjust_tuplet_length(q)
         self.mediator.copy_prev_chord(q.duration)
         self.check_note(q)
+        self.update_beams(q)
         self.update_time_and_check(q)
 
     def Context(self, context):
