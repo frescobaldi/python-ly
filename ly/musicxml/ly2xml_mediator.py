@@ -600,6 +600,9 @@ class Mediator():
             if self.tied:
                 cn.set_tie('stop')
             self.bar.add(cn)
+            if i == 0:  # On base note of chord, update divisions
+                self.check_duration(False)
+                self.check_divs()
         self.tied = False
 
     def clear_chord(self):
@@ -929,21 +932,12 @@ class Mediator():
         scaling = self.current_note.duration[1]
         divs = self.divisions
         tupl = self.current_note.tuplet
-        if not tupl:
-            a = 4
-            if base:
-                b = 1/base
-            else:
-                b = 1
-                print("Warning problem checking duration!")
+        a = 4
+        if base:
+            b = 1/base
         else:
-            num = 1
-            den = 1
-            for t in tupl:
-                num *= t.fraction[0]
-                den *= t.fraction[1]
-            a = 4*den
-            b = (1/base)*num
+            b = 1
+            print("Warning problem checking duration!")
         c = a * divs * scaling
         predur, mod = divmod(c, b)
         if mod > 0:
