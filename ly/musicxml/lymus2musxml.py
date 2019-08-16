@@ -948,7 +948,8 @@ class ParseSource():
         elif command.token == '\\defaultTimeSignature':
             self.numericTime = False
             # If the current bar has no music and is 2/2 or 4/4, then change it to cut or common time respectively
-            if self.mediator.bar and not self.mediator.bar.has_music() and self.mediator.current_attr.time and len(self.mediator.current_attr.time) < 3:
+            #     Don't add 'cut' or 'common' tag if one already exists
+            if self.mediator.bar and not self.mediator.bar.has_music() and self.mediator.current_attr.time and len(self.mediator.current_attr.time) == 2:
                 num = self.mediator.current_attr.time[0]
                 den = self.mediator.current_attr.time[1]
                 if num == 2 and den == 2:
