@@ -740,9 +740,9 @@ class BarNote(BarMus):
         self.lyric = None
         self.beam = False
 
-    def set_duration(self, duration, durtype=''):
+    def set_duration(self, duration, durtype='', dot=0):
         self.duration = duration
-        self.dot = 0
+        self.dot = dot
         if durtype:
             self.type = durtype
 
@@ -856,8 +856,11 @@ class BarAttr():
 
     def set_time(self, fractlist, numeric=True):
         self.time = fractlist
-        if not numeric and (fractlist == [2, 2] or fractlist == [4, 4]):
-            self.time.append('common')
+        if not numeric:
+            if fractlist == [4, 4]:
+                self.time.append('common')
+            elif fractlist == [2, 2]:
+                self.time.append('cut')
 
     def set_clef(self, clef):
         self.clef = clef

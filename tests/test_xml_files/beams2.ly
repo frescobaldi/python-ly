@@ -2,7 +2,6 @@
 
 keyTime = {
     \time 3/4
-    \numericTimeSignature
     \key c \major
 }
 

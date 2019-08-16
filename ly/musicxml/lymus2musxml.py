@@ -114,6 +114,7 @@ class ParseSource():
         self.time_since_bar = 0
         self.barline_locations = {}
         self.chord_locations = {}
+        self.prev_len_before_tuplet = 0
 
     def parse_text(self, ly_text, filename=None):
         """Parse the LilyPond source specified as text.
@@ -231,7 +232,12 @@ class ParseSource():
         self.mediator.clear_chord()
 
     def Q(self, q):
+        """ q, A copy of the previous chord's pitches (has its own length) """
+        self.adjust_tuplet_length(q)
         self.mediator.copy_prev_chord(q.duration)
+        self.check_note(q)
+        self.update_beams(q)
+        self.update_time_and_check(q)
 
     def Context(self, context):
         r""" \context """
@@ -277,8 +283,9 @@ class ParseSource():
             self.first_meas = True
         elif context == 'Devnull':
             self.mediator.new_section('devnull', True)
-        elif context == 'Lyrics':
-            pass  # The way lyrics are implemented, they don't need a new section here (prevents irrelevant warning)
+        elif context == 'Lyrics':  # The way lyrics are implemented, they don't need a new section here (prevents irrelevant warning)
+            if self.alt_mode == 'lyric':
+                print("Warning: Nested lyric sections are not supported!")  # TODO: Support nested lyrics
         elif context == 'ChordNames':
             pass  # Without using ChordMode to write actual chords, ChordNames doesn't need a new section
         else:
@@ -463,6 +470,9 @@ class ParseSource():
 
     def adjust_tuplet_length(self, obj):
         r""" Adjusts the length of notes within a \tuplet """
+        self.prev_len_before_tuplet = obj.length()
+        if isinstance(obj.parent(), ly.music.items.Chord):  # Adjust length of total chord not singular note in chord
+            obj = obj.parent()
         if len(self.tuplet) != 0:
             obj.duration = (Fraction(self.tuplet[0]["length"] / self.tuplet[0]["fraction"][0]), obj.duration[1])
 
@@ -500,7 +510,8 @@ class ParseSource():
         """
         time_after_note = self.time_since_bar + note.length()
         # Only beam notes shorter than a quarter
-        if note.length() < Fraction(1, 4):
+        #     Note: quarter note tuplets should not be beamed
+        if (note.length() < Fraction(1, 4) and not self.tuplet) or (self.prev_len_before_tuplet < Fraction(1, 4) and self.tuplet):
             # Beams started without [
             if self.beam == "Normal":
                 if self.shortest_length_in_beam > note.length():
@@ -643,6 +654,7 @@ class ParseSource():
         if rest.token == 'R':
             self.scale = 'R'
         self.mediator.new_rest(rest)
+        self.check_note(rest)
         self.update_time_and_check(rest)
         self.end_beam()
 
@@ -925,13 +937,25 @@ class ParseSource():
 
     def Command(self, command):
         r""" \bar, \rest etc """
-        excls = ['\\major', '\\minor', '\\bar']
+        excls = ['\\major', '\\dorian', '\\minor', '\\bar']
         if command.token == '\\rest':
             self.mediator.note2rest()
         elif command.token == '\\numericTimeSignature':
             self.numericTime = True
+            # If the current bar has no music and is in common or cut time, then change it to numeric time
+            if self.mediator.bar and not self.mediator.bar.has_music() and self.mediator.current_attr.time and self.mediator.current_attr.time[-1] in ['common', 'cut']:
+                self.mediator.current_attr.time.pop()
         elif command.token == '\\defaultTimeSignature':
             self.numericTime = False
+            # If the current bar has no music and is 2/2 or 4/4, then change it to cut or common time respectively
+            #     Don't add 'cut' or 'common' tag if one already exists
+            if self.mediator.bar and not self.mediator.bar.has_music() and self.mediator.current_attr.time and len(self.mediator.current_attr.time) == 2:
+                num = self.mediator.current_attr.time[0]
+                den = self.mediator.current_attr.time[1]
+                if num == 2 and den == 2:
+                    self.mediator.current_attr.time.append('cut')
+                elif num == 4 and den == 4:
+                    self.mediator.current_attr.time.append('common')
         elif command.token.find('voice') == 1:
             self.mediator.set_voicenr(command.token[1:], piano=self.piano_staff)
         elif command.token == '\\glissando':
@@ -1074,6 +1098,7 @@ class ParseSource():
             elif end.node.context() in group_contexts:
                 self.mediator.close_group()
             elif end.node.context() in staff_contexts:
+                self.numericTime = False
                 if not self.piano_staff:
                     self.mediator.check_part()
             elif end.node.context() in pno_contexts:
@@ -1095,7 +1120,7 @@ class ParseSource():
                 self.mediator.voices_skipped = 0
                 self.mediator.voice_name = self.voice_sep_start_voice_name
                 self.voice_sep_start_voice_name = None
-            elif not self.piano_staff:
+            elif not self.piano_staff and not self.alt_mode == 'lyric':  # Simultaneous lyric sections not currently supported
                 self.mediator.check_simultan()
                 if self.sims_and_seqs:
                     self.sims_and_seqs.pop()

@@ -5,7 +5,7 @@
   <identification>
     <encoding>
       <software>python-ly 0.9.5</software>
-      <encoding-date>2019-07-11</encoding-date>
+      <encoding-date>2019-08-15</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -20,7 +20,7 @@
     <measure number="1">
       <attributes>
         <divisions>1</divisions>
-        <time>
+        <time symbol="common">
           <beats>4</beats>
           <beat-type>4</beat-type>
         </time>
@@ -507,7 +507,7 @@
     <measure number="1">
       <attributes>
         <divisions>1</divisions>
-        <time>
+        <time symbol="common">
           <beats>4</beats>
           <beat-type>4</beat-type>
         </time>

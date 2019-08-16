@@ -5,7 +5,7 @@
   <identification>
     <encoding>
       <software>python-ly 0.9.5</software>
-      <encoding-date>2019-08-08</encoding-date>
+      <encoding-date>2019-08-16</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -16,7 +16,7 @@
   <part id="P1">
     <measure number="1">
       <attributes>
-        <divisions>1157625</divisions>
+        <divisions>105</divisions>
         <key>
           <fifths>0</fifths>
           <mode>major</mode>
@@ -36,7 +36,7 @@
           <alter>-1</alter>
           <octave>4</octave>
         </pitch>
-        <duration>771750</duration>
+        <duration>70</duration>
         <voice>1</voice>
         <type>quarter</type>
         <accidental>flat</accidental>
@@ -44,7 +44,6 @@
           <actual-notes>3</actual-notes>
           <normal-notes>2</normal-notes>
         </time-modification>
-        <beam number="1">begin</beam>
         <notations>
           <tuplet number="1" type="start" />
         </notations>
@@ -59,7 +58,7 @@
           <alter>1</alter>
           <octave>4</octave>
         </pitch>
-        <duration>771750</duration>
+        <duration>70</duration>
         <voice>1</voice>
         <type>quarter</type>
         <accidental>sharp</accidental>
@@ -67,7 +66,6 @@
           <actual-notes>3</actual-notes>
           <normal-notes>2</normal-notes>
         </time-modification>
-        <beam number="1">continue</beam>
         <lyric number="1">
           <syllabic>single</syllabic>
           <text>di</text>
@@ -78,14 +76,13 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>771750</duration>
+        <duration>70</duration>
         <voice>1</voice>
         <type>quarter</type>
         <time-modification>
           <actual-notes>3</actual-notes>
           <normal-notes>2</normal-notes>
         </time-modification>
-        <beam number="1">end</beam>
         <notations>
           <tuplet number="1" type="stop" />
         </notations>
@@ -99,7 +96,7 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>1157625</duration>
+        <duration>105</duration>
         <voice>1</voice>
         <type>quarter</type>
         <lyric number="1">
@@ -112,7 +109,7 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>1157625</duration>
+        <duration>105</duration>
         <voice>1</voice>
         <type>quarter</type>
         <lyric number="1">
@@ -121,19 +118,19 @@
         </lyric>
       </note>
       <backup>
-        <duration>4630500</duration>
+        <duration>420</duration>
       </backup>
       <note>
         <pitch>
           <step>E</step>
           <octave>4</octave>
         </pitch>
-        <duration>4630500</duration>
+        <duration>420</duration>
         <voice>2</voice>
         <type>whole</type>
       </note>
       <backup>
-        <duration>4630500</duration>
+        <duration>420</duration>
       </backup>
     </measure>
     <measure number="2">
@@ -142,7 +139,7 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>463050</duration>
+        <duration>42</duration>
         <voice>1</voice>
         <type>eighth</type>
         <time-modification>
@@ -163,7 +160,7 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>463050</duration>
+        <duration>42</duration>
         <voice>1</voice>
         <type>eighth</type>
         <time-modification>
@@ -181,7 +178,7 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>463050</duration>
+        <duration>42</duration>
         <voice>1</voice>
         <type>eighth</type>
         <time-modification>
@@ -199,7 +196,7 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>463050</duration>
+        <duration>42</duration>
         <voice>1</voice>
         <type>eighth</type>
         <time-modification>
@@ -217,7 +214,7 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>463050</duration>
+        <duration>42</duration>
         <voice>1</voice>
         <type>eighth</type>
         <time-modification>
@@ -238,14 +235,13 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>463050</duration>
+        <duration>42</duration>
         <voice>1</voice>
         <type>quarter</type>
         <time-modification>
           <actual-notes>5</actual-notes>
           <normal-notes>2</normal-notes>
         </time-modification>
-        <beam number="1">begin</beam>
         <notations>
           <tuplet number="1" type="start" />
         </notations>
@@ -259,14 +255,13 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>463050</duration>
+        <duration>42</duration>
         <voice>1</voice>
         <type>quarter</type>
         <time-modification>
           <actual-notes>5</actual-notes>
           <normal-notes>2</normal-notes>
         </time-modification>
-        <beam number="1">continue</beam>
         <lyric number="1">
           <syllabic>single</syllabic>
           <text>la</text>
@@ -277,14 +272,13 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>463050</duration>
+        <duration>42</duration>
         <voice>1</voice>
         <type>quarter</type>
         <time-modification>
           <actual-notes>5</actual-notes>
           <normal-notes>2</normal-notes>
         </time-modification>
-        <beam number="1">continue</beam>
         <lyric number="1">
           <syllabic>single</syllabic>
           <text>di</text>
@@ -295,14 +289,13 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>463050</duration>
+        <duration>42</duration>
         <voice>1</voice>
         <type>quarter</type>
         <time-modification>
           <actual-notes>5</actual-notes>
           <normal-notes>2</normal-notes>
         </time-modification>
-        <beam number="1">continue</beam>
         <lyric number="1">
           <syllabic>single</syllabic>
           <text>la</text>
@@ -313,14 +306,13 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>463050</duration>
+        <duration>42</duration>
         <voice>1</voice>
         <type>quarter</type>
         <time-modification>
           <actual-notes>5</actual-notes>
           <normal-notes>2</normal-notes>
         </time-modification>
-        <beam number="1">end</beam>
         <notations>
           <tuplet number="1" type="stop" />
         </notations>
@@ -330,14 +322,14 @@
         </lyric>
       </note>
       <backup>
-        <duration>4630500</duration>
+        <duration>420</duration>
       </backup>
       <note>
         <pitch>
           <step>E</step>
           <octave>4</octave>
         </pitch>
-        <duration>4630500</duration>
+        <duration>420</duration>
         <voice>2</voice>
         <type>whole</type>
       </note>
@@ -348,14 +340,13 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>661500</duration>
+        <duration>60</duration>
         <voice>1</voice>
         <type>quarter</type>
         <time-modification>
           <actual-notes>7</actual-notes>
           <normal-notes>4</normal-notes>
         </time-modification>
-        <beam number="1">begin</beam>
         <notations>
           <tuplet number="1" type="start" />
         </notations>
@@ -369,14 +360,13 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>661500</duration>
+        <duration>60</duration>
         <voice>1</voice>
         <type>quarter</type>
         <time-modification>
           <actual-notes>7</actual-notes>
           <normal-notes>4</normal-notes>
         </time-modification>
-        <beam number="1">continue</beam>
         <lyric number="1">
           <syllabic>single</syllabic>
           <text>di</text>
@@ -387,14 +377,13 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>661500</duration>
+        <duration>60</duration>
         <voice>1</voice>
         <type>quarter</type>
         <time-modification>
           <actual-notes>7</actual-notes>
           <normal-notes>4</normal-notes>
         </time-modification>
-        <beam number="1">continue</beam>
         <lyric number="1">
           <syllabic>single</syllabic>
           <text>la</text>
@@ -405,14 +394,13 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>661500</duration>
+        <duration>60</duration>
         <voice>1</voice>
         <type>quarter</type>
         <time-modification>
           <actual-notes>7</actual-notes>
           <normal-notes>4</normal-notes>
         </time-modification>
-        <beam number="1">continue</beam>
         <lyric number="1">
           <syllabic>single</syllabic>
           <text>di</text>
@@ -423,14 +411,13 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>661500</duration>
+        <duration>60</duration>
         <voice>1</voice>
         <type>quarter</type>
         <time-modification>
           <actual-notes>7</actual-notes>
           <normal-notes>4</normal-notes>
         </time-modification>
-        <beam number="1">continue</beam>
         <lyric number="1">
           <syllabic>single</syllabic>
           <text>la</text>
@@ -441,14 +428,13 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>661500</duration>
+        <duration>60</duration>
         <voice>1</voice>
         <type>quarter</type>
         <time-modification>
           <actual-notes>7</actual-notes>
           <normal-notes>4</normal-notes>
         </time-modification>
-        <beam number="1">continue</beam>
         <lyric number="1">
           <syllabic>single</syllabic>
           <text>di</text>
@@ -459,14 +445,13 @@
           <step>A</step>
           <octave>4</octave>
         </pitch>
-        <duration>661500</duration>
+        <duration>60</duration>
         <voice>1</voice>
         <type>quarter</type>
         <time-modification>
           <actual-notes>7</actual-notes>
           <normal-notes>4</normal-notes>
         </time-modification>
-        <beam number="1">end</beam>
         <notations>
           <tuplet number="1" type="stop" />
         </notations>
@@ -476,14 +461,14 @@
         </lyric>
       </note>
       <backup>
-        <duration>4630500</duration>
+        <duration>420</duration>
       </backup>
       <note>
         <pitch>
           <step>E</step>
           <octave>4</octave>
         </pitch>
-        <duration>4630500</duration>
+        <duration>420</duration>
         <voice>2</voice>
         <type>whole</type>
       </note>

@@ -469,7 +469,15 @@ class Mediator():
         """Create a copy of a xml_objs.BarNote."""
         p = bar_note.base_note
         alt = bar_note.alter
-        acc = bar_note.accidental_token
+        try:
+            if bar_note.accidental_token != 'normal':
+                acc = bar_note.accidental_token  # special accidentals (?, !)
+            else:
+                acc = None
+        except AttributeError:
+            acc = None
+        if acc is None and self.is_acc_needed(p, alt):  # check if a normal accidental should be printed
+            acc = 'normal'
         dura = bar_note.duration
         voc = bar_note.voice
         voc_name = bar_note.voice_name
@@ -580,7 +588,10 @@ class Mediator():
             prev_chord = self.q_chord
         for i, pc in enumerate(prev_chord):
             cn = self.copy_barnote_basics(pc)
-            cn.set_duration(duration)
+            pc_dot = 0
+            if duration == pc.duration:  # Carry over dots from prev chord if this copy has same duration
+                pc_dot = pc.dot
+            cn.set_duration(duration, dot=pc_dot)
             cn.set_durtype(durval2type(self.dur_token))
             if i == 0:
                 self.prev_note = self.current_note
@@ -589,6 +600,9 @@ class Mediator():
             if self.tied:
                 cn.set_tie('stop')
             self.bar.add(cn)
+            if i == 0:  # On base note of chord, update divisions
+                self.check_duration(False)
+                self.check_divs()
         self.tied = False
 
     def clear_chord(self):
@@ -918,21 +932,12 @@ class Mediator():
         scaling = self.current_note.duration[1]
         divs = self.divisions
         tupl = self.current_note.tuplet
-        if not tupl:
-            a = 4
-            if base:
-                b = 1/base
-            else:
-                b = 1
-                print("Warning problem checking duration!")
+        a = 4
+        if base:
+            b = 1/base
         else:
-            num = 1
-            den = 1
-            for t in tupl:
-                num *= t.fraction[0]
-                den *= t.fraction[1]
-            a = 4*den
-            b = (1/base)*num
+            b = 1
+            print("Warning problem checking duration!")
         c = a * divs * scaling
         predur, mod = divmod(c, b)
         if mod > 0:
@@ -988,6 +993,8 @@ def get_fifths(key, mode):
         fifths = -flatkeys.index(key)
     if mode == 'minor':
         return fifths-3
+    elif mode == 'dorian':
+        return fifths-2
     elif mode == 'major':
         return fifths
 

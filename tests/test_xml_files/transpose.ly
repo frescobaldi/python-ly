@@ -4,7 +4,6 @@
 
 keyTime = {
     \time 5/4
-    \numericTimeSignature
     \partial 4
     \key f \minor
 }

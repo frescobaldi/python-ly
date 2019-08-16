@@ -10,7 +10,6 @@ StanzaOne = \lyricmode {
 
 keyTime = {
     \time 4/4
-    \numericTimeSignature
     \key c \major
 }
 
