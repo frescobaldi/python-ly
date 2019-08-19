@@ -47,7 +47,7 @@ This will behave like running the `ly` command when the package is installed.
 The `ly` Python module
 ----------------------
 
-The `ly` module supports both Python2 and Python3. This is a short description
+The `ly` module supports only Python3. This is a short description
 of some modules:
   
 * ``ly.slexer``: generic tools to build parsers using regular expressions
