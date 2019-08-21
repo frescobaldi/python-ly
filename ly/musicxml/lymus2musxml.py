@@ -107,6 +107,7 @@ class ParseSource():
         self.transposer = None
         # Variables to keep track of place in music, and place of \bar barlines and chord symbols
         self.time_sig = Fraction(1, 1)
+        self.time_sig_locations = {}
         self.partial = 0
         self.first_meas = False
         self.prev_note_dur = 0
@@ -279,6 +280,7 @@ class ParseSource():
                 self.mediator.voice_name = context_id
                 self.mediator.new_section(context_id)
             else:
+                self.mediator.voice_name = None
                 self.mediator.new_section('voice')
             self.first_meas = True
         elif context == 'Devnull':
@@ -300,6 +302,7 @@ class ParseSource():
                 self.mediator.voices_skipped += 1
             else:  # Last \\
                 self.total_time = self.total_time - self.voice_sep_length
+                self.update_time_sig()
                 self.time_since_bar = self.voice_sep_start_time_since_bar
                 self.first_meas = self.voice_sep_first_meas
 
@@ -427,6 +430,11 @@ class ParseSource():
                 return True
         return False
 
+    def update_time_sig(self):
+        """ If time sig changes here in a previous part of the music, update current time sig accordingly """
+        if self.total_time in self.time_sig_locations:
+            self.time_sig = self.time_sig_locations[self.total_time]
+
     def update_time_and_check(self, mus_obj):
         """
         Takes a note, rest, skip, etc. and updates total_time and time_since_bar accordingly
@@ -441,10 +449,12 @@ class ParseSource():
                     self.chord_locations[self.total_time] = {"root": mus_obj.token.capitalize()[0],
                                                              "root-alter": int(mus_obj.pitch.alter * 2),
                                                              "bass": False, "bass-alter": 0, "text": ""}
+                self.update_time_sig()
                 self.total_time += mus_obj.length()
             # When not in chord alt_mode, treat notes as notes
             else:
                 self.time_since_bar += mus_obj.length()
+                self.update_time_sig()
                 self.total_time += mus_obj.length()
                 # Check for bar unless final note in voice separator (in which case, wait until after)
                 if not self.voice_sep:
@@ -465,6 +475,7 @@ class ParseSource():
         elif isinstance(mus_obj.parent(), ly.music.items.Chord):
             self.prev_note_dur = mus_obj.parent().duration[0]
             self.time_since_bar += mus_obj.parent().duration[0]
+            self.update_time_sig()
             self.total_time += mus_obj.parent().duration[0]
             self.check_for_chord(mus_obj)
 
@@ -664,6 +675,7 @@ class ParseSource():
         if self.alt_mode == 'lyric':
             self.mediator.new_lyrics_item(skip.token)
         elif self.alt_mode == "chord":
+            self.update_time_sig()
             self.total_time += skip.length()
         else:
             self.break_skip_at_barline(skip)
@@ -676,6 +688,7 @@ class ParseSource():
             self.mediator.prev_note = self.mediator.current_note
             self.mediator.current_note = xml_objs.BarRest((length, Fraction(1, 1)), voice=self.mediator.voice, voice_name=self.mediator.voice_name, skip=True)
             self.mediator.check_current_note(rest=True)
+            self.update_time_sig()
             self.total_time += length
             self.time_since_bar += length
             self.check_for_barline()
@@ -860,6 +873,7 @@ class ParseSource():
 
     def TimeSignature(self, timeSign):
         self.get_beat_structure_from_time_sig(timeSign.numerator(), timeSign.fraction().denominator)
+        self.time_sig_locations[self.total_time] = timeSign.measure_length()
         self.time_sig = timeSign.measure_length()
         self.mediator.new_time(timeSign.numerator(), timeSign.fraction(), self.numericTime)
 

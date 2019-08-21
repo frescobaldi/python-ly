@@ -49,6 +49,7 @@ class Mediator():
         self.permanent_sections = []
         """ default and initial values """
         self.insert_into = None
+        self.current_attr = None
         self.current_note = None
         self.prev_note = None
         self.current_lynote = None
@@ -834,9 +835,7 @@ class Mediator():
         tempo = xml_objs.BarAttr()
         unittype = durval2type(unit) if unit else ''
         tempo.set_tempo(unit, unittype, beats, dots, text)
-        if self.bar is None:
-            self.new_bar()
-        self.bar.add(tempo)
+        self.add_to_bar(tempo)
 
     def set_by_property(self, prprty, value, group=False):
         """Generic setter for different properties."""
