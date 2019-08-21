@@ -376,7 +376,7 @@ class Mediator():
     def new_repeat(self, rep):
         barline = xml_objs.BarAttr()
         barline.set_barline(rep)
-        barline.repeat = rep
+        barline.repeats.append(rep)
         if self.bar is None:
             self.new_bar()
         self.bar.add(barline)
