@@ -71,6 +71,7 @@ class Mediator():
         self.q_chord = []
         self.prev_pitch = None
         self.prev_chord_pitch = None
+        self.prev_bar = None
         self.store_voicenr = 0
         self.staff_id_dict = {}
         self.store_unset_staff = False
@@ -223,6 +224,7 @@ class Mediator():
         def continue_barlist(insert_into):
             self.insert_into = insert_into
             if insert_into.barlist:
+                self.prev_bar = self.bar
                 self.bar = insert_into.barlist[-1]
             else:
                 self.new_bar(False)
@@ -359,6 +361,7 @@ class Mediator():
         if self.bar and fill_prev:
             self.bar.list_full = True
         self.current_attr = xml_objs.BarAttr()
+        self.prev_bar = self.bar
         self.bar = xml_objs.Bar()
         self.bar.obj_list = [self.current_attr]
         self.insert_into.barlist.append(self.bar)
@@ -368,19 +371,115 @@ class Mediator():
             self.new_bar()
         self.bar.add(obj)
 
+    def change_end_type(self, bar, from_type, to_type):
+        """ Adds a "downward jog" to the end of a final alternate ending. """
+        obj = bar.obj_list[0]
+        if isinstance(obj, ly.musicxml.xml_objs.BarAttr):
+            for end in obj.endings:
+                if end.etype == from_type:
+                    end.etype = to_type
+                    return
+
     def create_barline(self, bl):
+        if bl in ['|.', '.|']:
+            self.change_end_type(self.bar, 'discontinue', 'stop')
+        else:
+            self.change_end_type(self.bar, 'stop', 'discontinue')
         barline = xml_objs.BarAttr()
         barline.set_barline(bl)
         self.bar.add(barline)
         self.new_bar()
 
-    def new_repeat(self, rep):
-        barline = xml_objs.BarAttr()
-        barline.set_barline(rep)
-        barline.repeat = rep
+    def modify_barline(self, bl):
+        if bl in ['|.', '.|']:
+            self.change_end_type(self.prev_bar, 'discontinue', 'stop')
+        else:
+            self.change_end_type(self.prev_bar, 'stop', 'discontinue')
+        barline = self.prev_bar.get_last_attr()
+        barline.set_barline(bl)
+
+    def new_repeat(self, rep, prev=False):
+        """ Create a repeat sign (forward or backward). """
+        # Start a new bar when None or forward repeat in middle of measure
+        if self.bar is None or (rep == 'forward' and self.bar.has_music()):
+            self.new_bar()
+        # Determine whether the repeat should be in this measure or the previous
+        bar = None
+        if prev or (rep == 'backward' and not self.bar.has_music()):
+            bar = self.prev_bar
+        else:
+            bar = self.bar
+        # Determine whether a new attribute is needed
+        attr = None
+        if bar.has_music_since_attr():
+            attr = xml_objs.BarAttr()
+            bar.add(attr)
+        else:
+            attr = bar.get_last_attr()
+        # Set the barline (or left barline for forward repeats), but do not overwrite existing special barlines
+        existing_barline = False
+        if rep == 'forward':
+            if self.prev_bar is not None:
+                for obj in self.prev_bar.obj_list:
+                    if isinstance(obj, ly.musicxml.xml_objs.BarAttr):
+                        if obj.barline is not None:
+                            existing_barline = True
+                            break
+            if not existing_barline:
+                attr.set_left_barline(rep)
+        else:
+            for obj in bar.obj_list:
+                if isinstance(obj, ly.musicxml.xml_objs.BarAttr):
+                    if obj.barline is not None:
+                        existing_barline = True
+                        break
+            if not existing_barline:
+                attr.set_barline(rep)
+        # Create the repeat
+        attr.repeats.append(rep)
+        # Start a new bar if necessary
+        if not prev and rep == 'backward':
+            self.new_bar()
+
+    def new_ending(self, start, end, etype, staff_nr):
+        """ Create an alternate ending to a repeat. """
         if self.bar is None:
             self.new_bar()
-        self.bar.add(barline)
+        # Choose the appropriate bar, create necessary repeats between endings,
+        #     and create empty barlines at the start and end of the alternate endings (if they occur in the middle of a measure)
+        bar = None
+        if not self.bar.has_music():
+            if etype == 'start':
+                bar = self.bar
+            else:
+                bar = self.prev_bar
+                if etype == 'stop':
+                    self.new_repeat('backward', prev=True)
+        else:
+            if etype == 'start':
+                self.create_barline('')
+                bar = self.bar
+            elif etype == 'discontinue':
+                bar = self.bar
+                self.create_barline('')
+            elif etype == 'stop':
+                bar = self.bar
+                self.new_repeat('backward')
+        # If the final ending in a set of alternate endings ends on a 'light-heavy' barline, give it a "downward jog"
+        if etype == 'discontinue':
+            for obj in bar.obj_list:
+                if isinstance(obj, ly.musicxml.xml_objs.BarAttr):
+                    if obj.barline in ['light-heavy', 'heavy-light']:
+                        etype = 'stop'
+        elif etype == 'stop':
+            for obj in bar.obj_list:
+                if isinstance(obj, ly.musicxml.xml_objs.BarAttr):
+                    if obj.barline is not None and obj.barline not in ['light-heavy', 'heavy-light']:
+                        etype = 'discontinue'
+        # Mark the ending only if this is the first staff
+        if staff_nr == 1:
+            attr = bar.obj_list[0]
+            attr.add_ending(start, end, etype)
 
     def new_key(self, key_name, mode):
         self.num_accidentals_in_key = get_fifths(key_name, mode)
