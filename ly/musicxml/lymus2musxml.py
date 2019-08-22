@@ -238,8 +238,8 @@ class ParseSource():
     def is_volta_ending(self, music_list):
         """ Returns whether a MusicList in an alternate ending of a volta repeat (not in lyrics or chord symbols) """
         return (music_list.parent().parent().token == '\\alternative'
-                    and music_list.parent().parent().parent().specifier() == 'volta'
-                    and self.alt_mode not in ['lyric', 'chord'])
+                and music_list.parent().parent().parent().specifier() == 'volta'
+                and self.alt_mode not in ['lyric', 'chord'])
 
     def Chord(self, chord):
         self.mediator.clear_chord()
