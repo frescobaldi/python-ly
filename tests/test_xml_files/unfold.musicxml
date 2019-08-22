@@ -364,10 +364,6 @@
       </note>
     </measure>
     <measure number="10">
-      <attributes />
-      <barline location="right">
-        <bar-style>light-heavy</bar-style>
-      </barline>
       <note>
         <pitch>
           <step>D</step>
