@@ -125,15 +125,14 @@ class IterateXmlObjs():
         if obj.has_attr():
             self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, obj.divs)
         # Place repeats, alternate endings, and their associated barlines
-        if obj.endings or obj.repeats:
-            # Get repeats
+        if obj.endings or obj.repeat is not None:
+            # Get repeat
             forward_rep = None
             backward_rep = None
-            for rep in obj.repeats:
-                if rep == 'forward':
-                    forward_rep = rep
-                else:
-                    backward_rep = rep
+            if obj.repeat == 'forward':
+                forward_rep = obj.repeat
+            elif obj.repeat == 'backward':
+                backward_rep = obj.repeat
             # Get endings
             ending_start = None
             ending_end = None
@@ -143,10 +142,10 @@ class IterateXmlObjs():
                 else:
                     ending_end = end
             # Left barline
-            if forward_rep is not None or ending_start is not None:
+            if forward_rep is not None or ending_start is not None or obj.left_barline is not None:
                 self.musxml.add_barline(obj.left_barline, ending_start, forward_rep)
             # Right barline
-            if backward_rep is not None or ending_end is not None:
+            if backward_rep is not None or ending_end is not None or obj.barline is not None:
                 self.musxml.add_barline(obj.barline, ending_end, backward_rep)
         # Place barline without any repeats or alternate endings
         elif obj.barline:
@@ -529,7 +528,7 @@ class ScorePart(ScoreSection):
                     glob_barattr.time = obj.time
                     glob_barattr.mode = obj.mode
                     glob_barattr.barline = obj.barline
-                    glob_barattr.repeats = obj.repeats
+                    glob_barattr.repeat = obj.repeat
                     glob_barattr.tempo = obj.tempo
                     section_bar.obj_list.append(glob_barattr)
             section.barlist.append(section_bar)
@@ -549,23 +548,6 @@ class Bar():
 
     def add(self, obj):
         self.obj_list.append(obj)
-
-    def get_last_attr(self):
-        """ Returns the last BarAttr in the bar. """
-        for obj in reversed(self.obj_list):
-            if isinstance(obj, BarAttr):
-                return obj
-        return None
-
-    def has_music_since_attr(self):
-        """ Check if bar has added music since the last BarAttr. """
-        ret = False
-        for obj in self.obj_list:
-            if isinstance(obj, BarMus):
-                ret = True
-            elif isinstance(obj, BarAttr):
-                ret = False
-        return ret
 
     def has_music(self):
         """ Check if bar contains music. """
@@ -907,7 +889,7 @@ class BarAttr():
         self.divs = 0
         self.barline = None
         self.left_barline = None
-        self.repeats = []
+        self.repeat = None
         self.endings = []
         self.staves = 0
         self.multiclef = []
@@ -961,7 +943,7 @@ class BarAttr():
             check = True
         elif self.staves != 0:
             check = True
-        elif self.repeats:
+        elif self.repeat is not None:
             check = True
         elif self.endings:
             check = True
