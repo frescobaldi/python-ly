@@ -372,30 +372,40 @@ class Mediator():
         self.bar.add(obj)
 
     def change_end_type(self, bar, from_type, to_type):
-        """ Adds a "downward jog" to the end of a final alternate ending. """
+        """ Changes ending in bar of from_type to to_type. """
         obj = bar.obj_list[0]
-        if isinstance(obj, ly.musicxml.xml_objs.BarAttr):
+        if isinstance(obj, xml_objs.BarAttr):
             for end in obj.endings:
                 if end.etype == from_type:
                     end.etype = to_type
                     return
 
-    def create_barline(self, bl):
-        if bl in ['|.', '.|']:
-            self.change_end_type(self.bar, 'discontinue', 'stop')
+    def update_ending(self, bl, bar):
+        """ Updates whether an ending has a downward jog based on what type of barline is added (bl). """
+        if bl in ['|.', '.|']: # 'light-heavy' or 'heavy-light'
+            # Add downward jog to ending
+            self.change_end_type(bar, 'discontinue', 'stop')
         else:
-            self.change_end_type(self.bar, 'stop', 'discontinue')
+            # Remove downward jog from ending
+            self.change_end_type(bar, 'stop', 'discontinue')
+
+    def create_barline(self, bl):
+        self.update_ending(bl, self.bar)
         barline = xml_objs.BarAttr()
         barline.set_barline(bl)
         self.bar.add(barline)
         self.new_bar()
 
     def modify_barline(self, bl):
-        if bl in ['|.', '.|']:
-            self.change_end_type(self.prev_bar, 'discontinue', 'stop')
+        """ Set the barline of the previous measure to bl. """
+        self.update_ending(bl, self.prev_bar)
+        # If the last object in the measure is an attribute, change its barline
+        if isinstance(self.prev_bar.obj_list[-1], xml_objs.BarAttr):
+            barline = self.prev_bar.obj_list[-1]
+        # Otherwise, create a new BarAttr for the barline
         else:
-            self.change_end_type(self.prev_bar, 'stop', 'discontinue')
-        barline = self.prev_bar.get_last_attr()
+            barline = xml_objs.BarAttr()
+            self.prev_bar.add(barline)
         barline.set_barline(bl)
 
     def new_repeat(self, rep, prev=False):
@@ -411,34 +421,42 @@ class Mediator():
             bar = self.bar
         # Determine whether a new attribute is needed
         attr = None
-        if bar.has_music_since_attr():
-            attr = xml_objs.BarAttr()
-            bar.add(attr)
+        if rep == 'backward':
+            if isinstance(bar.obj_list[-1], xml_objs.BarAttr):
+                attr = bar.obj_list[-1]
+            else:
+                attr = xml_objs.BarAttr()
+                bar.add(attr)
         else:
-            attr = bar.get_last_attr()
+            attr = bar.obj_list[0]
         # Set the barline (or left barline for forward repeats), but do not overwrite existing special barlines
         existing_barline = False
         if rep == 'forward':
             if self.prev_bar is not None:
                 for obj in self.prev_bar.obj_list:
-                    if isinstance(obj, ly.musicxml.xml_objs.BarAttr):
-                        if obj.barline is not None:
+                    if isinstance(obj, xml_objs.BarAttr):
+                        # Backward repeats with 'light-heavy' barlines don't count as special barlines
+                        if obj.repeat == 'backward':
+                            if obj.barline != 'light-heavy':
+                                existing_barline = True
+                                break
+                        elif obj.barline is not None:
                             existing_barline = True
                             break
             if not existing_barline:
                 attr.set_left_barline(rep)
         else:
             for obj in bar.obj_list:
-                if isinstance(obj, ly.musicxml.xml_objs.BarAttr):
+                if isinstance(obj, xml_objs.BarAttr):
                     if obj.barline is not None:
                         existing_barline = True
                         break
             if not existing_barline:
                 attr.set_barline(rep)
         # Create the repeat
-        attr.repeats.append(rep)
+        attr.repeat = rep
         # Start a new bar if necessary
-        if not prev and rep == 'backward':
+        if not prev and rep == 'backward' and self.bar.has_music():
             self.new_bar()
 
     def new_ending(self, start, end, etype, staff_nr):
@@ -468,14 +486,16 @@ class Mediator():
         # If the final ending in a set of alternate endings ends on a 'light-heavy' barline, give it a "downward jog"
         if etype == 'discontinue':
             for obj in bar.obj_list:
-                if isinstance(obj, ly.musicxml.xml_objs.BarAttr):
+                if isinstance(obj, xml_objs.BarAttr):
                     if obj.barline in ['light-heavy', 'heavy-light']:
                         etype = 'stop'
+                        break
         elif etype == 'stop':
             for obj in bar.obj_list:
-                if isinstance(obj, ly.musicxml.xml_objs.BarAttr):
+                if isinstance(obj, xml_objs.BarAttr):
                     if obj.barline is not None and obj.barline not in ['light-heavy', 'heavy-light']:
                         etype = 'discontinue'
+                        break
         # Mark the ending only if this is the first staff
         if staff_nr == 1:
             attr = bar.obj_list[0]

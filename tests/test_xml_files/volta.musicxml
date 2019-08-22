@@ -611,7 +611,6 @@
         <ending number="1, 2" type="start">1.-2.</ending>
       </barline>
       <barline location="right">
-        <bar-style>heavy-light</bar-style>
         <ending number="1, 2" type="stop" />
       </barline>
       <note>
