@@ -382,7 +382,7 @@ class Mediator():
 
     def update_ending(self, bl, bar):
         """ Updates whether an ending has a downward jog based on what type of barline is added (bl). """
-        if bl in ['|.', '.|']: # 'light-heavy' or 'heavy-light'
+        if bl in ['|.', '.|']:  # 'light-heavy' or 'heavy-light'
             # Add downward jog to ending
             self.change_end_type(bar, 'discontinue', 'stop')
         else:
