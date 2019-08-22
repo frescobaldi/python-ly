@@ -231,11 +231,15 @@ class ParseSource():
                 self.sims_and_seqs.append('sim')
         elif musicList.token == '{':
             self.sims_and_seqs.append('seq')
-            if (musicList.parent().parent().token == '\\alternative'
-                    and musicList.parent().parent().parent().specifier() == 'volta'
-                    and self.alt_mode not in ['lyric', 'chord']):
+            if self.is_volta_ending(musicList):
                 end = self.alt_endings[0]
                 self.mediator.new_ending(end[0], end[1], 'start', self.staff)
+
+    def is_volta_ending(self, music_list):
+        """ Returns whether a MusicList in an alternate ending of a volta repeat (not in lyrics or chord symbols) """
+        return (music_list.parent().parent().token == '\\alternative'
+                    and music_list.parent().parent().parent().specifier() == 'volta'
+                    and self.alt_mode not in ['lyric', 'chord'])
 
     def Chord(self, chord):
         self.mediator.clear_chord()
@@ -906,13 +910,13 @@ class ParseSource():
             num_repeats = self.volta_counts.pop()
             if num_endings > num_repeats:
                 print('Warning: More alternate endings than repeats!')
-            # Create a stack of ending lists of form [start_num, end_num, is_last]
-            for end_num in range(1, num_endings + 1):
-                if end_num == 1:  # First ending
-                    self.alt_endings.append([1, num_repeats - num_endings + 1, False])
-                else:  # All other endings endings
-                    self.alt_endings.append([num_repeats - num_endings + end_num, num_repeats - num_endings + end_num, False])
-                if end_num == num_endings:  # If last ending, indicate so
+            # Create a stack of ending lists of form [starting_repeat_num, ending_repeat_num, is_last]
+            for ending_num in range(1, num_endings + 1):
+                if ending_num == 1:  # First ending
+                    self.alt_endings.append([ending_num, num_repeats - num_endings + ending_num, False])
+                else:  # All other endings
+                    self.alt_endings.append([num_repeats - num_endings + ending_num, num_repeats - num_endings + ending_num, False])
+                if ending_num == num_endings:  # If last ending, indicate so
                     self.alt_endings[-1][-1] = True
 
     def Tremolo(self, tremolo):
@@ -1186,9 +1190,7 @@ class ParseSource():
                 self.alt_mode = None
             elif end.node.parent().token == '\\transpose':
                 self.transposer = None
-            if (end.node.parent().parent().token == '\\alternative'
-                    and end.node.parent().parent().parent().specifier() == 'volta'
-                    and self.alt_mode not in ['lyric', 'chord']):
+            if self.is_volta_ending(end.node):
                 end = self.alt_endings.pop(0)
                 if end[2]:  # Final ending
                     self.mediator.new_ending(end[0], end[1], 'discontinue', self.staff)
