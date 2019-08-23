@@ -566,10 +566,21 @@ class CreateMusicXML():
             octchnode = etree.SubElement(clefnode, "clef-octave-change")
             octchnode.text = str(oct_ch)
 
-    def add_barline(self, bl_type, repeat=None):
-        barnode = etree.SubElement(self.current_bar, "barline", location="right")
-        barstyle = etree.SubElement(barnode, "bar-style")
-        barstyle.text = bl_type
+    def add_barline(self, bl_type=None, ending=None, repeat=None):
+        # Do not place repeat if this is the first measure
+        if repeat == "forward" and "number" in self.current_bar.attrib and self.current_bar.attrib["number"] == "1":
+            return
+        if repeat == "forward" or ending and ending.etype == "start":  # Forward repeats and ending starts should be at the start of the measure
+            barnode = etree.SubElement(self.current_bar, "barline", location="left")
+        else:  # All other barlines should be at the end of the measure
+            barnode = etree.SubElement(self.current_bar, "barline", location="right")
+        if bl_type:
+            barstyle = etree.SubElement(barnode, "bar-style")
+            barstyle.text = bl_type
+        if ending:
+            endingnode = etree.SubElement(barnode, "ending", number=ending.get_number(), type=ending.etype)
+            if ending.etype == "start":
+                endingnode.text = ending.get_text()
         if repeat:
             repeatnode = etree.SubElement(barnode, "repeat", direction=repeat)
 

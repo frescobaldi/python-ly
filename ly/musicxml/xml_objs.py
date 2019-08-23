@@ -124,10 +124,32 @@ class IterateXmlObjs():
         """Create bar attribute xml-nodes."""
         if obj.has_attr():
             self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, obj.divs)
-        if obj.repeat:
-            self.musxml.add_barline(obj.barline, obj.repeat)
+        # Place repeats, alternate endings, and their associated barlines
+        if obj.endings or obj.repeat is not None:
+            # Get repeat
+            forward_rep = None
+            backward_rep = None
+            if obj.repeat == 'forward':
+                forward_rep = obj.repeat
+            elif obj.repeat == 'backward':
+                backward_rep = obj.repeat
+            # Get endings
+            ending_start = None
+            ending_end = None
+            for end in obj.endings:
+                if end.etype == 'start':
+                    ending_start = end
+                else:
+                    ending_end = end
+            # Left barline
+            if forward_rep is not None or ending_start is not None or obj.left_barline is not None:
+                self.musxml.add_barline(obj.left_barline, ending_start, forward_rep)
+            # Right barline
+            if backward_rep is not None or ending_end is not None or obj.barline is not None:
+                self.musxml.add_barline(obj.barline, ending_end, backward_rep)
+        # Place barline without any repeats or alternate endings
         elif obj.barline:
-            self.musxml.add_barline(obj.barline)
+            self.musxml.add_barline(obj.barline, None, None)
         if obj.staves:
             self.musxml.add_staves(obj.staves)
         if obj.multiclef:
@@ -567,7 +589,7 @@ class Bar():
         """ Adding new voice to bar.
         Omitting double or conflicting bar attributes as long as override is false.
         Omitting also bars with only skips."""
-        if new_voice.obj_list[0].has_attr():
+        if new_voice.obj_list and new_voice.obj_list[0].has_attr():
             if self.obj_list[0].has_attr():
                 self.obj_list[0].merge_attr(new_voice.obj_list[0], override)
             else:
@@ -578,7 +600,7 @@ class Bar():
         try:
             if self.obj_list[-1].barline and new_voice.obj_list[-1].barline:
                 self.obj_list.pop()
-        except AttributeError:
+        except (AttributeError, IndexError):
             pass
         if not self.is_skip(backup_list):
             self.create_backup()
@@ -832,6 +854,30 @@ class BarRest(BarMus):
             self.type = durtype
 
 
+class Ending():
+    """ object that keeps track of alternate repeat endings """
+
+    def __init__(self, start, end, etype):
+        self.start = start
+        self.end = end
+        self.etype = etype
+
+    def get_number(self):
+        """ A string of comma separated integers from start to end """
+        number = ''
+        for i in range(self.start, self.end):
+            number += str(i) + ', '
+        return number + str(self.end)
+
+    def get_text(self):
+        """ 'S.' if start == end, else 'S.-E.' (where S and E are the start and end numbers) """
+        text = ''
+        text += str(self.start) + '.'
+        if self.start != self.end:
+            text += '-' + str(self.end) + '.'
+        return text
+
+
 class BarAttr():
     """ object that keep track of bar attributes, e.g. time sign, clef, key etc """
 
@@ -842,7 +888,9 @@ class BarAttr():
         self.mode = ''
         self.divs = 0
         self.barline = None
+        self.left_barline = None
         self.repeat = None
+        self.endings = []
         self.staves = 0
         self.multiclef = []
         self.tempo = None
@@ -868,8 +916,14 @@ class BarAttr():
     def set_barline(self, bl):
         self.barline = convert_barl(bl)
 
+    def set_left_barline(self, bl):
+        self.left_barline = convert_barl(bl)
+
     def set_tempo(self, unit=0, unittype='', beats=0, dots=0, text=""):
         self.tempo = TempoDir(unit, unittype, beats, dots, text)
+
+    def add_ending(self, start, end, etype):
+        self.endings.append(Ending(start, end, etype))
 
     def has_attr(self):
         check = False
@@ -884,6 +938,14 @@ class BarAttr():
         elif self.divs != 0:
             check = True
         elif self.barline is not None:
+            check = True
+        elif self.tempo is not None:
+            check = True
+        elif self.staves != 0:
+            check = True
+        elif self.repeat is not None:
+            check = True
+        elif self.endings:
             check = True
         return check
 
