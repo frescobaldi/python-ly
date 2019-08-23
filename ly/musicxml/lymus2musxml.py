@@ -431,7 +431,7 @@ class ParseSource():
         return False
 
     def update_time_sig(self):
-        """ If time sig changes here in a previous part of the music, update current time sig accordingly """
+        """ If time sig changes here in a previously processed part of the music, update current time sig accordingly """
         if self.total_time in self.time_sig_locations:
             self.time_sig = self.time_sig_locations[self.total_time]
 
