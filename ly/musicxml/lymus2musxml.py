@@ -1295,10 +1295,35 @@ class ParseSource():
         Iter over node which represent a \repeat unfold expression
         and do the unfolding directly.
         """
+        # Create list of repeat_count alternate endings (in reverse order) if there are any
+        #     (the first ending is repeated to fill in the difference between the number of endings and repeat_count)
+        num_endings = 0
+        endings = []
+        for node in repeat_node:
+            if isinstance(node, ly.music.items.Alternative):
+                num_endings = len(node[0])
+                if num_endings > repeat_count:
+                    num_endings = repeat_count
+                    print("Warning: More alternate endings than unfold repeats (removing extras)!")
+                if num_endings != 0:
+                    # Append all endings from the last ending until the second ending (reverse order)
+                    for i in range(num_endings - 1, 0, -1):
+                        endings.append(node[0][i])
+                    # Repeat first ending
+                    for i in range(repeat_count - num_endings + 1):
+                        endings.append(node[0][0])
+                break
+        # Duplicate the nodes in the repeat
         for r in range(repeat_count):
+            # Duplicate nodes in the body of the repeat
             for n in repeat_node:
-                for c in self.iter_score(n, doc):
-                    yield c
+                if not isinstance(n, ly.music.items.Alternative):
+                    for c in self.iter_score(n, doc):
+                        yield c
+            # Produce one ending (if any) after every time the body of the repeat has been duplicated
+            if endings:
+                for alt in self.iter_score(endings.pop(), doc):
+                    yield alt
 
     def find_score_sub(self, doc):
         """Find substitute for scorenode. Takes first music node that isn't
