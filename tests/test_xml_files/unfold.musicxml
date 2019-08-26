@@ -5,7 +5,7 @@
   <identification>
     <encoding>
       <software>python-ly 0.9.5</software>
-      <encoding-date>2019-08-21</encoding-date>
+      <encoding-date>2019-08-26</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -266,8 +266,8 @@
       </note>
       <note>
         <pitch>
-          <step>C</step>
-          <octave>5</octave>
+          <step>B</step>
+          <octave>4</octave>
         </pitch>
         <duration>2</duration>
         <voice>1</voice>

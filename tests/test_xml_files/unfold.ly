@@ -6,7 +6,7 @@ Soprano = \relative c'' {
   \time 4/4 \key c \major
   \voiceOne
   \repeat unfold 5 {a2}
-  \alternative {{b2 b1 \bar ""} {c2 c1} {d2 d1}} \bar "|."
+  \alternative {{b2 b1 \bar ""} {b2 c1} {d2 d1}} \bar "|."
 }
 
 Alto = \relative c'' {
