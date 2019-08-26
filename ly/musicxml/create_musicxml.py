@@ -458,7 +458,10 @@ class CreateMusicXML():
 
     def add_tremolo(self, trem_type, lines):
         self.add_ornaments()
-        trem_node = etree.SubElement(self.current_ornament, "tremolo", type=trem_type)
+        if trem_type is not None:
+            trem_node = etree.SubElement(self.current_ornament, "tremolo", type=trem_type)
+        else:
+            trem_node = etree.SubElement(self.current_ornament, "tremolo")
         trem_node.text = str(lines)
 
     def add_trill(self):

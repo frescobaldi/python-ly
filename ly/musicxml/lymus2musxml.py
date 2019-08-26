@@ -75,6 +75,8 @@ class ParseSource():
         self.scale = ''
         self.grace_seq = False
         self.trem_rep = 0
+        self.trem_note_count = 0
+        self.trem_is_started = False
         self.piano_staff = 0
         self.staff = 0
         self.numericTime = False
@@ -623,13 +625,26 @@ class ParseSource():
             self.update_beams(drumnote)
         self.update_time_and_check(drumnote)
 
+    def handle_tremolo_start_stop(self):
+        """ Set multinote tremolos. The first note gets the 'start' type, subsequent notes get no type. """
+        if not self.trem_is_started:
+            ttype = 'start'
+            self.trem_is_started = True
+        else:
+            ttype = None
+        self.mediator.set_tremolo(trem_type=ttype, repeats=self.trem_rep, note_count=self.trem_note_count)
+
     def check_note(self, note):
         """Generic check for all notes, both pitched and unpitched."""
         self.check_tuplet()
         if self.grace_seq:
             self.mediator.new_grace()
-        if self.trem_rep and not self.look_ahead(note, ly.music.items.Duration):
-            self.mediator.set_tremolo(trem_type='start', repeats=self.trem_rep)
+        if self.trem_rep:
+            # Update the duration of the note
+            note.duration = (note.duration[0] * self.trem_rep, note.duration[1])
+            # Set tremolo if there isn't a duration change
+            if not self.look_ahead(note, ly.music.items.Duration):
+                self.handle_tremolo_start_stop()
 
     def check_tuplet(self):
         """Generic tuplet check."""
@@ -661,7 +676,7 @@ class ParseSource():
             if self.alt_mode not in ["chord", "lyric"]:  # Avoids \skip # in lyrics
                 self.mediator.new_duration_token(duration.token, duration.tokens)
                 if self.trem_rep:
-                    self.mediator.set_tremolo(trem_type='start', repeats=self.trem_rep)
+                    self.handle_tremolo_start_stop()
 
     def Tempo(self, tempo):
         """ Tempo direction, e g '4 = 80' """
@@ -900,6 +915,10 @@ class ParseSource():
                 self.mediator.new_repeat('forward')
         elif repeat.specifier() == 'tremolo':
             self.trem_rep = repeat.repeat_count()
+            if isinstance(repeat[0], ly.music.items.MusicList):  # List of notes
+                self.trem_note_count = len(repeat[0])
+            else:  # Singular note
+                self.trem_note_count = 1
         else:  # TODO: Support percent repeats
             print("Warning: Repeat", repeat.specifier(), "is not supported!")
 
@@ -1144,6 +1163,7 @@ class ParseSource():
                     self.mediator.set_tremolo(trem_type="stop")
                 else:
                     self.mediator.set_tremolo(trem_type="single")
+                self.trem_is_started = False
                 self.trem_rep = 0
         elif isinstance(end.node, ly.music.items.Context):
             self.in_context = False
