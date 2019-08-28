@@ -1215,7 +1215,7 @@ def length_to_duration(length):
         8, 4, 2, 1, Fraction(1, 2), Fraction(1, 4), Fraction(1, 8), Fraction(1, 16), Fraction(1, 32),
         Fraction(1, 64), Fraction(1, 128), Fraction(1, 256), Fraction(1, 512), Fraction(1, 1024), Fraction(1, 2048)
     ]  # Note: 2048 is supported by ly but not by MusicXML!
-    index = 13
+    index = durations.index(Fraction(1, 2048))
     dots = dur = add = 0
     # Calculate the index of the first duration shorter than length
     for i in range(len(durations)):
@@ -1232,7 +1232,7 @@ def length_to_duration(length):
                 print("Warning: Length of note is too long!")
             index = i
             break
-    if index == 13:
+    if index == durations.index(Fraction(1, 2048)):
         print("Warning: Length of note is too short for MusicXML!")
     return ly.duration.durations[index], dots
 
