@@ -895,15 +895,16 @@ class Mediator():
             n = 1
         note.set_gliss(line, endtype="stop", nr=n)
 
-    def set_tremolo(self, trem_type='single', duration=0, repeats=0):
+    def set_tremolo(self, trem_type='single', duration=0, repeats=0, note_count=1):
         if self.current_note.tremolo[1]:  # tremolo already set
             self.current_note.set_tremolo(trem_type)
         else:
             if repeats:
                 duration = int(self.dur_token)
-                bs, durtype = calc_trem_dur(repeats, self.current_note.duration, duration)
+                bs, durtype, dot_num = calc_trem_dur(repeats, self.current_note.duration, duration, note_count)
                 self.current_note.duration = bs
                 self.current_note.type = durtype
+                self.current_note.dot = dot_num
             elif not duration:
                 duration = self.prev_tremolo
             else:
@@ -1202,19 +1203,51 @@ def artic_token2xml_name(art_token):
             return False
 
 
-def calc_trem_dur(repeats, base_scaling, duration):
-    """ Calculate tremolo duration from number of
-    repeats and initial duration. """
+def length_to_duration(length):
+    """
+    Convert a note length fraction (such as 3/4) into a lilypond duration (str) and a number of dots
+        lilypond duration could be: '\\maxima' (8), '\\longa' (4), '\\breve' (2), or '1', '2', '4', ..., '2048' for fractions (1/#)
+
+    Ex: length of 3/4 -> ('2', 1) because 3/4 is a dotted half note
+        length of 7/2 -> ('\\breve', 2) because 7/2 is a double dotted breve
+    """
+    durations = [
+        8, 4, 2, 1, Fraction(1, 2), Fraction(1, 4), Fraction(1, 8), Fraction(1, 16), Fraction(1, 32),
+        Fraction(1, 64), Fraction(1, 128), Fraction(1, 256), Fraction(1, 512), Fraction(1, 1024), Fraction(1, 2048)
+    ]  # Note: 2048 is supported by ly but not by MusicXML!
+    index = durations.index(Fraction(1, 2048))
+    dots = dur = add = 0
+    # Calculate the index of the first duration shorter than length
+    for i in range(len(durations)):
+        if length >= durations[i]:
+            if length < 16:  # Prevents infinite recursion
+                dur = durations[i]
+                dot_length = dur * Fraction(1, 2)
+                # Calculate number of needed dots
+                while(length > dur):  # Limit of dur is durations[i] * 2
+                    dots += 1
+                    dur += dot_length
+                    dot_length *= Fraction(1, 2)
+            else:
+                print("Warning: Length of note is too long!")
+            index = i
+            break
+    if index == durations.index(Fraction(1, 2048)):
+        print("Warning: Length of note is too short for MusicXML!")
+    return ly.duration.durations[index], dots
+
+
+def calc_trem_dur(repeats, base_scaling, duration, note_count):
+    """
+    Calculate tremolo duration, note type, and number of dots from:
+        number of repeats, initial duration, and number of notes in the tremolo.
+    """
     base = base_scaling[0]
     scale = base_scaling[1]
+    duration, dots = length_to_duration(base * scale * repeats * note_count)
     new_base = base * repeats
-    if repeats > duration:
-        import ly.duration
-        trem_length = ly.duration.tostring(int((repeats // duration) * -0.5))
-    else:
-        trem_length = str(duration // repeats)
-    new_type = xml_objs.durval2type(trem_length)
-    return (new_base, scale), new_type
+    new_type = durval2type(duration)
+    return (new_base, scale), new_type, dots
 
 
 def get_line_style(style):
