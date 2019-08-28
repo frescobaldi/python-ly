@@ -72,3 +72,21 @@ by typing ``make html`` in the doc directory.
 
 You can also read the docs online at http://python-ly.readthedocs.org/.
 
+`Core Understanding Test (CUT)`_
+--------------------------------
+
+.. _Core Understanding Test (CUT): //gitlab.ccel.org/drupal/shared-modules/wikis
+  /Core-Understanding-Test
+
+- When should branches be merged to ``master``, ``ccel-specific``,
+  and ``stable`` respectively?
+- If you were going to be a developer for python-ly's ``ly2xml`` conversion,
+  where would be a good directory of test files to use in order to become
+  familiar with ``Lilypond`` and ``MusicXML``?
+- What software should you use to render ``Lilypond`` and ``MusicXML`` files,
+  respectively?
+- Within the ``/ly/musicxml`` directory, what is the general flow of control 
+  between files?
+- What are two important differences and one similarity between ``Lilypond`` and
+  ``MusicXML`` files?
+
