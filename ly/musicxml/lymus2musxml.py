@@ -159,9 +159,9 @@ class ParseSource():
         score = self.get_score(mustree)
         # Help from https://stackoverflow.com/questions/28963354/typeerror-cant-pickle-generator-objects
         if score:
-            mus_nodes = list(self.iter_score(score, mustree))
+            mus_nodes = self.iter_score(score, mustree)
         else:
-            mus_nodes = list(self.find_score_sub(mustree))
+            mus_nodes = self.find_score_sub(mustree)
         self.generate_location_dicts(mus_nodes)
         self.mediator.new_section("fallback")  # fallback/default section
         self.parse_nodes(mus_nodes)
@@ -1407,17 +1407,19 @@ class ParseSource():
 
         Furthermore \repeat unfold expressions are unfolded.
         """
+        return_list = []
         for s in scorenode:
             if isinstance(s, ly.music.items.Repeat) and s.specifier() == 'unfold':
                 for u in self.unfold_repeat(s, s.repeat_count(), doc):
-                    yield u
+                    return_list.append(u)
             else:
                 n = doc.substitute_for_node(s) or s
-                yield n
+                return_list.append(n)
                 for c in self.iter_score(n, doc):
-                    yield c
+                    return_list.append(c)
                 if isinstance(s, ly.music.items.Container):
-                    yield End(s)
+                    return_list.append(End(s))
+        return return_list
 
     def unfold_repeat(self, repeat_node, repeat_count, doc):
         r"""
