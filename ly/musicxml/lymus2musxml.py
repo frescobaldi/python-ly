@@ -193,18 +193,15 @@ class ParseSource():
             staff = 0
             for m in nodes:
                 class_name = m.__class__.__name__
-                # Notes should advance total_time by their length (but not chord notes)
+                # Notes should advance total_time by their length (but not chord or grace notes)
                 if (isinstance(m, ly.music.items.Durable) and not isinstance(m, ly.music.items.LyricText)
-                        and not chord_mode and not isinstance(m.parent(), ly.music.items.Chord)):
+                        and not chord_mode and not grace_seq and not isinstance(m.parent(), ly.music.items.Chord)):
                     dur = m.duration
                     # In the instance of a tuplet or tremolo repeat, change the duration
                     if len(tuplet) != 0:
                         dur = (Fraction((dur[0] * tuplet[-1][1]) / tuplet[-1][0]), dur[1])
                     if trem_rep != 0:
                         dur = (dur[0] * trem_rep, dur[1])
-                    # Grace notes get no length
-                    if grace_seq:
-                        dur = (0, 1)
                     total_time += dur[0] * dur[1]
                 # Indicate chord mode (ignore notes in this mode)
                 elif isinstance(m, (ly.music.items.ChordMode)):
