@@ -731,6 +731,7 @@ class ParseSource():
         """
         break_locations = []
         remaining_length = skip.length()
+        time_since_bar = self.time_since_bar
         partial = 0
         prev_break = 0
         # Get break locations from \bar positions
@@ -738,10 +739,17 @@ class ParseSource():
             if bar_location > self.total_time and bar_location <= self.total_time + remaining_length:
                 break_locations.append(bar_location - self.total_time)
         # Get break location from pickup measure if needed
-        if self.first_meas and self.partial != 0 and remaining_length >= self.partial:
-            break_locations.append(self.partial)
-            remaining_length -= self.partial
-            partial = self.partial
+        if self.first_meas and self.partial != 0 and remaining_length >= self.partial - time_since_bar:
+            partial = self.partial - time_since_bar
+            break_locations.append(partial)
+            remaining_length -= partial
+            time_since_bar = 0
+        # Get break location from measure already started
+        if time_since_bar and remaining_length >= self.time_sig - time_since_bar:
+            partial = self.time_sig - time_since_bar
+            break_locations.append(partial)
+            remaining_length -= partial
+            time_since_bar = 0
         # Get break locations from full measure lengths
         if remaining_length >= self.time_sig:
             for i in range(remaining_length // self.time_sig):
