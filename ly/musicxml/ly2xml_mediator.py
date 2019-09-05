@@ -318,7 +318,7 @@ class Mediator():
         if self.score.is_empty():
             self.new_part()
             self.part.barlist.extend(self.get_first_var())
-        self.score.merge_globally(self.score.glob_section, override=True)
+        self.score.merge_globally(self.score.glob_section, False)
 
     def reset_current_accidentals_dict(self, fifths):
         """Resets self.current_accidentals_dict to only include the accidentals in the current key"""
@@ -395,18 +395,6 @@ class Mediator():
         barline.set_barline(bl)
         self.bar.add(barline)
         self.new_bar()
-
-    def modify_barline(self, bl):
-        """ Set the barline of the previous measure to bl. """
-        self.update_ending(bl, self.prev_bar)
-        # If the last object in the measure is an attribute, change its barline
-        if isinstance(self.prev_bar.obj_list[-1], xml_objs.BarAttr):
-            barline = self.prev_bar.obj_list[-1]
-        # Otherwise, create a new BarAttr for the barline
-        else:
-            barline = xml_objs.BarAttr()
-            self.prev_bar.add(barline)
-        barline.set_barline(bl)
 
     def new_repeat(self, rep, prev=False):
         """ Create a repeat sign (forward or backward). """
@@ -516,7 +504,7 @@ class Mediator():
     def new_time(self, num, den, numeric=False):
         if self.bar is None:
             self.new_bar()
-        self.current_attr.set_time([num, den.denominator], numeric)
+        self.current_attr.set_time([num, den], numeric)
 
     def new_clef(self, clefname):
         self.clef = clefname2clef(clefname)
