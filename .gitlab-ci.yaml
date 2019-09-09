@@ -1,9 +1,39 @@
-tests:
+.test_template: &test_definition
   stage: test
   tags:
-    - python
+    - docker
   script:
     - pip3 install -r requirements.txt
     - pip3 install -r dev-only-reqs.txt
     - pycodestyle --ignore=E501,W503,E121,E123,E126,E133,E226,E241,E242,E704 .
-    - python3 -m tests.test_xml
+    - pytest tests --cov=ly --cov-report term --cov-report html
+
+test_python3.5:
+  image: python:3.5
+  <<: *test_definition
+test_python3.6:
+  image: python:3.6
+  <<: *test_definition
+test_python3.7:
+  image: python:3.7
+  <<: *test_definition
+
+test:
+  image: python
+  <<: *test_definition
+  artifacts:
+    paths:
+      - htmlcov/
+    expire_in: 1 day
+
+docs:
+  stage: deploy
+  tags:
+    - static-server
+  dependencies:
+    - test
+  script:
+    - rm -rf ~/coverage/htdocs/python-ly
+    - mv htmlcov/ ~/coverage/htdocs/python-ly
+  only:
+    - master
