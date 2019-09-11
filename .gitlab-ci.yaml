@@ -36,4 +36,4 @@ docs:
     - rm -rf ~/coverage/htdocs/python-ly
     - mv htmlcov/ ~/coverage/htdocs/python-ly
   only:
-    - master
+    - stable
