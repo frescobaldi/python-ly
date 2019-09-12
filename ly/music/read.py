@@ -132,6 +132,8 @@ class Reader(object):
         self.language = "nederlands"
         self.in_chord = False
         self.prev_duration = Fraction(1, 4), 1
+        self.lyric_mode = False
+        self.volta = False
 
     def set_language(self, lang):
         r"""Changes the pitch name language to use.
@@ -230,7 +232,11 @@ class Reader(object):
         """Yield Item instances reading from source."""
         source = source or self.source
         for t in skip(source):
-            item = self.read_item(t, source)
+            # Handle case where lyrics are within a volta repeat
+            if self.lyric_mode and self.volta:
+                item = self.read_lyric_item(t)
+            else:
+                item = self.read_item(t, source)
             if item:
                 yield item
 
@@ -649,6 +655,8 @@ class Reader(object):
         for t in skip(source):
             if isinstance(t, lilypond.RepeatSpecifier):
                 item._specifier = t
+                if t == 'volta':
+                    self.volta = True
             elif not item.specifier and isinstance(t, lex.StringStart):
                 item._specifier = self.factory(String, t, True)
             elif isinstance(t, lilypond.RepeatCount):
@@ -675,6 +683,7 @@ class Reader(object):
                         self.source.pushback()
                     break
                 break
+        self.volta = False
         return item
 
     @_commands('\\alternative')
@@ -798,6 +807,7 @@ class Reader(object):
     }
     @_commands(*_lyricmode_commands)
     def handle_lyricmode(self, t, source):
+        self.lyric_mode = True
         cls = self._lyricmode_commands[t]
         item = self.factory(cls, t)
         if cls is LyricsTo:
@@ -814,6 +824,7 @@ class Reader(object):
             if i:
                 item.append(i)
             break
+        self.lyric_mode = False
         return item
 
     def read_lyric_item(self, t):

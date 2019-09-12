@@ -78,6 +78,7 @@ class ParseSource():
         self.trem_note_count = 0
         self.trem_is_started = False
         self.piano_staff = 0
+        self.staves_in_piano_staff = False
         self.staff = 0
         self.voice_count = 0
         self.numericTime = False
@@ -195,6 +196,8 @@ class ParseSource():
             voice_sep_length = 0
             prev = False
             numeric_time = False
+            piano_staff = False
+            staves_in_piano_staff = False
             staff = 0
             for m in nodes:
                 class_name = m.__class__.__name__
@@ -252,10 +255,16 @@ class ParseSource():
                         self.time_sig_locations[total_time]['numerator'] = m.numerator()
                         self.time_sig_locations[total_time]['denominator'] = m.fraction().denominator
                         self.time_sig_locations[total_time]['length'] = m.measure_length()
+                # Handle piano staff beginning
+                elif class_name == 'Context' and m.context() in pno_contexts:
+                    piano_staff = True
                 # Reset total_time to 0 at new voices and staves
                 elif class_name == 'Context' and (m.context() == 'Voice' or m.context() in staff_contexts):
                     total_time = 0
-                    if m.context() in staff_contexts:
+                    if m.context() in staff_contexts and piano_staff:
+                        staves_in_piano_staff = True
+                    # With staves or new voices without staves in a piano staff, indicate the start of a new staff
+                    if m.context() in staff_contexts or (m.context() == 'Voice' and piano_staff and not staves_in_piano_staff):
                         staff += 1
                         numeric_time = False
                 # End currently running nodes
@@ -280,6 +289,10 @@ class ParseSource():
                     # End grace note(s)
                     elif isinstance(m.node, ly.music.items.Grace):
                         grace_seq = False
+                    # End piano staff
+                    elif isinstance(m.node, ly.music.items.Context) and m.node.context() in pno_contexts:
+                        piano_staff = False
+                        staves_in_piano_staff = False
 
     def parse_nodes(self, nodes):
         """Work through all nodes by calling the function with the
@@ -396,6 +409,7 @@ class ParseSource():
                 self.mediator.new_section('piano-staff'+str(self.piano_staff))
                 self.mediator.set_staffnr(self.piano_staff)
                 self.piano_staff += 1
+                self.staves_in_piano_staff = True
             else:
                 if token != '\\context' or self.mediator.part_not_empty():
                     self.mediator.new_part(context_id)
@@ -407,6 +421,13 @@ class ParseSource():
             self.staff += 1
             self.update_time_sig()
         elif context == 'Voice':
+            # Treat voices without staves in a piano staff as staves
+            if self.piano_staff and not self.staves_in_piano_staff:
+                self.mediator.set_voicenr(nr=1)
+                self.mediator.new_section('piano-staff'+str(self.piano_staff))
+                self.mediator.set_staffnr(self.piano_staff)
+                self.piano_staff += 1
+                self.staff += 1
             self.total_time = 0
             self.time_since_bar = 0
             self.sims_and_seqs.append('voice')
@@ -1314,6 +1335,7 @@ class ParseSource():
                 self.mediator.check_voices()
                 self.mediator.check_part()
                 self.piano_staff = 0
+                self.staves_in_piano_staff = False
                 self.mediator.set_voicenr(nr=1)
             elif end.node.context() == 'Devnull':
                 self.mediator.check_voices()
