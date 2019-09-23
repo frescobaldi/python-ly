@@ -1429,22 +1429,18 @@ class ParseSource():
         except IndexError:
             return False
 
-    def simple_node_gen(self, nodes):
+    def simple_node_gen(self, node):
         """Unlike iter_score are the subnodes yielded without substitution."""
-        for starting_node in nodes:
-            for n in starting_node:
-                yield n
-                for s in self.simple_node_gen([n]):
-                    yield s
+        for n in node:
+            yield n
+            for s in self.simple_node_gen(n):
+                yield s
 
     def iter_header(self, tree):
-        """Iter only over header nodes (could be more than one header)."""
-        headers = []
+        """Iter only over header nodes."""
         for t in tree:
             if isinstance(t, ly.music.items.Header):
-                headers.append(t)
-        if headers:
-            return self.simple_node_gen(headers)
+                return self.simple_node_gen(t)
 
     def get_score(self, node):
         """ Returns (first) Score node or false if no Score is found. """
