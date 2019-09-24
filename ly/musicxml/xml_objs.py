@@ -69,9 +69,9 @@ class IterateXmlObjs():
         self.divisions = div
         if score.title:
             self.musxml.create_title(score.title)
-        for ctag in score.creators:
+        for ctag in sorted(score.creators.keys()):
             self.musxml.add_creator(ctag, score.creators[ctag])
-        for itag in score.info:
+        for itag in sorted(score.info.keys()):
             self.musxml.create_score_info(itag, score.info[itag])
         if score.rights:
             self.musxml.add_rights(score.rights)
