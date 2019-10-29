@@ -62,7 +62,7 @@ class Mediator():
         self.tied = False
         self.tie_line = 'solid'
         self.voice = 1
-        self.voices_skipped = 0
+        self.voice_sep_sections = 0
         self.voice_name = None
         self.staff = 0
         self.part = None
@@ -183,8 +183,6 @@ class Mediator():
 
     def set_voicenr(self, command=None, add=False, nr=0, piano=0):
         if add:
-            if not self.store_voicenr:
-                self.store_voicenr = self.voice
             self.voice += 1
         elif nr:
             self.voice = nr
@@ -192,10 +190,6 @@ class Mediator():
             self.voice = get_voice(command)
             if piano > 2:
                 self.voice += piano+1
-
-    def revert_voicenr(self):
-        self.voice = self.store_voicenr
-        self.store_voicenr = 0
 
     def set_staffnr(self, staffnr, staff_id=None):
         self.store_unset_staff = False
@@ -261,7 +255,8 @@ class Mediator():
         sect_len = len(self.sections)
         if sect_len > 2:
             if self.voice > 1:
-                for n in range(self.store_voicenr, self.voice - self.voices_skipped):
+                voices_skipped = (self.voice - self.store_voicenr) - (self.voice_sep_sections - 1)
+                for n in range(self.store_voicenr, self.voice - voices_skipped):
                     self.check_voices()
                 if isinstance(self.sections[-1], xml_objs.Snippet):
                     self.add_snippet(self.sections[-1].name)

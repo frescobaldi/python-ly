@@ -361,7 +361,8 @@ class ParseSource():
                 self.voice_sep_start_time_since_bar = self.time_since_bar
                 self.voice_sep_first_meas = self.first_meas
                 self.voice_sep_start_voice_name = self.mediator.voice_name
-                self.mediator.voice_name = None
+                self.mediator.store_voicenr = self.mediator.voice
+                self.mediator.voice_name = '1'
             else:
                 self.mediator.new_section('simultan')
                 self.sims_and_seqs.append('sim')
@@ -457,17 +458,19 @@ class ParseSource():
             print("Context not implemented:", context)
 
     def VoiceSeparator(self, voice_sep):
-        self.mediator.new_snippet('sim')
-        self.mediator.set_voicenr(add=True)
-        if self.voice_sep:
-            # Reset time information after last \\ (voice separator), if multiple \\ occur in a row, skip voices
-            if self.get_next_node(voice_sep).token == r"\\":  # Multiple \\
-                self.mediator.voices_skipped += 1
-            else:  # Last \\
-                self.time_sig = self.voice_sep_start_time_sig
-                self.total_time = self.total_time - self.voice_sep_length
-                self.time_since_bar = self.voice_sep_start_time_since_bar
-                self.first_meas = self.voice_sep_first_meas
+        # Increment voice name no matter what (for lyric assignment)
+        self.mediator.voice_name = str(int(self.mediator.voice_name) + 1)
+        # Prevent << \\ {... from starting on a different voice
+        if self.mediator.voice_sep_sections > 0:
+            self.mediator.new_snippet('sim')
+            self.mediator.set_voicenr(add=True)
+            if self.voice_sep:
+                # Reset time information after last \\ (voice separator)
+                if self.get_next_node(voice_sep).token != r"\\":  # Last \\
+                    self.time_sig = self.voice_sep_start_time_sig
+                    self.total_time = self.total_time - self.voice_sep_length
+                    self.time_since_bar = self.voice_sep_start_time_since_bar
+                    self.first_meas = self.voice_sep_first_meas
 
     def Change(self, change):
         r""" A \change music expression. Changes the staff number. """
@@ -1368,12 +1371,12 @@ class ParseSource():
         elif end.node.token == '<<':
             if self.voice_sep:
                 self.mediator.check_voices_by_nr()
-                self.mediator.revert_voicenr()
+                self.mediator.set_voicenr(nr=self.mediator.store_voicenr)
                 self.voice_sep = False
                 self.voice_sep_length = 0
                 self.check_for_barline()
                 self.update_time_sig()
-                self.mediator.voices_skipped = 0
+                self.mediator.voice_sep_sections = 0
                 self.mediator.voice_name = self.voice_sep_start_voice_name
                 self.voice_sep_start_voice_name = None
             elif not self.piano_staff and not self.alt_mode == 'lyric':  # Simultaneous lyric sections not currently supported
@@ -1386,7 +1389,8 @@ class ParseSource():
             self.slur_types.pop()
             if self.sims_and_seqs:
                 self.sims_and_seqs.pop()
-            if self.voice_sep:
+            if end.node.parent().token == '<<':
+                self.mediator.voice_sep_sections += 1
                 self.voice_sep_length = self.total_time - self.voice_sep_start_total_time
             if end.node.parent().token in ["\\notemode", "\\notes", "\\chordmode", "\\chords",
                                            "\\drummode", "\\drums", "\\figuremode", "\\figures",

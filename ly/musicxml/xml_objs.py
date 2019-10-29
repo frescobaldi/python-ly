@@ -365,8 +365,9 @@ class ScoreSection():
                 if isinstance(obj, BarMus) and not obj.chord:
                     # Get the name of the voice, if there is no voice name (likely inside a voice separator), then use the voice number as a string
                     voc_name = obj.voice_name
-                    if voc_name is None:
+                    if voc_name is None:  # Should never be None
                         voc_name = str(obj.voice)
+                        print("Warning: Voice name for a lyric is None!")
                     if voc_name not in voices:
                         voices[voc_name] = []
                     voices[voc_name].append({"note": obj, "time": time})
