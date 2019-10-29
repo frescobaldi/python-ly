@@ -100,6 +100,9 @@ class ParseSource():
         self.unset_tuplspan = False
         self.alt_mode = None
         self.rel_pitch_isset = False
+        self.tie_types = []
+        self.phr_slur_types = []
+        self.slur_types = []
         self.slurcount = 0
         self.slurnr = 0
         self.phrslurnr = 0
@@ -363,6 +366,9 @@ class ParseSource():
                 self.mediator.new_section('simultan')
                 self.sims_and_seqs.append('sim')
         elif musicList.token == '{':
+            self.tie_types.append('solid')
+            self.phr_slur_types.append('solid')
+            self.slur_types.append('solid')
             self.sims_and_seqs.append('seq')
             if self.is_volta_ending(musicList):
                 end = self.alt_endings[0]
@@ -837,7 +843,7 @@ class ParseSource():
 
     def Tie(self, tie):
         """ tie ~ """
-        self.mediator.tie_to_next()
+        self.mediator.tie_to_next(self.tie_types[-1])
 
     def Rest(self, rest):
         r""" rest, r or R. Note: NOT by command, i.e. \rest """
@@ -979,9 +985,9 @@ class ParseSource():
         if slur.token == '(':
             self.slurcount += 1
             self.slurnr = self.slurcount
-            self.mediator.set_slur(self.slurnr, "start")
+            self.mediator.set_slur(self.slurnr, "start", False, self.slur_types[-1])
         elif slur.token == ')':
-            self.mediator.set_slur(self.slurnr, "stop")
+            self.mediator.set_slur(self.slurnr, "stop", False, self.slur_types[-1])
             self.slurcount -= 1
 
     def PhrasingSlur(self, phrslur):
@@ -989,9 +995,9 @@ class ParseSource():
         if phrslur.token == r'\(':
             self.slurcount += 1
             self.phrslurnr = self.slurcount
-            self.mediator.set_slur(self.phrslurnr, "start", True)
+            self.mediator.set_slur(self.phrslurnr, "start", True, self.phr_slur_types[-1])
         elif phrslur.token == r'\)':
-            self.mediator.set_slur(self.phrslurnr, "stop", True)
+            self.mediator.set_slur(self.phrslurnr, "stop", True, self.phr_slur_types[-1])
             self.slurcount -= 1
 
     def Dynamic(self, dynamic):
@@ -1208,6 +1214,24 @@ class ParseSource():
             self.auto_beam = True
         elif command.token == '\\autoBeamOff':
             self.auto_beam = False
+        elif command.token == '\\slurSolid':
+            self.slur_types[-1] = 'solid'
+        elif command.token == '\\slurDashed':
+            self.slur_types[-1] = 'dashed'
+        elif command.token == '\\slurDotted':
+            self.slur_types[-1] = 'dotted'
+        elif command.token == '\\tieSolid':
+            self.tie_types[-1] = 'solid'
+        elif command.token == '\\tieDashed':
+            self.tie_types[-1] = 'dashed'
+        elif command.token == '\\tieDotted':
+            self.tie_types[-1] = 'dotted'
+        elif command.token == '\\phrasingSlurSolid':
+            self.phr_slur_types[-1] = 'solid'
+        elif command.token == '\\phrasingSlurDashed':
+            self.phr_slur_types[-1] = 'dashed'
+        elif command.token == '\\phrasingSlurDotted':
+            self.phr_slur_types[-1] = 'dotted'
         else:
             if command.token not in excls:
                 print("Unknown command:", command.token)
@@ -1357,6 +1381,9 @@ class ParseSource():
                 if self.sims_and_seqs:
                     self.sims_and_seqs.pop()
         elif end.node.token == '{':
+            self.tie_types.pop()
+            self.phr_slur_types.pop()
+            self.slur_types.pop()
             if self.sims_and_seqs:
                 self.sims_and_seqs.pop()
             if self.voice_sep:

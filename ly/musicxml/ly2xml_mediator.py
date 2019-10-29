@@ -60,6 +60,7 @@ class Mediator():
         self.dur_tokens = ()
         self.dots = 0
         self.tied = False
+        self.tie_line = 'solid'
         self.voice = 1
         self.voices_skipped = 0
         self.voice_name = None
@@ -605,7 +606,7 @@ class Mediator():
             self.set_octave(rel)
         if not rest:
             if self.tied:
-                self.current_note.set_tie('stop')
+                self.current_note.set_tie('stop', self.tie_line)
                 self.tied = False
         self.check_duration(rest)
         self.check_divs()
@@ -706,7 +707,7 @@ class Mediator():
                 self.current_note = cn
             self.current_chord.append(cn)
             if self.tied:
-                cn.set_tie('stop')
+                cn.set_tie('stop', self.tie_line)
             self.bar.add(cn)
             if i == 0:  # On base note of chord, update divisions
                 self.check_duration(False)
@@ -804,15 +805,16 @@ class Mediator():
         fraction and duration of tuplet."""
         return tfraction[1] / length
 
-    def tie_to_next(self):
+    def tie_to_next(self, line):
         tie_type = 'start'
         self.tied = True
-        self.current_note.set_tie(tie_type)
+        self.tie_line = line
+        self.current_note.set_tie(tie_type, line)
 
-    def set_slur(self, nr, slur_type, phrasing=False):
+    def set_slur(self, nr, slur_type, phrasing=False, line='solid'):
         """
         Set the slur start or stop for the current note. """
-        self.current_note.set_slur(nr, slur_type, phrasing)
+        self.current_note.set_slur(nr, slur_type, phrasing, line)
 
     def new_articulation(self, art_token):
         """

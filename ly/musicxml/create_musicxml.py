@@ -188,10 +188,10 @@ class CreateMusicXML():
             else:
                 self.add_tuplet_type(nr, ttype)
 
-    def tie_note(self, tie_type):
+    def tie_note(self, tie_type, line):
         self.add_tie(tie_type)
         self.add_notations()
-        self.add_tied(tie_type)
+        self.add_tied(tie_type, line)
 
     def new_rest(self, duration, durtype, pos, dot, voice, staff):
         """Create all nodes needed for a rest. """
@@ -380,9 +380,12 @@ class CreateMusicXML():
         if not self.current_notation:
             self.current_notation = etree.SubElement(self.current_note, "notations")
 
-    def add_tied(self, tie_type):
+    def add_tied(self, tie_type, line):
         """Create node tied (used for notation of tie) """
-        etree.SubElement(self.current_notation, "tied", type=tie_type)
+        if line != 'solid':
+            etree.SubElement(self.current_notation, "tied", {'type':tie_type, 'line-type':line})
+        else:
+            etree.SubElement(self.current_notation, "tied", {'type':tie_type})
 
     def add_time_modify(self, fraction):
         """Create time modification """
@@ -432,10 +435,13 @@ class CreateMusicXML():
                 normtype = self.current_note.find("type").text
             ntt.text = normtype
 
-    def add_slur(self, nr, sl_type):
+    def add_slur(self, nr, sl_type, line):
         """Add slur. """
         self.add_notations()
-        etree.SubElement(self.current_notation, "slur", {'number': str(nr), 'type': sl_type})
+        if line != 'solid':
+            etree.SubElement(self.current_notation, "slur", {'number': str(nr), 'type': sl_type, 'line-type': line})
+        else:
+            etree.SubElement(self.current_notation, "slur", {'number': str(nr), 'type': sl_type})
 
     def add_named_notation(self, notate):
         """Fermata, etc. """
