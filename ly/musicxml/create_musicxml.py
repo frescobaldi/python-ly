@@ -383,9 +383,9 @@ class CreateMusicXML():
     def add_tied(self, tie_type, line):
         """Create node tied (used for notation of tie) """
         if line != 'solid':
-            etree.SubElement(self.current_notation, "tied", {'type':tie_type, 'line-type':line})
+            etree.SubElement(self.current_notation, "tied", {'type': tie_type, 'line-type': line})
         else:
-            etree.SubElement(self.current_notation, "tied", {'type':tie_type})
+            etree.SubElement(self.current_notation, "tied", {'type': tie_type})
 
     def add_time_modify(self, fraction):
         """Create time modification """
