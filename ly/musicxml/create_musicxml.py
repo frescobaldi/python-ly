@@ -78,7 +78,9 @@ class CreateMusicXML():
 
     def create_partgroup(self, gr_type, num, name=None, abbr=None, symbol=None):
         """Create a new part group."""
-        attr_dict = {"number": str(num), "type": gr_type}
+        attr_dict = {}
+        attr_dict["number"] = str(num)
+        attr_dict["type"] = gr_type
         partgroup = etree.SubElement(self.partlist, "part-group", attr_dict)
         if name:
             group_name = etree.SubElement(partgroup, "group-name")
