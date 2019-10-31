@@ -100,6 +100,9 @@ class ParseSource():
         self.unset_tuplspan = False
         self.alt_mode = None
         self.rel_pitch_isset = False
+        self.tie_types = []
+        self.phr_slur_types = []
+        self.slur_types = []
         self.slurcount = 0
         self.slurnr = 0
         self.phrslurnr = 0
@@ -358,11 +361,15 @@ class ParseSource():
                 self.voice_sep_start_time_since_bar = self.time_since_bar
                 self.voice_sep_first_meas = self.first_meas
                 self.voice_sep_start_voice_name = self.mediator.voice_name
-                self.mediator.voice_name = None
+                self.mediator.store_voicenr = self.mediator.voice
+                self.mediator.voice_name = '1'
             else:
                 self.mediator.new_section('simultan')
                 self.sims_and_seqs.append('sim')
         elif musicList.token == '{':
+            self.tie_types.append('solid')
+            self.phr_slur_types.append('solid')
+            self.slur_types.append('solid')
             self.sims_and_seqs.append('seq')
             if self.is_volta_ending(musicList):
                 end = self.alt_endings[0]
@@ -451,17 +458,19 @@ class ParseSource():
             print("Context not implemented:", context)
 
     def VoiceSeparator(self, voice_sep):
-        self.mediator.new_snippet('sim')
-        self.mediator.set_voicenr(add=True)
-        if self.voice_sep:
-            # Reset time information after last \\ (voice separator), if multiple \\ occur in a row, skip voices
-            if self.get_next_node(voice_sep).token == r"\\":  # Multiple \\
-                self.mediator.voices_skipped += 1
-            else:  # Last \\
-                self.time_sig = self.voice_sep_start_time_sig
-                self.total_time = self.total_time - self.voice_sep_length
-                self.time_since_bar = self.voice_sep_start_time_since_bar
-                self.first_meas = self.voice_sep_first_meas
+        # Increment voice name no matter what (for lyric assignment)
+        self.mediator.voice_name = str(int(self.mediator.voice_name) + 1)
+        # Prevent << \\ {... from starting on a different voice
+        if self.mediator.voice_sep_sections > 0:
+            self.mediator.new_snippet('sim')
+            self.mediator.set_voicenr(add=True)
+            if self.voice_sep:
+                # Reset time information after last \\ (voice separator)
+                if self.get_next_node(voice_sep).token != r"\\":  # Last \\
+                    self.time_sig = self.voice_sep_start_time_sig
+                    self.total_time = self.total_time - self.voice_sep_length
+                    self.time_since_bar = self.voice_sep_start_time_since_bar
+                    self.first_meas = self.voice_sep_first_meas
 
     def Change(self, change):
         r""" A \change music expression. Changes the staff number. """
@@ -837,7 +846,7 @@ class ParseSource():
 
     def Tie(self, tie):
         """ tie ~ """
-        self.mediator.tie_to_next()
+        self.mediator.tie_to_next(self.tie_types[-1])
 
     def Rest(self, rest):
         r""" rest, r or R. Note: NOT by command, i.e. \rest """
@@ -979,9 +988,9 @@ class ParseSource():
         if slur.token == '(':
             self.slurcount += 1
             self.slurnr = self.slurcount
-            self.mediator.set_slur(self.slurnr, "start")
+            self.mediator.set_slur(self.slurnr, "start", False, self.slur_types[-1])
         elif slur.token == ')':
-            self.mediator.set_slur(self.slurnr, "stop")
+            self.mediator.set_slur(self.slurnr, "stop", False, self.slur_types[-1])
             self.slurcount -= 1
 
     def PhrasingSlur(self, phrslur):
@@ -989,9 +998,9 @@ class ParseSource():
         if phrslur.token == r'\(':
             self.slurcount += 1
             self.phrslurnr = self.slurcount
-            self.mediator.set_slur(self.phrslurnr, "start", True)
+            self.mediator.set_slur(self.phrslurnr, "start", True, self.phr_slur_types[-1])
         elif phrslur.token == r'\)':
-            self.mediator.set_slur(self.phrslurnr, "stop", True)
+            self.mediator.set_slur(self.phrslurnr, "stop", True, self.phr_slur_types[-1])
             self.slurcount -= 1
 
     def Dynamic(self, dynamic):
@@ -1208,6 +1217,24 @@ class ParseSource():
             self.auto_beam = True
         elif command.token == '\\autoBeamOff':
             self.auto_beam = False
+        elif command.token == '\\slurSolid':
+            self.slur_types[-1] = 'solid'
+        elif command.token == '\\slurDashed':
+            self.slur_types[-1] = 'dashed'
+        elif command.token == '\\slurDotted':
+            self.slur_types[-1] = 'dotted'
+        elif command.token == '\\tieSolid':
+            self.tie_types[-1] = 'solid'
+        elif command.token == '\\tieDashed':
+            self.tie_types[-1] = 'dashed'
+        elif command.token == '\\tieDotted':
+            self.tie_types[-1] = 'dotted'
+        elif command.token == '\\phrasingSlurSolid':
+            self.phr_slur_types[-1] = 'solid'
+        elif command.token == '\\phrasingSlurDashed':
+            self.phr_slur_types[-1] = 'dashed'
+        elif command.token == '\\phrasingSlurDotted':
+            self.phr_slur_types[-1] = 'dotted'
         else:
             if command.token not in excls:
                 print("Unknown command:", command.token)
@@ -1344,12 +1371,12 @@ class ParseSource():
         elif end.node.token == '<<':
             if self.voice_sep:
                 self.mediator.check_voices_by_nr()
-                self.mediator.revert_voicenr()
+                self.mediator.set_voicenr(nr=self.mediator.store_voicenr)
                 self.voice_sep = False
                 self.voice_sep_length = 0
                 self.check_for_barline()
                 self.update_time_sig()
-                self.mediator.voices_skipped = 0
+                self.mediator.voice_sep_sections = 0
                 self.mediator.voice_name = self.voice_sep_start_voice_name
                 self.voice_sep_start_voice_name = None
             elif not self.piano_staff and not self.alt_mode == 'lyric':  # Simultaneous lyric sections not currently supported
@@ -1357,9 +1384,13 @@ class ParseSource():
                 if self.sims_and_seqs:
                     self.sims_and_seqs.pop()
         elif end.node.token == '{':
+            self.tie_types.pop()
+            self.phr_slur_types.pop()
+            self.slur_types.pop()
             if self.sims_and_seqs:
                 self.sims_and_seqs.pop()
-            if self.voice_sep:
+            if end.node.parent().token == '<<':
+                self.mediator.voice_sep_sections += 1
                 self.voice_sep_length = self.total_time - self.voice_sep_start_total_time
             if end.node.parent().token in ["\\notemode", "\\notes", "\\chordmode", "\\chords",
                                            "\\drummode", "\\drums", "\\figuremode", "\\figures",

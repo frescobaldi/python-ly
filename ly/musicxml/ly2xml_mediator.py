@@ -60,8 +60,9 @@ class Mediator():
         self.dur_tokens = ()
         self.dots = 0
         self.tied = False
+        self.tie_line = 'solid'
         self.voice = 1
-        self.voices_skipped = 0
+        self.voice_sep_sections = 0
         self.voice_name = None
         self.staff = 0
         self.part = None
@@ -182,8 +183,6 @@ class Mediator():
 
     def set_voicenr(self, command=None, add=False, nr=0, piano=0):
         if add:
-            if not self.store_voicenr:
-                self.store_voicenr = self.voice
             self.voice += 1
         elif nr:
             self.voice = nr
@@ -191,10 +190,6 @@ class Mediator():
             self.voice = get_voice(command)
             if piano > 2:
                 self.voice += piano+1
-
-    def revert_voicenr(self):
-        self.voice = self.store_voicenr
-        self.store_voicenr = 0
 
     def set_staffnr(self, staffnr, staff_id=None):
         self.store_unset_staff = False
@@ -260,7 +255,8 @@ class Mediator():
         sect_len = len(self.sections)
         if sect_len > 2:
             if self.voice > 1:
-                for n in range(self.store_voicenr, self.voice - self.voices_skipped):
+                voices_skipped = (self.voice - self.store_voicenr) - (self.voice_sep_sections - 1)
+                for n in range(self.store_voicenr, self.voice - voices_skipped):
                     self.check_voices()
                 if isinstance(self.sections[-1], xml_objs.Snippet):
                     self.add_snippet(self.sections[-1].name)
@@ -605,7 +601,7 @@ class Mediator():
             self.set_octave(rel)
         if not rest:
             if self.tied:
-                self.current_note.set_tie('stop')
+                self.current_note.set_tie('stop', self.tie_line)
                 self.tied = False
         self.check_duration(rest)
         self.check_divs()
@@ -706,7 +702,7 @@ class Mediator():
                 self.current_note = cn
             self.current_chord.append(cn)
             if self.tied:
-                cn.set_tie('stop')
+                cn.set_tie('stop', self.tie_line)
             self.bar.add(cn)
             if i == 0:  # On base note of chord, update divisions
                 self.check_duration(False)
@@ -804,15 +800,16 @@ class Mediator():
         fraction and duration of tuplet."""
         return tfraction[1] / length
 
-    def tie_to_next(self):
+    def tie_to_next(self, line):
         tie_type = 'start'
         self.tied = True
-        self.current_note.set_tie(tie_type)
+        self.tie_line = line
+        self.current_note.set_tie(tie_type, line)
 
-    def set_slur(self, nr, slur_type, phrasing=False):
+    def set_slur(self, nr, slur_type, phrasing=False, line='solid'):
         """
         Set the slur start or stop for the current note. """
-        self.current_note.set_slur(nr, slur_type, phrasing)
+        self.current_note.set_slur(nr, slur_type, phrasing, line)
 
     def new_articulation(self, art_token):
         """

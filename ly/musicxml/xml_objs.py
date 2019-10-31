@@ -208,9 +208,9 @@ class IterateXmlObjs():
                                  obj.grace, obj.staff, obj.beam)
         for t in obj.tie:
             if not obj.chord:
-                self.musxml.tie_note(t)
+                self.musxml.tie_note(t[0], t[1])
         for s in obj.slur:
-            self.musxml.add_slur(s.nr, s.slurtype)
+            self.musxml.add_slur(s.nr, s.slurtype, s.line)
         for a in obj.artic:
             self.musxml.new_articulation(a)
         if obj.ornament:
@@ -365,8 +365,9 @@ class ScoreSection():
                 if isinstance(obj, BarMus) and not obj.chord:
                     # Get the name of the voice, if there is no voice name (likely inside a voice separator), then use the voice number as a string
                     voc_name = obj.voice_name
-                    if voc_name is None:
+                    if voc_name is None:  # Should never be None
                         voc_name = str(obj.voice)
+                        print("Warning: Voice name for a lyric is None!")
                     if voc_name not in voices:
                         voices[voc_name] = []
                     voices[voc_name].append({"note": obj, "time": time})
@@ -729,10 +730,11 @@ class Tuplet():
 class Slur():
     """Stores information about slur."""
 
-    def __init__(self, nr, slurtype, phrasing):
+    def __init__(self, nr, slurtype, phrasing, line):
         self.nr = nr
         self.slurtype = slurtype
         self.phrasing = phrasing
+        self.line = line
 
 
 ##
@@ -774,11 +776,11 @@ class BarNote(BarMus):
     def set_octave(self, octave):
         self.octave = octave
 
-    def set_tie(self, tie_type):
-        self.tie.append(tie_type)
+    def set_tie(self, tie_type, line):
+        self.tie.append((tie_type, line))
 
-    def set_slur(self, nr, slur_type, phrasing):
-        self.slur.append(Slur(nr, slur_type, phrasing))
+    def set_slur(self, nr, slur_type, phrasing, line):
+        self.slur.append(Slur(nr, slur_type, phrasing, line))
 
     def add_articulation(self, art_name):
         self.artic.append(art_name)
