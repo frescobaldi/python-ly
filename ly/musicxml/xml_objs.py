@@ -80,6 +80,8 @@ class IterateXmlObjs():
                 self.iterate_part(p)
             elif isinstance(p, ScorePartGroup):
                 self.iterate_partgroup(p)
+        # Correct the accidentals from the last measure
+        self.musxml.correct_accidentals()
 
     def iterate_partgroup(self, group):
         """Loop through a group, recursively if nested."""
