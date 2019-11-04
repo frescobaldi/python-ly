@@ -44,6 +44,14 @@ except ImportError:
 import ly.pkginfo
 
 
+def duration(dictionary):
+    """
+    Return the 'dur' element of a dictionary (used for `sort(key=duration)`)
+    Example from https://www.geeksforgeeks.org/python-list-sort/
+    """
+    return dictionary['dur']
+
+
 class CreateMusicXML():
     """ Creates the XML nodes according to the Music XML standard."""
 
@@ -60,6 +68,13 @@ class CreateMusicXML():
         encoding_date.text = str(datetime.date.today())
         self.partlist = etree.SubElement(self.root, "part-list")
         self.part_count = 1
+        # Dictionary to keep track of all accidentals (or lack thereof) applied to each note name and octave in the current measure in reverse chronological order
+        #     Keys look like 'N#' where N is a note letter and # is an octave number, for example 'A3'
+        #     Entries of lists look like: {'dur': duration since bar at time of accidental, 'alt': accidental alter,
+        #                                  'note': note with the accidental, 'type': accidental type ('normal', '?', '!', None)}
+        # Includes notes which do not have an accidental applied because after a measure is complete, it may be necessary to add an accidental
+        self.accidentals = {}
+        self.current_dur = 0
 
     ##
     # Building the basic Elements
@@ -112,8 +127,30 @@ class CreateMusicXML():
         self.part_count += 1
         self.bar_nr = 1
 
+    def correct_accidentals(self):
+        """ Remove and add accidentals to the previous measure which are made redundant or necessary by other voices """
+        for note_name, acc_list in self.accidentals.items():
+            acc_list.sort(key=duration)
+            current_alter = 0
+            acc_count = 0
+            for acc in acc_list:
+                # Add necessary accidentals not applied previously (as a result of multiple voices)
+                if acc['type'] is None and current_alter != acc['alt'] and acc_count:
+                    self.add_accidental(acc['alt'], note=acc['note'])
+                    acc_count += 1
+                # Remove unnecessary accidentals
+                elif acc['type'] == 'normal' and acc['alt'] == current_alter and acc_count:
+                    acc['note'].remove(acc['note'].find('accidental'))
+                    acc_count -= 1
+                elif acc['type'] is not None:
+                    acc_count += 1
+                current_alter = acc['alt']
+        self.accidentals = {}
+        self.current_dur = 0
+
     def create_measure(self, **bar_attrs):
         """Create new measure """
+        self.correct_accidentals()
         self.current_bar = etree.SubElement(self.current_part, "measure", number=str(self.bar_nr))
         self.bar_nr += 1
         if bar_attrs:
@@ -124,9 +161,13 @@ class CreateMusicXML():
     ##
 
     def new_note(self, step, octave, durtype, divdur, alter=0,
-                 acc_token=0, voice=1, dot=0, chord=0, grace=(0, 0), staff=0, beam=False):
+                 acc_token=None, voice=1, dot=0, chord=0, grace=(0, 0), staff=0, beam=False):
         """Create all nodes needed for a normal note. """
         self.create_note()
+        key = step + str(octave)
+        if key not in self.accidentals:
+            self.accidentals[key] = []
+        self.accidentals[key].append({'dur': self.current_dur, 'alt': alter, 'note': self.current_note, 'type': acc_token})
         if grace[0]:
             self.add_grace(grace[1])
         if chord:
@@ -139,7 +180,7 @@ class CreateMusicXML():
         if dot:
             for i in range(dot):
                 self.add_dot()
-        if acc_token:
+        if acc_token is not None:
             if acc_token == '!':  # cautionary
                 self.add_accidental(alter, caut=True)
             elif acc_token == '?':  # parentheses
@@ -301,14 +342,17 @@ class CreateMusicXML():
         octnode = etree.SubElement(unpitched, "display-octave")
         octnode.text = str(octave)
 
-    def add_accidental(self, alter, caut=False, parenth=False):
+    def add_accidental(self, alter, caut=False, parenth=False, note=None):
         """Create accidental."""
+        selected_note = self.current_note
+        if note is not None:
+            selected_note = note
         attrib = {}
         if caut:
             attrib['cautionary'] = 'yes'
         if parenth:
             attrib['parentheses'] = 'yes'
-        acc = etree.SubElement(self.current_note, "accidental", attrib)
+        acc = etree.SubElement(selected_note, "accidental", attrib)
         acc_dict = {
             0: 'natural',
             1: 'sharp', -1: 'flat',
@@ -332,20 +376,27 @@ class CreateMusicXML():
 
     def add_skip(self, duration, forward=True):
         if forward:
+            self.current_dur += duration
             skip = etree.SubElement(self.current_bar, "forward")
         else:
+            self.current_dur -= duration
+            if self.current_dur < 0:
+                self.current_dur = 0
             skip = etree.SubElement(self.current_bar, "backward")
         dura_node = etree.SubElement(skip, "duration")
         dura_node.text = str(duration)
 
     def add_div_duration(self, divdur):
         """Create new duration """
+        self.current_dur += divdur
         self.duration = etree.SubElement(self.current_note, "duration")
         self.duration.text = str(divdur)
         self.mult = 1
 
     def change_div_duration(self, newdura):
         """Set new duration when tuplet """
+        self.current_dur -= int(self.duration.text)
+        self.current_dur += newdura
         self.duration.text = str(newdura)
 
     def add_duration_type(self, durtype):
@@ -596,6 +647,9 @@ class CreateMusicXML():
     def add_backup(self, duration):
         if duration <= 0:
             return
+        self.current_dur -= duration
+        if self.current_dur < 0:
+            self.current_dur = 0
         backupnode = etree.SubElement(self.current_bar, "backup")
         durnode = etree.SubElement(backupnode, "duration")
         durnode.text = str(duration)

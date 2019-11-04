@@ -87,6 +87,7 @@ class Mediator():
         self.prev_tremolo = 8
         self.tupl_dur = 0
         self.tupl_sum = 0
+        self.ly_to_xml_oct = 3  # xml octave values are 3 higher than lilypond
 
     def new_header_assignment(self, name, value):
         """Distributing header information."""
@@ -319,8 +320,8 @@ class Mediator():
     def reset_current_accidentals_dict(self, fifths):
         """Resets self.current_accidentals_dict to only include the accidentals in the current key"""
         ORDER_OF_FIFTHS = ('B', 'E', 'A', 'D', 'G', 'C', 'F')
-        for n in ORDER_OF_FIFTHS:  # return all notes to natural by default
-            self.current_accidentals_dict[n] = 0
+        # Reset all notes to natural, and remove any notes with octaves
+        self.current_accidentals_dict = {'C': 0, 'D': 0, 'E': 0, 'F': 0, 'G': 0, 'A': 0, 'B': 0}
         if fifths < 0:  # flat key
             for f in ORDER_OF_FIFTHS[:abs(fifths)]:
                 self.current_accidentals_dict[f] = -1
@@ -328,7 +329,7 @@ class Mediator():
             for s in ORDER_OF_FIFTHS[-fifths:]:
                 self.current_accidentals_dict[s] = 1
 
-    def is_acc_needed(self, name, alter):
+    def is_acc_needed(self, name, octave, alter):
         """
         Check if a given note needs an accidental
         given the current state of accidentals
@@ -336,15 +337,25 @@ class Mediator():
         name is the name of the note ('A', 'B', 'C', 'D', 'E', 'F', 'G')
         alter is a number representing the flat/sharp status of the note (-1 is flat, +1 is sharp, 0 is natural)
         """
+        abs_note = name + str(octave)
         if self.tied:  # subsequent tied notes never need accidentals
             return False
-        for note in self.current_accidentals_dict:
-            if name == note:
-                if self.current_accidentals_dict[note] == alter:
-                    return False
-                else:
-                    self.current_accidentals_dict[note] = alter
-                    return True
+        if abs_note in self.current_accidentals_dict:
+            # Same note in same octave had same alter
+            if self.current_accidentals_dict[abs_note] == alter:
+                return False
+            # Same note in same octave had different alter
+            else:
+                self.current_accidentals_dict[abs_note] = alter
+                return True
+        # No previous same notes in same octave, but key matches alter
+        elif self.current_accidentals_dict[name] == alter:
+            self.current_accidentals_dict[abs_note] = alter
+            return False
+        # No previous same notes in same octave, and key has different alter
+        else:
+            self.current_accidentals_dict[abs_note] = alter
+            return True
         print("Warning: Invalid note checked for accidental!")
         return False
 
@@ -528,7 +539,7 @@ class Mediator():
             self.check_current_note(is_unpitched=True)
         else:
             self.prev_note = self.current_note
-            self.current_note = self.create_barnote_from_note(note)
+            self.current_note = self.create_barnote_from_note(note, rel)
             self.current_lynote = note
             self.check_current_note(rel)
         self.do_action_onnext(self.current_note)
@@ -556,21 +567,26 @@ class Mediator():
         dura = unpitched.duration
         return xml_objs.Unpitched(dura, voice=self.voice, voice_name=self.voice_name)
 
-    def create_barnote_from_note(self, note):
+    def create_barnote_from_note(self, note, relative):
         """Create a xml_objs.BarNote from ly.music.items.Note."""
+        p_copy = note.pitch.copy()
+        if relative:
+            p_copy.makeAbsolute(self.prev_pitch)
+        octave = p_copy.octave + self.ly_to_xml_oct
         p = getNoteName(note.pitch.note)
         alt = get_xml_alter(note.pitch.alter)
         try:
             acc = note.accidental_token  # special accidentals (?, !)
         except AttributeError:
             acc = None
-        if acc is None and self.is_acc_needed(p, alt):  # check if a normal accidental should be printed
+        if acc is None and self.is_acc_needed(p, octave, alt):  # check if a normal accidental should be printed
             acc = 'normal'
         dura = note.duration
         return xml_objs.BarNote(p, alt, acc, dura, self.voice, self.voice_name)
 
     def copy_barnote_basics(self, bar_note):
         """Create a copy of a xml_objs.BarNote."""
+        octave = bar_note.octave
         p = bar_note.base_note
         alt = bar_note.alter
         try:
@@ -580,7 +596,7 @@ class Mediator():
                 acc = None
         except AttributeError:
             acc = None
-        if acc is None and self.is_acc_needed(p, alt):  # check if a normal accidental should be printed
+        if acc is None and self.is_acc_needed(p, octave, alt):  # check if a normal accidental should be printed
             acc = 'normal'
         dura = bar_note.duration
         voc = bar_note.voice
@@ -619,12 +635,12 @@ class Mediator():
             chord_note.set_staff(self.staff)
 
     def set_octave(self, relative):
-        """Set octave by getting the octave of an absolute note + 3."""
+        """Set octave by getting the octave of an absolute note + self.ly_to_xml_oct (3)."""
         p = self.current_lynote.pitch.copy()
         if relative:
             p.makeAbsolute(self.prev_pitch)
         self.prev_pitch = p
-        self.current_note.set_octave(p.octave + 3)
+        self.current_note.set_octave(p.octave + self.ly_to_xml_oct)
 
     def do_action_onnext(self, note):
         """Perform the stored action on the next note."""
@@ -660,13 +676,13 @@ class Mediator():
 
     def new_chordbase(self, note, duration, rel=False):
         self.prev_note = self.current_note
-        self.current_note = self.create_barnote_from_note(note)
+        self.current_note = self.create_barnote_from_note(note, rel)
         self.current_note.set_duration(duration)
         self.current_lynote = note
         self.check_current_note(rel)
 
     def new_chordnote(self, note, rel):
-        chord_note = self.create_barnote_from_note(note)
+        chord_note = self.create_barnote_from_note(note, rel)
         chord_note.set_duration(self.current_note.duration)
         chord_note.set_durtype(durval2type(self.dur_token))
         chord_note.dots = self.dots
@@ -677,7 +693,7 @@ class Mediator():
         p = note.pitch.copy()
         if(rel):
             p.makeAbsolute(self.prev_chord_pitch)
-        chord_note.set_octave(p.octave + 3)
+        chord_note.set_octave(p.octave + self.ly_to_xml_oct)
         self.prev_chord_pitch = p
         chord_note.chord = True
         self.bar.add(chord_note)
