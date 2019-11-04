@@ -86,6 +86,7 @@ class Mediator():
         self.prev_tremolo = 8
         self.tupl_dur = 0
         self.tupl_sum = 0
+        self.ly_to_xml_oct = 3  # xml octave values are 3 higher than lilypond
 
     def new_header_assignment(self, name, value):
         """Distributing header information."""
@@ -575,7 +576,7 @@ class Mediator():
         p_copy = note.pitch.copy()
         if relative:
             p_copy.makeAbsolute(self.prev_pitch)
-        octave = p_copy.octave + 3
+        octave = p_copy.octave + self.ly_to_xml_oct
         p = getNoteName(note.pitch.note)
         alt = get_xml_alter(note.pitch.alter)
         try:
@@ -638,12 +639,12 @@ class Mediator():
             chord_note.set_staff(self.staff)
 
     def set_octave(self, relative):
-        """Set octave by getting the octave of an absolute note + 3."""
+        """Set octave by getting the octave of an absolute note + self.ly_to_xml_oct (3)."""
         p = self.current_lynote.pitch.copy()
         if relative:
             p.makeAbsolute(self.prev_pitch)
         self.prev_pitch = p
-        self.current_note.set_octave(p.octave + 3)
+        self.current_note.set_octave(p.octave + self.ly_to_xml_oct)
 
     def do_action_onnext(self, note):
         """Perform the stored action on the next note."""
@@ -696,7 +697,7 @@ class Mediator():
         p = note.pitch.copy()
         if(rel):
             p.makeAbsolute(self.prev_chord_pitch)
-        chord_note.set_octave(p.octave + 3)
+        chord_note.set_octave(p.octave + self.ly_to_xml_oct)
         self.prev_chord_pitch = p
         chord_note.chord = True
         self.bar.add(chord_note)
