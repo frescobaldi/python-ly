@@ -269,7 +269,8 @@ class CreateMusicXML():
 
     def add_creator(self, creator, name):
         """Add creator to score info."""
-        attr = {'type': creator}
+        attr = {}
+        attr["type"] = creator
         self.create_score_info("creator", name, attr)
 
     def add_rights(self, rights):
@@ -384,10 +385,11 @@ class CreateMusicXML():
 
     def add_tied(self, tie_type, line):
         """Create node tied (used for notation of tie) """
-        if line != 'solid':
-            etree.SubElement(self.current_notation, "tied", {'type': tie_type, 'line-type': line})
-        else:
-            etree.SubElement(self.current_notation, "tied", {'type': tie_type})
+        attr = {}
+        if line != "solid":
+            attr["line-type"] = line
+        attr["type"] = tie_type
+        etree.SubElement(self.current_notation, "tied", attr)
 
     def add_time_modify(self, fraction):
         """Create time modification """
@@ -418,8 +420,10 @@ class CreateMusicXML():
 
     def add_tuplet_type(self, nr, ttype, actnr=0, acttype='', normnr=0, normtype=''):
         """Create tuplet with type attribute """
-        tuplnode = etree.SubElement(self.current_notation, "tuplet",
-                                    {'number': str(nr), 'type': ttype})
+        attr = {}
+        attr["number"] = str(nr)
+        attr["type"] = ttype
+        tuplnode = etree.SubElement(self.current_notation, "tuplet", attr)
         if actnr:
             actnode = etree.SubElement(tuplnode, "tuplet-actual")
             atn = etree.SubElement(actnode, "tuplet-number")
@@ -440,10 +444,12 @@ class CreateMusicXML():
     def add_slur(self, nr, sl_type, line):
         """Add slur. """
         self.add_notations()
-        if line != 'solid':
-            etree.SubElement(self.current_notation, "slur", {'number': str(nr), 'type': sl_type, 'line-type': line})
-        else:
-            etree.SubElement(self.current_notation, "slur", {'number': str(nr), 'type': sl_type})
+        attr = {}
+        attr["number"] = str(nr)
+        attr["type"] = sl_type
+        if line != "solid":
+            attr["line-type"] = line
+        etree.SubElement(self.current_notation, "slur", attr)
 
     def add_named_notation(self, notate):
         """Fermata, etc. """
@@ -489,7 +495,10 @@ class CreateMusicXML():
         etree.SubElement(self.current_ornament, "wavy-line", type=end_type)
 
     def add_gliss(self, linetype, endtype, nr):
-        nodedict = {"line-type": linetype, "number": str(nr), "type": endtype}
+        nodedict = {}
+        nodedict["line-type"] = linetype
+        nodedict["number"] = str(nr)
+        nodedict["type"] = endtype
         self.add_notations()
         etree.SubElement(self.current_notation, "glissando", nodedict)
 
@@ -651,7 +660,9 @@ class CreateMusicXML():
 
     def add_octave_shift(self, plac, octdir, size):
         """Add octave shift."""
-        oct_dict = {"type": octdir, "size": str(size)}
+        oct_dict = {}
+        oct_dict["type"] = octdir
+        oct_dict["size"] = str(size)
         direction = etree.SubElement(self.current_bar, "direction", placement=plac)
         dirtypenode = etree.SubElement(direction, "direction-type")
         dyn_node = etree.SubElement(dirtypenode, "octave-shift", oct_dict)
