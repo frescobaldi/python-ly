@@ -445,10 +445,10 @@ class CreateMusicXML():
         """Add slur. """
         self.add_notations()
         attr = {}
-        attr["number"] = str(nr)
-        attr["type"] = sl_type
         if line != "solid":
             attr["line-type"] = line
+        attr["number"] = str(nr)
+        attr["type"] = sl_type
         etree.SubElement(self.current_notation, "slur", attr)
 
     def add_named_notation(self, notate):
