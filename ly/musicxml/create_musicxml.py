@@ -88,8 +88,11 @@ class CreateMusicXML():
 
     def create_score_info(self, tag, info, attr={}):
         """Create score info."""
-        info_node = etree.SubElement(self.score_info, tag, attr)
+        # modeled after https://kite.com/python/examples/3596/xml-insert-a-subelement-into-an-xml-element
+        info_node = etree.Element(tag, attr)
         info_node.text = info
+        # put info_node before <encoding> data, prevents invalid xml
+        self.score_info.insert(0, info_node)
 
     def create_partgroup(self, gr_type, num, name=None, abbr=None, symbol=None):
         """Create a new part group."""
