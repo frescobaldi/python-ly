@@ -202,6 +202,7 @@ class ParseSource():
             piano_staff = False
             staves_in_piano_staff = False
             staff = 0
+            note_locations = [[(0, False)]]
             for m in nodes:
                 class_name = m.__class__.__name__
                 # Notes should advance total_time by their length (but not chord or grace notes)
@@ -214,6 +215,11 @@ class ParseSource():
                     if trem_rep != 0:
                         dur = (dur[0] * trem_rep, dur[1])
                     total_time += dur[0] * dur[1]
+                    # Log the end time of this Durable and whether it is a Skip
+                    if isinstance(m, ly.music.items.Skip):
+                        note_locations[-1].append((total_time, True))
+                    else:
+                        note_locations[-1].append((total_time, False))
                 # Indicate chord mode (ignore notes in this mode)
                 elif isinstance(m, (ly.music.items.ChordMode)):
                     chord_mode = True
@@ -235,6 +241,7 @@ class ParseSource():
                     voice_sep_start_total_time = total_time
                 # Reset time at a voice separator (only do so for final \\ if multiple in a row)
                 elif class_name == 'VoiceSeparator' and voice_sep and not self.get_next_node(m).token == r'\\':
+                    note_locations.append([(voice_sep_start_total_time, False)])
                     total_time = total_time - voice_sep_length
                 # A string could be a \bar type, so record its position and type if so
                 elif class_name == 'String':
@@ -263,6 +270,7 @@ class ParseSource():
                     piano_staff = True
                 # Reset total_time to 0 at new voices and staves
                 elif class_name == 'Context' and (m.context() == 'Voice' or m.context() in staff_contexts):
+                    note_locations.append([(0, False)])
                     total_time = 0
                     if m.context() in staff_contexts and piano_staff:
                         staves_in_piano_staff = True
@@ -296,6 +304,39 @@ class ParseSource():
                     elif isinstance(m.node, ly.music.items.Context) and m.node.context() in pno_contexts:
                         piano_staff = False
                         staves_in_piano_staff = False
+            # Find any (\bar) barlines which occur during some note
+            barline_locations_to_skip = []
+            barline_conflict = False
+            # Iterate through all found barlines
+            for bar_loc in self.barline_locations.keys():
+                # Iterate through sections of note locations
+                for part in note_locations:
+                    # Iterate through the note end locations themselves
+                    for note_num in range(len(part)):
+                        note_loc = part[note_num][0]
+                        skip = part[note_num][1]
+                        # Note ends at barline is ok
+                        if note_loc == bar_loc:
+                            break
+                        # First note to end after barline
+                        elif note_loc > bar_loc:
+                            # If the note is the first in the part or is a skip then ok
+                            if note_num == 0 or skip:
+                                break
+                            # Barline occurs during some note
+                            else:
+                                print("Warning: Barline found during note, skipping barline!")
+                                barline_locations_to_skip.append(bar_loc)
+                                barline_conflict = True
+                                break
+                    # If current barline location has a conflict, go on to check next barline location
+                    if barline_conflict:
+                        barline_conflict = False
+                        break
+            # Clear the conflicting barlines
+            for loc in barline_locations_to_skip:
+                if loc in self.barline_locations:
+                    self.barline_locations.pop(loc)
 
     def parse_nodes(self, nodes):
         """Work through all nodes by calling the function with the
