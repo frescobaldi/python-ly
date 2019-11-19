@@ -976,6 +976,9 @@ class BarBackup():
     def __init__(self, duration):
         self.duration = duration
 
+    def has_attr(self):
+        return False
+
 
 class TempoDir():
     """ Object that stores tempo direction information """
