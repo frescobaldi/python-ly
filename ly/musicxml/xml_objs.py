@@ -125,7 +125,7 @@ class IterateXmlObjs():
     def new_xml_bar_attr(self, obj):
         """Create bar attribute xml-nodes."""
         if obj.has_attr():
-            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, obj.divs)
+            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, obj.divs, obj.sys_break)
         # Place repeats, alternate endings, and their associated barlines
         if obj.endings or obj.repeat is not None:
             # Get repeat
@@ -898,6 +898,7 @@ class BarAttr():
         self.staves = 0
         self.multiclef = []
         self.tempo = None
+        self.sys_break = False
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.time)
@@ -951,6 +952,8 @@ class BarAttr():
             check = True
         elif self.endings:
             check = True
+        elif self.sys_break:
+            check = True
         return check
 
     def merge_attr(self, barattr, override=False):
@@ -968,6 +971,8 @@ class BarAttr():
             self.multiclef += barattr.multiclef
         if barattr.tempo is not None and (override or self.tempo is None):
             self.tempo = barattr.tempo
+        if barattr.sys_break and (override or not self.sys_break):
+            self.sys_break = barattr.sys_break
 
 
 class BarBackup():

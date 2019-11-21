@@ -527,6 +527,17 @@ class Mediator():
             else:
                 self.current_attr.set_clef(self.clef)
 
+    def set_sys_break(self):
+        if self.bar is None:
+            self.new_bar()
+        if self.bar.has_music():
+            self.new_bar()
+            new_bar_attr = xml_objs.BarAttr()
+            new_bar_attr.sys_break = True
+            self.add_to_bar(new_bar_attr)
+        else:
+            self.current_attr.sys_break = True
+
     def set_relative(self, note):
         self.prev_pitch = note.pitch
 
