@@ -240,7 +240,7 @@ class ParseSource():
                     voice_sep = True
                     voice_sep_start_total_time = total_time
                 # Reset time at a voice separator (only do so for final \\ if multiple in a row)
-                elif class_name == 'VoiceSeparator' and voice_sep and not self.get_next_node(m).token == r'\\':
+                elif class_name == 'VoiceSeparator' and voice_sep and self.get_next_node(m) and not self.get_next_node(m).token == r'\\':
                     note_locations.append([(voice_sep_start_total_time, False)])
                     total_time = total_time - voice_sep_length
                 # A string could be a \bar type, so record its position and type if so
