@@ -53,6 +53,7 @@ staff_contexts = ['Staff', 'RhythmicStaff', 'TabStaff',
 
 part_contexts = pno_contexts + staff_contexts
 
+
 def eprint(*args, **kwargs):
     """
     From https://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python
