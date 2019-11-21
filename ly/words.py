@@ -661,7 +661,7 @@ markupcommands_nargs = (
     'arrow-head',
     'beam',
     'draw-circle',
-    'eps-file',
+    'epsfile',
     'filled-box',
     'general-align',
     'note-by-number',
