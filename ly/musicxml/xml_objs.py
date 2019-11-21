@@ -102,7 +102,7 @@ class IterateXmlObjs():
             for bar in part.barlist:
                 self.iterate_bar(bar)
         else:
-            print("Warning: empty part:", part.name)
+            eprint("Warning: empty part:", part.name)
 
     def iterate_bar(self, bar):
         """The objects in the bar are output to the xml-file."""
@@ -286,14 +286,14 @@ class Score():
         ind = "  "
 
         def debug_part(p):
-            print("Score part:"+p.name)
+            eprint("Score part:"+p.name)
             for n, b in enumerate(p.barlist):
-                print(ind+"Bar nr: "+str(n+1))
+                eprint(ind+"Bar nr: "+str(n+1))
                 for obj in b.obj_list:
-                    print(ind+ind+repr(obj))
+                    eprint(ind+ind+repr(obj))
                     for a in attr:
                         try:
-                            print(ind+ind+ind+a+':'+repr(getattr(obj, a)))
+                            eprint(ind+ind+ind+a+':'+repr(getattr(obj, a)))
                         except AttributeError:
                             pass
 
@@ -301,7 +301,7 @@ class Score():
             if hasattr(g, 'barlist'):
                 debug_part(g)
             else:
-                print("Score group:"+g.name)
+                eprint("Score group:"+g.name)
                 for pg in g.partlist:
                     debug_group(pg)
 
@@ -369,7 +369,7 @@ class ScoreSection():
                     voc_name = obj.voice_name
                     if voc_name is None:
                         voc_name = "None"
-                        print("Warning: Voice name for a lyric is None!")
+                        eprint("Warning: Voice name for a lyric is None!")
                     if voc_name not in voices:
                         voices[voc_name] = []
                     voices[voc_name].append({"note": obj, "time": time})
@@ -435,9 +435,9 @@ class ScoreSection():
                             if prev_lyr[1] in voices:
                                 current_voice = prev_lyr[1]
                             else:
-                                print("Warning: Voice", prev_lyr[1], "is not a valid voice for lyric assignment!")
+                                eprint("Warning: Voice", prev_lyr[1], "is not a valid voice for lyric assignment!")
                         else:
-                            print("Warning: Unknown voice command!")
+                            eprint("Warning: Unknown voice command!")
                     lyrics_idx += 1
                 else:
                     note_used = True  # No lyric needed for slurred/tied note
@@ -502,12 +502,12 @@ class ScorePart(ScoreSection):
             try:
                 self.barlist[0].obj_list[0].set_time(initime, False)
             except AttributeError:
-                print("Warning can't set initial time sign!")
+                eprint("Warning can't set initial time sign!")
         if not check_clef(self.barlist[0]):
             try:
                 self.barlist[0].obj_list[0].set_clef(iniclef)
             except AttributeError:
-                print("Warning can't set initial clef sign!")
+                eprint("Warning can't set initial clef sign!")
         self.barlist[0].obj_list[0].divs = divisions
         if self.staves:
             self.barlist[0].obj_list[0].staves = self.staves

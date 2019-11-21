@@ -29,6 +29,7 @@ is captured.
 from __future__ import unicode_literals
 from __future__ import print_function
 
+import sys
 import ly.document
 import ly.music
 from ly.pitch.transpose import Transposer
@@ -51,6 +52,13 @@ staff_contexts = ['Staff', 'RhythmicStaff', 'TabStaff',
                   'DrumStaff', 'VaticanaStaff', 'MensuralStaff']
 
 part_contexts = pno_contexts + staff_contexts
+
+def eprint(*args, **kwargs):
+    """
+    From https://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python
+    Prints to stderr
+    """
+    print(*args, file=sys.stderr, **kwargs)
 
 
 class End():
@@ -158,7 +166,7 @@ class ParseSource():
 
     def parse_tree(self, mustree):
         """Parse the LilyPond source as a ly.music node tree."""
-        # print(mustree.dump())
+        # eprint(mustree.dump())
         header_nodes = self.iter_header(mustree)
         if header_nodes:
             self.parse_nodes(header_nodes)
@@ -325,7 +333,7 @@ class ParseSource():
                                 break
                             # Barline occurs during some note
                             else:
-                                print("Warning: Barline found during note, skipping barline!")
+                                eprint("Warning: Barline found during note, skipping barline!")
                                 barline_locations_to_skip.append(bar_loc)
                                 barline_conflict = True
                                 break
@@ -343,18 +351,18 @@ class ParseSource():
         same name as the nodes class."""
         if nodes:
             for m in nodes:
-                # print(m)
+                # eprint(m)
                 func_name = m.__class__.__name__  # get instance name
                 if func_name not in excl_list:
                     try:
                         func_call = getattr(self, func_name)
                         func_call(m)
                     except AttributeError as ae:
-                        print("Warning:", func_name, "not implemented!")
-                        print(ae)
+                        eprint("Warning:", func_name, "not implemented!")
+                        eprint(ae)
                         pass
         else:
-            print("Warning! Couldn't parse source!")
+            eprint("Warning! Couldn't parse source!")
 
     def musicxml(self, prettyprint=True):
         self.mediator.check_score()
@@ -492,11 +500,11 @@ class ParseSource():
             self.mediator.new_section('devnull', True)
         elif context == 'Lyrics':  # The way lyrics are implemented, they don't need a new section here (prevents irrelevant warning)
             if self.alt_mode == 'lyric':
-                print("Warning: Nested lyric sections are not supported!")  # TODO: Support nested lyrics
+                eprint("Warning: Nested lyric sections are not supported!")  # TODO: Support nested lyrics
         elif context == 'ChordNames':
             pass  # Without using ChordMode to write actual chords, ChordNames doesn't need a new section
         else:
-            print("Context not implemented:", context)
+            eprint("Context not implemented:", context)
 
     def VoiceSeparator(self, voice_sep):
         # Increment voice name no matter what (for lyric assignment)
@@ -769,7 +777,7 @@ class ParseSource():
 
     def Note(self, note):
         """ notename, e.g. c, cis, a bes ... """
-        # print(note.token)
+        # eprint(note.token)
         self.adjust_tuplet_length(note)
         self.transpose_note(note)
         # if the note is a bass note in a chord symbol, break out of function
@@ -1010,7 +1018,7 @@ class ParseSource():
             self.end_beam()
             if self.beam == "Manual":  # Should never be True
                 self.mediator.current_note.set_beam("continue")
-                print("Warning: Beam start does not have corresponding beam end!")
+                eprint("Warning: Beam start does not have corresponding beam end!")
             self.beam = "Manual"
             self.prev_beam_type = "Manual"
         elif beam.token == "]":
@@ -1018,7 +1026,7 @@ class ParseSource():
                 self.mediator.current_note.set_beam("end")
                 self.beam = None
             else:  # Should never be True
-                print("Warning: Beam end does not have corresponding beam start!")
+                eprint("Warning: Beam end does not have corresponding beam start!")
 
     def Partial(self, partial):
         r""" \partial # """
@@ -1128,7 +1136,7 @@ class ParseSource():
             else:  # Singular note
                 self.trem_note_count = 1
         else:  # TODO: Support percent repeats
-            print("Warning: Repeat", repeat.specifier(), "is not supported!")
+            eprint("Warning: Repeat", repeat.specifier(), "is not supported!")
 
     def Alternative(self, alt):
         r""" A \alternative {...} provides alternate endings. """
@@ -1136,7 +1144,7 @@ class ParseSource():
             num_endings = len(alt[0])
             num_repeats = self.volta_counts.pop()
             if num_endings > num_repeats:
-                print('Warning: More alternate endings than repeats!')
+                eprint('Warning: More alternate endings than repeats!')
             # Create a stack of ending lists of form [starting_repeat_num, ending_repeat_num, is_last]
             for ending_num in range(1, num_endings + 1):
                 if ending_num == 1:  # First ending
@@ -1203,14 +1211,14 @@ class ParseSource():
         elif cont_set.property() == 'ignoreMelismata':
             self.set_ignore_melismata(cont_set.value().get_bool())
         else:
-            print("Warning: Set", cont_set.property(), "failed!")
+            eprint("Warning: Set", cont_set.property(), "failed!")
 
     def Unset(self, cont_unset):
         r""" A \unset command. """
         if cont_unset.property() == 'ignoreMelismata':
             self.mediator.new_lyrics_item(["ignoreMelismata", False, "command"])
         else:
-            print("Warning: Unset", cont_unset.property(), "failed!")
+            eprint("Warning: Unset", cont_unset.property(), "failed!")
 
     def Command(self, command):
         r""" \bar, \rest etc """
@@ -1278,7 +1286,7 @@ class ParseSource():
             self.phr_slur_types[-1] = 'dotted'
         else:
             if command.token not in excls:
-                print("Unknown command:", command.token)
+                eprint("Unknown command:", command.token)
 
     def UserCommand(self, usercommand):
         """Music variables are substituted so this must be something else."""
@@ -1352,7 +1360,7 @@ class ParseSource():
         elif self.look_behind(item, ly.music.items.Set):
             pass  # See Set()
         else:
-            print("SchemeItem not implemented:", item.token)
+            eprint("SchemeItem not implemented:", item.token)
 
     def SchemeQuote(self, quote):
         """A ' in scheme."""
@@ -1380,7 +1388,7 @@ class ParseSource():
                     self.mediator.new_repeat('backward')
                 elif not self.look_ahead(end.node[-1][0], ly.music.items.MusicList):
                     self.mediator.new_repeat('backward')
-                    print("Warning: Alternate ending has no music lists!")
+                    eprint("Warning: Alternate ending has no music lists!")
             elif end.node.specifier() == 'tremolo':
                 if self.look_ahead(end.node, ly.music.items.MusicList):
                     self.mediator.set_tremolo(trem_type="stop")
@@ -1474,7 +1482,7 @@ class ParseSource():
             self.relative = False
             self.rel_pitch_isset = False
         else:
-            # print("end:", end.node.token)
+            # eprint("end:", end.node.token)
             pass
 
     ##
@@ -1559,7 +1567,7 @@ class ParseSource():
                 num_endings = len(node[0])
                 if num_endings > repeat_count:
                     num_endings = repeat_count
-                    print("Warning: More alternate endings than unfold repeats (removing extras)!")
+                    eprint("Warning: More alternate endings than unfold repeats (removing extras)!")
                 if num_endings != 0:
                     # Append all endings from the last ending until the second ending (reverse order)
                     for i in range(num_endings - 1, 0, -1):
