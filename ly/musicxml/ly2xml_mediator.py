@@ -263,7 +263,7 @@ class Mediator():
                     self.add_snippet(self.sections[-1].name)
                     self.sections.pop()
                 else:
-                    print("WARNING: problem adding snippet!")
+                    eprint("WARNING: problem adding snippet!")
 
     def check_lyrics(self, voice_id):
         """Check the finished lyrics section and merge it into
@@ -275,7 +275,7 @@ class Mediator():
         if voice_section:
             voice_section.merge_lyrics(lyrics_section)
         else:
-            print("Warning can't merge in lyrics!", voice_section)
+            eprint("Warning can't merge in lyrics!", voice_section)
         self.lyric = None  # Clear final lyric
 
     def check_part(self):
@@ -356,7 +356,7 @@ class Mediator():
         else:
             self.current_accidentals_dict[abs_note] = alter
             return True
-        print("Warning: Invalid note checked for accidental!")
+        eprint("Warning: Invalid note checked for accidental!")
         return False
 
     def get_first_var(self):
@@ -1018,7 +1018,7 @@ class Mediator():
     def new_lyrics_text(self, txt):
         if not txt:
             txt = "ERR"
-            print("Warning: Lyric text not readable, marked with ERR!")
+            eprint("Warning: Lyric text not readable, marked with ERR!")
         if self.lyric:
             if self.lyric_syll:
                 if self.lyric[1] in ['begin', 'middle']:
@@ -1045,7 +1045,7 @@ class Mediator():
         elif isinstance(item, list) and item[-1] == "command":
             self.insert_into.barlist.append(item)  # Item should be of form ["commandName", args, "command"]
         else:
-            print("Warning: Lyric item", str(item), "not implemented!")
+            eprint("Warning: Lyric item", str(item), "not implemented!")
 
     def duration_from_tokens(self, tokens):
         """Calculate dots and multibar rests from tokens."""
@@ -1069,7 +1069,7 @@ class Mediator():
             b = 1/base
         else:
             b = 1
-            print("Warning problem checking duration!")
+            eprint("Warning problem checking duration!")
         c = a * divs * scaling
         predur, mod = divmod(c, b)
         if mod > 0:
@@ -1242,11 +1242,11 @@ def length_to_duration(length):
                     dur += dot_length
                     dot_length *= Fraction(1, 2)
             else:
-                print("Warning: Length of note is too long!")
+                eprint("Warning: Length of note is too long!")
             index = i
             break
     if index == durations.index(Fraction(1, 2048)):
-        print("Warning: Length of note is too short for MusicXML!")
+        eprint("Warning: Length of note is too short for MusicXML!")
     return ly.duration.durations[index], dots
 
 
