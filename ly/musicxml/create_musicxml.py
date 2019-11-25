@@ -276,9 +276,11 @@ class CreateMusicXML():
         if ornament == "wavy-line":
             self.add_wavyline(args['type'])
 
-    def new_bar_attr(self, clef=0, mustime=0, key=None, mode=0, divs=0):
+    def new_bar_attr(self, clef=0, mustime=0, key=None, mode=0, divs=0, br=False):
         """Create all bar attributes set. """
         self.create_bar_attr()
+        if br:
+            self.add_break()
         if divs:
             self.add_divisions(divs)
         if key is not None:
@@ -604,6 +606,11 @@ class CreateMusicXML():
         if ofst:
             offset = etree.SubElement(harmony, "offset")
             offset.text = str(ofst)
+
+    def add_break(self):
+        attr_dict = {}
+        attr_dict["new-system"] = "yes"
+        sys_break = etree.SubElement(self.current_bar, "print", attr_dict)
 
     def add_divisions(self, div):
         division = etree.SubElement(self.bar_attr, "divisions")

@@ -1276,6 +1276,8 @@ class ParseSource():
             self.phr_slur_types[-1] = 'dashed'
         elif command.token == '\\phrasingSlurDotted':
             self.phr_slur_types[-1] = 'dotted'
+        elif command.token == '\\break':
+            self.mediator.set_sys_break()
         else:
             if command.token not in excls:
                 print("Unknown command:", command.token)
