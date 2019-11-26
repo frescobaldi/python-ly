@@ -28,10 +28,19 @@ from __future__ import division
 
 from fractions import Fraction
 
+import sys
 import ly.duration
 import ly.pitch
 
 from . import xml_objs
+
+
+def eprint(*args, **kwargs):
+    """
+    From https://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python
+    Prints to stderr
+    """
+    print(*args, file=sys.stderr, **kwargs)
 
 
 class Mediator():
