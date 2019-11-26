@@ -53,6 +53,16 @@ from __future__ import print_function
 
 from fractions import Fraction
 
+import sys
+
+
+def eprint(*args, **kwargs):
+    """
+    From https://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python
+    Prints to stderr
+    """
+    print(*args, file=sys.stderr, **kwargs)
+
 
 class IterateXmlObjs():
     """
