@@ -843,10 +843,10 @@ class Mediator():
         self.tie_line = line
         self.current_note.set_tie(tie_type, line)
 
-    def set_slur(self, nr, slur_type, phrasing=False, line='solid'):
+    def set_slur(self, nr, slur_type, phrasing=False, line='solid', grace=False):
         """
         Set the slur start or stop for the current note. """
-        self.current_note.set_slur(nr, slur_type, phrasing, line)
+        self.current_note.set_slur(nr, slur_type, phrasing, line, grace)
 
     def new_articulation(self, art_token):
         """

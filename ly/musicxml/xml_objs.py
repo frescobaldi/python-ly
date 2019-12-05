@@ -374,7 +374,7 @@ class ScoreSection():
         # Create dictionary of lists for each voice's notes
         for bar in self.barlist:
             for obj in bar.obj_list:
-                if isinstance(obj, BarMus) and not obj.chord:
+                if isinstance(obj, BarMus) and not obj.chord and (not isinstance(obj, BarNote) or obj.grace == (0, 0)):
                     # Get the name of the voice, if there is no voice name, then use "None"
                     voc_name = obj.voice_name
                     if voc_name is None:
@@ -404,7 +404,7 @@ class ScoreSection():
                                 # For loops cover the case where a note has multiple slur objects
                                 #    ex: the note `(a)` has an opening and closing slur, meaning slur should remain False
                                 for s in notes[indices[voice]]["note"].slur:
-                                    if not s.phrasing:  # Phrasing slurs don't affect lyric placement
+                                    if not s.phrasing and not s.grace:  # Phrasing/grace slurs don't affect lyric placement
                                         slurs[voice] = not slurs[voice]
                                 for t in notes[indices[voice]]["note"].tie:
                                     ties[voice] = not ties[voice]
@@ -574,10 +574,9 @@ class Bar():
         b = 0
         s = 1
         for obj in self.obj_list:
-            if isinstance(obj, BarMus):
-                if not obj.chord:
-                    b += obj.duration[0]
-                    s *= obj.duration[1]
+            if isinstance(obj, BarMus) and not obj.chord and (not isinstance(obj, BarNote) or obj.grace == (0, 0)):
+                b += obj.duration[0]
+                s *= obj.duration[1]
             elif isinstance(obj, BarBackup):
                 b -= obj.duration[0]
                 s /= obj.duration[1]
@@ -742,11 +741,12 @@ class Tuplet():
 class Slur():
     """Stores information about slur."""
 
-    def __init__(self, nr, slurtype, phrasing, line):
+    def __init__(self, nr, slurtype, phrasing, line, grace=False):
         self.nr = nr
         self.slurtype = slurtype
         self.phrasing = phrasing
         self.line = line
+        self.grace = grace
 
 
 ##
@@ -791,8 +791,8 @@ class BarNote(BarMus):
     def set_tie(self, tie_type, line):
         self.tie.append((tie_type, line))
 
-    def set_slur(self, nr, slur_type, phrasing, line):
-        self.slur.append(Slur(nr, slur_type, phrasing, line))
+    def set_slur(self, nr, slur_type, phrasing, line, grace):
+        self.slur.append(Slur(nr, slur_type, phrasing, line, grace))
 
     def add_articulation(self, art_name):
         self.artic.append(art_name)
