@@ -73,7 +73,7 @@
         <voice>1</voice>
         <type>eighth</type>
         <notations>
-          <slur number="0" type="start" />
+          <slur number="1" type="start" />
         </notations>
       </note>
       <note>
@@ -85,7 +85,7 @@
         <voice>1</voice>
         <type>quarter</type>
         <notations>
-          <slur number="0" type="stop" />
+          <slur number="1" type="stop" />
         </notations>
       </note>
       <backup>
@@ -185,7 +185,7 @@
         <type>eighth</type>
         <beam number="1">begin</beam>
         <notations>
-          <slur number="0" type="start" />
+          <slur number="2" type="start" />
         </notations>
       </note>
       <note>
@@ -198,7 +198,7 @@
         <type>eighth</type>
         <beam number="1">end</beam>
         <notations>
-          <slur number="0" type="continue" />
+          <slur number="2" type="continue" />
         </notations>
       </note>
       <note>
@@ -210,7 +210,7 @@
         <voice>1</voice>
         <type>quarter</type>
         <notations>
-          <slur number="0" type="stop" />
+          <slur number="2" type="stop" />
         </notations>
       </note>
       <note>
@@ -222,7 +222,7 @@
         <voice>1</voice>
         <type>eighth</type>
         <notations>
-          <slur number="0" type="start" />
+          <slur number="2" type="start" />
         </notations>
       </note>
       <note>
@@ -234,7 +234,7 @@
         <voice>1</voice>
         <type>quarter</type>
         <notations>
-          <slur number="0" type="stop" />
+          <slur number="2" type="stop" />
         </notations>
       </note>
       <note>

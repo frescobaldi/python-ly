@@ -874,10 +874,13 @@ class ParseSource():
             self.mediator.new_grace(self.grace_slash)
             if self.grace_slur:
                 if not self.prev_was_grace_slur:
+                    self.slurcount += 1
+                    self.slurnr = self.slurcount
                     self.mediator.set_slur(self.slurnr, "start", grace=True)
                     self.prev_was_grace_slur = True
                 else:
                     self.mediator.set_slur(self.slurnr, "continue", grace=True)
+                    self.slurcount -= 1
         else:
             if self.prev_was_grace_slur:
                 self.mediator.set_slur(self.slurnr, "stop", grace=True)
