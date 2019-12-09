@@ -83,6 +83,9 @@ class ParseSource():
         self.tuplet = []
         self.scale = ''
         self.grace_seq = False
+        self.grace_slash = False
+        self.grace_slur = False
+        self.prev_was_grace_slur = False
         self.trem_rep = 0
         self.trem_note_count = 0
         self.trem_is_started = False
@@ -203,6 +206,7 @@ class ParseSource():
             tuplet = []
             trem_rep = 0
             grace_seq = False
+            slashed_grace = False
             voice_sep = False
             voice_sep_start_total_time = 0
             voice_sep_length = 0
@@ -216,19 +220,25 @@ class ParseSource():
                 class_name = m.__class__.__name__
                 # Notes should advance total_time by their length (but not chord or grace notes)
                 if (isinstance(m, ly.music.items.Durable) and not isinstance(m, ly.music.items.LyricText)
-                        and not chord_mode and not grace_seq and not isinstance(m.parent(), ly.music.items.Chord)):
-                    dur = m.duration
-                    # In the instance of a tuplet or tremolo repeat, change the duration
-                    if len(tuplet) != 0:
-                        dur = (Fraction((dur[0] * tuplet[-1][1]) / tuplet[-1][0]), dur[1])
-                    if trem_rep != 0:
-                        dur = (dur[0] * trem_rep, dur[1])
-                    total_time += dur[0] * dur[1]
-                    # Log the end time of this Durable and whether it is a Skip
-                    if isinstance(m, ly.music.items.Skip):
-                        note_locations[-1].append((total_time, True))
-                    else:
-                        note_locations[-1].append((total_time, False))
+                        and not chord_mode and not isinstance(m.parent(), ly.music.items.Chord)):
+                    if not grace_seq:
+                        dur = m.duration
+                        # In the instance of a tuplet or tremolo repeat, change the duration
+                        if len(tuplet) != 0:
+                            dur = (Fraction((dur[0] * tuplet[-1][1]) / tuplet[-1][0]), dur[1])
+                        if trem_rep != 0:
+                            dur = (dur[0] * trem_rep, dur[1])
+                        total_time += dur[0] * dur[1]
+                        # Log the end time of this Durable and whether it is a Skip
+                        if isinstance(m, ly.music.items.Skip):
+                            note_locations[-1].append((total_time, True))
+                        else:
+                            note_locations[-1].append((total_time, False))
+                    # End slashed grace note
+                    # TODO: Handle multiple/chord \slashedGrace notes
+                    elif slashed_grace:
+                        grace_seq = False
+                        slashed_grace = False
                 # Indicate chord mode (ignore notes in this mode)
                 elif isinstance(m, (ly.music.items.ChordMode)):
                     chord_mode = True
@@ -265,6 +275,11 @@ class ParseSource():
                         numeric_time = False
                     if total_time in self.time_sig_locations:
                         self.time_sig_locations[total_time]['numeric'][staff] = numeric_time
+                # Handle user commands (like slashedGrace notes)
+                elif class_name == 'UserCommand':
+                    if m.token == '\\slashedGrace':
+                        grace_seq = True
+                        slashed_grace = True
                 # Store the location of time signature changes
                 elif class_name == 'TimeSignature':
                     if total_time not in self.time_sig_locations:
@@ -661,49 +676,57 @@ class ParseSource():
         Also records chord symbol locations when in 'chord' alt_mode
         After updating times, checks for barlines, time sigs, and/or chord symbols when applicable
         """
-        length = 0
-        # Skip lengths are given manually, otherwise use the object's length
-        if skip_len:
-            length = skip_len
-        else:
-            length = mus_obj.length()
-        if length:
-            self.prev_note_dur = length
-            # When in chord alt_mode, record chord symb locations
-            if self.alt_mode == "chord":
-                if not isinstance(mus_obj, ly.music.items.Skip):
-                    self.chord_locations[self.total_time] = {"root": mus_obj.token.capitalize()[0],
-                                                             "root-alter": int(mus_obj.pitch.alter * 2),
-                                                             "bass": False, "bass-alter": 0, "text": ""}
-                self.total_time += length
-            # When not in chord alt_mode, treat notes as notes
+        if not self.grace_seq:
+            length = 0
+            # Skip lengths are given manually, otherwise use the object's length
+            if skip_len:
+                length = skip_len
             else:
-                self.time_since_bar += length
-                self.total_time += length
-                # Check for bar/time sigs unless final note in voice separator (in which case, wait until after)
-                if not self.voice_sep or (skip_len and not final_skip):
-                    self.check_for_barline()
-                    self.update_time_sig()
+                length = mus_obj.length()
+            if length:
+                self.prev_note_dur = length
+                # When in chord alt_mode, record chord symb locations
+                if self.alt_mode == "chord":
+                    if not isinstance(mus_obj, ly.music.items.Skip):
+                        self.chord_locations[self.total_time] = {"root": mus_obj.token.capitalize()[0],
+                                                                 "root-alter": int(mus_obj.pitch.alter * 2),
+                                                                 "bass": False, "bass-alter": 0, "text": ""}
+                    self.total_time += length
+                # When not in chord alt_mode, treat notes as notes
                 else:
-                    node = mus_obj
-                    while True:
-                        if not self.get_next_node(node):
-                            break
-                        elif isinstance(self.get_next_node(node), ly.music.items.Durable):
-                            self.check_for_barline()
-                            self.update_time_sig()
-                            break
-                        else:
-                            node = self.get_next_node(node)
-                if not skip_len:
-                    self.check_for_chord(mus_obj)
-        # First note of chord is used to update time and check for chord symbols,
-        #     but must wait for end of chord to check for barlines/time sigs (see End())
-        elif mus_obj is not None and isinstance(mus_obj.parent(), ly.music.items.Chord):
-            self.prev_note_dur = mus_obj.parent().duration[0]
-            self.time_since_bar += mus_obj.parent().duration[0]
-            self.total_time += mus_obj.parent().duration[0]
-            self.check_for_chord(mus_obj)
+                    self.time_since_bar += length
+                    self.total_time += length
+                    # Check for bar/time sigs unless final note in voice separator (in which case, wait until after)
+                    if not self.voice_sep or (skip_len and not final_skip):
+                        self.check_for_barline()
+                        self.update_time_sig()
+                    else:
+                        node = mus_obj
+                        while True:
+                            if not self.get_next_node(node):
+                                break
+                            elif isinstance(self.get_next_node(node), ly.music.items.Durable):
+                                self.check_for_barline()
+                                self.update_time_sig()
+                                break
+                            else:
+                                node = self.get_next_node(node)
+                    if not skip_len:
+                        self.check_for_chord(mus_obj)
+            # First note of chord is used to update time and check for chord symbols,
+            #     but must wait for end of chord to check for barlines/time sigs (see End())
+            elif mus_obj is not None and isinstance(mus_obj.parent(), ly.music.items.Chord):
+                self.prev_note_dur = mus_obj.parent().duration[0]
+                self.time_since_bar += mus_obj.parent().duration[0]
+                self.total_time += mus_obj.parent().duration[0]
+                self.check_for_chord(mus_obj)
+        else:
+            # Handle end of \slashedGrace (since it is not a Grace object)
+            # TODO: Handle multiple/chord \slashedGrace notes
+            if self.grace_slash and not self.grace_slur:
+                self.grace_slash = False
+                self.grace_slur = False
+                self.grace_seq = False
 
     def adjust_tuplet_length(self, obj):
         r""" Adjusts the length of notes within a \tuplet """
@@ -811,7 +834,7 @@ class ParseSource():
                         self.update_time_and_check(note)
                     # chord as grace note
                     if self.grace_seq:
-                        self.mediator.new_chord_grace()
+                        self.mediator.new_chord_grace(self.grace_slash)
 
     def Unpitched(self, unpitched):
         """A note without pitch, just a standalone duration."""
@@ -846,8 +869,22 @@ class ParseSource():
     def check_note(self, note):
         """Generic check for all notes, both pitched and unpitched."""
         self.check_tuplet()
+        # Handle grace notes and their slurs (marked as grace note slurs to avoid lyrics skipping notes)
         if self.grace_seq:
-            self.mediator.new_grace()
+            self.mediator.new_grace(self.grace_slash)
+            if self.grace_slur:
+                if not self.prev_was_grace_slur:
+                    self.slurcount += 1
+                    self.slurnr = self.slurcount
+                    self.mediator.set_slur(self.slurnr, "start", grace=True)
+                    self.prev_was_grace_slur = True
+                else:
+                    self.mediator.set_slur(self.slurnr, "continue", grace=True)
+                    self.slurcount -= 1
+        else:
+            if self.prev_was_grace_slur:
+                self.mediator.set_slur(self.slurnr, "stop", grace=True)
+                self.prev_was_grace_slur = False
         if self.trem_rep:
             # Update the duration of the note
             note.duration = (note.duration[0] * self.trem_rep, note.duration[1])
@@ -1058,6 +1095,15 @@ class ParseSource():
         self.mediator.new_dynamics(dynamic.token[1:])
 
     def Grace(self, grace):
+        if grace.token == '\\acciaccatura':
+            self.grace_slash = True
+            self.grace_slur = True
+        elif grace.token == '\\appoggiatura':
+            self.grace_slash = False
+            self.grace_slur = True
+        else:
+            self.grace_slash = False
+            self.grace_slur = False
         self.grace_seq = True
 
     def generate_beam_ends(self, fraction, beat_pattern):
@@ -1295,6 +1341,10 @@ class ParseSource():
         """Music variables are substituted so this must be something else."""
         if usercommand.name() == 'tupletSpan':
             self.tupl_span = True
+        elif usercommand.name() == 'slashedGrace':
+            self.grace_slash = True
+            self.grace_slur = False
+            self.grace_seq = True
 
     def String(self, string):
         r""" See check_for_barline() and generate_location_dicts() for more on how `\bar "..."` is implemented """
@@ -1382,7 +1432,9 @@ class ParseSource():
                 self.mediator.change_tuplet_type(len(self.tuplet) - 1, "stop")
             self.tuplet.pop()
             self.fraction = None
-        elif isinstance(end.node, ly.music.items.Grace):  # Grace
+        elif isinstance(end.node, ly.music.items.Grace):  # Grace notes (except \slashedGrace)
+            self.grace_slash = False
+            self.grace_slur = False
             self.grace_seq = False
         elif end.node.token == '\\repeat':
             if end.node.specifier() == 'volta' and self.alt_mode not in ['lyric', 'chord']:
