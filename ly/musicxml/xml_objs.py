@@ -371,6 +371,20 @@ class ScoreSection():
         ties = {}                        # Indicates whether the current note is tied for each voice {"voice": bool}
         prev_time = -1                   # Stores the start time of the previously placed lyric
         note_used = True                 # Indicates whether the current note has had a lyric (or skip) assigned
+        voice_count = 0                  # Stores how many voices there are (not counting the "None" voice)
+        # Create dictionary of empty lists for each voice's notes
+        for bar in self.barlist:
+            for obj in bar.obj_list:
+                if isinstance(obj, BarMus) and not obj.chord and (not isinstance(obj, BarNote) or obj.grace == (0, 0)):
+                    # Get the name of the voice, if there is no voice name, then use "None"
+                    voc_name = obj.voice_name
+                    if voc_name is None:
+                        voc_name = "None"
+                    if voc_name not in voices:
+                        voices[voc_name] = []
+        voice_count = len(voices)
+        if "None" in voices:
+            voice_count -= 1
         # Create dictionary of lists for each voice's notes
         for bar in self.barlist:
             for obj in bar.obj_list:
@@ -380,14 +394,13 @@ class ScoreSection():
                     if voc_name is None:
                         voc_name = "None"
                         eprint("Warning: Voice name for a lyric is None!")
-                    if voc_name not in voices:
-                        voices[voc_name] = []
                     voices[voc_name].append({"note": obj, "time": time})
                     time += obj.duration[0] * obj.duration[1]
-                elif isinstance(obj, BarBackup):
+                elif isinstance(obj, BarBackup) and voice_count > 1:
                     time -= obj.duration[0] * obj.duration[1]
         # Initialize the needed keys for indices and objects
         for voice in voices:
+            voice_count += 1
             if voice not in indices:
                 indices[voice] = 0
                 objects[voice] = None
