@@ -219,8 +219,9 @@
         <voice>1</voice>
         <type>quarter</type>
         <lyric number="1">
+          <!--Lyric text was not parsed correctly, so it was marked with ERROR-->
           <syllabic>single</syllabic>
-          <text>ERR</text>
+          <text>ERROR</text>
         </lyric>
       </note>
     </measure>
