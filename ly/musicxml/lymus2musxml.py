@@ -1333,6 +1333,8 @@ class ParseSource():
             self.phr_slur_types[-1] = 'dotted'
         elif command.token == '\\break':
             self.mediator.set_sys_break()
+        elif command.token == '\\breathe':
+            self.mediator.set_breathe()
         else:
             if command.token not in excls:
                 eprint("Unknown command:", command.token)
