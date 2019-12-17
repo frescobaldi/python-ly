@@ -86,6 +86,13 @@ class CreateMusicXML():
         mov_title.text = title
         self.root.insert(0, mov_title)
 
+    def create_subtitle(self, subtitle):
+        """Create score subtitle (using <movement-number>)."""
+        # TODO: Better option than <movement-number>?
+        mov_number = etree.Element("movement-number")
+        mov_number.text = subtitle
+        self.root.insert(0, mov_number)
+
     def create_score_info(self, tag, info, attr={}):
         """Create score info."""
         # modeled after https://kite.com/python/examples/3596/xml-insert-a-subelement-into-an-xml-element
