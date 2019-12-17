@@ -765,6 +765,9 @@ class CreateMusicXML():
         syllnode.text = syll
         txtnode = etree.SubElement(lyricnode, "text")
         txtnode.text = txt
+        # For lyrics which were not parsed correctly (https://lxml.de/tutorial.html)
+        if txt == "ERROR":
+            lyricnode.insert(0, etree.Comment("Lyric text was not parsed correctly, so it was marked with ERROR"))
         if ext:
             etree.SubElement(lyricnode, "extend")
 

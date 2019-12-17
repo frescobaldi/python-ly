@@ -1347,8 +1347,13 @@ class ParseSource():
             self.grace_seq = True
 
     def String(self, string):
-        r""" See check_for_barline() and generate_location_dicts() for more on how `\bar "..."` is implemented """
-        pass
+        r"""
+        Handles case where multiple words are to be placed on one note (ex: "all these words")
+
+        See check_for_barline() and generate_location_dicts() for more on how `\bar "..."` is implemented
+        """
+        if self.alt_mode == 'lyric' and self.look_behind(string, ly.music.items.LyricText):
+            self.mediator.new_lyrics_text(string.tokens[0])
 
     def LyricsTo(self, lyrics_to):
         r"""A \lyricsto expression. """
@@ -1356,8 +1361,14 @@ class ParseSource():
         self.sims_and_seqs.append('lyrics')
 
     def LyricText(self, lyrics_text):
-        """A lyric text (word, markup or string), with a Duration."""
-        self.mediator.new_lyrics_text(lyrics_text.token)
+        """
+        A lyric text (word, markup or string), with a Duration
+
+        Create a lyric text if there is text or the next node is not a String
+            in which case, wait to allow that String to be the lyric text (see String() above)
+        """
+        if lyrics_text.token or not self.look_ahead(lyrics_text, ly.music.items.String):
+            self.mediator.new_lyrics_text(lyrics_text.token)
 
     def LyricItem(self, lyrics_item):
         """Another lyric item (skip, extender, hyphen or tie)."""

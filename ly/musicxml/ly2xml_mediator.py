@@ -1028,8 +1028,8 @@ class Mediator():
 
     def new_lyrics_text(self, txt):
         if not txt:
-            txt = "ERR"
-            eprint("Warning: Lyric text not readable, marked with ERR!")
+            txt = "ERROR"
+            eprint("Warning: Lyric text not readable, marked with ERROR!")
         if self.lyric:
             if self.lyric_syll:
                 if self.lyric[1] in ['begin', 'middle']:
