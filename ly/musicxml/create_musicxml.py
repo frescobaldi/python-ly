@@ -88,7 +88,7 @@ class CreateMusicXML():
 
     def create_subtitle(self, subtitle):
         """Create score subtitle (using <movement-number>)."""
-        # TODO: Better option than <movement-title>?
+        # TODO: Better option than <movement-number>?
         mov_number = etree.Element("movement-number")
         mov_number.text = subtitle
         self.root.insert(0, mov_number)
