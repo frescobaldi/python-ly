@@ -103,6 +103,8 @@ class Mediator():
         creators = ['composer', 'arranger', 'poet', 'lyricist']
         if name == 'title':
             self.score.title = value
+        elif name == 'subtitle':
+            self.score.subtitle = value
         elif name == 'copyright':
             self.score.rights = value
         elif name in creators:
