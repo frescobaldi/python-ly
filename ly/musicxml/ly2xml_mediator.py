@@ -919,6 +919,9 @@ class Mediator():
             n = 1
         note.set_gliss(line, endtype="stop", nr=n)
 
+    def set_breathe(self):
+        self.current_note.add_articulation('breath-mark')
+
     def set_tremolo(self, trem_type='single', duration=0, repeats=0, note_count=1):
         if self.current_note.tremolo[1]:  # tremolo already set
             self.current_note.set_tremolo(trem_type)
