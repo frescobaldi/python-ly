@@ -366,7 +366,7 @@ class ScoreSection():
         voices = {}                      # Stores the notes in each voice (name (ex: "SopranoVoice") or number (ex: "3"))
         indices = {}                     # Stores the current index in each voice's note list
         objects = {}                     # Stores the current object (containing the note and time) in each voice
-        chords = {}                      # Stores the secondary chord notes (containing the note and time) in each voice
+        chords = {}                      # Stores the secondary chord notes (containing the note indexed by time) in each voice
         time = 0                         # Stores the current time in the music
         lyrics_idx = 0                   # Stores the current index in the lyrics list
         ignore_slur = False              # Indicates whether subsequent slurred/tied notes should have lyrics (no if False)
@@ -383,6 +383,7 @@ class ScoreSection():
                     voc_name = obj.voice_name
                     if voc_name is None:
                         voc_name = "None"
+                        eprint("Warning: Voice name for an object is None!")
                     if voc_name not in voices:
                         voices[voc_name] = []
                     if voc_name not in chords:
@@ -393,21 +394,23 @@ class ScoreSection():
         # Create dictionary of lists for each voice's notes
         for bar in self.barlist:
             for obj in bar.obj_list:
+                # Handle notes and rests which are not secondary chord notes (placed in the voices list, advances time)
                 if isinstance(obj, BarMus) and not obj.chord and (not isinstance(obj, BarNote) or obj.grace == (0, 0)):
                     # Get the name of the voice, if there is no voice name, then use "None"
                     voc_name = obj.voice_name
                     if voc_name is None:
                         voc_name = "None"
-                        eprint("Warning: Voice name for a lyric is None!")
                     voices[voc_name].append({"note": obj, "time": time})
                     time += obj.duration[0] * obj.duration[1]
+                # Handle bar backups which send current time backwards
                 elif isinstance(obj, BarBackup) and voice_count > 1:
                     time -= obj.duration[0] * obj.duration[1]
+                # Handle secondary chord notes (placed in the chords dictionary)
                 elif isinstance(obj, BarMus) and obj.chord:
+                    # Get the name of the voice, if there is no voice name, then use "None"
                     voc_name = obj.voice_name
                     if voc_name is None:
                         voc_name = "None"
-                        eprint("Warning: Voice name for a lyric is None!")
                     chord_time = time - obj.duration[0] * obj.duration[1]
                     if chord_time in chords[voc_name]:
                         chords[voc_name][chord_time].append(obj)
@@ -434,17 +437,19 @@ class ScoreSection():
                                 for s in notes[indices[voice]]["note"].slur:
                                     if not s.phrasing and not s.grace:  # Phrasing/grace slurs don't affect lyric placement
                                         slurs[voice] = not slurs[voice]
+                                # Keep track of the number of unfinished ties (normal notes)
                                 for t in notes[indices[voice]]["note"].tie:
                                     if t[0] == "start":
                                         ties[voice] += 1
-                                    else:
+                                    else:  # "stop"
                                         ties[voice] -= 1
+                                # Keep track of the number of unfinished ties (chord notes)
                                 if notes[indices[voice]]["time"] in chords[voice]:
                                     for ch in chords[voice][notes[indices[voice]]["time"]]:
                                         for t in ch.tie:
                                             if t[0] == "start":
                                                 ties[voice] += 1
-                                            else:
+                                            else:  # "stop"
                                                 ties[voice] -= 1
                             indices[voice] += 1
                         # Store current note in voice

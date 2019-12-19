@@ -876,7 +876,7 @@ class Mediator():
             self.tie_list.append(note)
 
     def check_for_tie_end(self, name, octave, alter):
-        """ If there is an unfinished tie which matches note, then return its list index else return None. """
+        """ If there is an unfinished tie which matches the input note information, then return its list index else return None. """
         if self.tie_list:
             count = 0
             for tie in self.tie_list:
