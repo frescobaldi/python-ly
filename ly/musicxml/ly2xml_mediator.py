@@ -68,7 +68,7 @@ class Mediator():
         self.dur_token = "4"
         self.dur_tokens = ()
         self.dots = 0
-        self.tied = False
+        self.tie_list = []
         self.tie_line = 'solid'
         self.voice = 1
         self.voice_sep_sections = 0
@@ -97,6 +97,7 @@ class Mediator():
         self.tupl_dur = 0
         self.tupl_sum = 0
         self.ly_to_xml_oct = 3  # xml octave values are 3 higher than lilypond
+        self.current_chord_or_note = []
 
     def new_header_assignment(self, name, value):
         """Distributing header information."""
@@ -349,7 +350,7 @@ class Mediator():
         alter is a number representing the flat/sharp status of the note (-1 is flat, +1 is sharp, 0 is natural)
         """
         abs_note = name + str(octave)
-        if self.tied:  # subsequent tied notes never need accidentals
+        if self.check_for_tie_end(name, octave, alter) is not None:  # subsequent tied notes never need accidentals
             return False
         if abs_note in self.current_accidentals_dict:
             # Same note in same octave had same alter
@@ -564,6 +565,7 @@ class Mediator():
             self.current_note = self.create_barnote_from_note(note, rel)
             self.current_lynote = note
             self.check_current_note(rel)
+        self.current_chord_or_note = [self.current_note]
         self.do_action_onnext(self.current_note)
         self.action_onnext = []
 
@@ -638,9 +640,11 @@ class Mediator():
         if not rest and not is_unpitched:
             self.set_octave(rel)
         if not rest:
-            if self.tied:
-                self.current_note.set_tie('stop', self.tie_line)
-                self.tied = False
+            note = self.current_note
+            tie_idx = self.check_for_tie_end(note.base_note, note.octave, note.alter)
+            if tie_idx is not None:
+                self.tie_list.pop(tie_idx)
+                note.set_tie('stop', self.tie_line)
         self.check_duration(rest)
         self.check_divs()
         if self.staff:
@@ -701,6 +705,7 @@ class Mediator():
         self.current_note = self.create_barnote_from_note(note, rel)
         self.current_note.set_duration(duration)
         self.current_lynote = note
+        self.current_chord_or_note = [self.current_note]
         self.check_current_note(rel)
 
     def new_chordnote(self, note, rel):
@@ -708,7 +713,6 @@ class Mediator():
         chord_note.set_duration(self.current_note.duration)
         chord_note.set_durtype(durval2type(self.dur_token))
         chord_note.dots = self.dots
-        chord_note.tie = self.current_note.tie
         chord_note.tuplet = self.current_note.tuplet
         if not self.prev_chord_pitch:
             self.prev_chord_pitch = self.prev_pitch
@@ -718,11 +722,17 @@ class Mediator():
         chord_note.set_octave(p.octave + self.ly_to_xml_oct)
         self.prev_chord_pitch = p
         chord_note.chord = True
+        self.current_chord_or_note.append(chord_note)
         self.bar.add(chord_note)
         self.check_chord_note_for_staff(chord_note)
+        tie_idx = self.check_for_tie_end(chord_note.base_note, chord_note.octave, chord_note.alter)
+        if tie_idx is not None:
+            self.tie_list.pop(tie_idx)
+            chord_note.set_tie('stop', self.tie_line)
         return chord_note
 
     def copy_prev_chord(self, duration):
+        self.current_chord_or_note = []
         if self.current_chord:
             prev_chord = self.current_chord
             self.clear_chord()
@@ -740,13 +750,16 @@ class Mediator():
                 self.prev_note = self.current_note
                 self.current_note = cn
             self.current_chord.append(cn)
-            if self.tied:
+            self.current_chord_or_note.append(cn)
+            tie_idx = self.check_for_tie_end(cn.base_note, cn.octave, cn.alter)
+            if tie_idx is not None:
+                self.tie_list.pop(tie_idx)
                 cn.set_tie('stop', self.tie_line)
             self.bar.add(cn)
             if i == 0:  # On base note of chord, update divisions
                 self.check_duration(False)
                 self.check_divs()
-        self.tied = False
+        self.current_chord_or_note.append('end')
 
     def clear_chord(self):
         self.q_chord = self.current_chord
@@ -755,6 +768,7 @@ class Mediator():
 
     def chord_end(self):
         """Actions when chord is parsed."""
+        self.current_chord_or_note.append('end')
         self.action_onnext = []
 
     def new_rest(self, rest):
@@ -840,10 +854,36 @@ class Mediator():
         return tfraction[1] / length
 
     def tie_to_next(self, line):
+        """ Begin a tie on an entire chord or an individual note. """
         tie_type = 'start'
-        self.tied = True
         self.tie_line = line
-        self.current_note.set_tie(tie_type, line)
+        if self.current_chord_or_note:
+            if self.current_chord_or_note[-1] == 'end':
+                # Apply tie to entire chord if it comes after
+                for note in self.current_chord_or_note:
+                    if note != 'end':
+                        note.set_tie(tie_type, line)
+                        self.tie_list.append(note)
+            else:
+                # Apply tie to only most recent note
+                note = self.current_chord_or_note[-1]
+                note.set_tie(tie_type, line)
+                self.tie_list.append(note)
+        else:
+            eprint("Warning: No proper note/chord found for tie!")
+            note = self.current_note
+            note.set_tie(tie_type, line)
+            self.tie_list.append(note)
+
+    def check_for_tie_end(self, name, octave, alter):
+        """ If there is an unfinished tie which matches the input note information, then return its list index else return None. """
+        if self.tie_list:
+            count = 0
+            for tie in self.tie_list:
+                if tie.base_note == name and tie.octave == octave and tie.alter == alter:
+                    return count
+                count += 1
+        return None
 
     def set_slur(self, nr, slur_type, phrasing=False, line='solid', grace=False):
         """
