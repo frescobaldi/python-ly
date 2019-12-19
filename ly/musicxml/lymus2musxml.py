@@ -284,11 +284,26 @@ class ParseSource():
                 elif class_name == 'TimeSignature':
                     if total_time not in self.time_sig_locations:
                         self.time_sig_locations[total_time] = {'numerator': m.numerator(), 'denominator': m.fraction().denominator,
-                                                               'length': m.measure_length(), 'numeric': {staff: numeric_time}}
+                                                               'length': m.measure_length(), 'numeric': {staff: numeric_time},
+                                                               'setMeasLen': False}
                     else:
                         self.time_sig_locations[total_time]['numerator'] = m.numerator()
                         self.time_sig_locations[total_time]['denominator'] = m.fraction().denominator
                         self.time_sig_locations[total_time]['length'] = m.measure_length()
+                        self.time_sig_locations[total_time]['setMeasLen'] = False
+                # Store the location of set measure length changes (same location as time sig changes)
+                elif class_name == 'Set' and m.property() == 'measureLength':
+                    num = m.value().get_list_ints()[0]
+                    den = m.value().get_list_ints()[1]
+                    if total_time not in self.time_sig_locations:
+                        self.time_sig_locations[total_time] = {'numerator': num, 'denominator': den,
+                                                               'length': Fraction(num, den), 'numeric': {staff: numeric_time},
+                                                               'setMeasLen': True}
+                    else:
+                        self.time_sig_locations[total_time]['numerator'] = num
+                        self.time_sig_locations[total_time]['denominator'] = den
+                        self.time_sig_locations[total_time]['length'] = Fraction(num, den)
+                        self.time_sig_locations[total_time]['setMeasLen'] = True
                 # Handle piano staff beginning
                 elif class_name == 'Context' and m.context() in pno_contexts:
                     piano_staff = True
@@ -662,13 +677,16 @@ class ParseSource():
         if self.total_time in self.time_sig_locations:
             ts = self.time_sig_locations[self.total_time]
             self.time_sig = ts['length']
-            self.get_beat_structure_from_time_sig(ts['numerator'], ts['denominator'])
-            numeric = False
-            if self.staff in ts['numeric']:
-                numeric = ts['numeric'][self.staff]
-            else:
-                numeric = self.numericTime
-            self.mediator.new_time(ts['numerator'], ts['denominator'], numeric)
+            # Only change beaming and place a time sig if this was
+            #     an actual `\time #/#`, not a `\set Timing.measureLength...`
+            if not ts['setMeasLen']:
+                self.get_beat_structure_from_time_sig(ts['numerator'], ts['denominator'])
+                numeric = False
+                if self.staff in ts['numeric']:
+                    numeric = ts['numeric'][self.staff]
+                else:
+                    numeric = self.numericTime
+                self.mediator.new_time(ts['numerator'], ts['denominator'], numeric)
 
     def update_time_and_check(self, mus_obj, skip_len=0, final_skip=False):
         """
@@ -1257,6 +1275,8 @@ class ParseSource():
             self.mediator.new_lyrics_item(["switchVoice", cont_set.value().value(), "command"])
         elif cont_set.property() == 'ignoreMelismata':
             self.set_ignore_melismata(cont_set.value().get_bool())
+        elif cont_set.property() == 'measureLength':
+            pass  # See generate_location_dicts() and update_time_sig() for implementation of measureLength
         else:
             eprint("Warning: Set", cont_set.property(), "failed!")
 
