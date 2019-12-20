@@ -2,7 +2,7 @@
 
 StanzaOne = \lyricmode {
   La "di lo li" da doo loo
-  "ta da" here's a rest: \markup \tiny {\musicglyph #"rests.2"}
+  "ta da" this \markup \tiny {\musicglyph #"rests.2"} is rest
 }
 
 \language "english"

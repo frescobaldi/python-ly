@@ -5,7 +5,7 @@
   <identification>
     <encoding>
       <software>python-ly 0.9.5</software>
-      <encoding-date>2019-12-09</encoding-date>
+      <encoding-date>2019-12-20</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -181,7 +181,7 @@
         <type>quarter</type>
         <lyric number="1">
           <syllabic>single</syllabic>
-          <text>here's</text>
+          <text>this</text>
         </lyric>
       </note>
       <note>
@@ -193,8 +193,9 @@
         <voice>1</voice>
         <type>quarter</type>
         <lyric number="1">
+          <!--Lyric text was not parsed correctly, so it was marked with ERROR-->
           <syllabic>single</syllabic>
-          <text>a</text>
+          <text>ERROR</text>
         </lyric>
       </note>
       <note>
@@ -207,7 +208,7 @@
         <type>quarter</type>
         <lyric number="1">
           <syllabic>single</syllabic>
-          <text>rest:</text>
+          <text>is</text>
         </lyric>
       </note>
       <note>
@@ -219,9 +220,8 @@
         <voice>1</voice>
         <type>quarter</type>
         <lyric number="1">
-          <!--Lyric text was not parsed correctly, so it was marked with ERROR-->
           <syllabic>single</syllabic>
-          <text>ERROR</text>
+          <text>rest</text>
         </lyric>
       </note>
     </measure>
