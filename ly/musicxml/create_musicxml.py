@@ -758,17 +758,20 @@ class CreateMusicXML():
     def add_sound_dir(self, midi_tempo):
         soundnode = etree.SubElement(self.direction, "sound", tempo=str(midi_tempo))
 
-    def add_lyric(self, txt, syll, nr, ext=False):
+    def add_lyric(self, txt, syll, nr, args=[]):
         """ Add lyric element. """
         lyricnode = etree.SubElement(self.current_note, "lyric", number=str(nr))
         syllnode = etree.SubElement(lyricnode, "syllabic")
         syllnode.text = syll
-        txtnode = etree.SubElement(lyricnode, "text")
+        arg_dict = {}
+        if "italic" in args:
+            arg_dict["font-style"] = "italic"
+        txtnode = etree.SubElement(lyricnode, "text", arg_dict)
         txtnode.text = txt
         # For lyrics which were not parsed correctly (https://lxml.de/tutorial.html)
         if txt == "ERROR":
             lyricnode.insert(0, etree.Comment("Lyric text was not parsed correctly, so it was marked with ERROR"))
-        if ext:
+        if "extend" in args:
             etree.SubElement(lyricnode, "extend")
 
     ##
