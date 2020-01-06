@@ -1378,7 +1378,7 @@ class ParseSource():
 
         See check_for_barline() and generate_location_dicts() for more on how `\bar "..."` is implemented
         """
-        if self.alt_mode == 'lyric' and self.look_behind(string, ly.music.items.LyricText):
+        if self.alt_mode == 'lyric' and isinstance(string.parent(), ly.music.items.LyricText):
             if 'LyricText_font-shape' in self.override_dict and self.override_dict['LyricText_font-shape'] == 'italic':
                 self.mediator.new_lyrics_text(string.tokens[0], True)
             else:
@@ -1396,7 +1396,7 @@ class ParseSource():
         Create a lyric text if there is text or the next node is not a String
             in which case, wait to allow that String to be the lyric text (see String() above)
         """
-        if lyrics_text.token or not self.look_ahead(lyrics_text, ly.music.items.String):
+        if lyrics_text.token or not isinstance(lyrics_text[0], ly.music.items.String):
             if 'LyricText_font-shape' in self.override_dict and self.override_dict['LyricText_font-shape'] == 'italic':
                 self.mediator.new_lyrics_text(lyrics_text.token, True)
             else:
