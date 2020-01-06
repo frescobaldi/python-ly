@@ -2,6 +2,11 @@ ChangeLog for python-ly
 =======================
 
 
+2020-??-??: python-ly 0.9.6
+
+- improved indentation of Scheme code, thanks to Paul Morris (#132)
+
+
 2017-02-17: python-ly 0.9.5
 
 - basic support for tokenizing the MUP format 
