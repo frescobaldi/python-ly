@@ -299,7 +299,7 @@ class Line(object):
         for indent in indenters:
             token, rest = indent[0], indent[1:]
             if isinstance(token, ly.lex.scheme.OpenParen):
-                if len(rest) > 1 and self.is_alignable_scheme_keyword(rest[0]):
+                if len(rest) > 1 and not self.is_special_scheme_keyword(rest[0]):
                     align, indent = rest[1].pos, False
                 elif len(rest) == 1 and not isinstance(rest[0], ly.lex.Comment):
                     align, indent = rest[0].pos, False
@@ -311,16 +311,51 @@ class Line(object):
                 align, indent = None, True
             self.indenters.append((align, indent))
     
-    def is_alignable_scheme_keyword(self, token):
-        """Return True if token is an alignable Scheme word like "if", etc."""
-        return isinstance(token, ly.lex.scheme.Word) and token in (
+    def is_special_scheme_keyword(self, token):
+        """Return True if token is a special Scheme word like "define", etc.
 
-            # Scheme commands that can have one argument on the same line and 
-            # then want the next arguments on the next lines at the same 
-            # position.
-            'if', 'and', 'or', 'set!',
-            '=', '<', '<=', '>', '>=',
-            'eq?', 'eqv?', 'equal?',
-            'filter',
-        )
+        The tokens in the list below and those that start with "def", like
+        "define", do not follow the standard Scheme indentation patterns.
+
+        The list below and the "def" rule are from GNU Emacs source code,
+        which sets the standard for GNU Guile Scheme indentation.
+        See: emacs/lisp/progmodes/scheme.el
+        See also: http://community.schemewiki.org/?scheme-style
+
+        """
+        return (isinstance(token, ly.lex.scheme.Word) and
+                (token[0:3] == "def" or token in (
+            'begin',
+            'case',
+            'delay',
+            'do',
+            'lambda',
+            'let',
+            'let*',
+            'letrec',
+            'let-values',
+            'let*-values',
+            'sequence',
+            'let-syntax',
+            'letrec-syntax',
+            'syntax-rules',
+            'syntax-case',
+            'library',
+            'call-with-input-file',
+            'with-input-from-file',
+            'with-input-from-port',
+            'call-with-output-file',
+            'with-output-to-file',
+            'with-output-to-port',
+            'call-with-values',
+            'dynamic-wind',
+            'when',
+            'unless',
+            'letrec*',
+            'parameterize',
+            'define-values',
+            'define-record-type',
+            'define-library',
+            'receive',
+       )))
 
