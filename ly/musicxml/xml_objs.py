@@ -239,11 +239,14 @@ class IterateXmlObjs():
         self.gener_xml_mus(obj)  # Notations must be added before lyrics to have a valid XML
         if obj.lyric:
             for l in obj.lyric:
-                # Allows a lyric to have the extend tag if necessary
+                args = []
+                # Allows a lyric to be italicized
+                if "italic" in l:
+                    args.append("italic")
+                # Allows a lyric to have the extend tag
                 if "extend" in l:
-                    self.musxml.add_lyric(l[0], l[1], l[2], "extend")
-                else:
-                    self.musxml.add_lyric(l[0], l[1], l[2])
+                    args.append("extend")
+                self.musxml.add_lyric(l[0], l[1], l[2], args)
 
     def new_xml_rest(self, obj):
         """Create rest specific xml-nodes."""

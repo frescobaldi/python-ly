@@ -102,7 +102,11 @@ class ParseSource():
         self.voice_sep_length = 0
         self.voice_sep_first_meas = False
         self.sims_and_seqs = []
+        self.override_key = ''
+        self.override_key_word_count = 0
         self.override_dict = {}
+        self.revert_key = ''
+        self.revert_key_word_count = 0
         self.ottava = False
         self.with_contxt = None
         self.schm_assignm = None
@@ -1375,7 +1379,10 @@ class ParseSource():
         See check_for_barline() and generate_location_dicts() for more on how `\bar "..."` is implemented
         """
         if self.alt_mode == 'lyric' and isinstance(string.parent(), ly.music.items.LyricText):
-            self.mediator.new_lyrics_text(string.tokens[0])
+            if 'LyricText_font-shape' in self.override_dict and self.override_dict['LyricText_font-shape'] == 'italic':
+                self.mediator.new_lyrics_text(string.tokens[0], True)
+            else:
+                self.mediator.new_lyrics_text(string.tokens[0])
 
     def LyricsTo(self, lyrics_to):
         r"""A \lyricsto expression. """
@@ -1390,7 +1397,10 @@ class ParseSource():
             in which case, wait to allow that String to be the lyric text (see String() above)
         """
         if lyrics_text.token or not isinstance(lyrics_text[0], ly.music.items.String):
-            self.mediator.new_lyrics_text(lyrics_text.token)
+            if 'LyricText_font-shape' in self.override_dict and self.override_dict['LyricText_font-shape'] == 'italic':
+                self.mediator.new_lyrics_text(lyrics_text.token, True)
+            else:
+                self.mediator.new_lyrics_text(lyrics_text.token)
 
     def LyricItem(self, lyrics_item):
         """Another lyric item (skip, extender, hyphen or tie)."""
@@ -1425,10 +1435,53 @@ class ParseSource():
     def Override(self, override):
         r"""An \override command."""
         self.override_key = ''
+        self.override_key_word_count = len(override) - 1
+
+    def Revert(self, revert):
+        r"""A \revert command."""
+        self.revert_key = ''
+        self.revert_key_word_count = len(revert)
+
+    def handle_override_revert_items(self, item):
+        r"""
+        Handle items which come after \override or \revert.
+
+        For override:
+            If the item is not the final one, it should be appended to the key.
+            The final item should be the value assigned to the key in override_dict.
+
+        For revert:
+            All items compose the key, and once complete, that key should be popped from override_dict.
+        """
+        # Override item
+        if self.look_behind(item, ly.music.items.Override):
+            # First word in key
+            if len(self.override_key) == 0:
+                self.override_key += item.token
+            # Secondary word in key (separated by _)
+            elif self.override_key.count('_') < self.override_key_word_count - 1:
+                self.override_key += '_' + item.token
+            # Key is complete, value is assigned in dictionary
+            else:
+                self.override_dict[self.override_key] = str(item.token)
+        # Revert item
+        elif self.look_behind(item, ly.music.items.Revert):
+            # First word in key
+            if len(self.revert_key) == 0:
+                self.revert_key += item.token
+            # Secondary word in key (separated by _)
+            elif self.revert_key.count('_') < self.revert_key_word_count - 1:
+                self.revert_key += '_' + item.token
+            # Key is complete, value with revert_key is popped from dictionary
+            if self.revert_key.count('_') == self.revert_key_word_count - 1:
+                try:
+                    self.override_dict.pop(self.revert_key)
+                except KeyError as ke:
+                    eprint("Warning: Revert could not find override to remove!")
 
     def PathItem(self, item):
         r"""An item in the path of an \override or \revert command."""
-        self.override_key += item.token
+        self.handle_override_revert_items(item)
 
     def Scheme(self, scheme):
         """A Scheme expression inside LilyPond."""
@@ -1439,8 +1492,8 @@ class ParseSource():
         if self.ottava:
             self.mediator.new_ottava(item.token)
             self.ottava = False
-        elif self.look_behind(item, ly.music.items.Override):
-            self.override_dict[self.override_key] = item.token
+        elif self.look_behind(item, ly.music.items.Override) or self.look_behind(item, ly.music.items.Revert):
+            self.handle_override_revert_items(item)
         elif self.schm_assignm:
             self.mediator.set_by_property(self.schm_assignm, item.token)
         elif self.look_behind(item, ly.music.items.Set):
