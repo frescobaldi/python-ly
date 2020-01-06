@@ -1069,7 +1069,7 @@ class Mediator():
     def new_lyric_nr(self, num):
         self.lyric_nr = num
 
-    def new_lyrics_text(self, txt):
+    def new_lyrics_text(self, txt, italic=False):
         if not txt:
             txt = "ERROR"
             eprint("Warning: Lyric text not readable, marked with ERROR!")
@@ -1083,6 +1083,8 @@ class Mediator():
                 self.lyric = [txt, 'single', self.lyric_nr]
         else:
             self.lyric = [txt, 'single', self.lyric_nr]
+        if italic:
+            self.lyric.append('italic')
         self.insert_into.barlist.append(self.lyric)
         self.lyric_syll = False
 
