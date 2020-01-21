@@ -2,8 +2,17 @@ ChangeLog for python-ly
 =======================
 
 
-2020-??-??: python-ly 0.9.6
+2020-01-22: python-ly 0.9.6
 
+- Various improvements to the experimental MusicXML output
+  - Fixed #32 Correctly export measures without the help of explicit barchecks
+  - Fixed #102 MusicXML: \mark is not exported
+  - Fixed #107 MusicXML: scale_rest bug
+  - Fixed #110 MusicXML: stem direction is not supported
+  - Fixed #114 Empty measures created with no attributes
+  - Many improvements by Felippe Roza, Peter Bjuhr, Urs Liska, Endre Oma and
+    others, thanks!
+- Fixed Frescobaldi#1213 eps-file -> epsfile
 - improved indentation of Scheme code, thanks to Paul Morris (#132)
 
 
