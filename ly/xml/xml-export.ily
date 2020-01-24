@@ -356,9 +356,9 @@ at the toplevel.)
     ((ly:moment? o)
      (xml 'open-close-tag 'moment
        `((main-numer . ,(ly:moment-main-numerator o))
-         (main-denum . ,(ly:moment-main-denominator o))
+         (main-denom . ,(ly:moment-main-denominator o))
          (grace-numer . ,(ly:moment-grace-numerator o))
-         (grace-denum . ,(ly:moment-grace-denominator o)))))
+         (grace-denom . ,(ly:moment-grace-denominator o)))))
     ((ly:input-location? o)
      (let ((origin (ly:input-file-line-char-column o)))
        (xml 'open-close-tag 'origin

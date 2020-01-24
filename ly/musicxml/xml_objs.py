@@ -72,7 +72,11 @@ class IterateXmlObjs():
         for itag in score.info:
             self.musxml.create_score_info(itag, score.info[itag])
         if score.rights:
-            self.musxml.add_rights(score.rights)
+            if len(score.rights) > 1:
+                for right in score.rights:
+                    self.musxml.add_rights(right[0], right[1])
+            else:
+                self.musxml.add_rights(score.rights[0][0])
         for p in score.partlist:
             if isinstance(p, ScorePart):
                 self.iterate_part(p)
@@ -93,16 +97,20 @@ class IterateXmlObjs():
     def iterate_part(self, part):
         """The part is iterated."""
         if part.barlist:
+            last_bar = part.barlist[-1]
+            last_bar_objs = last_bar.obj_list
             part.set_first_bar(self.divisions)
             self.musxml.create_part(part.name, part.abbr, part.midi)
-            for bar in part.barlist:
+            for bar in part.barlist[:-1]:
                 self.iterate_bar(bar)
+            if len(last_bar_objs) > 1 or last_bar_objs[0].has_attr():
+                self.iterate_bar(last_bar)
         else:
             print("Warning: empty part:", part.name)
 
     def iterate_bar(self, bar):
         """The objects in the bar are output to the xml-file."""
-        self.musxml.create_measure()
+        self.musxml.create_measure(pickup = bar.pickup)
         for obj in bar.obj_list:
             if isinstance(obj, BarAttr):
                 self.new_xml_bar_attr(obj)
@@ -121,7 +129,10 @@ class IterateXmlObjs():
     def new_xml_bar_attr(self, obj):
         """Create bar attribute xml-nodes."""
         if obj.has_attr():
-            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, obj.divs)
+            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, 
+                obj.divs, obj.multirest)
+        if obj.new_system:
+            self.musxml.new_system(obj.new_system)
         if obj.repeat:
             self.musxml.add_barline(obj.barline, obj.repeat, obj.repeat_times)
         elif obj.barline:
@@ -136,6 +147,10 @@ class IterateXmlObjs():
         if obj.tempo:
             self.musxml.create_tempo(obj.tempo.text, obj.tempo.metr,
                                      obj.tempo.midi, obj.tempo.dots)
+        if obj.mark:
+            self.musxml.add_mark(obj.mark)
+        if obj.word:
+            self.musxml.add_dirwords(obj.word)
 
     def before_note(self, obj):
         """Xml-nodes before note."""
@@ -181,7 +196,7 @@ class IterateXmlObjs():
         else:
             self.musxml.new_note(obj.base_note, obj.octave, obj.type, divdur,
                 obj.alter, obj.accidental_token, obj.voice, obj.dot, obj.chord,
-                obj.grace)
+                obj.grace, obj.stem_direction)
         for t in obj.tie:
             self.musxml.tie_note(t)
         for s in obj.slur:
@@ -229,8 +244,11 @@ class Score():
         self.title = None
         self.creators = {}
         self.info = {}
-        self.rights = None
+        self.rights = []
         self.glob_section = ScoreSection('global', True)
+
+    def add_right(self, value, type):
+        self.rights.append((value, type))
 
     def is_empty(self):
         """Check if score is empty."""
@@ -296,6 +314,17 @@ class ScorePartGroup():
             part.merge_voice(voice, override)
 
 
+class SlurCount:
+    """Utility class meant for keeping count of started slurs in a section"""
+    def __init__(self):
+        self.count = 0
+
+    def inc(self):
+        self.count += 1
+
+    def dec(self):
+        self.count -= 1
+
 class ScoreSection():
     """ object to keep track of music section """
     def __init__(self, name, glob=False):
@@ -303,13 +332,16 @@ class ScoreSection():
         self.barlist = []
         self.glob = glob
 
+        # Keeps track of the number of started slurs in the section
+        self.active_slur_count = SlurCount()
+
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.name)
 
     def merge_voice(self, voice, override=False):
         """Merge in other ScoreSection."""
         for org_v, add_v in zip(self.barlist, voice.barlist):
-            org_v.inject_voice(add_v, override)
+            org_v.inject_voice(add_v, override, self.active_slur_count)
         bl_len = len(self.barlist)
         if len(voice.barlist) > bl_len:
             self.barlist += voice.barlist[bl_len:]
@@ -434,6 +466,7 @@ class Bar():
     Contains also information about how complete it is."""
     def __init__(self):
         self.obj_list = []
+        self.pickup = False
         self.list_full = False
 
     def __repr__(self):
@@ -459,6 +492,13 @@ class Bar():
         """ Check if bar contains music. """
         for obj in self.obj_list:
             if isinstance(obj, BarMus):
+                return True
+        return False
+
+    def has_attr(self):
+        """ Check if bar contains attribute. """
+        for obj in self.obj_list:
+            if isinstance(obj, BarAttr):
                 return True
         return False
 
@@ -489,7 +529,7 @@ class Bar():
                     return False
         return True
 
-    def inject_voice(self, new_voice, override=False):
+    def inject_voice(self, new_voice, override=False, active_slur_count=None):
         """ Adding new voice to bar.
         Omitting double or conflicting bar attributes as long as override is false.
         Omitting also bars with only skips."""
@@ -508,9 +548,36 @@ class Bar():
             pass
         if not self.is_skip(backup_list):
             self.create_backup()
+
+            if active_slur_count:
+                # Update active_slur_count wrt to already existing slur starts
+                # and slur ends in the bar, before we add backup_list
+
+                for n in self.obj_list:
+                    if isinstance(n, BarNote):
+                        for slur in n.slur:
+                            if slur.slurtype == 'start':
+                                active_slur_count.inc()
+                            elif slur.slurtype == 'stop':
+                                active_slur_count.dec()
+
             for bl in backup_list:
                 self.add(bl)
 
+                if active_slur_count and isinstance(bl, BarNote):
+                    # If the slur is starting: increase active_slur_count and set slur number
+                    # to that value.
+                    # If the slur is ending: set slur number to be the same as the origin slur number.
+
+                    for slur in bl.slur:
+                        if slur.slurtype == 'start':
+                            active_slur_count.inc()
+                            slur.nr = active_slur_count.count
+                        elif slur.slurtype == 'stop':
+                            active_slur_count.dec()
+
+                            if slur.start_node:
+                                slur.nr = slur.start_node.nr
 
 class BarMus():
     """ Common class for notes and rests. """
@@ -610,11 +677,13 @@ class Tuplet():
         self.normtype = normtype
 
 class Slur():
-    """Stores information about slur."""
-    def __init__(self, nr, slurtype):
+    """Stores information about slur. start_node is only interesting if slurtype is 'stop'.
+    start_node must be None or a Slur instance."""
+    def __init__(self, nr, slurtype, phrasing=False, start_node=None):
         self.nr = nr
         self.slurtype = slurtype
-
+        self.phrasing = phrasing
+        self.start_node = start_node
 
 ##
 # Subclasses of BarMus
@@ -640,6 +709,7 @@ class BarNote(BarMus):
         self.adv_ornament = None
         self.fingering = None
         self.lyric = None
+        self.stem_direction = None
 
     def set_duration(self, duration, durtype=''):
         self.duration = duration
@@ -656,8 +726,8 @@ class BarNote(BarMus):
     def set_tie(self, tie_type):
         self.tie.append(tie_type)
 
-    def set_slur(self, nr, slur_type):
-        self.slur.append(Slur(nr, slur_type))
+    def set_slur(self, nr, slur_type, phrasing=False, slur_start_node=None):
+        self.slur.append(Slur(nr, slur_type, phrasing, slur_start_node))
 
     def add_articulation(self, art_name):
         self.artic.append(art_name)
@@ -681,6 +751,9 @@ class BarNote(BarMus):
             self.tremolo = (trem_type, dur2lines(duration))
         else:
             self.tremolo = (trem_type, self.tremolo[1])
+
+    def set_stem_direction(self, direction):
+        self.stem_direction = direction
 
     def add_fingering(self, finger_nr):
         self.fingering = finger_nr
@@ -742,6 +815,10 @@ class BarAttr():
         self.staves = 0
         self.multiclef = []
         self.tempo = None
+        self.multirest = None
+        self.mark = None
+        self.word = None
+        self.new_system = None
 
         # Ending type, 'start', 'stop' or 'discontinue'
         self.ending = None
@@ -755,6 +832,9 @@ class BarAttr():
         if self.__class__ != other.__class__:
             return False
         return self.__dict__ == other.__dict__
+
+    def add_break(self, force_break):
+        self.new_system = force_break
 
     def set_key(self, muskey, mode):
         self.key = muskey
@@ -778,6 +858,17 @@ class BarAttr():
         self.ending = type
         self.ending_number = number
 
+    def set_multp_rest(self, size=0):
+        self.multirest = size
+
+    def set_mark(self, mark):
+        self.mark = mark
+
+    def set_word(self, words):
+        if self.word == None:
+            self.word = ''
+        self.word += words + ' '
+
     def has_attr(self):
         check = False
         if self.key is not None:
@@ -789,6 +880,10 @@ class BarAttr():
         elif self.multiclef:
             check = True
         elif self.divs != 0:
+            check = True
+        elif self.multirest is not None:
+            check = True
+        elif self.mark:
             check = True
         return check
 

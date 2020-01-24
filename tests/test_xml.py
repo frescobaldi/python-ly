@@ -30,6 +30,44 @@ def test_dynamics():
 def test_tuplet():
     compare_output('tuplet')
 
+def test_merge_voice_slurs():
+    compare_output('merge_voice_slurs')
+
+def test_break():
+    compare_output('break')
+
+
+def test_mark():
+    compare_output('mark')
+
+
+def test_partial():
+    compare_output('partial')
+
+
+def test_full_bar():
+    compare_output('full_bar_rest')
+
+
+def test_stem_direction():
+    compare_output('stem')
+
+
+def test_church():
+    compare_output('church_modes')
+
+
+def test_markup():
+    compare_output('markup')
+
+
+def test_breathe():
+    compare_output('breathe')
+
+
+def test_no_barcheck():
+    compare_output('no_barcheck')
+
 
 def test_repeat():
     compare_output('repeat')

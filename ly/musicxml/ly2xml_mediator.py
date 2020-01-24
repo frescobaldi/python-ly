@@ -52,6 +52,8 @@ class Mediator():
         self.current_note = None
         self.current_lynote = None
         self.current_is_rest = False
+        self.current_time = Fraction(4, 4)
+        self.bar_dura = Fraction(0, 4)
         self.action_onnext = []
         self.divisions = 1
         self.dur_token = "4"
@@ -81,14 +83,20 @@ class Mediator():
         self.prev_tremolo = 8
         self.tupl_dur = 0
         self.tupl_sum = 0
+        self.slur_stack = []
+        self.multiple_rest = False
+        self.multiple_rest_bar = None
+        self.current_mark = 1
+        self.bar_is_pickup = False
+        self.stem_dir = None
 
     def new_header_assignment(self, name, value):
         """Distributing header information."""
         creators = ['composer', 'arranger', 'poet', 'lyricist']
         if name == 'title':
             self.score.title = value
-        elif name == 'copyright':
-            self.score.rights = value
+        elif name in ['copyright', 'tagline']:
+            self.score.add_right(value, name)
         elif name in creators:
             self.score.creators[name] = value
         else:
@@ -317,6 +325,9 @@ class Mediator():
         if self.sections:
             return self.sections[0].barlist
 
+    def set_pickup(self):
+        self.bar_is_pickup = True
+
     def new_bar(self, fill_prev=True):
         if self.bar and fill_prev:
             self.bar.list_full = True
@@ -325,6 +336,9 @@ class Mediator():
 
         self.current_attr = xml_objs.BarAttr()
         self.bar = xml_objs.Bar()
+        if self.bar_is_pickup:
+            self.bar.pickup = True
+            self.bar_is_pickup = False
         self.bar.obj_list = [self.current_attr]
         self.insert_into.barlist.append(self.bar)
 
@@ -381,7 +395,45 @@ class Mediator():
         else:
             self.current_attr.set_key(get_fifths(key_name, mode), mode)
 
+    def bijective(self, n):
+        '''encodes an int to a sequence of letters'''
+        import string
+        digits = string.ascii_uppercase.replace("I","")
+        result = []
+        while n > 0:
+            n, mod = divmod(n - 1, len(digits))
+            result += digits[mod]
+        return ''.join(reversed(result))
+
+    def new_mark(self, num_mark = None):
+        if num_mark == None:
+            if self.bar is None:
+                self.new_bar()
+            if self.bar.has_attr():
+                self.current_attr.set_mark(self.bijective(self.current_mark))
+            else:
+                new_bar_attr = xml_objs.BarAttr()
+                new_bar_attr.set_mark(self.bijective(self.current_mark))
+                self.add_to_bar(new_bar_attr)
+        elif num_mark <= 0:
+            print("Mark value out of range")
+        else:
+            self.current_mark = num_mark
+            self.current_attr.set_mark(self.bijective(self.current_mark))
+        self.current_mark += 1
+
+    def new_word(self, word):
+        if self.bar is None:
+            self.new_bar()
+        if self.bar.has_attr():
+            self.current_attr.set_word(word)
+        else:
+            new_bar_attr = xml_objs.BarAttr()
+            new_bar_attr.set_word(word)
+            self.add_to_bar(new_bar_attr)
+
     def new_time(self, num, den, numeric=False):
+        self.current_time = Fraction(num, den.denominator)
         if self.bar is None:
             self.new_bar()
         self.current_attr.set_time([num, den.denominator], numeric)
@@ -403,6 +455,12 @@ class Mediator():
     def set_relative(self, note):
         self.prev_pitch = note.pitch
 
+    def increase_bar_dura(self, duration):
+        self.bar_dura += duration[0] * duration[1]
+        if self.bar_dura >= self.current_time:
+            self.bar_dura = 0
+            self.new_bar()
+
     def new_note(self, note, rel=False, is_unpitched=False):
         self.current_is_rest = False
         self.clear_chord()
@@ -413,8 +471,11 @@ class Mediator():
             self.current_note = self.create_barnote_from_note(note)
             self.current_lynote = note
             self.check_current_note(rel)
+        if self.stem_dir:
+            self.current_note.set_stem_direction(self.stem_dir)
         self.do_action_onnext(self.current_note)
         self.action_onnext = []
+        self.increase_bar_dura(note.duration)
 
     def new_iso_dura(self, note, rel=False, is_unpitched=False):
         """
@@ -485,6 +546,14 @@ class Mediator():
                     self.staff_unset_notes[self.staff] = [self.current_note]
         self.add_to_bar(self.current_note)
 
+    def stem_direction(self, direction):
+        if direction == '\\stemUp':
+            self.stem_dir = 'up'
+        elif direction == '\\stemDown':
+            self.stem_dir = 'down'
+        elif direction == '\\stemNeutral':
+            self.stem_dir = None
+
     def set_octave(self, relative):
         """Set octave by getting the octave of an absolute note + 3."""
         p = self.current_lynote.pitch.copy()
@@ -508,7 +577,7 @@ class Mediator():
                 if rs == bs[1]:
                     self.current_note.duration = (bs[0], 1)
                     self.current_note.dot = 0
-                    self.scale_rest(rs)
+                    self.scale_rest(bs)
                     return
         self.current_note.dot = dots
         self.dots = dots
@@ -585,9 +654,12 @@ class Mediator():
             self.current_note = xml_objs.BarRest(dur, self.voice)
         elif rtype == 'R':
             self.current_note = xml_objs.BarRest(dur, self.voice, show_type=False)
+            if self.multiple_rest:
+                self.set_mult_rest_bar(dur)
         elif rtype == 's' or rtype == '\\skip':
             self.current_note = xml_objs.BarRest(dur, self.voice, skip=True)
         self.check_current_note(rest=True)
+        self.increase_bar_dura(dur)
 
     def note2rest(self):
         """Note used as rest position transformed to rest."""
@@ -599,12 +671,26 @@ class Mediator():
         self.bar.obj_list.pop()
         self.bar.add(self.current_note)
 
-    def scale_rest(self, multp):
+    def set_mult_rest(self):
+        self.multiple_rest = True
+
+    def set_mult_rest_bar(self, dur):
+        """ add multiple-rest attribute to bar """
+        if self.bar is None:
+            self.new_bar()
+        multp = dur[1]
+        rest_size = int(multp * (dur[0]/self.current_time))
+        new_bar_attr = xml_objs.BarAttr()
+        new_bar_attr.set_multp_rest(rest_size)
+        self.bar.add(new_bar_attr)
+
+    def scale_rest(self, bs):
         """ create multiple whole bar rests """
         dur = self.current_note.duration
         voc = self.current_note.voice
         st = self.current_note.show_type
         sk = self.current_note.skip
+        multp = int(bs[1] * (bs[0]/self.current_time))
         for i in range(1, int(multp)):
             self.new_bar()
             rest_copy = xml_objs.BarRest(dur, voice=voc, show_type=st, skip=sk)
@@ -657,10 +743,21 @@ class Mediator():
         self.tied = True
         self.current_note.set_tie(tie_type)
 
-    def set_slur(self, nr, slur_type):
+    def set_slur(self, nr, slur_type, phrasing=False):
         """
-        Set the slur start or stop for the current note. """
-        self.current_note.set_slur(nr, slur_type)
+        Set the slur start or stop for the current note.
+        phrasing should be set to True if the slur is meant to be a phrasing mark.
+        """
+
+        slur_start = None
+
+        if slur_type == 'stop':
+            slur_start = self.slur_stack.pop()
+
+        self.current_note.set_slur(nr, slur_type, phrasing, slur_start)
+
+        if slur_type == 'start':
+            self.slur_stack.append(self.current_note.slur[-1])
 
     def new_articulation(self, art_token):
         """
@@ -902,6 +999,10 @@ class Mediator():
             mult = get_mult(a, b)
             self.divisions = divs*mult
 
+    def add_break(self):
+        if self.bar is None:
+            self.new_bar()
+        self.current_attr.add_break('yes')
 
 
 ##
@@ -950,6 +1051,8 @@ def get_fifths(key, mode):
         return fifths-3
     elif mode=='major':
         return fifths
+    elif mode=='dorian':
+        return fifths-2
 
 def clefname2clef(clefname):
     """
@@ -1018,7 +1121,7 @@ def artic_token2xml_name(art_token):
     artic_dict = {
     ".": "staccato", "-": "tenuto", ">": "accent",
     "_": "detached-legato", "!": "staccatissimo",
-    "\\staccatissimo": "staccatissimo"
+    "\\staccatissimo": "staccatissimo", "\\breathe":"breath-mark"
     }
     ornaments = ['\\trill', '\\prall', '\\mordent', '\\turn']
     others = ['\\fermata']
