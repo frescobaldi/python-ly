@@ -60,6 +60,7 @@ lilypond_keywords = (
     'layout',
     'with',
     'context',
+    'tagGroup', # since 2.20
 )
 
 
@@ -84,6 +85,7 @@ lilypond_music_commands = (
     'applyMusic',
     'applyOutput',
     'appoggiatura',
+    'arabicStringNumbers', # since 2.20
     'arpeggio',
     'arpeggioArrowDown',
     'arpeggioArrowUp',
@@ -108,6 +110,7 @@ lilypond_music_commands = (
     'bassFigureStaffAlignmentDown',
     'bassFigureStaffAlignmentNeutral',
     'bassFigureStaffAlignmentUp',
+    'beamExceptions', # since 2.20
     'bendAfter',
     'blackTriangleMarkup',
     'bookOutputName',
@@ -247,6 +250,7 @@ lilypond_music_commands = (
     'lyricmode',
     'lyrics',
     'lyricsto',
+    'magnifyMusic', # since 2.20
     'maininput',
     'majorSevenSymbol',
     'makeClusters',
@@ -332,6 +336,7 @@ lilypond_music_commands = (
     'revert',
     'rfz',
     'rightHandFinger',
+    'romanStringNumbers', # since 2.20
     'sacredHarpHeads',
     'sacredHarpHeadsMinor',
     'scaleDurations',
@@ -574,6 +579,7 @@ markupcommands_nargs = (
     'italic',
     'justify',
     'justify-field',
+    'justify-line', #since 2.20
     'justify-string',
     'large',
     'larger',
@@ -592,6 +598,7 @@ markupcommands_nargs = (
     'normal-text',
     'number',
     'oval', # since 2.18
+    'overtie', # since 2.20
     'postscript',
     'right-align',
     'right-brace',
@@ -610,12 +617,14 @@ markupcommands_nargs = (
     'super',
     'teeny',
     'text',
+    'tie', # since 2.20
     'tied-lyric',
     'tiny',
     'transparent',
     'triangle',
     'typewriter',
     'underline',
+    'undertie', # since 2.20
     'upright',
     'vcenter',
     'vspace',
@@ -655,12 +664,14 @@ markupcommands_nargs = (
     'with-link',
     'with-url',
     'woodwind-diagram',
+    'with-dimensions-from', # since 2.20
 ),
 # three arguments
 (
     'arrow-head',
     'beam',
     'draw-circle',
+    'draw-squiggle-line', # since 2.20
     'epsfile',
     'filled-box',
     'general-align',
@@ -1098,6 +1109,8 @@ accidentalstyles = (
     'modern-voice-cautionary',
     'piano',
     'piano-cautionary',
+    'choral', # since 2.20
+    'choral-cautionary', # since 2.20
     'neo-modern',
     'neo-modern-cautionary',
     'neo-modern-voice',
