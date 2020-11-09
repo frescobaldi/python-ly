@@ -598,6 +598,7 @@ markupcommands_nargs = (
     'normal-text',
     'number',
     'oval', # since 2.18
+    'overlay', # since 2.20
     'overtie', # since 2.20
     'postscript',
     'right-align',
