@@ -475,7 +475,7 @@ ornaments = (
     'reverseturn',
     'trill',
 )
-   
+
 
 fermatas = (
     'shortfermata',
@@ -518,15 +518,15 @@ ancient_scripts = (
 
 
 modes = (
-    'major',     
-    'minor',     
-    'ionian',    
-    'dorian',    
-    'phrygian',  
-    'lydian',    
+    'major',
+    'minor',
+    'ionian',
+    'dorian',
+    'phrygian',
+    'lydian',
     'mixolydian',
-    'aeolian',   
-    'locrian',   
+    'aeolian',
+    'locrian',
 )
 
 
@@ -994,7 +994,7 @@ headervariables = (
     'texidoc',
     'footer',
 )
-    
+
 
 papervariables = (
     # fixed vertical
@@ -1003,7 +1003,7 @@ papervariables = (
     'bottom-margin',
     'ragged-bottom',
     'ragged-last-bottom',
-    
+
     # horizontal
     'paper-width',
     'line-width',
@@ -1019,7 +1019,7 @@ papervariables = (
     'horizontal-shift',
     'indent',
     'short-indent',
-    
+
     # flex vertical
     'markup-system-spacing', # the distance between a (title or top-level) markup and the system that follows it.
     'score-markup-spacing',  # the distance between the last system of a score and the (title or top-level) markup that follows it.
@@ -1029,7 +1029,7 @@ papervariables = (
     'last-bottom-spacing',   # the distance from the last system or top-level markup on a page to the bottom of the printable area (i.e. the top of the bottom margin).
     'top-system-spacing',    # the distance from the top of the printable area (i.e. the bottom of the top margin) to the first system on a page, when there is no (title or top-level) markup between the two.
     'top-markup-spacing',    # the distance from the top of the printable area (i.e. the bottom of the top margin) to the first (title or top-level) markup on a page, when there is no system between the two.
-    
+
     # line breaking
     'max-systems-per-page',
     'min-systems-per-page',
@@ -1043,21 +1043,21 @@ papervariables = (
     'page-breaking',                 # The page-breaking algorithm to use. Choices are ly:minimal-breaking, ly:page-turn-breaking, and ly:optimal-breaking.
     'page-breaking-system-system-spacing', # Tricks the page breaker into thinking that system-system-spacing is set to something different than it really is. For example, if page-breaking-system-system-spacing #'padding is set to something substantially larger than system-system-spacing #'padding, then the page-breaker will put fewer systems on each page. Default: unset.
     'page-count',                    # The number of pages to be used for a score, unset by default.
-    
+
     # page numbering
     'auto-first-page-number',
     'first-page-number',
     'print-first-page-number',
     'print-page-number',
-    
+
     # misc
     'page-spacing-weight',
     'print-all-headers',
     'system-separator-markup',
-    
+
     # debugging
     'annotate-spacing',
-    
+
     # different markups
     'bookTitleMarkup',
     'evenFooterMarkup',
@@ -1067,10 +1067,10 @@ papervariables = (
     'scoreTitleMarkup',
     'tocItemMarkup',
     'tocTitleMarkup',
-    
+
     # fonts
     'fonts',
-    
+
     # undocumented?
     #'blank-after-score-page-force',
     #'force-assignment',
@@ -1145,7 +1145,7 @@ clefs_plain = (
     'varpercussion',    # since 2.19
     'violin',
 )
-    
+
 
 clefs = clefs_plain + (
     'treble_8',
