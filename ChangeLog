@@ -2,6 +2,14 @@ ChangeLog for python-ly
 =======================
 
 
+2020-12-25: python-ly 0.9.7
+
+- Improvements:
+  - added LilyPond 2.20 words (PR#140 by Simon Albrecht)
+- Bugfixes:
+  - Fixed #144 Error when making rhythm implicit per line
+
+
 2020-01-22: python-ly 0.9.6
 
 - Various improvements to the experimental MusicXML output
@@ -18,7 +26,7 @@ ChangeLog for python-ly
 
 2017-02-17: python-ly 0.9.5
 
-- basic support for tokenizing the MUP format 
+- basic support for tokenizing the MUP format
 - fix wbsoft/frescobaldi#832: wrong duration handling with \partial when
   changing durations
 - xml export tests now work correctly with Python3
