@@ -98,7 +98,7 @@ lilypond_music_commands = (
     'autoAccidentals',
     'autoBeamOff',
     'autoBeamOn',
-    'autochange',
+    'autoChange', # used to be autochange?
     'balloonGrobText',
     'balloonLengthOff',
     'balloonLengthOn',
@@ -112,6 +112,7 @@ lilypond_music_commands = (
     'bassFigureStaffAlignmentUp',
     'beamExceptions', # since 2.20
     'bendAfter',
+    'bendHold', # since 2.23
     'blackTriangleMarkup',
     'bookOutputName',
     'bookOutputSuffix',
@@ -135,6 +136,7 @@ lilypond_music_commands = (
     'cm',
     'compoundMeter', # since 2.16
     'compressFullBarRests',
+    'compressMMRests', # since 2.23
     'context',
     'cr',
     'cresc',
@@ -168,12 +170,14 @@ lilypond_music_commands = (
     'dimTextDim',
     'displayLilyMusic',
     'displayMusic',
+    'displayScheme', # since 2.23
     'divisioMaior',
     'divisioMaxima',
     'divisioMinima',
     'dotsDown',
     'dotsNeutral',
     'dotsUp',
+    'dropNote', # since 2.23
     'drummode',
     'drumPitchTable',
     'drums',
@@ -195,6 +199,7 @@ lilypond_music_commands = (
     'escapedParenthesisCloseSymbol',
     'escapedParenthesisOpenSymbol',
     'escapedSmallerSymbol',
+    'eventChords', # since 2.23
     'expandFullBarRests',
     'f',
     'featherDurations',
@@ -206,8 +211,11 @@ lilypond_music_commands = (
     'figuremode',
     'figures',
     'finalis',
+    'finger', # since 2.23
     'fingeringOrientations',
+    'fixed', # since 2.23
     'flexa',
+    'footnote', # since 2.23
     'fp',
     'frenchChords',
     'fullJazzExceptions',
@@ -218,7 +226,10 @@ lilypond_music_commands = (
     'glissando',
     'grace',
     'graceSettings',
+    'grobdescriptions', # since 2.23
     'harmonic',
+    'harmonicByFret', # since 2.23
+    'harmonicByRatio', # since 2.23
     'hideNotes',
     'hideStaffSwitch',
     'huge',
@@ -234,15 +245,20 @@ lilypond_music_commands = (
     'inclinatum',
     'includePageLayoutFile',
     'indent',
+    'inStaffSegno', # since 2.23
     'instrumentSwitch',
     'instrumentTransposition',
     'interscoreline',
+    'inversion', # since 2.23
+    'invertChords', # since 2.23
     'italianChords',
     'keepWithTag',
     'key',
     'killCues',
     'label',
     'laissezVibrer',
+    'languageSaveAndChange', # since 2.23
+    'languageRestore', # since 2.23
     'large',
     'ligature',
     'linea',
@@ -251,6 +267,7 @@ lilypond_music_commands = (
     'lyrics',
     'lyricsto',
     'magnifyMusic', # since 2.20
+    'magnifyStaff', # since 2.23
     'maininput',
     'majorSevenSymbol',
     'makeClusters',
@@ -260,6 +277,7 @@ lilypond_music_commands = (
     'markup',
     'markuplines', # deprecated, till 2.14
     'markuplist', # from 2.16
+    'markupMap', #since 2.23
     'maxima',
     'melisma',
     'melismaEnd',
@@ -269,6 +287,8 @@ lilypond_music_commands = (
     'mergeDifferentlyHeadedOn',
     'mf',
     'mm',
+    'modalInversion', # since 2.23
+    'modalTranspose', # since 2.23
     'mp',
     'musicMap',
     'neumeDemoLayout',
@@ -282,6 +302,7 @@ lilypond_music_commands = (
     'notemode',
     'numericTimeSignature',
     'octaveCheck',
+    'offset', # since 2.23
     'oldaddlyrics',
     'oneVoice',
     'oriscus',
@@ -298,8 +319,10 @@ lilypond_music_commands = (
     'parenthesisCloseSymbol',
     'parenthesisOpenSymbol',
     'parenthesize',
-    'partcombine',
+    'partCombine', # was partcombine?
+    'partCombineDown', # since 2.23
     'partCombineListener',
+    'partCombineUp', # since 2.23
     'partial',
     'partialJazzExceptions',
     'partialJazzMusic',
@@ -318,12 +341,21 @@ lilypond_music_commands = (
     'ppp',
     'pppp',
     'ppppp',
+    'preBend', # since 2.23
+    'preBendHold', # since 2.23
     'predefinedFretboardsOff',
     'predefinedFretboardsOn',
+    'propertyOverride', # since 2.23
+    'propertyRevert', # since 2.23
+    'propertySet', # since 2.23
+    'propertyTweak', # since 2.23
+    'propertyUnset', # since 2.23
     'pt',
     'pushToTag', # since 2.16
     'quilisma',
     'quoteDuring',
+    'raiseNote', # since 2.23
+    'reduceChords', # since 2.23
     'relative',
     'RemoveEmptyRhythmicStaffContext',
     'RemoveEmptyStaffContext',
@@ -333,7 +365,9 @@ lilypond_music_commands = (
     'resetRelativeOctave',
     'responsum',
     'rest',
+    'retrograde', # since 2.23
     'revert',
+    'revertTimeSignatureSettings', # since 2.23
     'rfz',
     'rightHandFinger',
     'romanStringNumbers', # since 2.20
@@ -343,6 +377,7 @@ lilypond_music_commands = (
     'scoreTweak',
     'semiGermanChords',
     'set',
+    'settingsFrom', # 2.23
     'sf',
     'sff',
     'sfp',
@@ -357,6 +392,7 @@ lilypond_music_commands = (
     'single', # since 2.18
     'skip',
     'skipTypesetting',
+    'slashedGrace', # 2.23
     'slurDashed',
     'slurDotted',
     'slurDown',
@@ -391,6 +427,7 @@ lilypond_music_commands = (
     'stringTuning', # since 2.16
     'strokeFingerOrientations',
     'stropha',
+    'styledNoteHeads', # since 2.23
     'sustainOff',
     'sustainOn',
     'tabFullNotation',
@@ -422,9 +459,11 @@ lilypond_music_commands = (
     'tuplet', # since 2.18
     'tupletDown',
     'tupletNeutral',
+    'tupletSpan', #since 2.23
     'tupletUp',
     'tweak',
     'unaCorda',
+    'unfolded', # since 2.23
     'unfoldRepeats',
     'unHideNotes',
     'unit',
@@ -437,10 +476,13 @@ lilypond_music_commands = (
     'voiceNeutralStyle',
     'voiceOne',
     'voiceOneStyle',
+    'voices', # since 2.23
     'voiceThree',
     'voiceThreeStyle',
     'voiceTwo',
     'voiceTwoStyle',
+    'void', # since 2.23
+    'vshape', # since 2.23
     'walkerHeads',
     'walkerHeadsMinor',
     'whiteTriangleMarkup',
