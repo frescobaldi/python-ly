@@ -61,6 +61,7 @@ lilypond_keywords = (
     'with',
     'context',
     'tagGroup', # since 2.20
+    'etc', # since 2.20
 )
 
 
