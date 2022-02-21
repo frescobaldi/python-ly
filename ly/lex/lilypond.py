@@ -785,7 +785,7 @@ class SimultaneousOrSequentialCommand(Keyword):
 
 
 class SchemeStart(_token.Item):
-    rx = "[#$](?![{}])"
+    rx = "[#$]@?(?![{}])"
     def update_state(self, state):
         from . import scheme
         state.enter(scheme.ParseScheme(1))
