@@ -31,7 +31,7 @@ lilypond_keywords = (
     'defaultchild',
     'denies',
     # 'description',
-    # 'grobdescriptions',
+    'grobdescriptions',  # since 2.16
     'hide',  # since 2.18
     'include',
     # 'invalid',
@@ -100,6 +100,7 @@ lilypond_music_commands = (
     'arpeggioNormal',
     'arpeggioParenthesis',
     'arpeggioParenthesisDashed',  # since 2.14 or before
+    'articulate',  # since 2.14 or earlier
     'ascendens',
     'assertBeamQuant',  # since 2.20
     'assertBeamSlope',  # since 2.20
@@ -107,6 +108,8 @@ lilypond_music_commands = (
     'augmentum',
     'autoAccidentals',
     'autoBeamOff',
+    'autoBreaksOff',  # since 2.20
+    'autoBreaksOn',  # since 2.20
     'autoBeamOn',
     'autochange',  # renamed in 2.22
     'autoChange',  # since 2.22
@@ -127,6 +130,8 @@ lilypond_music_commands = (
     'bassFigureStaffAlignmentUp',
     'beamExceptions',  # since 2.20
     'bendAfter',
+    'bendHold',  # since 2.23
+    'bendStartLevel',  # since
     'blackTriangleMarkup',
     'bookOutputName',
     'bookOutputSuffix',
@@ -148,6 +153,7 @@ lilypond_music_commands = (
     'chords',
     'clef',
     'cm',
+    'codaMark',  # since 2.23
     'compoundMeter',  # since 2.16
     'compressEmptyMeasures',  # since 2.22
     'compressFullBarRests',  # renamed to compressEmptyMeasures in 2.22
@@ -162,7 +168,7 @@ lilypond_music_commands = (
     'cueClefUnset',  # since 2.16
     'cueDuring',
     'cueDuringWithClef',  # since 2.16
-    'bashBang',  # since 2.20
+    'dashBang',  # since 2.20
     'dashBar',  # not found in doc or code
     'dashDash',
     'dashDot',
@@ -208,7 +214,7 @@ lilypond_music_commands = (
     'easyHeadsOff',
     'easyHeadsOn',
     'endcr',
-    'enablePloymeter',  # since 2.23
+    'enablePolymeter',  # since 2.23
     'endcresc',  # not found in docs, found in ly/spanners-init.ly
     'endcr',  # since 2.20, synonym for endcresc?
     'enddecr',
@@ -303,7 +309,7 @@ lilypond_music_commands = (
     'lyrics',
     'lyricsto',
     'magnifyMusic',  # since 2.20
-    'maginfyStaff',  # since 2.20
+    'magnifyStaff',  # since 2.20
     'maininput',
     'majorSevenSymbol',
     'makeClusters',
@@ -420,6 +426,7 @@ lilypond_music_commands = (
     'responsum',
     'rest',
     'rest-by-number',  # since 2.18
+    'retrograde',  # since 2.14 or earlier
     'revert',
     'revertTimeSignatureSettings',  # since 2.14 or earlier
     'rfz',
@@ -679,7 +686,7 @@ markupcommands_nargs = (
         'char',
         'circle',
         'column',
-        'compount-meter',  # since 2.20
+        'compound-meter',  # since 2.20
         'concat',
         'dir-column',
         'draw-dashed-line',  # since 2.18
@@ -780,6 +787,7 @@ markupcommands_nargs = (
         'hcenter-in',
         'lower',
         'magnify',
+        'map-commands', # since 2.23
         'markup-command',  # since 2.23
         'note',
         'on-the-fly',
