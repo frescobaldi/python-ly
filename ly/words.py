@@ -23,33 +23,33 @@ LilyPond reserved words for auto completion and highlighting.
 
 from __future__ import unicode_literals
 
-
 lilypond_keywords = (
     'accepts',
+    'addlyrics',
     'alias',
     'consists',
     'defaultchild',
     'denies',
-    #'description',
-    #'grobdescriptions',
-    'hide', # since 2.18
+    # 'description',
+    # 'grobdescriptions',
+    'hide',  # since 2.18
     'include',
-    #'invalid',
+    # 'invalid',
     'language',
     'name',
-    #'objectid',
-    'omit', # since 2.18
+    # 'objectid',
+    'omit',  # since 2.18
     'once',
     'set',
     'unset',
     'override',
     'revert',
     'remove',
-    'temporary', # since 2.18
-    #'sequential',
-    #'simultaneous',
-    #'type',
-    'undo', # since 2.18 (not mentioned in the command index)
+    'temporary',  # since 2.18
+    # 'sequential',
+    # 'simultaneous',
+    'type',  # since 2.14 or earlier
+    'undo',  # since 2.20
     'version',
     'score',
     'book',
@@ -60,46 +60,60 @@ lilypond_keywords = (
     'layout',
     'with',
     'context',
-    'tagGroup', # since 2.20
-    'etc', # since 2.20
+    'tagGroup',  # since 2.20
+    'etc',  # since 2.20
 )
 
-
 lilypond_music_commands = (
-    'absolute', # since 2.18
+    'absolute',  # since 2.18
     'acciaccatura',
-    'accidentalStyle', # since 2.16
-    'addChordShape', # since 2.16
-    'addInstrumentDefinition',
-    'addlyrics',
+    'accidentalStyle',  # since 2.16
+    'addChordShape',  # since 2.16
+    'addInstrumentDefinition',  # deprecated in 2.23
+    # 'addlyrics', # this is a keyword
     'addQuote',
+    'after',  # since 2.23
     'afterGrace',
-    #'afterGraceFraction', # this is a parser variable
+    # 'afterGraceFraction', # this is a parser variable
     'aikenHeads',
     'aikenHeadsMinor',
+    'aikenThinHeads',  # since 2.23
+    'aikenThinHeadsMinor',  # since 2.23
     'allowPageTurn',
-    'alterBroken', # since 2.18 (?)
+    'allowVoltaHook',  # since 2.18
+    'alterBroken',  # since 2.18 (?)
     'alternative',
-    #'AncientRemoveEmptyStaffContext',
-    'appendToTag', # since 2.16
+    'ambitusAfter',  # since 2.22
+    'AncientRemoveEmptyStaffContext',  # in ly/engraver-init.ly, not in docs
+    'appendToTag',  # since 2.16
     'applyContext',
     'applyMusic',
     'applyOutput',
+    'applySwing',  # since 2.22
+    'applySwingWithOffset',  # since 2.22
     'appoggiatura',
-    'arabicStringNumbers', # since 2.20
+    'arabicStringNumbers',  # since 2.20
     'arpeggio',
     'arpeggioArrowDown',
     'arpeggioArrowUp',
     'arpeggioBracket',
     'arpeggioNormal',
     'arpeggioParenthesis',
+    'arpeggioParenthesisDashed',  # since 2.14 or before
     'ascendens',
+    'assertBeamQuant',  # since 2.20
+    'assertBeamSlope',  # since 2.20
     'auctum',
     'augmentum',
     'autoAccidentals',
     'autoBeamOff',
     'autoBeamOn',
-    'autoChange', # used to be autochange?
+    'autochange',  # renamed in 2.22
+    'autoChange',  # since 2.22
+    'autoLineBreaksOff',  # since 2.20
+    'autoLineBreaksOn',  # since 2.20
+    'autoPageBreaksOff',  # since 2.20
+    'autoPageBreaksOn',  # since 2.20
     'balloonGrobText',
     'balloonLengthOff',
     'balloonLengthOn',
@@ -111,14 +125,13 @@ lilypond_music_commands = (
     'bassFigureStaffAlignmentDown',
     'bassFigureStaffAlignmentNeutral',
     'bassFigureStaffAlignmentUp',
-    'beamExceptions', # since 2.20
+    'beamExceptions',  # since 2.20
     'bendAfter',
-    'bendHold', # since 2.23
     'blackTriangleMarkup',
     'bookOutputName',
     'bookOutputSuffix',
-    'bracketCloseSymbol',
-    'bracketOpenSymbol',
+    'bracketCloseSymbol',  # not in docs, in python/convertrules.py
+    'bracketOpenSymbol',  # not in docs, in python/convertrules.py
     'break',
     'breathe',
     'breve',
@@ -128,27 +141,29 @@ lilypond_music_commands = (
     'cavum',
     'change',
     'chordmode',
-    #'chordNameSeparator',
-    #'chordPrefixSpacer',
-    #'chordRootNamer',
-    'chordRepeats', # since 2.16
+    'chordNameSeparator',  # not a music function, it's a property, found in ly/engraver-init.ly
+    'chordPrefixSpacer',  # ditto
+    'chordRootNamer',  # ditto
+    'chordRepeats',  # since 2.16
     'chords',
     'clef',
     'cm',
-    'compoundMeter', # since 2.16
-    'compressFullBarRests',
-    'compressMMRests', # since 2.23
+    'compoundMeter',  # since 2.16
+    'compressEmptyMeasures',  # since 2.22
+    'compressFullBarRests',  # renamed to compressEmptyMeasures in 2.22
+    'compressMMRests',  # since 2.22
     'context',
     'cr',
     'cresc',
     'crescHairpin',
     'crescTextCresc',
-    'crossStaff', # since 2.16
+    'crossStaff',  # since 2.16
     'cueClef',  # since 2.16
     'cueClefUnset',  # since 2.16
     'cueDuring',
     'cueDuringWithClef',  # since 2.16
-    'dashBar',
+    'bashBang',  # since 2.20
+    'dashBar',  # not found in doc or code
     'dashDash',
     'dashDot',
     'dashHat',
@@ -156,11 +171,14 @@ lilypond_music_commands = (
     'dashPlus',
     'dashUnderscore',
     'deadNote',  # since 2.16
+    'deadNotesOff',  # since 2.20
+    'deadNotesOn',  # since 2.20
     'decr',
+    'decresc',  # since 2.14 or earlier
     'default',
-    'defaultNoteHeads',  # since 2.16
+    'defaultNoteHeads',  # since 2.16, not a music function, found in ly/property-init.ly
     'defaultTimeSignature',
-    'defineBarLine', # since 2.18
+    'defineBarLine',  # since 2.18
     'deminutum',
     'denies',
     'descendens',
@@ -169,29 +187,33 @@ lilypond_music_commands = (
     'dimTextDecr',
     'dimTextDecresc',
     'dimTextDim',
+    'discant',  # since 2.18
     'displayLilyMusic',
     'displayMusic',
-    'displayScheme', # since 2.23
+    'displayScheme',  # since 2.20
     'divisioMaior',
     'divisioMaxima',
     'divisioMinima',
     'dotsDown',
     'dotsNeutral',
     'dotsUp',
-    'dropNote', # since 2.23
+    'dropNote',  # since 2.22
     'drummode',
-    'drumPitchTable',
+    'drumPitchTable',  # not in music functions, it's a property, found in ly/performer-init.ly
     'drums',
+    'dwn',  # since 2.20
     'dynamicDown',
     'dynamicNeutral',
     'dynamicUp',
     'easyHeadsOff',
     'easyHeadsOn',
     'endcr',
-    'endcresc',
+    'enablePloymeter',  # since 2.23
+    'endcresc',  # not found in docs, found in ly/spanners-init.ly
+    'endcr',  # since 2.20, synonym for endcresc?
     'enddecr',
-    'enddim',
-    'endincipit',
+    'enddim',  # not found in docs, found in ly/spanners-init.ly
+    # not found: 'endincipit',
     'endSpanners',
     'episemFinis',
     'episemInitium',
@@ -200,11 +222,12 @@ lilypond_music_commands = (
     'escapedParenthesisCloseSymbol',
     'escapedParenthesisOpenSymbol',
     'escapedSmallerSymbol',
-    'eventChords', # since 2.23
-    'expandFullBarRests',
+    'eventChords',  # since 2.16
+    'expandEmptyMeasures',  # since 2.22
+    'expandFullBarRests',  # renamed to expandEmptyMeasures since 2.22
     'f',
     'featherDurations',
-    'fermataMarkup',
+    'fermataMarkup',  # gone since 2.22
     'ff',
     'fff',
     'ffff',
@@ -212,30 +235,37 @@ lilypond_music_commands = (
     'figuremode',
     'figures',
     'finalis',
-    'finger', # since 2.23
     'fingeringOrientations',
-    'fixed', # since 2.23
+    'fixed',  # since 2.20
     'flexa',
-    'footnote', # since 2.23
+    'footnote',  # since 2.18 or earlier
     'fp',
+    'freeBass',  # since 2.18
     'frenchChords',
-    'fullJazzExceptions',
+    'fullJazzExceptions',  # not found in docs or code
     'funkHeads',
     'funkHeadsMinor',
-    'fz',
+    'fz',  # not in docs, found in ly/dynamic-scripts-init.ly
     'germanChords',
+    'glide',  # since 2.23
     'glissando',
+    'glissandoMap',  # since 2.20
     'grace',
-    'graceSettings',
-    'grobdescriptions', # since 2.23
+    'graceSettings',  # found in internals, shouldn't be directly manipulated, found in ly/engraver-init.ly
     'harmonic',
-    'harmonicByFret', # since 2.23
-    'harmonicByRatio', # since 2.23
+    'harmonicByFret',  # since 2.14 or earlier
+    'harmonicByRatio',  # since 2.14 or earlier
+    'harmonicNote',  # since 2.20
+    'harmonicsOff',  # since 2.14 or before
+    'harmonicsOn',  # since 2.14 or before
+    'hideKeySignature',  # since 2.14 or before
     'hideNotes',
+    'hideSplitTiedTabNotes',  # since 2.14 or before
     'hideStaffSwitch',
     'huge',
     'ignatzekExceptionMusic',
     'ignatzekExceptions',
+    'if',  # since 2.23
     'iij',
     'IIJ',
     'ij',
@@ -243,42 +273,48 @@ lilypond_music_commands = (
     'improvisationOff',
     'improvisationOn',
     'in',
+    'incipit',  # since 2.20
     'inclinatum',
     'includePageLayoutFile',
     'indent',
-    'inStaffSegno', # since 2.23
+    'inherit-acceptability',  # since 2.20
+    'inStaffSegno',  # since 2.16
     'instrumentSwitch',
-    'instrumentTransposition',
-    'interscoreline',
-    'inversion', # since 2.23
-    'invertChords', # since 2.23
+    'instrumentTransposition',  # not in docs, found in ly/engraver-init.ly
+    # 'interscoreline',  # not found in docs or code
+    'inversion',
+    'invertChords',  # since 2.22
     'italianChords',
+    'jump',  # since 2.23
     'keepWithTag',
     'key',
+    'kievanOff',  # since 2.20
+    'kievanOn',  # since 2.20
     'killCues',
     'label',
     'laissezVibrer',
-    'languageSaveAndChange', # since 2.23
-    'languageRestore', # since 2.23
-    'large',
+    'languageRestore',  # since 2.20
+    'languageSaveAndChange',  # since 2.20
+    # 'large', # already in markup section
     'ligature',
     'linea',
     'longa',
     'lyricmode',
     'lyrics',
     'lyricsto',
-    'magnifyMusic', # since 2.20
-    'magnifyStaff', # since 2.23
+    'magnifyMusic',  # since 2.20
+    'maginfyStaff',  # since 2.20
     'maininput',
     'majorSevenSymbol',
     'makeClusters',
+    'makeDefaultStringTuning',  # since 2.20
     'mark',
-    'markLengthOff', # since 2.18
+    'markLengthOff',  # since 2.18
     'markLengthOn',  # since 2.18
     'markup',
-    'markuplines', # deprecated, till 2.14
-    'markuplist', # from 2.16
-    'markupMap', #since 2.23
+    'markuplines',  # deprecated, till 2.14
+    'markuplist',  # from 2.16
+    'markupMap',  # since 2.20
     'maxima',
     'melisma',
     'melismaEnd',
@@ -288,10 +324,12 @@ lilypond_music_commands = (
     'mergeDifferentlyHeadedOn',
     'mf',
     'mm',
-    'modalInversion', # since 2.23
-    'modalTranspose', # since 2.23
+    'modalInversion',  # since 2.14 or earlier
+    'modalTranspose',  # since 2.14 or earlier
     'mp',
+    'multi-measure-rest-by-number',  # since 2.23
     'musicMap',
+    'n',  # since 2.22
     'neumeDemoLayout',
     'new',
     'newSpacingSection',
@@ -303,7 +341,7 @@ lilypond_music_commands = (
     'notemode',
     'numericTimeSignature',
     'octaveCheck',
-    'offset', # since 2.23
+    'offset',  # since 2.22?
     'oldaddlyrics',
     'oneVoice',
     'oriscus',
@@ -317,96 +355,120 @@ lilypond_music_commands = (
     'palmMute',  # since 2.16
     'palmMuteOn',  # since 2.16
     'parallelMusic',
-    'parenthesisCloseSymbol',
-    'parenthesisOpenSymbol',
+    'parenthesisCloseSymbol',  # not in the docs, lilypond/python/convertrules.py changes this to ')'
+    'parenthesisOpenSymbol',  # not in the docs, lilypond/python/convertrules.py changes this to '('
     'parenthesize',
-    'partCombine', # was partcombine?
-    'partCombineDown', # since 2.23
-    'partCombineListener',
-    'partCombineUp', # since 2.23
+    'partcombine',  # renamed since 2.22
+    'partCombine',  # since 2.22
+    'partCombineApart',  # since 2.22
+    'partCombineAutomatic',  # since 2.22
+    'partCombineChords',  # since 2.22
+    'partCombineDown',  # since 2.22
+    'partCombineForce',  # since 2.22
+    'partCombineListener',  # not in docs, found in ly/declarations-init.ly
+    'partCombineSoloI',  # since 2.22
+    'partCombineSoloII',  # since 2.22
+    'partCombineUnisono',  # since 2.22
+    'partCombineUp',  # since 2.22
     'partial',
-    'partialJazzExceptions',
-    'partialJazzMusic',
+    'partialJazzExceptions',  # not found in docs or code
+    'partialJazzMusic',  # not found in docs or code
     'pes',
     'phrasingSlurDashed',
+    'phrasingSlurDashPattern',  # since 2.14 or earlier
     'phrasingSlurDotted',
     'phrasingSlurDown',
+    'phrasingSlurHalfDashed',  # since 2.14 or earlier
+    'phrasingSlurHalfSolid',  # since 2.14 or earlier
     'phrasingSlurNeutral',
     'phrasingSlurSolid',
     'phrasingSlurUp',
-    'pipeSymbol',
+    'pipeSymbol',  # not in doc, lilypond/python/convertrules.py changes this to '|'
     'pitchedTrill',
     'pointAndClickOff',
     'pointAndClickOn',
+    'pointAndClickTypes',  # since 2.20
     'pp',
     'ppp',
     'pppp',
     'ppppp',
-    'preBend', # since 2.23
-    'preBendHold', # since 2.23
+    'preBend',  # since 2.23
+    'preBendHold',  # since 2.32
     'predefinedFretboardsOff',
     'predefinedFretboardsOn',
-    'propertyOverride', # since 2.23
-    'propertyRevert', # since 2.23
-    'propertySet', # since 2.23
-    'propertyTweak', # since 2.23
-    'propertyUnset', # since 2.23
+    'propertyOverride',  # since 2.20
+    'propertyRevert',  # since 2.20
+    'propertySet',  # since 2.20
+    'propertyTweak',  # since 2.20
+    'propertyUnset',  # since 2.20
     'pt',
-    'pushToTag', # since 2.16
+    'pushToTag',  # since 2.16
     'quilisma',
     'quoteDuring',
-    'raiseNote', # since 2.23
-    'reduceChords', # since 2.23
+    'raiseNote',  # since 2.22
+    'reduceChords',  # since 2.20
     'relative',
-    'RemoveEmptyRhythmicStaffContext',
+    'RemoveAllEmptyStaves',  # since 2.20
+    'RemoveEmptyStaves',  # since 2.14 or earlier
+    'RemoveEmptyRhythmicStaffContext',  # not in docs, found in ly/engraver-init.ly
     'RemoveEmptyStaffContext',
     'removeWithTag',
     'repeat',
     'repeatTie',
+    'replace',  # since 2.16
     'resetRelativeOctave',
     'responsum',
     'rest',
-    'retrograde', # since 2.23
+    'rest-by-number',  # since 2.18
     'revert',
-    'revertTimeSignatureSettings', # since 2.23
+    'revertTimeSignatureSettings',  # since 2.14 or earlier
     'rfz',
     'rightHandFinger',
-    'romanStringNumbers', # since 2.20
+    'romanStringNumbers',  # since 2.20
     'sacredHarpHeads',
     'sacredHarpHeadsMinor',
     'scaleDurations',
-    'scoreTweak',
+    # 'scoreTweak',  # not found in docs or code
+    'section',  # since 2.23
+    'sectionLabel',  # since 2.23
+    'segnoMark',  # since 2.23
     'semiGermanChords',
     'set',
-    'settingsFrom', # 2.23
+    'settingsFrom',  # since 2.20
     'sf',
     'sff',
     'sfp',
     'sfz',
-    'shape', # since 2.16
+    'shape',  # since 2.16
     'shiftDurations',
     'shiftOff',
     'shiftOn',
     'shiftOnn',
     'shiftOnnn',
+    'showKeySignature',  # since 2.14 or earlier
     'showStaffSwitch',
-    'single', # since 2.18
+    'single',  # since 2.18
     'skip',
     'skipTypesetting',
-    'slashedGrace', # 2.23
+    'slashedGrace',  # since 2.20
     'slurDashed',
+    'slurDashPattern',  # since 2.14 or earlier
     'slurDotted',
     'slurDown',
+    'slurHalfDashed',  # since 2.14 or earlier
+    'slurHalfSolid',  # since 2.14 or earlier
     'slurNeutral',
     'slurSolid',
     'slurUp',
     'small',
     'sostenutoOff',
     'sostenutoOn',
+    'sourcefileline',  # since 2.20
+    'sourcefilename',  # since 2.20
     'southernHarmonyHeads',
     'southernHarmonyHeadsMinor',
     'sp',
-    'spacingTweaks',
+    'spacingTweaks',  # dropped in 2.23
     'spp',
     'startAcciaccaturaMusic',
     'startAppoggiaturaMusic',
@@ -418,21 +480,25 @@ lilypond_music_commands = (
     'stemDown',
     'stemNeutral',
     'stemUp',
-    'stopAcciaccaturaMusic',
-    'stopAppoggiaturaMusic',
-    'stopGraceMusic',
+    'stopAcciaccaturaMusic',  # defined in ly/grace-init.ly, only redefine them, never "call" them (with backslash)
+    'stopAppoggiaturaMusic',  # ditto
+    'stopGraceMusic',  # ditto
     'stopGroup',
     'stopStaff',
     'stopTextSpan',
     'stopTrillSpan',
-    'stringTuning', # since 2.16
-    'strokeFingerOrientations',
+    'storePredefinedDiagram',  # since 2.14 or before
+    'stringTuning',  # since 2.16
+    'strokeFingerOrientations',  # property of New_fingering_engraver
     'stropha',
-    'styledNoteHeads', # since 2.23
+    'styledNoteHeads',  # since 2.14 or earlier
     'sustainOff',
     'sustainOn',
+    'tabChordRepeats',  # since 2.16
+    'tabChordRepetition',  # since 2.14 or earlier
     'tabFullNotation',
     'tag',
+    'taor',  # since 2.14 or earlier
     'teeny',
     'tempo',
     'tempoWholesPerMinute',
@@ -442,32 +508,38 @@ lilypond_music_commands = (
     'textSpannerNeutral',
     'textSpannerUp',
     'tieDashed',
+    'tieDashPattern',  # since 2.14 or earlier
     'tieDotted',
     'tieDown',
+    'tieHalfDashed',  # since 2.20
+    'tieHalfSolid',  # since 2.20
     'tieNeutral',
     'tieSolid',
     'tieUp',
-    'tildeSymbol',
+    'tildeSymbol',  # not in docs, converted to '~' in python/convertrules.py
     'time',
     'times',
     'timing',
     'tiny',
-    'tocItem', # since ?
+    'tocItem',  # since 2.14 or before
+    'tocItemWithDotsMarkup',  # since 2.20
     'transpose',
     'transposedCueDuring',
     'transposition',
     'treCorde',
-    'tuplet', # since 2.18
+    'tripletFeel',  # since 2.22
+    'tuplet',  # since 2.18
     'tupletDown',
     'tupletNeutral',
-    'tupletSpan', #since 2.23
+    'tupletSpan',  # since 2.18
     'tupletUp',
     'tweak',
     'unaCorda',
-    'unfolded', # since 2.23
+    'unfolded',  # since 2.23
     'unfoldRepeats',
     'unHideNotes',
-    'unit',
+    'unless',  # since 2.23
+    'unit',  # scheme function?  not a music function or command
     'unset',
     'versus',
     'virga',
@@ -477,19 +549,22 @@ lilypond_music_commands = (
     'voiceNeutralStyle',
     'voiceOne',
     'voiceOneStyle',
-    'voices', # since 2.23
+    'voices',  # since 2.20
     'voiceThree',
     'voiceThreeStyle',
     'voiceTwo',
     'voiceTwoStyle',
-    'void', # since 2.23
-    'vshape', # since 2.23
+    'void',  # since 2.16
+    'vshape',  # since 2.23
+    'vowelTransition',  # since 2.22
     'walkerHeads',
     'walkerHeadsMinor',
     'whiteTriangleMarkup',
     'withMusicProperty',
+    'xNote',  # since 2.20
+    'xNotesOff',  # since 2.20
+    'xNotesOn',  # since 2.20
 )
-
 
 articulations = (
     'accent',
@@ -500,7 +575,6 @@ articulations = (
     'staccato',
     'tenuto',
 )
-
 
 ornaments = (
     'prall',
@@ -517,16 +591,19 @@ ornaments = (
     'prallup',
     'reverseturn',
     'trill',
+    'slashturn',  # since 2.22
+    'haydnturn',  # since 2.22
 )
-
 
 fermatas = (
     'shortfermata',
     'fermata',
     'longfermata',
     'verylongfermata',
+    'veryshortfermata',  # since 2.22
+    'henzeshortfermata',  # since 2.22
+    'henzelongfermata',  # since 2.22
 )
-
 
 instrument_scripts = (
     'upbow',
@@ -543,13 +620,12 @@ instrument_scripts = (
     'rtoe',
 )
 
-
 repeat_scripts = (
     'segno',
     'coda',
     'varcoda',
+    'fine',  # since 2.23
 )
-
 
 ancient_scripts = (
     'ictus',
@@ -558,7 +634,6 @@ ancient_scripts = (
     'semicirculus',
     'signumcongruentiae',
 )
-
 
 modes = (
     'major',
@@ -572,172 +647,191 @@ modes = (
     'locrian',
 )
 
-
 markupcommands_nargs = (
-# no arguments
-(
-    'doubleflat',
-    'doublesharp',
-    'eyeglasses',
-    'flat',
-    'natural',
-    'null',
-    'semiflat',
-    'semisharp',
-    'sesquiflat',
-    'sesquisharp',
-    'sharp',
-    'strut',
-    'table-of-contents'
-),
-# one argument
-(
-    'backslashed-digit',
-    'bold',
-    'box',
-    'bracket',
-    'caps',
-    'center-align',
-    'center-column',
-    'char',
-    'circle',
-    'column',
-    'concat',
-    'dir-column',
-    'draw-dashed-line', # since 2.18
-    'draw-dotted-line', # since 2.18
-    'draw-line',
-    'dynamic',
-    'fill-line',
-    'finger',
-    'fontCaps',
-    'fret-diagram',
-    'fret-diagram-terse',
-    'fret-diagram-verbose',
-    'fromproperty',
-    'harp-pedal',
-    'hbracket',
-    'hspace',
-    'huge',
-    'italic',
-    'justify',
-    'justify-field',
-    'justify-line', #since 2.20
-    'justify-string',
-    'large',
-    'larger',
-    'left-align',
-    'left-brace',
-    'left-column',
-    'line',
-    'lookup',
-    'markalphabet',
-    'markletter',
-    'medium',
-    'musicglyph',
-    'normalsize',
-    'normal-size-sub',
-    'normal-size-super',
-    'normal-text',
-    'number',
-    'oval', # since 2.18
-    'overlay', # since 2.20
-    'overtie', # since 2.20
-    'postscript',
-    'right-align',
-    'right-brace',
-    'right-column',
-    'roman',
-    'rounded-box',
-    'sans',
-    'score',
-    'simple',
-    'slashed-digit',
-    'small',
-    'smallCaps',
-    'smaller',
-    'stencil',
-    'sub',
-    'super',
-    'teeny',
-    'text',
-    'tie', # since 2.20
-    'tied-lyric',
-    'tiny',
-    'transparent',
-    'triangle',
-    'typewriter',
-    'underline',
-    'undertie', # since 2.20
-    'upright',
-    'vcenter',
-    'vspace',
-    'verbatim-file',
-    'whiteout',
-    'wordwrap',
-    'wordwrap-field',
-    'wordwrap-string',
-),
-# two arguments
-(
-    'abs-fontsize',
-    'auto-footnote', # since 2.16
-    'combine',
-    'customTabClef',
-    'fontsize',
-    'footnote',
-    'fraction',
-    'halign',
-    'hcenter-in',
-    'lower',
-    'magnify',
-    'note',
-    'on-the-fly',
-    'override',
-    'pad-around',
-    'pad-markup',
-    'pad-x',
-    'page-link',
-    'path',     # added in LP 2.13.31
-    'raise',
-    'rotate',
-    'scale',
-    'translate',
-    'translate-scaled',
-    'with-color',
-    'with-link',
-    'with-url',
-    'woodwind-diagram',
-    'with-dimensions-from', # since 2.20
-),
-# three arguments
-(
-    'arrow-head',
-    'beam',
-    'draw-circle',
-    'draw-squiggle-line', # since 2.20
-    'epsfile',
-    'filled-box',
-    'general-align',
-    'note-by-number',
-    'pad-to-box',
-    'page-ref',
-    'with-dimensions',
-),
-# four arguments
-(
-    'pattern',
-    'put-adjacent',
-),
-# five arguments,
-(
-    'fill-with-pattern',
-),
+    # no arguments
+    (
+        'doubleflat',
+        'doublesharp',
+        'draw-hline',  # since 2.14 or before
+        'eyeglasses',
+        'flat',
+        'natural',
+        'null',
+        'semiflat',
+        'semisharp',
+        'sesquiflat',
+        'sesquisharp',
+        'sharp',
+        'slashSeparator',  # since 2.20
+        'strut',
+        'table-of-contents'
+    ),
+    # one argument
+    (
+        'accidental',  # since 2.23
+        'backslashed-digit',
+        'bold',
+        'box',
+        'bracket',
+        'caps',
+        'center-align',
+        'center-column',
+        'char',
+        'circle',
+        'column',
+        'compount-meter',  # since 2.20
+        'concat',
+        'dir-column',
+        'draw-dashed-line',  # since 2.18
+        'draw-dotted-line',  # since 2.18
+        'draw-line',
+        'dynamic',
+        'ellipse',  # since 2.18
+        'fill-line',
+        'finger',
+        'first-visible',  # since 2.20
+        'fontCaps',
+        'fret-diagram',
+        'fret-diagram-terse',
+        'fret-diagram-verbose',
+        'fromproperty',
+        'harp-pedal',
+        'hbracket',
+        'hspace',
+        'huge',
+        'italic',
+        'justify',
+        'justify-field',
+        'justify-line',  # since 2.20
+        'justify-string',
+        'large',
+        'larger',
+        'left-align',
+        'left-brace',
+        'left-column',
+        'line',
+        'lookup',
+        'markalphabet',
+        'markletter',
+        'medium',
+        'musicglyph',
+        'normalsize',
+        'normal-size-sub',
+        'normal-size-super',
+        'normal-text',
+        'number',
+        'oval',  # since 2.18
+        'overlay',  # since 2.20
+        'overtie',  # since 2.20
+        'polygon',  # since 2.23
+        'postscript',
+        'property-recursive',  # since 2.16
+        'right-align',
+        'right-brace',
+        'right-column',
+        'roman',
+        'rounded-box',
+        'sans',
+        'score',
+        'score-lines',  # since 2.20
+        'simple',
+        'slashed-digit',
+        'small',
+        'smallCaps',
+        'smaller',
+        'stdBass',  # since 2.18
+        'stdBassIV',  # since 2.18
+        'stdBassV',  # since 2.18
+        'stdBassVI',  # since 2.18
+        'stencil',
+        'string-lines',  # since 2.23
+        'sub',
+        'super',
+        'teeny',
+        'text',
+        'tie',  # since 2.20
+        'tied-lyric',
+        'tiny',
+        'transparent',
+        'triangle',
+        'typewriter',
+        'underline',
+        'undertie',  # since 2.20
+        'upright',
+        'vcenter',
+        'vspace',
+        'verbatim-file',
+        'whiteout',
+        'with-true-dimensions',  # since 2.23
+        'wordwrap',
+        'wordwrap-field',
+        'wordwrap-string',
+    ),
+    # two arguments
+    (
+        'abs-fontsize',
+        'auto-footnote',  # since 2.16
+        'combine',
+        'customTabClef',
+        'fontsize',
+        'footnote',
+        'fraction',
+        'halign',
+        'hcenter-in',
+        'lower',
+        'magnify',
+        'markup-command',  # since 2.23
+        'note',
+        'on-the-fly',
+        'override',
+        'pad',  # since 2.23
+        'pad-around',
+        'pad-markup',
+        'pad-x',
+        'page-link',
+        'path',  # added in LP 2.13.31
+        'raise',
+        'rotate',
+        'scale',
+        'table',  # since 2.20
+        'translate',
+        'translate-scaled',
+        'with-color',
+        'with-link',
+        'with-outline',  # since 2.20
+        'with-true-dimension',  # since 2.23
+        'with-url',
+        'woodwind-diagram',
+        'with-dimensions-from',  # since 2.20
+    ),
+    # three arguments
+    (
+        'arrow-head',
+        'beam',
+        'draw-circle',
+        'draw-squiggle-line',  # since 2.20
+        'epsfile',
+        'filled-box',
+        'general-align',
+        'note-by-number',
+        'pad-to-box',
+        'page-ref',
+        'with-dimension',  # since 2.23
+        'with-dimension-from',  # since 2.23
+        'with-dimensions',
+    ),
+    # four arguments
+    (
+        'pattern',
+        'put-adjacent',
+    ),
+    # five arguments,
+    (
+        'fill-with-pattern',
+    ),
 )
 
-
 markupcommands = sum(markupcommands_nargs, ())
-
 
 markuplistcommands = (
     'column-lines',
@@ -747,7 +841,6 @@ markuplistcommands = (
     'wordwrap-lines',
     'wordwrap-string-internal',
 )
-
 
 contexts = (
     'ChoirStaff',
@@ -763,15 +856,15 @@ contexts = (
     'GrandStaff',
     'GregorianTranscriptionStaff',
     'GregorianTranscriptionVoice',
-    'KievanStaff', # since 2.16
-    'KievanVoice', # since 2.16
+    'KievanStaff',  # since 2.16
+    'KievanVoice',  # since 2.16
     'Lyrics',
     'MensuralStaff',
     'MensuralVoice',
     'NoteNames',
-    'NullVoice',     # since 2.18
-    'PetrucciStaff', # since 2.16
-    'PetrucciVoice', # since 2.16
+    'NullVoice',  # since 2.18
+    'PetrucciStaff',  # since 2.16
+    'PetrucciVoice',  # since 2.16
     'PianoStaff',
     'RhythmicStaff',
     'Score',
@@ -784,7 +877,6 @@ contexts = (
     'VaticanaVoice',
     'Voice',
 )
-
 
 midi_instruments = (
     # (1-8 piano)
@@ -839,7 +931,7 @@ midi_instruments = (
     'contrabass',
     'tremolo strings',
     'pizzicato strings',
-    'orchestral harp', # till LilyPond 2.12 was this erroneously called: 'orchestral strings'
+    'orchestral harp',  # till LilyPond 2.12 was this erroneously called: 'orchestral strings'
     'timpani',
     # (49-56 ensemble)
     'string ensemble 1',
@@ -959,8 +1051,7 @@ midi_instruments = (
     'cm-64 drums',
 )
 
-
-#scheme_functions = (
+# scheme_functions = (
 #    'set-accidental-style',
 #    'set-global-staff-size',
 #    'set-octavation',
@@ -989,7 +1080,7 @@ midi_instruments = (
 #    'color?',
 #    'rgb-color',
 #    'x11-color',
-#)
+# )
 
 
 scheme_values = (
@@ -1003,7 +1094,6 @@ scheme_values = (
     'padding',
     'stretchability',
 )
-
 
 headervariables = (
     'dedication',
@@ -1038,7 +1128,6 @@ headervariables = (
     'footer',
 )
 
-
 papervariables = (
     # fixed vertical
     'paper-height',
@@ -1064,14 +1153,19 @@ papervariables = (
     'short-indent',
 
     # flex vertical
-    'markup-system-spacing', # the distance between a (title or top-level) markup and the system that follows it.
-    'score-markup-spacing',  # the distance between the last system of a score and the (title or top-level) markup that follows it.
-    'score-system-spacing',  # the distance between the last system of a score and the first system of the score that follows it, when no (title or top-level) markup exists between them.
-    'system-system-spacing', # the distance between two systems in the same score.
-    'markup-markup-spacing', # the distance between two (title or top-level) markups.
-    'last-bottom-spacing',   # the distance from the last system or top-level markup on a page to the bottom of the printable area (i.e. the top of the bottom margin).
-    'top-system-spacing',    # the distance from the top of the printable area (i.e. the bottom of the top margin) to the first system on a page, when there is no (title or top-level) markup between the two.
-    'top-markup-spacing',    # the distance from the top of the printable area (i.e. the bottom of the top margin) to the first (title or top-level) markup on a page, when there is no system between the two.
+    'markup-system-spacing',  # the distance between a (title or top-level) markup and the system that follows it.
+    'score-markup-spacing',
+    # the distance between the last system of a score and the (title or top-level) markup that follows it.
+    'score-system-spacing',
+    # the distance between the last system of a score and the first system of the score that follows it, when no (title or top-level) markup exists between them.
+    'system-system-spacing',  # the distance between two systems in the same score.
+    'markup-markup-spacing',  # the distance between two (title or top-level) markups.
+    'last-bottom-spacing',
+    # the distance from the last system or top-level markup on a page to the bottom of the printable area (i.e. the top of the bottom margin).
+    'top-system-spacing',
+    # the distance from the top of the printable area (i.e. the bottom of the top margin) to the first system on a page, when there is no (title or top-level) markup between the two.
+    'top-markup-spacing',
+    # the distance from the top of the printable area (i.e. the bottom of the top margin) to the first (title or top-level) markup on a page, when there is no system between the two.
 
     # line breaking
     'max-systems-per-page',
@@ -1080,23 +1174,29 @@ papervariables = (
     'systems-per-page',
 
     # page breaking
-    'blank-after-score-page-force',  # The penalty for having a blank page after the end of one score and before the next. By default, this is smaller than blank-page-force, so that we prefer blank pages after scores to blank pages within a score.
-    'blank-last-page-force',         # The penalty for ending the score on an odd-numbered page.
-    'blank-page-force',              # The penalty for having a blank page in the middle of a score. This is not used by ly:optimal-breaking since it will never consider blank pages in the middle of a score.
-    'page-breaking',                 # The page-breaking algorithm to use. Choices are ly:minimal-breaking, ly:page-turn-breaking, and ly:optimal-breaking.
-    'page-breaking-system-system-spacing', # Tricks the page breaker into thinking that system-system-spacing is set to something different than it really is. For example, if page-breaking-system-system-spacing #'padding is set to something substantially larger than system-system-spacing #'padding, then the page-breaker will put fewer systems on each page. Default: unset.
-    'page-count',                    # The number of pages to be used for a score, unset by default.
+    'blank-after-score-page-force',
+    # The penalty for having a blank page after the end of one score and before the next. By default, this is smaller than blank-page-force, so that we prefer blank pages after scores to blank pages within a score.
+    'blank-last-page-force',  # The penalty for ending the score on an odd-numbered page.
+    'blank-page-force',
+    # The penalty for having a blank page in the middle of a score. This is not used by ly:optimal-breaking since it will never consider blank pages in the middle of a score.
+    'page-breaking',
+    # The page-breaking algorithm to use. Choices are ly:minimal-breaking, ly:page-turn-breaking, and ly:optimal-breaking.
+    'page-breaking-system-system-spacing',
+    # Tricks the page breaker into thinking that system-system-spacing is set to something different than it really is. For example, if page-breaking-system-system-spacing #'padding is set to something substantially larger than system-system-spacing #'padding, then the page-breaker will put fewer systems on each page. Default: unset.
+    'page-count',  # The number of pages to be used for a score, unset by default.
 
     # page numbering
     'auto-first-page-number',
     'first-page-number',
     'print-first-page-number',
     'print-page-number',
+    'page-number-type',  # since 2.20
 
     # misc
     'page-spacing-weight',
     'print-all-headers',
     'system-separator-markup',
+    'staff-space',  # since 2.20
 
     # debugging
     'annotate-spacing',
@@ -1115,12 +1215,11 @@ papervariables = (
     'fonts',
 
     # undocumented?
-    #'blank-after-score-page-force',
-    #'force-assignment',
-    #'input-encoding',
-    #'output-scale',
+    # 'blank-after-score-page-force',
+    # 'force-assignment',
+    # 'input-encoding',
+    # 'output-scale',
 )
-
 
 layoutvariables = (
     'indent',
@@ -1131,18 +1230,16 @@ layoutvariables = (
     'ragged-last',
 )
 
-
 midivariables = (
 )
-
 
 repeat_types = (
     'unfold',
     'percent',
     'volta',
     'tremolo',
+    'segno',  # since 2.23
 )
-
 
 accidentalstyles = (
     'default',
@@ -1153,8 +1250,8 @@ accidentalstyles = (
     'modern-voice-cautionary',
     'piano',
     'piano-cautionary',
-    'choral', # since 2.20
-    'choral-cautionary', # since 2.20
+    'choral',  # since 2.20
+    'choral-cautionary',  # since 2.20
     'neo-modern',
     'neo-modern-cautionary',
     'neo-modern-voice',
@@ -1165,7 +1262,6 @@ accidentalstyles = (
     'forget',
 )
 
-
 clefs_plain = (
     'alto',
     'baritone',
@@ -1174,27 +1270,25 @@ clefs_plain = (
     'F',
     'french',
     'G',
-    'GG',               # since 2.19
+    'GG',  # since 2.19
     'mezzosoprano',
     'percussion',
     'soprano',
     'subbass',
     'tab',
     'tenor',
-    'tenorG',           # since 2.19
+    'tenorG',  # since 2.19
     'treble',
     'varbaritone',
-    'varC',             # since 2.19
-    'varpercussion',    # since 2.19
+    'varC',  # since 2.19
+    'varpercussion',  # since 2.19
     'violin',
 )
-
 
 clefs = clefs_plain + (
     'treble_8',
     'bass_8',
 )
-
 
 break_visibility = (
     'all-invisible',
@@ -1205,7 +1299,6 @@ break_visibility = (
     'end-of-line-invisible',
     'center-invisible',
 )
-
 
 mark_formatters = (
     'format-mark-alphabet',
@@ -1221,5 +1314,3 @@ mark_formatters = (
     'format-mark-circle-letters',
     'format-mark-circle-numbers',
 )
-
-
