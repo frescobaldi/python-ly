@@ -62,6 +62,7 @@ lilypond_keywords = (
     'context',
     'tagGroup',  # since 2.20
     'etc',  # since 2.20
+    'offset',  # since 2.20
 )
 
 lilypond_music_commands = (
@@ -347,7 +348,6 @@ lilypond_music_commands = (
     'notemode',
     'numericTimeSignature',
     'octaveCheck',
-    'offset',  # since 2.22?
     'oldaddlyrics',
     'oneVoice',
     'oriscus',
