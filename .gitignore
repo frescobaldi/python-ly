@@ -3,3 +3,6 @@
 *.egg-info
 build/
 dist/
+
+# PyCharm IDE specific
+.idea/
