@@ -228,8 +228,11 @@ lilypond_music_commands = (
     'graceSettings',
     'grobdescriptions', # since 2.23
     'harmonic',
-    'harmonicByFret', # since 2.23
-    'harmonicByRatio', # since 2.23
+    'harmonicByFret', # since 2.20
+    'harmonicByRatio', # since 2.20
+    'harmonicNote',
+    'harmonicsOff',
+    'harmonicsOn',
     'hideNotes',
     'hideStaffSwitch',
     'huge',
@@ -392,7 +395,7 @@ lilypond_music_commands = (
     'single', # since 2.18
     'skip',
     'skipTypesetting',
-    'slashedGrace', # 2.23
+    'slashedGrace', # since 2.20
     'slurDashed',
     'slurDotted',
     'slurDown',
