@@ -28,6 +28,11 @@ import itertools
 from . import _token
 from . import Parser, FallthroughParser
 
+# an identifier allowing letters and single hyphens in between
+re_identifier = r"[^\W\d_]+([_-][^\W\d_]+)*"
+
+# the lookahead pattern for the end of an identifier (ref)
+re_identifier_end = r"(?![_-]?[^\W\d])"
 
 re_articulation = r"[-_^][_.>|!+^-]"
 re_dynamic = (
@@ -37,15 +42,11 @@ re_dynamic = (
     r"|cresc|decresc|dim|cr|decr"
     r")(?![A-Za-z])")
 
-re_duration = r"(\\(maxima|longa|breve)\b|(1|2|4|8|16|32|64|128|256|512|1024|2048)(?!\d))"
+re_duration = rf"(\\(maxima|longa|breve){re_identifier_end}|(1|2|4|8|16|32|64|128|256|512|1024|2048)(?!\d))"
+
 re_dot = r"\."
 re_scaling = r"\*[\t ]*\d+(/\d+)?"
 
-# an identifier allowing letters and single hyphens in between
-re_identifier = r"[^\W\d_]+([_-][^\W\d_]+)*"
-
-# the lookahead pattern for the end of an identifier (ref)
-re_identifier_end = r"(?![_-]?[^\W\d])"
 
 
 class Identifier(_token.Token):
@@ -419,55 +420,55 @@ class Specifier(_token.Token):
 
 
 class Score(Keyword):
-    rx = r"\\score\b"
+    rx = r"\\score" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectScore())
 
 
 class Book(Keyword):
-    rx = r"\\book\b"
+    rx = r"\\book" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectBook())
 
 
 class BookPart(Keyword):
-    rx = r"\\bookpart\b"
+    rx = r"\\bookpart" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectBookPart())
 
 
 class Paper(Keyword):
-    rx = r"\\paper\b"
+    rx = r"\\paper" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectPaper())
 
 
 class Header(Keyword):
-    rx = r"\\header\b"
+    rx = r"\\header" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectHeader())
 
 
 class Layout(Keyword):
-    rx = r"\\layout\b"
+    rx = r"\\layout" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectLayout())
 
 
 class Midi(Keyword):
-    rx = r"\\midi\b"
+    rx = r"\\midi" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectMidi())
 
 
 class With(Keyword):
-    rx = r"\\with\b"
+    rx = r"\\with" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectWith())
 
 
 class LayoutContext(Keyword):
-    rx = r"\\context\b"
+    rx = r"\\context" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectContext())
 
@@ -516,7 +517,7 @@ class MarkupCommand(Markup, IdentifierRef):
 
 
 class MarkupScore(Markup):
-    rx = r"\\score\b"
+    rx = r"\\score" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectScore())
 
@@ -547,7 +548,7 @@ class CloseBracketMarkup(CloseBracket):
 
 
 class Repeat(Command):
-    rx = r"\\repeat(?![A-Za-z])"
+    rx = r"\\repeat" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseRepeat())
 
@@ -564,7 +565,7 @@ class RepeatCount(IntegerValue, _token.Leaver):
 
 
 class Tempo(Command):
-    rx = r"\\tempo\b"
+    rx = r"\\tempo" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseTempo())
 
@@ -574,35 +575,35 @@ class TempoSeparator(Delimiter):
 
 
 class Partial(Command):
-    rx = r"\\partial\b"
+    rx = r"\\partial" + re_identifier_end
 
 
 class Override(Keyword):
-    rx = r"\\override\b"
+    rx = r"\\override" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseOverride())
 
 
 class Set(Override):
-    rx = r"\\set\b"
+    rx = r"\\set" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseSet())
 
 
 class Revert(Override):
-    rx = r"\\revert\b"
+    rx = r"\\revert" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseRevert())
 
 
 class Unset(Keyword):
-    rx = r"\\unset\b"
+    rx = r"\\unset" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseUnset())
 
 
 class Tweak(Keyword):
-    rx = r"\\tweak\b"
+    rx = r"\\tweak" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseTweak())
 
@@ -613,19 +614,19 @@ class Translator(Command):
 
 
 class New(Translator):
-    rx = r"\\new\b"
+    rx = r"\\new" + re_identifier_end
 
 
 class Context(Translator):
-    rx = r"\\context\b"
+    rx = r"\\context" + re_identifier_end
 
 
 class Change(Translator):
-    rx = r"\\change\b"
+    rx = r"\\change" + re_identifier_end
 
 
 class AccidentalStyle(Command):
-    rx = r"\\accidentalStyle\b"
+    rx = r"\\accidentalStyle" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseAccidentalStyle())
 
@@ -638,13 +639,13 @@ class AccidentalStyleSpecifier(Specifier):
 
 
 class AlterBroken(Command):
-    rx = r"\\alterBroken\b"
+    rx = r"\\alterBroken" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseAlterBroken())
 
 
 class Clef(Command):
-    rx = r"\\clef\b"
+    rx = r"\\clef" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseClef())
 
@@ -660,7 +661,7 @@ class ClefSpecifier(Specifier):
 
 
 class PitchCommand(Command):
-    rx = r"\\(relative|transpose|transposition|key|octaveCheck)\b"
+    rx = r"\\(relative|transpose|transposition|key|octaveCheck)" + re_identifier_end
     def update_state(self, state):
         argcount = 2 if self == '\\transpose' else 1
         state.enter(ParsePitchCommand(argcount))
@@ -674,19 +675,19 @@ class KeySignatureMode(Command):
 
 
 class Hide(Keyword):
-    rx = r"\\hide\b"
+    rx = r"\\hide" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseHideOmit())
 
 
 class Omit(Keyword):
-    rx = r"\\omit\b"
+    rx = r"\\omit" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseHideOmit())
 
 
 class Unit(Command):
-    rx = r"\\(mm|cm|in|pt)\b"
+    rx = r"\\(mm|cm|in|pt)" + re_identifier_end
 
 
 class InputMode(Command):
@@ -694,7 +695,7 @@ class InputMode(Command):
 
 
 class LyricMode(InputMode):
-    rx = r"\\(lyricmode|((old)?add)?lyrics|lyricsto)\b"
+    rx = r"\\(lyricmode|((old)?add)?lyrics|lyricsto)" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectLyricMode())
 
@@ -753,25 +754,25 @@ class FigureModifier(Figure):
 
 
 class NoteMode(InputMode):
-    rx = r"\\(notes|notemode)\b"
+    rx = r"\\(notes|notemode)" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectNoteMode())
 
 
 class ChordMode(InputMode):
-    rx = r"\\(chords|chordmode)\b"
+    rx = r"\\(chords|chordmode)" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectChordMode())
 
 
 class DrumMode(InputMode):
-    rx = r"\\(drums|drummode)\b"
+    rx = r"\\(drums|drummode)" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectDrumMode())
 
 
 class FigureMode(InputMode):
-    rx = r"\\(figures|figuremode)\b"
+    rx = r"\\(figures|figuremode)"+ re_identifier_end
     def update_state(self, state):
         state.enter(ExpectFigureMode())
 
@@ -781,7 +782,7 @@ class UserCommand(IdentifierRef):
 
 
 class SimultaneousOrSequentialCommand(Keyword):
-    rx = r"\\(simultaneous|sequential)\b"
+    rx = r"\\(simultaneous|sequential)" + re_identifier_end
 
 
 class SchemeStart(_token.Item):
