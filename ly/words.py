@@ -961,6 +961,39 @@ midi_instruments = (
     'cm-64 drums',
 )
 
+# Follow the order of lilypond sources in ly/string-tunings-init.ly
+string_tunings = (
+    'guitar-tuning',
+    'guitar-seven-string-tuning',
+    'guitar-drop-d-tuning',
+    'guitar-drop-c-tuning',
+    'guitar-open-g-tuning',
+    'guitar-open-d-tuning',
+    'guitar-dadgad-tuning',
+    'guitar-lute-tuning',
+    'guitar-asus4-tuning',
+    'bass-tuning',
+    'bass-four-string-tuning',
+    'bass-drop-d-tuning',
+    'bass-five-string-tuning',
+    'bass-six-string-tuning',
+    'mandolin-tuning',
+    'banjo-open-g-tuning',
+    'banjo-c-tuning',
+    'banjo-modal-tuning',
+    'banjo-open-d-tuning',
+    'banjo-open-dm-tuning',
+    'banjo-double-c-tuning',
+    'banjo-double-d-tuning',
+    'ukulele-tuning',
+    'ukulele-d-tuning',
+    'tenor-ukulele-tuning',
+    'baritone-ukulele-tuning',
+    'violin-tuning',
+    'viola-tuning',
+    'cello-tuning',
+    'double-bass-tuning',
+)
 
 #scheme_functions = (
 #    'set-accidental-style',
