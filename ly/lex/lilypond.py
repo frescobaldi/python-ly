@@ -28,6 +28,11 @@ import itertools
 from . import _token
 from . import Parser, FallthroughParser
 
+# an identifier allowing letters and single hyphens in between
+re_identifier = r"[^\W\d_]+([_-][^\W\d_]+)*"
+
+# the lookahead pattern for the end of an identifier (ref)
+re_identifier_end = r"(?![_-]?[^\W\d])"
 
 re_articulation = r"[-_^][_.>|!+^-]"
 re_dynamic = (
@@ -37,15 +42,11 @@ re_dynamic = (
     r"|cresc|decresc|dim|cr|decr"
     r")(?![A-Za-z])")
 
-re_duration = r"(\\(maxima|longa|breve)\b|(1|2|4|8|16|32|64|128|256|512|1024|2048)(?!\d))"
+re_duration = rf"(\\(maxima|longa|breve){re_identifier_end}|(1|2|4|8|16|32|64|128|256|512|1024|2048)(?!\d))"
+
 re_dot = r"\."
 re_scaling = r"\*[\t ]*\d+(/\d+)?"
 
-# an identifier allowing letters and single hyphens in between
-re_identifier = r"[^\W\d_]+([_-][^\W\d_]+)*"
-
-# the lookahead pattern for the end of an identifier (ref)
-re_identifier_end = r"(?![_-]?[^\W\d])"
 
 
 class Identifier(_token.Token):
@@ -80,8 +81,8 @@ class IntegerValue(DecimalValue):
 
 class Fraction(Value):
     rx = r"\d+/\d+"
-    
-    
+
+
 class Delimiter(_token.Token):
     pass
 
@@ -115,7 +116,7 @@ class BlockComment(Comment, _token.BlockComment):
 
 class LineComment(Comment, _token.LineComment):
     rx = r"%.*$"
-    
+
 
 class String(_token.String):
     pass
@@ -125,7 +126,7 @@ class StringQuotedStart(String, _token.StringStart):
     rx = r'"'
     def update_state(self, state):
         state.enter(ParseString())
-        
+
 
 class StringQuotedEnd(String, _token.StringEnd):
     rx = r'"'
@@ -141,19 +142,19 @@ class StringQuoteEscape(_token.Character):
 class MusicItem(_token.Token):
     r"""A note, rest, spacer, ``\skip`` or ``q``."""
 
-    
+
 class Skip(MusicItem):
     rx = r"\\skip" + re_identifier_end
 
 
 class Spacer(MusicItem):
     rx = r"s(?![A-Za-z])"
-    
-    
+
+
 class Rest(MusicItem):
     rx = r"[Rr](?![A-Za-z])"
-    
-    
+
+
 class Note(MusicItem):
     rx = r"[a-x]+(?![A-Za-z])"
 
@@ -198,12 +199,12 @@ class Length(Duration):
 
 class Dot(Duration):
     rx = re_dot
-    
-    
+
+
 class Scaling(Duration):
     rx = re_scaling
-    
-    
+
+
 class OpenBracket(Delimiter, _token.MatchStart, _token.Indent):
     """An open bracket, does not enter different parser, subclass or reimplement Parser.update_state()."""
     rx = r"\{"
@@ -215,8 +216,8 @@ class CloseBracket(Delimiter, _token.MatchEnd, _token.Dedent):
     matchname = "bracket"
     def update_state(self, state):
         state.leave()
-        state.endArgument()    
-    
+        state.endArgument()
+
 
 class OpenSimultaneous(Delimiter, _token.MatchStart, _token.Indent):
     """An open double French quote, does not enter different parser, subclass or reimplement Parser.update_state()."""
@@ -230,7 +231,7 @@ class CloseSimultaneous(Delimiter, _token.MatchEnd, _token.Dedent):
     def update_state(self, state):
         state.leave()
         state.endArgument()
-    
+
 
 class SequentialStart(OpenBracket):
     def update_state(self, state):
@@ -275,8 +276,8 @@ class ArticulationCommand(Articulation, IdentifierRef):
                 if s in l:
                     return True
         return False
-    
-    
+
+
 class Direction(_token.Token):
     rx = r"[-_^]"
     def update_state(self, state):
@@ -302,22 +303,22 @@ class Slur(_token.Token):
 class SlurStart(Slur, _token.MatchStart):
     rx = r"\("
     matchname = "slur"
-    
+
 
 class SlurEnd(Slur, _token.MatchEnd):
     rx = r"\)"
     matchname = "slur"
-    
+
 
 class PhrasingSlurStart(SlurStart):
     rx = r"\\\("
     matchname = "phrasingslur"
-    
-    
+
+
 class PhrasingSlurEnd(SlurEnd):
     rx = r"\\\)"
     matchname = "phrasingslur"
-    
+
 
 class Tie(Slur):
     rx = r"~"
@@ -344,13 +345,13 @@ class Ligature(_token.Token):
 class LigatureStart(Ligature, _token.MatchStart):
     rx = r"\\\["
     matchname = "ligature"
-    
-    
+
+
 class LigatureEnd(Ligature, _token.MatchEnd):
     rx = r"\\\]"
     matchname = "ligature"
-    
-    
+
+
 class Tremolo(_token.Token):
     pass
 
@@ -387,7 +388,7 @@ class DotChord(ChordItem):
 
 class VoiceSeparator(Delimiter):
     rx = r"\\\\"
-    
+
 
 class Dynamic(_token.Token):
     rx = re_dynamic
@@ -401,7 +402,7 @@ class Command(_token.Item, IdentifierRef):
             from .. import words
             return s in words.lilypond_music_commands
         return False
-    
+
 
 class Keyword(_token.Item, IdentifierRef):
     @classmethod
@@ -419,55 +420,55 @@ class Specifier(_token.Token):
 
 
 class Score(Keyword):
-    rx = r"\\score\b"
+    rx = r"\\score" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectScore())
-        
+
 
 class Book(Keyword):
-    rx = r"\\book\b"
+    rx = r"\\book" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectBook())
-        
-        
+
+
 class BookPart(Keyword):
-    rx = r"\\bookpart\b"
+    rx = r"\\bookpart" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectBookPart())
 
 
 class Paper(Keyword):
-    rx = r"\\paper\b"
+    rx = r"\\paper" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectPaper())
 
 
 class Header(Keyword):
-    rx = r"\\header\b"
+    rx = r"\\header" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectHeader())
 
 
 class Layout(Keyword):
-    rx = r"\\layout\b"
+    rx = r"\\layout" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectLayout())
 
 
 class Midi(Keyword):
-    rx = r"\\midi\b"
+    rx = r"\\midi" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectMidi())
 
 
 class With(Keyword):
-    rx = r"\\with\b"
+    rx = r"\\with" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectWith())
 
 
 class LayoutContext(Keyword):
-    rx = r"\\context\b"
+    rx = r"\\context" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectContext())
 
@@ -500,7 +501,7 @@ class MarkupCommand(Markup, IdentifierRef):
     def test_match(cls, match):
         from .. import words
         return match.group()[1:] in words.markupcommands
-    
+
     def update_state(self, state):
         from .. import words
         command = self[1:]
@@ -516,7 +517,7 @@ class MarkupCommand(Markup, IdentifierRef):
 
 
 class MarkupScore(Markup):
-    rx = r"\\score\b"
+    rx = r"\\score" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectScore())
 
@@ -543,28 +544,28 @@ class CloseBracketMarkup(CloseBracket):
         while state.parser().argcount > 0:
             state.leave()
         state.leave()
-        state.endArgument()    
+        state.endArgument()
 
 
 class Repeat(Command):
-    rx = r"\\repeat(?![A-Za-z])"
+    rx = r"\\repeat" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseRepeat())
-    
-    
+
+
 class RepeatSpecifier(Specifier):
     @_token.patternproperty
     def rx():
         from .. import words
         return r"\b({0})(?![A-Za-z])".format("|".join(words.repeat_types))
-    
+
 
 class RepeatCount(IntegerValue, _token.Leaver):
     pass
 
 
 class Tempo(Command):
-    rx = r"\\tempo\b"
+    rx = r"\\tempo" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseTempo())
 
@@ -574,35 +575,35 @@ class TempoSeparator(Delimiter):
 
 
 class Partial(Command):
-    rx = r"\\partial\b"
+    rx = r"\\partial" + re_identifier_end
 
 
 class Override(Keyword):
-    rx = r"\\override\b"
+    rx = r"\\override" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseOverride())
 
 
 class Set(Override):
-    rx = r"\\set\b"
+    rx = r"\\set" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseSet())
-    
+
 
 class Revert(Override):
-    rx = r"\\revert\b"
+    rx = r"\\revert" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseRevert())
-    
+
 
 class Unset(Keyword):
-    rx = r"\\unset\b"
+    rx = r"\\unset" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseUnset())
 
 
 class Tweak(Keyword):
-    rx = r"\\tweak\b"
+    rx = r"\\tweak" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseTweak())
 
@@ -613,19 +614,19 @@ class Translator(Command):
 
 
 class New(Translator):
-    rx = r"\\new\b"
+    rx = r"\\new" + re_identifier_end
 
 
 class Context(Translator):
-    rx = r"\\context\b"
+    rx = r"\\context" + re_identifier_end
 
 
 class Change(Translator):
-    rx = r"\\change\b"
+    rx = r"\\change" + re_identifier_end
 
 
 class AccidentalStyle(Command):
-    rx = r"\\accidentalStyle\b"
+    rx = r"\\accidentalStyle" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseAccidentalStyle())
 
@@ -636,15 +637,15 @@ class AccidentalStyleSpecifier(Specifier):
         from .. import words
         return r"\b({0})(?!-?\w)".format("|".join(words.accidentalstyles))
 
-        
+
 class AlterBroken(Command):
-    rx = r"\\alterBroken\b"
+    rx = r"\\alterBroken" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseAlterBroken())
 
 
 class Clef(Command):
-    rx = r"\\clef\b"
+    rx = r"\\clef" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseClef())
 
@@ -654,13 +655,13 @@ class ClefSpecifier(Specifier):
     def rx():
         from .. import words
         return r"\b({0})\b".format("|".join(words.clefs_plain))
-    
+
     def update_state(self, state):
         state.leave()
 
 
 class PitchCommand(Command):
-    rx = r"\\(relative|transpose|transposition|key|octaveCheck)\b"
+    rx = r"\\(relative|transpose|transposition|key|octaveCheck)" + re_identifier_end
     def update_state(self, state):
         argcount = 2 if self == '\\transpose' else 1
         state.enter(ParsePitchCommand(argcount))
@@ -672,29 +673,29 @@ class KeySignatureMode(Command):
         from .. import words
         return r"\\({0})(?![A-Za-z])".format("|".join(words.modes))
 
-    
+
 class Hide(Keyword):
-    rx = r"\\hide\b"
+    rx = r"\\hide" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseHideOmit())
 
 
 class Omit(Keyword):
-    rx = r"\\omit\b"
+    rx = r"\\omit" + re_identifier_end
     def update_state(self, state):
         state.enter(ParseHideOmit())
 
 
 class Unit(Command):
-    rx = r"\\(mm|cm|in|pt)\b"
-    
+    rx = r"\\(mm|cm|in|pt)" + re_identifier_end
+
 
 class InputMode(Command):
     pass
 
 
 class LyricMode(InputMode):
-    rx = r"\\(lyricmode|((old)?add)?lyrics|lyricsto)\b"
+    rx = r"\\(lyricmode|((old)?add)?lyrics|lyricsto)" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectLyricMode())
 
@@ -709,15 +710,15 @@ class LyricText(Lyric):
 
 class LyricHyphen(Lyric):
     rx = r"--(?=($|[\s\\]))"
-    
-    
+
+
 class LyricExtender(Lyric):
     rx = r"__(?=($|[\s\\]))"
-    
-    
+
+
 class LyricSkip(Lyric):
     rx = r"_(?=($|[\s\\]))"
-    
+
 
 class Figure(_token.Token):
     """Base class for Figure items."""
@@ -753,35 +754,35 @@ class FigureModifier(Figure):
 
 
 class NoteMode(InputMode):
-    rx = r"\\(notes|notemode)\b"
+    rx = r"\\(notes|notemode)" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectNoteMode())
 
 
 class ChordMode(InputMode):
-    rx = r"\\(chords|chordmode)\b"
+    rx = r"\\(chords|chordmode)" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectChordMode())
 
 
 class DrumMode(InputMode):
-    rx = r"\\(drums|drummode)\b"
+    rx = r"\\(drums|drummode)" + re_identifier_end
     def update_state(self, state):
         state.enter(ExpectDrumMode())
 
 
 class FigureMode(InputMode):
-    rx = r"\\(figures|figuremode)\b"
+    rx = r"\\(figures|figuremode)"+ re_identifier_end
     def update_state(self, state):
         state.enter(ExpectFigureMode())
 
 
 class UserCommand(IdentifierRef):
     pass
-    
+
 
 class SimultaneousOrSequentialCommand(Keyword):
-    rx = r"\\(simultaneous|sequential)\b"
+    rx = r"\\(simultaneous|sequential)" + re_identifier_end
 
 
 class SchemeStart(_token.Item):
@@ -796,15 +797,15 @@ class ContextName(_token.Token):
     def rx():
         from .. import words
         return r"\b({0})\b".format("|".join(words.contexts))
-    
+
 
 class BackSlashedContextName(ContextName):
     @_token.patternproperty
     def rx():
         from .. import words
         return r"\\({0})\b".format("|".join(words.contexts))
-    
-    
+
+
 class GrobName(_token.Token):
     @_token.patternproperty
     def rx():
@@ -860,16 +861,16 @@ class ChordStart(Chord):
 
 class ChordEnd(Chord, _token.Leaver):
     rx = r">"
-    
+
 
 class DrumChordStart(ChordStart):
     def update_state(self, state):
         state.enter(ParseDrumChord())
 
-    
+
 class DrumChordEnd(ChordEnd):
     pass
-    
+
 
 class ErrorInChord(Error):
     rx = "|".join((
@@ -879,15 +880,15 @@ class ErrorInChord(Error):
         re_duration, # duration
         re_scaling, # scaling
     ))
-    
+
 
 class Name(UserVariable):
     r"""A variable name without \ prefix."""
-    
+
 
 class EqualSign(_token.Token):
     rx = r"="
-    
+
 
 # Parsers
 class ParseLilyPond(Parser):
@@ -898,7 +899,7 @@ space_items = (
     _token.Space,
     BlockCommentStart,
     LineComment,
-)    
+)
 
 
 base_items = space_items + (
@@ -972,7 +973,7 @@ music_items = base_items + (
     StringNumber,
     IntegerValue,
 ) + command_items
-    
+
 
 # items that occur inside chords
 music_chord_items = (
@@ -1020,9 +1021,9 @@ class ParseGlobalAssignment(FallthroughParser, ParseLilyPond):
 
 class ExpectOpenBracket(FallthroughParser, ParseLilyPond):
     """Waits for an OpenBracket and then replaces the parser with the class set in the replace attribute.
-    
+
     Subclass this to set the destination for the OpenBracket.
-    
+
     """
     default = Error
     items = space_items + (
@@ -1031,13 +1032,13 @@ class ExpectOpenBracket(FallthroughParser, ParseLilyPond):
     def update_state(self, state, token):
         if isinstance(token, OpenBracket):
             state.replace(self.replace())
-        
+
 
 class ExpectMusicList(FallthroughParser, ParseLilyPond):
     """Waits for an OpenBracket or << and then replaces the parser with the class set in the replace attribute.
-    
+
     Subclass this to set the destination for the OpenBracket.
-    
+
     """
     items = space_items + (
         OpenBracket,
@@ -1047,7 +1048,7 @@ class ExpectMusicList(FallthroughParser, ParseLilyPond):
     def update_state(self, state, token):
         if isinstance(token, (OpenBracket, OpenSimultaneous)):
             state.replace(self.replace())
-        
+
 
 class ParseScore(ParseLilyPond):
     r"""Parses the expression after ``\score {``, leaving at ``}`` """
@@ -1059,7 +1060,7 @@ class ParseScore(ParseLilyPond):
 
 class ExpectScore(ExpectOpenBracket):
     replace = ParseScore
-            
+
 
 class ParseBook(ParseLilyPond):
     r"""Parses the expression after ``\book {``, leaving at ``}`` """
@@ -1123,7 +1124,7 @@ class ParseHeader(ParseLilyPond):
 
 class ExpectHeader(ExpectOpenBracket):
     replace = ParseHeader
-        
+
 
 class ParseLayout(ParseLilyPond):
     r"""Parses the expression after ``\layout {``, leaving at ``}`` """
@@ -1143,7 +1144,7 @@ class ParseLayout(ParseLilyPond):
 
 class ExpectLayout(ExpectOpenBracket):
     replace = ParseLayout
-        
+
 
 class ParseMidi(ParseLilyPond):
     r"""Parses the expression after ``\midi {``, leaving at ``}`` """
@@ -1179,7 +1180,7 @@ class ParseWith(ParseLilyPond):
 
 class ExpectWith(ExpectOpenBracket):
     replace = ParseWith
-        
+
 
 class ParseContext(ParseLilyPond):
     r"""Parses the expression after (``\layout {``) ``\context {``, leaving at ``}`` """
@@ -1194,14 +1195,14 @@ class ParseContext(ParseLilyPond):
 
 class ExpectContext(ExpectOpenBracket):
     replace = ParseContext
-        
+
 
 class ParseMusic(ParseLilyPond):
     """Parses LilyPond music expressions."""
     items = music_items + (
         TremoloColon,
     )
-    
+
 
 class ParseChord(ParseMusic):
     """LilyPond inside chords ``< >``"""
@@ -1214,7 +1215,7 @@ class ParseString(Parser):
         StringQuotedEnd,
         StringQuoteEscape,
     )
-    
+
 
 class ParseBlockComment(Parser):
     default = BlockComment
@@ -1268,8 +1269,8 @@ class ParseDuration(FallthroughParser):
     )
     def fallthrough(self, state):
         state.replace(ParseDurationScaling())
-        
-        
+
+
 class ParseDurationScaling(ParseDuration):
     items = space_items + (
         Scaling,
@@ -1310,7 +1311,7 @@ class ParseRevert(FallthroughParser):
         if isinstance(token, GrobProperty):
             state.replace(ParseGrobPropertyPath())
 
-    
+
 class ParseGrobPropertyPath(FallthroughParser):
     items = space_items + (
         DotPath,
@@ -1342,7 +1343,7 @@ class ParseSet(ParseLilyPond):
         if isinstance(token, EqualSign):
             state.replace(ParseDecimalValue())
 
-    
+
 class ParseUnset(FallthroughParser):
     items = space_items + (
         ContextName,
@@ -1383,7 +1384,7 @@ class ParseTranslator(FallthroughParser):
         ContextName,
         Name,
     )
-    
+
     def update_state(self, state, token):
         if isinstance(token, (Name, ContextName)):
             state.replace(ExpectTranslatorId())
@@ -1393,7 +1394,7 @@ class ExpectTranslatorId(FallthroughParser):
     items = space_items + (
         EqualSign,
     )
-    
+
     def update_state(self, state, token):
         if token == '=':
             state.replace(ParseTranslatorId())
@@ -1405,7 +1406,7 @@ class ParseTranslatorId(FallthroughParser):
         Name,
         StringQuotedStart,
     )
-    
+
     def update_state(self, state, token):
         if isinstance(token, Name):
             state.leave()
@@ -1464,8 +1465,8 @@ class ParseInputMode(ParseLilyPond):
     def update_state(cls, state, token):
         if isinstance(token, (OpenSimultaneous, OpenBracket)):
             state.enter(cls())
-    
-    
+
+
 class ParseLyricMode(ParseInputMode):
     r"""Parser for ``\lyrics``, ``\lyricmode``, ``\addlyrics``, etc."""
     items = base_items + (
@@ -1514,7 +1515,7 @@ class ParseChordMode(ParseInputMode, ParseMusic):
 
 class ExpectChordMode(ExpectMusicList):
     replace = ParseChordMode
-        
+
 
 class ParseNoteMode(ParseMusic):
     r"""Parser for ``\notes`` and ``\notemode``. Same as Music itself."""
@@ -1522,7 +1523,7 @@ class ParseNoteMode(ParseMusic):
 
 class ExpectNoteMode(ExpectMusicList):
     replace = ParseNoteMode
-        
+
 
 class ParseDrumChord(ParseMusic):
     """LilyPond inside chords in drummode ``< >``"""
@@ -1589,7 +1590,7 @@ class ParseDrumMode(ParseInputMode, ParseMusic):
 
 class ExpectDrumMode(ExpectMusicList):
     replace = ParseDrumMode
-        
+
 
 class ParseFigureMode(ParseInputMode, ParseMusic):
     r"""Parser for ``\figures`` and ``\figuremode``."""
@@ -1619,7 +1620,7 @@ class ParseFigure(Parser):
 
 class ExpectFigureMode(ExpectMusicList):
     replace = ParseFigureMode
-        
+
 
 class ParsePitchCommand(FallthroughParser):
     argcount = 1
@@ -1654,5 +1655,3 @@ class ParseDecimalValue(FallthroughParser):
         Fraction,
         DecimalValue,
     )
-
-
