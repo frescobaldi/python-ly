@@ -27,40 +27,40 @@ from __future__ import unicode_literals
 lilypond_keywords = (
     'accepts',
     'alias',
+    'book',
+    'bookpart',
     'consists',
+    'context',
     'defaultchild',
     'denies',
     #'description',
     #'grobdescriptions',
+    'header',
     'hide', # since 2.18
     'include',
     #'invalid',
     'language',
+    'layout',
+    'midi',
     'name',
     #'objectid',
     'omit', # since 2.18
     'once',
-    'set',
-    'unset',
     'override',
-    'revert',
+    'paper',
     'remove',
-    'temporary', # since 2.18
+    'revert',
+    'score',
     #'sequential',
+    'set',
     #'simultaneous',
+    'tagGroup', # since 2.20
+    'temporary', # since 2.18
     #'type',
     'undo', # since 2.18 (not mentioned in the command index)
+    'unset',
     'version',
-    'score',
-    'book',
-    'bookpart',
-    'header',
-    'paper',
-    'midi',
-    'layout',
     'with',
-    'context',
-    'tagGroup', # since 2.20
 )
 
 
@@ -129,8 +129,8 @@ lilypond_music_commands = (
     'chordmode',
     #'chordNameSeparator',
     #'chordPrefixSpacer',
-    #'chordRootNamer',
     'chordRepeats', # since 2.16
+    #'chordRootNamer',
     'chords',
     'clef',
     'cm',
@@ -260,8 +260,8 @@ lilypond_music_commands = (
     'killCues',
     'label',
     'laissezVibrer',
-    'languageSaveAndChange', # since 2.23
     'languageRestore', # since 2.23
+    'languageSaveAndChange', # since 2.23
     'large',
     'ligature',
     'linea',
@@ -322,7 +322,7 @@ lilypond_music_commands = (
     'parenthesisCloseSymbol',
     'parenthesisOpenSymbol',
     'parenthesize',
-    'partCombine', # was partcombine?
+    'partCombine',
     'partCombineDown', # since 2.23
     'partCombineListener',
     'partCombineUp', # since 2.23
@@ -505,73 +505,73 @@ articulations = (
 
 
 ornaments = (
-    'prall',
-    'mordent',
-    'prallmordent',
-    'turn',
-    'upprall',
-    'downprall',
-    'upmordent',
     'downmordent',
+    'downprall',
     'lineprall',
-    'prallprall',
+    'mordent',
+    'prall',
     'pralldown',
+    'prallmordent',
+    'prallprall',
     'prallup',
     'reverseturn',
     'trill',
+    'turn',
+    'upmordent',
+    'upprall',
 )
 
 
 fermatas = (
-    'shortfermata',
     'fermata',
     'longfermata',
+    'shortfermata',
     'verylongfermata',
 )
 
 
 instrument_scripts = (
-    'upbow',
     'downbow',
     'flageolet',
-    'thumb',
-    'snappizzicato',
-    'open',
     'halfopen',
-    'stopped',
     'lheel',
-    'rheel',
     'ltoe',
+    'open',
+    'rheel',
     'rtoe',
+    'snappizzicato',
+    'stopped',
+    'thumb',
+    'upbow',
 )
 
 
 repeat_scripts = (
-    'segno',
     'coda',
+    'segno',
     'varcoda',
 )
 
 
 ancient_scripts = (
-    'ictus',
     'accentus',
     'circulus',
+    'ictus',
     'semicirculus',
     'signumcongruentiae',
 )
 
 
 modes = (
+    'aeolian',
+    'dorian',
+    'ionian',
+    'locrian',
+    'lydian',
     'major',
     'minor',
-    'ionian',
-    'dorian',
-    'phrygian',
-    'lydian',
     'mixolydian',
-    'aeolian',
-    'locrian',
+    'phrygian',
 )
 
 
@@ -673,8 +673,8 @@ markupcommands_nargs = (
     'undertie', # since 2.20
     'upright',
     'vcenter',
-    'vspace',
     'verbatim-file',
+    'vspace',
     'whiteout',
     'wordwrap',
     'wordwrap-field',
@@ -707,10 +707,10 @@ markupcommands_nargs = (
     'translate',
     'translate-scaled',
     'with-color',
+    'with-dimensions-from', # since 2.20
     'with-link',
     'with-url',
     'woodwind-diagram',
-    'with-dimensions-from', # since 2.20
 ),
 # three arguments
 (
@@ -1041,36 +1041,36 @@ scheme_values = (
 
 
 headervariables = (
-    'dedication',
-    'title',
-    'subtitle',
-    'subsubtitle',
-    'poet',
-    'composer',
-    'meter',
-    'opus',
     'arranger',
-    'instrument',
-    'piece',
     'breakbefore',
+    'composer',
     'copyright',
-    'tagline',
-    'mutopiatitle',
-    'mutopiacomposer',
-    'mutopiapoet',
-    'mutopiaopus',
-    'mutopiainstrument',
     'date',
+    'dedication',
     'enteredby',
-    'source',
-    'style',
+    'footer',
+    'instrument',
+    'lastupdated',
     'maintainer',
     'maintainerEmail',
     'maintainerWeb',
+    'meter',
     'moreInfo',
-    'lastupdated',
+    'mutopiacomposer',
+    'mutopiainstrument',
+    'mutopiaopus',
+    'mutopiapoet',
+    'mutopiatitle',
+    'opus',
+    'piece',
+    'poet',
+    'source',
+    'style',
+    'subsubtitle',
+    'subtitle',
+    'tagline',
     'texidoc',
-    'footer',
+    'title',
 )
 
 
@@ -1159,11 +1159,11 @@ papervariables = (
 
 layoutvariables = (
     'indent',
+    'line-width',
+    'ragged-last',
+    'ragged-right',
     'short-indent',
     'system-count',
-    'line-width',
-    'ragged-right',
-    'ragged-last',
 )
 
 
@@ -1172,32 +1172,32 @@ midivariables = (
 
 
 repeat_types = (
-    'unfold',
     'percent',
-    'volta',
     'tremolo',
+    'unfold',
+    'volta',
 )
 
 
 accidentalstyles = (
+    'choral', # since 2.20
+    'choral-cautionary', # since 2.20
     'default',
-    'voice',
+    'dodecaphonic',
+    'forget',
     'modern',
     'modern-cautionary',
     'modern-voice',
     'modern-voice-cautionary',
-    'piano',
-    'piano-cautionary',
-    'choral', # since 2.20
-    'choral-cautionary', # since 2.20
     'neo-modern',
     'neo-modern-cautionary',
     'neo-modern-voice',
     'neo-modern-voice-cautionary',
-    'dodecaphonic',
-    'teaching',
     'no-reset',
-    'forget',
+    'piano',
+    'piano-cautionary',
+    'teaching',
+    'voice',
 )
 
 
@@ -1226,27 +1226,25 @@ clefs_plain = (
 
 
 clefs = clefs_plain + (
-    'treble_8',
     'bass_8',
+    'treble_8',
 )
 
 
 break_visibility = (
     'all-invisible',
-    'begin-of-line-visible',
-    'end-of-line-visible',
     'all-visible',
     'begin-of-line-invisible',
-    'end-of-line-invisible',
+    'begin-of-line-visible',
     'center-invisible',
+    'end-of-line-invisible',
+    'end-of-line-visible',
 )
 
 
 mark_formatters = (
     'format-mark-alphabet',
     'format-mark-barnumbers',
-    'format-mark-letters',
-    'format-mark-numbers',
     'format-mark-box-alphabet',
     'format-mark-box-barnumbers',
     'format-mark-box-letters',
@@ -1255,6 +1253,8 @@ mark_formatters = (
     'format-mark-circle-barnumbers',
     'format-mark-circle-letters',
     'format-mark-circle-numbers',
+    'format-mark-letters',
+    'format-mark-numbers',
 )
 
 
