@@ -1,7 +1,7 @@
 # MakeFile
 
-# Which LilyPond executable to use
-LILYPOND=~/lilypond_bin/2.18.2-1/bin/lilypond
+# Set your LILYPOND environment variable before running make.
+# export LILYPOND=/path/to/bin/lilypond
 
 _lilypond_data.py: getdata.ly
 	$(LILYPOND) -dno-print-pages $< > $@
