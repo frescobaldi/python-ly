@@ -1,24 +1,24 @@
-\version "2.14.1"
+\version "2.24.0"
 %{
   Outputs data retrieved from LilyPond as Python code:
-  
+
   - version: the lilypond version string
   - interfaces: maps interface names to the list of their properties
   - grobs: maps grob names to the list of interfaces they implement
   - contextproperties: the list of all-user-translation-properties
   - musicglyphs: the list of all glyphs in the feta font
-  
+
 %}
 
 #(begin
-  
+
   (define (sort-symbol-list list)
     "sort a list of symbols"
     (sort list (lambda (s1 s2)
                  (string<
                   (symbol->string s1)
                   (symbol->string s2)))))
-  
+
   (define (hash-keys h)
     "returns the list of keys of a hash table"
     (hash-fold
@@ -26,7 +26,7 @@
        (append p (list k)))
      '()
      h))
-  
+
   ;; the list of properties we also want to complete, besides all
   ;; user properties
   (define accepted-properties
@@ -34,17 +34,17 @@
       cross-staff
       positioning-done
       ))
-  
+
   (define (user-property? prop)
     "is the property a user property?"
     (or (memq prop accepted-properties)
         (memq prop all-user-grob-properties)))
-  
+
   (define (format-string-list list indent)
     "formats a list of strings as a python list"
     (cond
      ((null? list) "[]")
-     (else 
+     (else
       (string-append
        "[\n"
        (string-join
@@ -58,20 +58,20 @@
         "")
        (make-string indent #\space)
        "]"))))
-  
+
   (define (format-dict-entry k v indent)
     "formats a dictionary entry: key and value are string"
     (string-append
      (make-string indent #\space)
      "\"" k "\": " v ",\n"))
-  
+
   (define (format-interfaces h)
     "formats the interfaces from ly:all-grob-interfaces as a Python dict"
     (string-append
      (fold (lambda (k p)
              (string-append
               p
-              (format-dict-entry 
+              (format-dict-entry
                (symbol->string k)
                (format-string-list
                 (sort
@@ -84,15 +84,15 @@
        "interfaces = {\n"
        (sort-symbol-list (hash-keys h)))
      "}\n"))
-  
+
   (define (alist-keys alist)
     "returns the list of keys of the specified alist"
-    (fold 
+    (fold
      (lambda (l p)
        (append p (list (car l))))
      '()
      alist))
-  
+
   (define (format-grob-interfaces)
     "writes out all grob interfaces as a Python dict"
     (string-append
@@ -104,18 +104,27 @@
                (format-string-list
                 (sort
                  (map symbol->string
-                   (assq-ref
-                    (assq-ref 
-                     (assq-ref all-grob-descriptions k)
-                     'meta)
-                    'interfaces))
+                      (let* ((desc (assq-ref all-grob-descriptions k))
+                             (meta (assq-ref desc 'meta))
+                             (ifaces (assq-ref meta 'interfaces))
+                             (classes (assq-ref meta 'classes))
+                             (cls-iface (lambda (cls . ifaces)
+                                          (if (memq cls classes)
+                                              ifaces
+                                              '()))))
+                        (append
+                         (cls-iface 'Item 'item-interface)
+                         (cls-iface 'Spanner 'spanner-interface)
+                         (cls-iface 'Paper_column 'paper-column-interface 'item-interface)
+                         (cls-iface 'System 'system-interface 'spanner-interface)
+                         ifaces)))
                  string<)
                 4)
                4)))
        "grobs = {\n"
        (sort-symbol-list (alist-keys all-grob-descriptions)))
      "}\n"))
-  
+
   (define (format-context-properties)
     "writes out the list of context (translation) properties"
     (string-append
@@ -126,7 +135,7 @@
        string<)
       0)
      "\n"))
-  
+
   (define (get-translator-names)
     "returns the list of names of all engravers"
     (map
@@ -134,7 +143,7 @@
        (symbol->string
         (ly:translator-name t)))
      (ly:get-all-translators)))
-  
+
   (define (format-translators)
     "writes the list of engravers and performers"
     (string-append
@@ -155,7 +164,7 @@
        string<)
       0)
      "\n"))
-  
+
   ;;; output
   (display
    (string-append
@@ -172,5 +181,5 @@
     (format-musicglyphs)
     "\n\n"
     )))
-  
-% EOF  
+
+% EOF

@@ -27,40 +27,37 @@ from __future__ import unicode_literals
 lilypond_keywords = (
     'accepts',
     'alias',
-    'consists',
-    'defaultchild',
-    'denies',
-    #'description',
-    #'grobdescriptions',
-    'hide', # since 2.18
-    'include',
-    #'invalid',
-    'language',
-    'name',
-    #'objectid',
-    'omit', # since 2.18
-    'once',
-    'set',
-    'unset',
-    'override',
-    'revert',
-    'remove',
-    'temporary', # since 2.18
-    #'sequential',
-    #'simultaneous',
-    #'type',
-    'undo', # since 2.18 (not mentioned in the command index)
-    'version',
-    'score',
     'book',
     'bookpart',
-    'header',
-    'paper',
-    'midi',
-    'layout',
-    'with',
+    'consists',
     'context',
+    'defaultchild',
+    'denies',
+    'description',
+    'etc',
+    'header',
+    'hide', # since 2.18
+    'include',
+    'inherit-acceptability',
+    'language',
+    'layout',
+    'midi',
+    'name',
+    'omit', # since 2.18
+    'once',
+    'override',
+    'paper',
+    'remove',
+    'revert',
+    'score',
+    'set',
     'tagGroup', # since 2.20
+    'temporary', # since 2.18
+    'type',
+    'undo', # since 2.18 (not mentioned in the command index)
+    'unset',
+    'version',
+    'with',
 )
 
 
@@ -72,13 +69,19 @@ lilypond_music_commands = (
     'addInstrumentDefinition',
     'addlyrics',
     'addQuote',
+    'after',
     'afterGrace',
     #'afterGraceFraction', # this is a parser variable
     'aikenHeads',
     'aikenHeadsMinor',
+    'aikenThinHeads',
+    'aikenThinHeadsMinor',
+    'allowBreak',
     'allowPageTurn',
+    'allowVoltaHook',
     'alterBroken', # since 2.18 (?)
     'alternative',
+    'ambitusAfter',
     #'AncientRemoveEmptyStaffContext',
     'appendToTag', # since 2.16
     'applyContext',
@@ -92,13 +95,23 @@ lilypond_music_commands = (
     'arpeggioBracket',
     'arpeggioNormal',
     'arpeggioParenthesis',
+    'arpeggioParenthesisDashed',
     'ascendens',
+    'assertBeamQuant',
+    'assertBeamSlope',
     'auctum',
+    'aug',
     'augmentum',
     'autoAccidentals',
     'autoBeamOff',
     'autoBeamOn',
-    'autoChange', # used to be autochange?
+    'autoBreaksOff',
+    'autoBreaksOn',
+    'autoChange',
+    'autoLineBreaksOff',
+    'autoLineBreaksOn',
+    'autoPageBreaksOff',
+    'autoPageBreaksOn',
     'balloonGrobText',
     'balloonLengthOff',
     'balloonLengthOn',
@@ -113,6 +126,7 @@ lilypond_music_commands = (
     'beamExceptions', # since 2.20
     'bendAfter',
     'bendHold', # since 2.23
+    'bendStartLevel',
     'blackTriangleMarkup',
     'bookOutputName',
     'bookOutputSuffix',
@@ -129,13 +143,14 @@ lilypond_music_commands = (
     'chordmode',
     #'chordNameSeparator',
     #'chordPrefixSpacer',
-    #'chordRootNamer',
     'chordRepeats', # since 2.16
+    #'chordRootNamer',
     'chords',
     'clef',
     'cm',
     'compoundMeter', # since 2.16
-    'compressFullBarRests',
+    #'compressFullBarRests', renamed to compressEmptyMeasures
+    'compressEmptyMeasures',
     'compressMMRests', # since 2.23
     'context',
     'cr',
@@ -155,6 +170,8 @@ lilypond_music_commands = (
     'dashPlus',
     'dashUnderscore',
     'deadNote',  # since 2.16
+    'deadNotesOff',
+    'deadNotesOn',
     'decr',
     'default',
     'defaultNoteHeads',  # since 2.16
@@ -162,6 +179,10 @@ lilypond_music_commands = (
     'defineBarLine', # since 2.18
     'deminutum',
     'denies',
+    'deprecatedcresc',
+    'deprecateddim',
+    'deprecatedendcresc',
+    'deprecatedenddim',
     'descendens',
     'dim',
     'dimHairpin',
@@ -186,11 +207,13 @@ lilypond_music_commands = (
     'dynamicUp',
     'easyHeadsOff',
     'easyHeadsOn',
+    'enablePolymeter',
     'endcr',
     'endcresc',
     'enddecr',
     'enddim',
     'endincipit',
+    'endSkipNCs',
     'endSpanners',
     'episemFinis',
     'episemInitium',
@@ -200,6 +223,7 @@ lilypond_music_commands = (
     'escapedParenthesisOpenSymbol',
     'escapedSmallerSymbol',
     'eventChords', # since 2.23
+    'expandEmptyMeasures',
     'expandFullBarRests',
     'f',
     'featherDurations',
@@ -211,6 +235,7 @@ lilypond_music_commands = (
     'figuremode',
     'figures',
     'finalis',
+    'fine',
     'finger', # since 2.23
     'fingeringOrientations',
     'fixed', # since 2.23
@@ -234,6 +259,7 @@ lilypond_music_commands = (
     'harmonicsOff',
     'harmonicsOn',
     'hideNotes',
+    'hideSplitTiedTabNotes',
     'hideStaffSwitch',
     'huge',
     'ignatzekExceptionMusic',
@@ -245,6 +271,7 @@ lilypond_music_commands = (
     'improvisationOff',
     'improvisationOn',
     'in',
+    'incipit',
     'inclinatum',
     'includePageLayoutFile',
     'indent',
@@ -255,13 +282,16 @@ lilypond_music_commands = (
     'inversion', # since 2.23
     'invertChords', # since 2.23
     'italianChords',
+    'jump',
     'keepWithTag',
     'key',
+    'kievanOff',
+    'kievanOn',
     'killCues',
     'label',
     'laissezVibrer',
-    'languageSaveAndChange', # since 2.23
     'languageRestore', # since 2.23
+    'languageSaveAndChange', # since 2.23
     'large',
     'ligature',
     'linea',
@@ -272,8 +302,10 @@ lilypond_music_commands = (
     'magnifyMusic', # since 2.20
     'magnifyStaff', # since 2.23
     'maininput',
+    'maj',
     'majorSevenSymbol',
     'makeClusters',
+    'makeDefaultStringTuning',
     'mark',
     'markLengthOff', # since 2.18
     'markLengthOn',  # since 2.18
@@ -282,6 +314,7 @@ lilypond_music_commands = (
     'markuplist', # from 2.16
     'markupMap', #since 2.23
     'maxima',
+    'medianChordGridStyle',
     'melisma',
     'melismaEnd',
     'mergeDifferentlyDottedOff',
@@ -317,22 +350,33 @@ lilypond_music_commands = (
     'pageBreak',
     'pageTurn',
     'palmMute',  # since 2.16
+    'palmMuteOff',
     'palmMuteOn',  # since 2.16
     'parallelMusic',
     'parenthesisCloseSymbol',
     'parenthesisOpenSymbol',
     'parenthesize',
-    'partCombine', # was partcombine?
+    'partCombine',
+    'partCombineApart',
+    'partCombineAutomatic',
+    'partCombineChords',
     'partCombineDown', # since 2.23
+    'partCombineForce',
     'partCombineListener',
+    'partCombineSoloI',
+    'partCombineSoloII',
+    'partCombineUnisono',
     'partCombineUp', # since 2.23
     'partial',
     'partialJazzExceptions',
     'partialJazzMusic',
     'pes',
     'phrasingSlurDashed',
+    'phrasingSlurDashPattern',
     'phrasingSlurDotted',
     'phrasingSlurDown',
+    'phrasingSlurHalfDashed',
+    'phrasingSlurHalfSolid',
     'phrasingSlurNeutral',
     'phrasingSlurSolid',
     'phrasingSlurUp',
@@ -340,6 +384,7 @@ lilypond_music_commands = (
     'pitchedTrill',
     'pointAndClickOff',
     'pointAndClickOn',
+    'pointAndClickTypes',
     'pp',
     'ppp',
     'pppp',
@@ -378,8 +423,12 @@ lilypond_music_commands = (
     'sacredHarpHeadsMinor',
     'scaleDurations',
     'scoreTweak',
+    'section',
+    'sectionLabel',
+    'segnoMark',
     'semiGermanChords',
     'set',
+    'setDefaultDurationToQuarter',
     'settingsFrom', # 2.23
     'sf',
     'sff',
@@ -391,14 +440,20 @@ lilypond_music_commands = (
     'shiftOn',
     'shiftOnn',
     'shiftOnnn',
+    'showSplitTiedTabNotes',
     'showStaffSwitch',
     'single', # since 2.18
     'skip',
+    'skipNC',
+    'skipNCs',
     'skipTypesetting',
     'slashedGrace', # since 2.20
     'slurDashed',
+    'slurDashPattern',
     'slurDotted',
     'slurDown',
+    'slurHalfDashed',
+    'slurHalfSolid',
     'slurNeutral',
     'slurSolid',
     'slurUp',
@@ -410,10 +465,15 @@ lilypond_music_commands = (
     'sp',
     'spacingTweaks',
     'spp',
+    'staff-space',
+    'staffHighlight',
     'startAcciaccaturaMusic',
     'startAppoggiaturaMusic',
     'startGraceMusic',
     'startGroup',
+    'startMeasureCount',
+    'startMeasureSpanner',
+    'startSlashedGraceMusic',
     'startStaff',
     'startTextSpan',
     'startTrillSpan',
@@ -424,28 +484,40 @@ lilypond_music_commands = (
     'stopAppoggiaturaMusic',
     'stopGraceMusic',
     'stopGroup',
+    'stopMeasureCount',
+    'stopMeasureSpanner',
+    'stopSlashedGraceMusic',
     'stopStaff',
+    'stopStaffHighlight',
     'stopTextSpan',
     'stopTrillSpan',
+    'storePredefinedDiagram',
     'stringTuning', # since 2.16
     'strokeFingerOrientations',
     'stropha',
     'styledNoteHeads', # since 2.23
     'sustainOff',
     'sustainOn',
+    'tabChordRepeats',
+    'tabChordRepetition',
     'tabFullNotation',
     'tag',
     'teeny',
     'tempo',
     'tempoWholesPerMinute',
+    'textEndMark',
     'textLengthOff',
     'textLengthOn',
+    'textMark',
     'textSpannerDown',
     'textSpannerNeutral',
     'textSpannerUp',
     'tieDashed',
+    'tieDashPattern',
     'tieDotted',
     'tieDown',
+    'tieHalfDashed',
+    'tieHalfSolid',
     'tieNeutral',
     'tieSolid',
     'tieUp',
@@ -490,6 +562,9 @@ lilypond_music_commands = (
     'walkerHeadsMinor',
     'whiteTriangleMarkup',
     'withMusicProperty',
+    'xNote',
+    'xNotesOff',
+    'xNotesOn',
 )
 
 
@@ -505,95 +580,100 @@ articulations = (
 
 
 ornaments = (
-    'prall',
-    'mordent',
-    'prallmordent',
-    'turn',
-    'upprall',
-    'downprall',
-    'upmordent',
     'downmordent',
+    'downprall',
     'lineprall',
-    'prallprall',
+    'mordent',
+    'prall',
     'pralldown',
+    'prallmordent',
+    'prallprall',
     'prallup',
     'reverseturn',
     'trill',
+    'turn',
+    'upmordent',
+    'upprall',
 )
 
 
 fermatas = (
-    'shortfermata',
     'fermata',
     'longfermata',
+    'shortfermata',
     'verylongfermata',
 )
 
 
 instrument_scripts = (
-    'upbow',
     'downbow',
     'flageolet',
-    'thumb',
-    'snappizzicato',
-    'open',
     'halfopen',
-    'stopped',
     'lheel',
-    'rheel',
     'ltoe',
+    'open',
+    'rheel',
     'rtoe',
+    'snappizzicato',
+    'stopped',
+    'thumb',
+    'upbow',
 )
 
 
 repeat_scripts = (
-    'segno',
     'coda',
+    'segno',
     'varcoda',
 )
 
 
 ancient_scripts = (
-    'ictus',
     'accentus',
     'circulus',
+    'ictus',
     'semicirculus',
     'signumcongruentiae',
 )
 
 
 modes = (
+    'aeolian',
+    'dorian',
+    'ionian',
+    'locrian',
+    'lydian',
     'major',
     'minor',
-    'ionian',
-    'dorian',
-    'phrygian',
-    'lydian',
     'mixolydian',
-    'aeolian',
-    'locrian',
+    'phrygian',
 )
 
 
 markupcommands_nargs = (
 # no arguments
 (
+    'coda',
     'doubleflat',
     'doublesharp',
     'eyeglasses',
+    'fermata',
     'flat',
     'natural',
     'null',
+    'segno',
     'semiflat',
     'semisharp',
     'sesquiflat',
     'sesquisharp',
     'sharp',
     'strut',
-    'table-of-contents'
+    'table-of-contents',
+    'varcoda',
 ),
 # one argument
 (
+    'accidental',
     'backslashed-digit',
     'bold',
     'box',
@@ -604,15 +684,22 @@ markupcommands_nargs = (
     'char',
     'circle',
     'column',
+    'compound-meter',
     'concat',
     'dir-column',
+    'discant',
     'draw-dashed-line', # since 2.18
     'draw-dotted-line', # since 2.18
+    'draw-hline',
     'draw-line',
     'dynamic',
+    'ellipse',
     'fill-line',
+    'figured-bass',
     'finger',
+    'first-visible',
     'fontCaps',
+    'freeBass',
     'fret-diagram',
     'fret-diagram-terse',
     'fret-diagram-verbose',
@@ -636,6 +723,7 @@ markupcommands_nargs = (
     'markalphabet',
     'markletter',
     'medium',
+    'multi-measure-rest-by-number',
     'musicglyph',
     'normalsize',
     'normal-size-sub',
@@ -645,20 +733,26 @@ markupcommands_nargs = (
     'oval', # since 2.18
     'overlay', # since 2.20
     'overtie', # since 2.20
+    'polygon',
     'postscript',
+    'property-recursive',
+    'rest',
     'right-align',
     'right-brace',
     'right-column',
     'roman',
     'rounded-box',
+    'rhythm',
     'sans',
     'score',
+    'score-lines',
     'simple',
     'slashed-digit',
     'small',
     'smallCaps',
     'smaller',
     'stencil',
+    'string-lines',
     'sub',
     'super',
     'teeny',
@@ -673,9 +767,10 @@ markupcommands_nargs = (
     'undertie', # since 2.20
     'upright',
     'vcenter',
-    'vspace',
     'verbatim-file',
+    'vspace',
     'whiteout',
+    'with-true-dimensions',
     'wordwrap',
     'wordwrap-field',
     'wordwrap-string',
@@ -691,6 +786,7 @@ markupcommands_nargs = (
     'fraction',
     'halign',
     'hcenter-in',
+    'if',
     'lower',
     'magnify',
     'note',
@@ -702,15 +798,21 @@ markupcommands_nargs = (
     'page-link',
     'path',     # added in LP 2.13.31
     'raise',
+    'replace',
+    'rest-by-number',
     'rotate',
     'scale',
     'translate',
     'translate-scaled',
+    'unless',
     'with-color',
+    'with-dimensions-from', # since 2.20
     'with-link',
+    'with-outline',
+    'with-string-transformer',
+    'with-true-dimension',
     'with-url',
     'woodwind-diagram',
-    'with-dimensions-from', # since 2.20
 ),
 # three arguments
 (
@@ -724,6 +826,8 @@ markupcommands_nargs = (
     'note-by-number',
     'pad-to-box',
     'page-ref',
+    'with-dimension',
+    'with-dimension-from',
     'with-dimensions',
 ),
 # four arguments
@@ -733,6 +837,7 @@ markupcommands_nargs = (
 ),
 # five arguments,
 (
+    'align-on-other',
     'fill-with-pattern',
 ),
 )
@@ -753,6 +858,8 @@ markuplistcommands = (
 
 contexts = (
     'ChoirStaff',
+    'ChordGrid',
+    'ChordGridScore',
     'ChordNames',
     'CueVoice',
     'Devnull',
@@ -763,8 +870,10 @@ contexts = (
     'FretBoards',
     'Global',
     'GrandStaff',
+    'GregorianTranscriptionLyrics',
     'GregorianTranscriptionStaff',
     'GregorianTranscriptionVoice',
+    'InternalGregorianStaff',
     'KievanStaff', # since 2.16
     'KievanVoice', # since 2.16
     'Lyrics',
@@ -772,6 +881,7 @@ contexts = (
     'MensuralVoice',
     'NoteNames',
     'NullVoice',     # since 2.18
+    'OneStaff',
     'PetrucciStaff', # since 2.16
     'PetrucciVoice', # since 2.16
     'PianoStaff',
@@ -779,9 +889,13 @@ contexts = (
     'Score',
     'Staff',
     'StaffGroup',
+    'StandaloneRhythmScore',
+    'StandaloneRhythmStaff',
+    'StandaloneRhythmVoice',
     'TabStaff',
     'TabVoice',
     'Timing',
+    'VaticanaLyrics',
     'VaticanaStaff',
     'VaticanaVoice',
     'Voice',
@@ -1041,36 +1155,36 @@ scheme_values = (
 
 
 headervariables = (
-    'dedication',
-    'title',
-    'subtitle',
-    'subsubtitle',
-    'poet',
-    'composer',
-    'meter',
-    'opus',
     'arranger',
-    'instrument',
-    'piece',
     'breakbefore',
+    'composer',
     'copyright',
-    'tagline',
-    'mutopiatitle',
-    'mutopiacomposer',
-    'mutopiapoet',
-    'mutopiaopus',
-    'mutopiainstrument',
     'date',
+    'dedication',
     'enteredby',
-    'source',
-    'style',
+    'footer',
+    'instrument',
+    'lastupdated',
     'maintainer',
     'maintainerEmail',
     'maintainerWeb',
+    'meter',
     'moreInfo',
-    'lastupdated',
+    'mutopiacomposer',
+    'mutopiainstrument',
+    'mutopiaopus',
+    'mutopiapoet',
+    'mutopiatitle',
+    'opus',
+    'piece',
+    'poet',
+    'source',
+    'style',
+    'subsubtitle',
+    'subtitle',
+    'tagline',
     'texidoc',
-    'footer',
+    'title',
 )
 
 
@@ -1129,6 +1243,7 @@ papervariables = (
     'print-page-number',
 
     # misc
+    'footnote-separator-markup',
     'page-spacing-weight',
     'print-all-headers',
     'system-separator-markup',
@@ -1159,11 +1274,11 @@ papervariables = (
 
 layoutvariables = (
     'indent',
+    'line-width',
+    'ragged-last',
+    'ragged-right',
     'short-indent',
     'system-count',
-    'line-width',
-    'ragged-right',
-    'ragged-last',
 )
 
 
@@ -1172,81 +1287,133 @@ midivariables = (
 
 
 repeat_types = (
-    'unfold',
     'percent',
-    'volta',
+    'segno',
     'tremolo',
+    'unfold',
+    'volta',
 )
 
 
 accidentalstyles = (
+    'choral', # since 2.20
+    'choral-cautionary', # since 2.20
     'default',
-    'voice',
+    'dodecaphonic',
+    'forget',
     'modern',
     'modern-cautionary',
     'modern-voice',
     'modern-voice-cautionary',
-    'piano',
-    'piano-cautionary',
-    'choral', # since 2.20
-    'choral-cautionary', # since 2.20
     'neo-modern',
     'neo-modern-cautionary',
     'neo-modern-voice',
     'neo-modern-voice-cautionary',
-    'dodecaphonic',
-    'teaching',
     'no-reset',
-    'forget',
+    'piano',
+    'piano-cautionary',
+    'teaching',
+    'voice',
 )
 
 
 clefs_plain = (
     'alto',
+    'altovarC',
     'baritone',
+    'baritonevarC',
+    'baritonevarF',
     'bass',
+    'blackmensural-c1',
+    'blackmensural-c2',
+    'blackmensural-c3',
+    'blackmensural-c4',
+    'blackmensural-c5',
     'C',
     'F',
     'french',
     'G',
     'GG',               # since 2.19
+    'G2',
+    'hufnagel-do-fa',
+    'hufnagel-do1',
+    'hufnagel-do2',
+    'hufnagel-do3',
+    'hufnagel-fa1',
+    'hufnagel-fa2',
+    'kievan-do',
+    'medicaea-do1',
+    'medicaea-do2',
+    'medicaea-do3',
+    'medicaea-fa1',
+    'medicaea-fa2',
+    'mensural-c1',
+    'mensural-c2',
+    'mensural-c3',
+    'mensural-c4',
+    'mensural-c5',
+    'mensural-f',
+    'mensural-g',
     'mezzosoprano',
+    'moderntab',
+    'neomensural-c1',
+    'neomensural-c2',
+    'neomensural-c3',
+    'neomensural-c4',
+    'neomensural-c5',
     'percussion',
+    'petrucci-c1',
+    'petrucci-c2',
+    'petrucci-c3',
+    'petrucci-c4',
+    'petrucci-c5',
+    'petrucci-f',
+    'petrucci-f2',
+    'petrucci-f3',
+    'petrucci-f4',
+    'petrucci-f5',
+    'petrucci-g',
+    'petrucci-g1',
+    'petrucci-g2',
     'soprano',
     'subbass',
     'tab',
     'tenor',
     'tenorG',           # since 2.19
+    'tenorvarC',
     'treble',
     'varbaritone',
     'varC',             # since 2.19
     'varpercussion',    # since 2.19
+    'vaticana-do1',
+    'vaticana-do2',
+    'vaticana-do3',
+    'vaticana-fa1',
+    'vaticana-fa2',
     'violin',
 )
 
 
 clefs = clefs_plain + (
-    'treble_8',
     'bass_8',
+    'treble_8',
 )
 
 
 break_visibility = (
     'all-invisible',
-    'begin-of-line-visible',
-    'end-of-line-visible',
     'all-visible',
     'begin-of-line-invisible',
-    'end-of-line-invisible',
+    'begin-of-line-visible',
     'center-invisible',
+    'end-of-line-invisible',
+    'end-of-line-visible',
 )
 
 
 mark_formatters = (
     'format-mark-alphabet',
     'format-mark-barnumbers',
-    'format-mark-letters',
-    'format-mark-numbers',
     'format-mark-box-alphabet',
     'format-mark-box-barnumbers',
     'format-mark-box-letters',
@@ -1255,6 +1422,8 @@ mark_formatters = (
     'format-mark-circle-barnumbers',
     'format-mark-circle-letters',
     'format-mark-circle-numbers',
+    'format-mark-letters',
+    'format-mark-numbers',
 )
 
 
