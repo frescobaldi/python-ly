@@ -141,8 +141,6 @@ def main():
             if word in lyVars:
                 lyVars.remove(word)
 
-        #lyVars.remove('parser')
-
         writeList(f, 'scheme_keywords', guileWords)
         writeList(f, 'scheme_functions', lyFunctions)
         writeList(f, 'scheme_variables', lyVars)
