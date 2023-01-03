@@ -78,6 +78,7 @@ def writeList(file_, name, lst):
 def replace(word):
     word = word.replace('&lt;', '<')
     word = word.replace('&gt;', '>')
+    word = word.replace('&amp;', '&')
     return word
 
 guilePage = urlopen(GUILE_URL).read()
