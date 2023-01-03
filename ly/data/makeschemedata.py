@@ -31,10 +31,10 @@ except:
     from urllib import urlopen
 
 
-VERSION = "2.18"
-GUILE_URL = "https://www.gnu.org/software/guile/docs/docs-1.8/guile-ref/Procedure-Index.html#Procedure-Index"
-LY_FUNCTION_URL = "http://lilypond.org/doc/v2.18/Documentation/internals/scheme-functions"
-SCM_PATH = os.path.join(os.environ['HOME'], 'lilypond_bin/2.18.2-1/lilypond/usr/share/lilypond/current/scm')
+VERSION = "2.24"
+GUILE_URL = "https://www.gnu.org/software/guile/docs/docs-2.2/guile-ref/Procedure-Index.html#Procedure-Index"
+LY_FUNCTION_URL = "http://lilypond.org/doc/v2.24/Documentation/internals/scheme-functions"
+SCM_PATH = os.path.join(os.environ['HOME'], '.local/lilypond/lilypond-2.24.0/share/lilypond/2.24.0/scm/lily')
 
 GUILE_IGNONED_TYPE = (
     'Apply Traps',
@@ -138,7 +138,7 @@ def main():
             if word in lyVars:
                 lyVars.remove(word)
         
-        lyVars.remove('parser')
+        #lyVars.remove('parser')
         
         writeList(f, 'scheme_keywords', guileWords) 
         writeList(f, 'scheme_functions', lyFunctions)
