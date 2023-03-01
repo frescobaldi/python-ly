@@ -117,13 +117,6 @@ ly.node module
     :undoc-members:
     :show-inheritance:
 
-ly.pkginfo module
------------------
-
-.. automodule:: ly.pkginfo
-    :members:
-    :member-order: bysource
-
 ly.reformat module
 ------------------
 
@@ -155,5 +148,3 @@ ly.words module
     :members:
     :undoc-members:
     :show-inheritance:
-
-

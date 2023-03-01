@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools >= 64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "python-ly"
+description = "Tool and library for manipulating LilyPond files"
+readme = "README.rst"
+license.text = "GPL"
+maintainers = [{name = "Wilbert Berendsen", email = "info@frescobaldi.org"}]
+classifiers = [
+    'Development Status :: 4 - Beta',
+    #'Development Status :: 5 - Production/Stable',
+    'License :: OSI Approved :: GNU General Public License (GPL)',
+    'Operating System :: MacOS :: MacOS X',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX',
+    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3',
+    'Topic :: Multimedia :: Sound/Audio',
+    'Topic :: Text Editors',
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/wbsoft/python-ly"
+Documentation = "https://python-ly.readthedocs.io"
+Repository = "https://github.com/frescobaldi/python-ly"
+"Issue tracker" = "https://github.com/frescobaldi/python-ly/issues"
+
+[project.scripts]
+ly = "ly.cli.main:main"
+ly-server = "ly.server.main:main"
+
+[tool.setuptools.dynamic]
+version.attr = "ly.pkginfo.version"

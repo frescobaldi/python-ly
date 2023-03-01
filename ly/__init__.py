@@ -43,7 +43,7 @@ A LilyPond document (source file) is held by a ly.document.Document. The
 Document class automatically parses and tokenizes the text, also when its
 contents are changed.
 
-A music tree can be built from a document using the ly.music module. 
+A music tree can be built from a document using the ly.music module.
 In the near future, music trees can be built from scratch and also generate
 LilyPond output from scratch. At that moment, ly.dom is deprecated.
 
@@ -52,4 +52,3 @@ the tokens in the document, but in the future they will work on the music tree.
 
 
 """
-
