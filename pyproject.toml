@@ -23,7 +23,7 @@ classifiers = [
 dynamic = ["version"]
 
 [project.urls]
-Homepage = "https://github.com/wbsoft/python-ly"
+Homepage = "https://github.com/frescobaldi/python-ly"
 Documentation = "https://python-ly.readthedocs.io"
 Repository = "https://github.com/frescobaldi/python-ly"
 "Issue tracker" = "https://github.com/frescobaldi/python-ly/issues"
