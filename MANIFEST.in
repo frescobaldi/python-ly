@@ -2,4 +2,6 @@ include README.rst INSTALL.rst ChangeLog
 include doc/*.rst
 include doc/conf.py
 include doc/Makefile
+include ly/xml/*.ly
+include ly/xml/*.ily
 global-exclude *~

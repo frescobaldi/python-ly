@@ -22,7 +22,6 @@ import os
 sys.path.insert(0, os.path.abspath('..'))
 import ly.pkginfo
 
-
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -49,8 +48,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = ly.pkginfo.name
-copyright = u'2015, ' + ly.pkginfo.maintainer
+project = 'python-ly'
+copyright = '2015, Wilbert Berendsen'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -233,9 +232,9 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('command', 'ly', u'Manipulate LilyPond source files',
-     [ly.pkginfo.maintainer], 1),
+     ['Wilbert Berendsen'], 1),
     ('servercmd', 'ly-server', u'Manipulate LilyPond source files via HTTP',
-     [ly.pkginfo.maintainer], 1),
+     ['Wilbert Berendsen'], 1),
 ]
 
 # If true, show URL addresses after external links.
@@ -248,8 +247,9 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', ly.pkginfo.name, u'python-ly Documentation',
-   u'Author', ly.pkginfo.name, ly.pkginfo.description,
+  ('index', 'python-ly', 'python-ly Documentation',
+   'Author', 'python-ly',
+   'Tool and library for manipulating LilyPond files',
    'Miscellaneous'),
 ]
 
@@ -269,10 +269,10 @@ texinfo_documents = [
 # -- Options for Epub output ----------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = ly.pkginfo.name
-epub_author = ly.pkginfo.maintainer
-epub_publisher = ly.pkginfo.maintainer
-epub_copyright = u'2015, ' + ly.pkginfo.maintainer
+epub_title = 'python-ly'
+epub_author = 'Wilbert Berendsen'
+epub_publisher = 'Wilbert Berendsen'
+epub_copyright = '2015, Wilbert Berendsen'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'ly'
