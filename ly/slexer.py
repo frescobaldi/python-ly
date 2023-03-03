@@ -160,11 +160,10 @@ class State(object):
     def tokens(self, text, pos=0):
         """Parse a text string using our state info.
 
-        Yields Token instances. All tokens are a subclass of str (or unicode in
-        Python 2.x) and have a pos and an end attribute, describing their
-        position in the original string. If the current parser defines a
-        'default' class attribute, it is the Token subclass to use for pieces of
-        text that would otherwise be skipped.
+        Yields Token instances. All tokens are a subclass of str and have a pos and
+        an end attribute, describing their position in the original string. If the
+        current parser defines a 'default' class attribute, it is the Token subclass to
+        use for pieces of text that would otherwise be skipped.
 
         """
         while True:
