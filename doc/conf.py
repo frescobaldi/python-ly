@@ -201,8 +201,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'python-ly.tex', u'python-ly Documentation',
-   u'Wilbert Berendsen', 'manual'),
+  ('index', 'python-ly.tex', 'python-ly Documentation',
+   'Wilbert Berendsen', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -231,9 +231,9 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('command', 'ly', u'Manipulate LilyPond source files',
+    ('command', 'ly', 'Manipulate LilyPond source files',
      ['Wilbert Berendsen'], 1),
-    ('servercmd', 'ly-server', u'Manipulate LilyPond source files via HTTP',
+    ('servercmd', 'ly-server', 'Manipulate LilyPond source files via HTTP',
      ['Wilbert Berendsen'], 1),
 ]
 
@@ -275,7 +275,7 @@ epub_publisher = 'Wilbert Berendsen'
 epub_copyright = '2015, Wilbert Berendsen'
 
 # The basename for the epub file. It defaults to the project name.
-#epub_basename = u'ly'
+#epub_basename = 'ly'
 
 # The HTML theme for the epub output. Since the default themes are not optimized
 # for small screen space, using the same theme for HTML and epub output is

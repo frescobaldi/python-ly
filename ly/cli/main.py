@@ -59,7 +59,7 @@ def die(message):
     sys.stderr.write(
         "See ly -h for a full list of commands and options.\n")
     sys.exit(1)
-        
+
 class Options(object):
     """Store all the startup options and their defaults."""
     def __init__(self):
@@ -74,11 +74,11 @@ class Options(object):
         self.default_language = "nederlands"
         self.rel_startpitch = True
         self.rel_absolute = None
-        
+
         self.indent_width = 2
         self.indent_tabs = False
         self.tab_width = 8
-        
+
         self.full_html = True
         self.inline_style = False
         self.stylesheet = None
@@ -99,27 +99,27 @@ class Options(object):
         except ValueError as e:
             die(format(e))
         setattr(self, name, value)
-    
+
 class Output(object):
     """Object living for a whole file/command operation, handling the output.
-    
+
     When opening a file it has already opened earlier, the file is appended to
     (like awk).
-    
+
     """
     def __init__(self):
         self._seen_filenames = set()
-    
+
     def get_filename(self, opts, filename):
         """Queries the output attribute from the Options and returns it.
-        
-        If replace_pattern is True (by default) and the attribute contains a 
-        '*', it is replaced with the full path of the specified filename, 
-        but without extension. It the attribute contains a '?', it is 
+
+        If replace_pattern is True (by default) and the attribute contains a
+        '*', it is replaced with the full path of the specified filename,
+        but without extension. It the attribute contains a '?', it is
         replaced with the filename without path and extension.
-        
+
         If '-' is returned, it denotes standard output.
-        
+
         """
         if not opts.output:
             return '-'
@@ -129,14 +129,14 @@ class Output(object):
             return opts.output.replace('?', name).replace('*', path)
         else:
             return opts.output
-    
+
     @contextlib.contextmanager
     def file(self, opts, filename, encoding):
         """Return a context manager for writing to.
-        
+
         If you set encoding to "binary" or False, the file is opened in binary
         mode and you should encode the data you write yourself.
-        
+
         """
         if not filename or filename == '-':
             filename, mode = sys.stdout.fileno(), 'w'
@@ -159,37 +159,31 @@ class Output(object):
 
 def parse_command_line():
     """Return a three-tuple(options, commands, files).
-    
+
     options is an Options instance with all the command-line options
     commands is a list of command.command instances
     files is the list of filename arguments
-    
+
     Also performs error handling and may exit on certain circumstances.
-    
+
     """
     if len(sys.argv) < 2:
         usage_short()
         sys.exit(2)
-    
-    if isinstance(sys.argv[0], type('')):
-        # python 3 - arguments are unicode strings
-        args = iter(sys.argv[1:])
-    else:
-        # python 2 - arguments are bytes, decode them
-        fsenc = sys.getfilesystemencoding() or 'latin1'
-        args = (a.decode(fsenc) for a in sys.argv[1:])
-    
+
+    args = iter(sys.argv[1:])
+
     opts = Options()
     commands = []
     files = []
-    
+
     def next_arg(message):
         """Get the next argument, if missing, die with message."""
         try:
             return next(args)
         except StopIteration:
             die(message)
-    
+
     for arg in args:
         if arg in ('-h', '--help'):
             usage()
@@ -234,14 +228,14 @@ def parse_command_line():
 
 def parse_command(arg):
     """Parse the command string, returning a list of command.command instances.
-    
+
     Exits when a command is invalid.
-    
+
     """
     from . import command
 
     result = []
-    
+
     for c in arg.split(';'):
         args = c.split(None, 1)
         if args:
@@ -287,4 +281,3 @@ def main():
         for c in commands:
             c.run(options, cursor, output)
     return exit_code
-

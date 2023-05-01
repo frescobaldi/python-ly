@@ -68,32 +68,32 @@ Here is an example::
     }
     ''')
     >>> m=ly.music.document(d)
-    >>> print m.dump()
+    >>> print(m.dump())
     <Document>
-      <Version u'\\version'>
-        <String u'"'>
-      <Assignment u'music'>
-        <Relative u'\\relative'>
-          <MusicList u'{'>
-            <TimeSignature u'\\time'>
-            <KeySignature u'\\key'>
-              <Note u'd'>
-              <Command u'\\minor'>
-            <Note u'd'>
-            <Note u'e'>
-            <Note u'f'>
-            <Note u'g'>
-            <Note u'a'>
-            <Note u'g'>
-            <Note u'f'>
-            <Note u'e'>
-            <Note u'd'>
-      <Score u'\\score'>
-        <Context u'\\new'>
-          <MusicList u'<<'>
-            <UserCommand u'\\music'>
+      <Version '\\version'>
+        <String '"'>
+      <Assignment 'music'>
+        <Relative '\\relative'>
+          <MusicList '{'>
+            <TimeSignature '\\time'>
+            <KeySignature '\\key'>
+              <Note 'd'>
+              <Command '\\minor'>
+            <Note 'd'>
+            <Note 'e'>
+            <Note 'f'>
+            <Note 'g'>
+            <Note 'a'>
+            <Note 'g'>
+            <Note 'f'>
+            <Note 'e'>
+            <Note 'd'>
+      <Score '\\score'>
+        <Context '\\new'>
+          <MusicList '<<'>
+            <UserCommand '\\music'>
     >>> m[2][0][0]
-    <MusicList u'<<'>
+    <MusicList '<<'>
     >>> m[2][0][0].length()
     Fraction(5, 2)
     >>>
@@ -107,5 +107,3 @@ def document(doc):
     """Return a music.items.Document instance for the ly.document.Document."""
     from . import items
     return items.Document(doc)
-
-
