@@ -7,6 +7,23 @@ defined at the bottom of this file.
 
 All notable changes to the python-ly project are documented in this file.
 
+## [0.9.8] - 2023-06-15
+
+### Added
+
+- Add list of string tunings (#149)
+
+### Changed
+
+- Add LilyPond 2.24 words (#151)
+- Require Python 3.8 (#156)
+- Move packaging metadata to `pyproject.toml` (#155)
+
+### Fixed
+
+- Fix `\set` highlighted on its own in `\set-abcd` and similar
+  cases (#150)
+
 
 ## [0.9.7] - 2020-12-25
 
@@ -236,3 +253,4 @@ Initial release.
 [0.9.5]: https://github.com/frescobaldi/frescobaldi/compare/v0.9.4..v0.9.5
 [0.9.6]: https://github.com/frescobaldi/frescobaldi/compare/v0.9.5..v0.9.6
 [0.9.7]: https://github.com/frescobaldi/frescobaldi/compare/v0.9.6..v0.9.7
+[0.9.8]: https://github.com/frescobaldi/frescobaldi/compare/v0.9.7..v0.9.8

@@ -1,3 +1,3 @@
 """Meta-information about the LY package."""
 
-version = "0.9.7"
+version = "0.9.8"
