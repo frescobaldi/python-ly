@@ -1300,8 +1300,6 @@ accidentalstyles = (
     'choral-cautionary', # since 2.20
     'default',
     'dodecaphonic',
-    'dodecaphonic-no-repeat', # since 2.20
-    'dodecaphonic-first', # since 2.20
     'forget',
     'modern',
     'modern-cautionary',
