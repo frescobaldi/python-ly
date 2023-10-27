@@ -41,6 +41,11 @@ class Mediator():
     def __init__(self):
         """ create global lists """
         self.score = xml_objs.Score()
+
+        # Previous and active bar, necessary for putting repeat sign at correct position
+        self.prev_bar = None
+        self.bar = None
+
         self.sections = []
         """ default and initial values """
         self.insert_into = None
@@ -103,6 +108,7 @@ class Mediator():
         self.insert_into = section
         self.sections.append(section)
         self.bar = None
+        self.prev_bar = None
 
     def new_snippet(self, name):
         name = self.check_name(name)
@@ -110,6 +116,7 @@ class Mediator():
         self.insert_into = snippet
         self.sections.append(snippet)
         self.bar = None
+        self.prev_bar = None
 
     def new_lyric_section(self, name, voice_id):
         name = self.check_name(name)
@@ -160,6 +167,7 @@ class Mediator():
                 self.score.partlist.append(self.part)
         self.insert_into = self.part
         self.bar = None
+        self.prev_bar = None
 
     def part_not_empty(self):
         return self.part and self.part.barlist
@@ -323,6 +331,9 @@ class Mediator():
     def new_bar(self, fill_prev=True):
         if self.bar and fill_prev:
             self.bar.list_full = True
+
+        self.prev_bar = self.bar
+
         self.current_attr = xml_objs.BarAttr()
         self.bar = xml_objs.Bar()
         if self.bar_is_pickup:
@@ -342,13 +353,37 @@ class Mediator():
         self.bar.add(barline)
         self.new_bar()
 
-    def new_repeat(self, rep):
+    def new_repeat(self, rep, times=None):
+
         barline = xml_objs.BarAttr()
         barline.set_barline(rep)
         barline.repeat = rep
+        barline.repeat_times = times
+
         if self.bar is None:
             self.new_bar()
-        self.bar.add(barline)
+
+        if rep == 'backward' and not self.bar.has_music() and self.prev_bar:
+            # If we are ending a repeat, but the current bar has no music (no rests, too),
+            # use the previous bar
+            self.prev_bar.add(barline)
+        else:
+            self.bar.add(barline)
+
+    def new_ending(self, type, number):
+        # type must be either 'start', 'stop' or 'discontinue'
+        # number must be ending number or a list of ending numbers
+
+        ending = xml_objs.BarAttr()
+        ending.set_ending(type, number)
+
+        if self.bar is None:
+            self.new_bar()
+
+        if type in ['stop', 'discontinue'] and not self.bar.has_music() and self.prev_bar:
+            self.prev_bar.add(ending)
+        else:
+            self.bar.add(ending)
 
     def new_key(self, key_name, mode):
         if self.bar is None:
