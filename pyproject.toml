@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools >= 64"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "python-ly"
@@ -35,5 +35,8 @@ Repository = "https://github.com/frescobaldi/python-ly"
 ly = "ly.cli.main:main"
 ly-server = "ly.server.main:main"
 
-[tool.setuptools.dynamic]
-version.attr = "ly.pkginfo.version"
+[tool.hatch.version]
+path = "ly/pkginfo.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ly"]
