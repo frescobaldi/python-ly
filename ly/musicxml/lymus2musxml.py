@@ -104,7 +104,7 @@ class ParseSource():
         self.parse_document(doc)
 
     def parse_document(self, ly_doc, relative_first_pitch_absolute=False):
-        """Parse the LilyPond source specified as a ly.document document.
+        r"""Parse the LilyPond source specified as a ly.document document.
         
         If relative_first_pitch_absolute is set to True, the first pitch in a
         \relative expression without startpitch is considered to be absolute
