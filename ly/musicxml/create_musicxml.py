@@ -55,7 +55,7 @@ class CreateMusicXML():
         self.score_info = etree.SubElement(self.root, "identification")
         encoding = etree.SubElement(self.score_info, "encoding")
         software = etree.SubElement(encoding, "software")
-        software.text = ly.pkginfo.name + " " + ly.pkginfo.version
+        software.text = "python-ly " + ly.pkginfo.version
         encoding_date = etree.SubElement(encoding, "encoding-date")
         import datetime
         encoding_date.text = str(datetime.date.today())
