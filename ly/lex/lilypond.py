@@ -38,7 +38,7 @@ re_articulation = r"[-_^][_.>|!+^-]"
 re_dynamic = (
     r"\\[<!>]|"
     r"\\(f{1,5}|p{1,5}"
-    r"|mf|mp|fp|spp?|sff?|sfz|rfz"
+    r"|mf|mp|fp|spp?|sff?|sfz|rfz|n"
     r"|cresc|decresc|dim|cr|decr"
     r")(?![A-Za-z])")
 
@@ -687,7 +687,7 @@ class Omit(Keyword):
 
 
 class Unit(Command):
-    rx = r"\\(mm|cm|in|pt)" + re_identifier_end
+    rx = r"\\(mm|cm|in|pt|bp)" + re_identifier_end
 
 
 class InputMode(Command):

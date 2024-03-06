@@ -51,6 +51,8 @@ lilypond_keywords = (
     'revert',
     'score',
     'set',
+    'sourcefileline', # since 2.20
+    'sourcefilename', # since 2.20
     'tagGroup', # since 2.20
     'temporary', # since 2.18
     'type',
@@ -130,6 +132,7 @@ lilypond_music_commands = (
     'blackTriangleMarkup',
     'bookOutputName',
     'bookOutputSuffix',
+    'bp', # since 2.24
     'bracketCloseSymbol',
     'bracketOpenSymbol',
     'break',
@@ -148,6 +151,7 @@ lilypond_music_commands = (
     'chords',
     'clef',
     'cm',
+    'codaMark', # since 2.24
     'compoundMeter', # since 2.16
     #'compressFullBarRests', renamed to compressEmptyMeasures
     'compressEmptyMeasures',
@@ -167,12 +171,14 @@ lilypond_music_commands = (
     'dashDot',
     'dashHat',
     'dashLarger',
+    'dashBang', # since 2.20
     'dashPlus',
     'dashUnderscore',
     'deadNote',  # since 2.16
     'deadNotesOff',
     'deadNotesOn',
     'decr',
+    'decresc', # since 2.14 or earlier
     'default',
     'defaultNoteHeads',  # since 2.16
     'defaultTimeSignature',
@@ -207,6 +213,7 @@ lilypond_music_commands = (
     'dynamicUp',
     'easyHeadsOff',
     'easyHeadsOn',
+    'EnableGregorianDivisiones', # 2.24
     'enablePolymeter',
     'endcr',
     'endcresc',
@@ -248,6 +255,7 @@ lilypond_music_commands = (
     'funkHeadsMinor',
     'fz',
     'germanChords',
+    'glide', # since 2.24
     'glissando',
     'grace',
     'graceSettings',
@@ -327,6 +335,7 @@ lilypond_music_commands = (
     'modalTranspose', # since 2.23
     'mp',
     'musicMap',
+    'n', # since 2.22
     'neumeDemoLayout',
     'new',
     'newSpacingSection',
@@ -405,8 +414,10 @@ lilypond_music_commands = (
     'raiseNote', # since 2.23
     'reduceChords', # since 2.23
     'relative',
+    'RemoveAllEmptyStaves', # since 2.20
     'RemoveEmptyRhythmicStaffContext',
     'RemoveEmptyStaffContext',
+    'RemoveEmptyStaves', # since 2.20
     'removeWithTag',
     'repeat',
     'repeatTie',
@@ -582,6 +593,7 @@ articulations = (
 ornaments = (
     'downmordent',
     'downprall',
+    'haydnturn', # since 2.22
     'lineprall',
     'mordent',
     'prall',
@@ -590,6 +602,7 @@ ornaments = (
     'prallprall',
     'prallup',
     'reverseturn',
+    'slashturn', # since 2.22
     'trill',
     'turn',
     'upmordent',
@@ -599,9 +612,12 @@ ornaments = (
 
 fermatas = (
     'fermata',
+    'henzelongfermata', # since 2.22
+    'henzeshortfermata', # since 2.22
     'longfermata',
     'shortfermata',
     'verylongfermata',
+    'veryshortfermata', # since 2.22
 )
 
 
@@ -751,6 +767,10 @@ markupcommands_nargs = (
     'small',
     'smallCaps',
     'smaller',
+    'stdBass', # since 2.18
+    'stdBassIV', # since 2.18
+    'stdBassV', # since 2.18
+    'stdBassVI', # since 2.18
     'stencil',
     'string-lines',
     'sub',
@@ -802,6 +822,7 @@ markupcommands_nargs = (
     'rest-by-number',
     'rotate',
     'scale',
+    'table', # since 2.20
     'translate',
     'translate-scaled',
     'unless',
@@ -849,6 +870,7 @@ markupcommands = sum(markupcommands_nargs, ())
 markuplistcommands = (
     'column-lines',
     'justified-lines',
+    'map-commands', # since 2.24
     'override-lines',
     'wordwrap-internal',
     'wordwrap-lines',
