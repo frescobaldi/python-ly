@@ -166,12 +166,12 @@ lilypond_music_commands = (
     'cueClefUnset',  # since 2.16
     'cueDuring',
     'cueDuringWithClef',  # since 2.16
+    'dashBang', # since 2.20
     'dashBar',
     'dashDash',
     'dashDot',
     'dashHat',
     'dashLarger',
-    'dashBang', # since 2.20
     'dashPlus',
     'dashUnderscore',
     'deadNote',  # since 2.16
