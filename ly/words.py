@@ -568,6 +568,7 @@ lilypond_music_commands = (
     'voiceTwo',
     'voiceTwoStyle',
     'void', # since 2.23
+    'volta', # since 2.24
     'vshape', # since 2.23
     'walkerHeads',
     'walkerHeadsMinor',
