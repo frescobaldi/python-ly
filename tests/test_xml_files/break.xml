@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 2.0 Partwise//EN"
                                 "http://www.musicxml.org/dtds/partwise.dtd">
 <score-partwise version="3.0">
   <identification>
     <encoding>
-      <software>python-ly 0.9.5</software>
-      <encoding-date>2017-05-14</encoding-date>
+      <software>python-ly 0.9.8</software>
+      <encoding-date>2024-08-10</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -64,6 +64,7 @@
       </note>
     </measure>
     <measure number="2">
+      <print new-system="yes" />
       <note>
         <pitch>
           <step>C</step>
@@ -101,6 +102,5 @@
         <type>quarter</type>
       </note>
     </measure>
-    <measure number="3" />
   </part>
 </score-partwise>

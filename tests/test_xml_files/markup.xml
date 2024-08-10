@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 2.0 Partwise//EN"
                                 "http://www.musicxml.org/dtds/partwise.dtd">
 <score-partwise version="3.0">
   <identification>
     <encoding>
-      <software>python-ly 0.9.5</software>
-      <encoding-date>2017-06-30</encoding-date>
+      <software>python-ly 0.9.8</software>
+      <encoding-date>2024-08-10</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -26,11 +26,6 @@
           <line>2</line>
         </clef>
       </attributes>
-      <direction placement="above">
-        <direction-type>
-          <words>intenso </words>
-        </direction-type>
-      </direction>
       <note>
         <pitch>
           <step>A</step>
@@ -60,7 +55,7 @@
     <measure number="3">
       <direction placement="above">
         <direction-type>
-          <words>poco più forte </words>
+          <words>intenso poco più forte </words>
         </direction-type>
       </direction>
       <note>

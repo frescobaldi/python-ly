@@ -5,18 +5,18 @@
   <movement-title>merge voices with slurs</movement-title>
   <identification>
     <encoding>
-      <software>python-ly 0.9.4</software>
-      <encoding-date>2016-03-28</encoding-date>
+      <software>python-ly 0.9.8</software>
+      <encoding-date>2024-08-10</encoding-date>
     </encoding>
   </identification>
   <part-list>
-    <part-group number="1" type="start">
+    <part-group type="start" number="1">
       <group-symbol>bracket</group-symbol>
     </part-group>
     <score-part id="P1">
       <part-name />
     </score-part>
-    <part-group number="1" type="stop" />
+    <part-group type="stop" number="1" />
   </part-list>
   <part id="P1">
     <measure number="1">
