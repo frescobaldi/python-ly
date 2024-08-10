@@ -114,8 +114,9 @@ def validate_xml(xml):
     xsdfile.close()
     xmlschema = etree.XMLSchema(xmlschema_doc)
     parser = etree.XMLParser(schema=xmlschema)
+    xml_bytes = xml.encode('utf-8')
     # Raises Exception if not valid:
-    etree.fromstring(xml, parser)
+    etree.fromstring(xml_bytes, parser)
 
 
 def assert_multi_line_equal(first, second, msg=None):
