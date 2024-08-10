@@ -5,6 +5,7 @@ import ly.musicxml
 from lxml import etree
 import os
 import io
+import re
 
 
 def test_glissando():
@@ -79,13 +80,14 @@ def ly_to_xml(filename):
     xml.write(sio, "utf-8")
     return sio.getvalue().decode("utf-8")
 
+encoding_date_element_re = re.compile(r'(?<=<encoding-date>)\d{4}-\d{2}-\d{2}(?=</encoding-date>)')
 
 def read_expected_xml(filename):
     """Return string with expected XML from file."""
     with open(filename, 'r') as xmlfile:
         output = xmlfile.read()
     # Replace date in XML file with today's date
-    output = output.replace("2016-03-28", str(datetime.date.today()))
+    output = encoding_date_element_re.sub(str(datetime.date.today()), output)
     return output
 
 
