@@ -75,9 +75,9 @@ def ly_to_xml(filename):
     with open(filename, 'r') as lyfile:
         writer.parse_text(lyfile.read())
     xml = writer.musicxml()
-    sio = io.StringIO()
+    sio = io.BytesIO()
     xml.write(sio, "utf-8")
-    return sio.getvalue()
+    return sio.getvalue().decode("utf-8")
 
 
 def read_expected_xml(filename):
