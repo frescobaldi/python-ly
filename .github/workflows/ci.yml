@@ -1,0 +1,22 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  specs:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - 3.8 # oldest officially supported by python-ly
+          - 3.12 # latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: pip install pytest lxml
+      - name: Run tests
+        run: pytest tests/
