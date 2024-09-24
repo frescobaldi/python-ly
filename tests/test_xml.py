@@ -1,10 +1,14 @@
 """Tests for XML output."""
 import datetime
 import difflib
+import glob
 import ly.musicxml
 from lxml import etree
 import os
+import os.path
 import io
+import re
+import sys
 
 
 def test_glissando():
@@ -75,17 +79,18 @@ def ly_to_xml(filename):
     with open(filename, 'r') as lyfile:
         writer.parse_text(lyfile.read())
     xml = writer.musicxml()
-    sio = io.StringIO()
+    sio = io.BytesIO()
     xml.write(sio, "utf-8")
-    return sio.getvalue()
+    return sio.getvalue().decode("utf-8")
 
+encoding_date_element_re = re.compile(r'(?<=<encoding-date>)\d{4}-\d{2}-\d{2}(?=</encoding-date>)')
 
 def read_expected_xml(filename):
     """Return string with expected XML from file."""
     with open(filename, 'r') as xmlfile:
         output = xmlfile.read()
     # Replace date in XML file with today's date
-    output = output.replace("2016-03-28", str(datetime.date.today()))
+    output = encoding_date_element_re.sub(str(datetime.date.today()), output)
     return output
 
 
@@ -109,8 +114,9 @@ def validate_xml(xml):
     xsdfile.close()
     xmlschema = etree.XMLSchema(xmlschema_doc)
     parser = etree.XMLParser(schema=xmlschema)
+    xml_bytes = xml.encode('utf-8')
     # Raises Exception if not valid:
-    etree.fromstring(xml, parser)
+    etree.fromstring(xml_bytes, parser)
 
 
 def assert_multi_line_equal(first, second, msg=None):
@@ -127,3 +133,21 @@ def assert_multi_line_equal(first, second, msg=None):
         if msg:
             message += " : " + msg
         assert False, "Multi-line strings are unequal:\n" + message
+
+
+def regenerate_xml():
+    """Regenerate the XML files"""
+    extension_re = re.compile(r'\.ly$')
+    for ly_path in glob.glob(os.path.join(os.path.dirname(__file__), 'test_xml_files/*.ly')):
+        xml_path = extension_re.sub('.xml', ly_path)
+        xml = ly_to_xml(ly_path)
+        with open(xml_path, 'w') as fw:
+            fw.write(xml)
+
+
+# Run
+#   $ test_xml.py regenerate
+# to generate the expected XML files anew with current python-ly
+if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1] == 'regenerate':
+        regenerate_xml()

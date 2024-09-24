@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 2.0 Partwise//EN"
                                 "http://www.musicxml.org/dtds/partwise.dtd">
 <score-partwise version="3.0">
   <identification>
     <encoding>
-      <software>python-ly 0.9.5</software>
-      <encoding-date>2017-06-26</encoding-date>
+      <software>python-ly 0.9.8</software>
+      <encoding-date>2024-08-10</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -26,11 +26,6 @@
           <line>2</line>
         </clef>
       </attributes>
-      <direction placement="above">
-        <direction-type>
-          <rehearsal>A</rehearsal>
-        </direction-type>
-      </direction>
       <note>
         <pitch>
           <step>C</step>
@@ -45,7 +40,7 @@
       <attributes />
       <direction placement="above">
         <direction-type>
-          <rehearsal>H</rehearsal>
+          <rehearsal>A</rehearsal>
         </direction-type>
       </direction>
       <note>
@@ -62,7 +57,7 @@
       <attributes />
       <direction placement="above">
         <direction-type>
-          <rehearsal>J</rehearsal>
+          <rehearsal>H</rehearsal>
         </direction-type>
       </direction>
       <note>
@@ -79,7 +74,7 @@
       <attributes />
       <direction placement="above">
         <direction-type>
-          <rehearsal>Z</rehearsal>
+          <rehearsal>J</rehearsal>
         </direction-type>
       </direction>
       <note>
@@ -96,7 +91,7 @@
       <attributes />
       <direction placement="above">
         <direction-type>
-          <rehearsal>AA</rehearsal>
+          <rehearsal>Z</rehearsal>
         </direction-type>
       </direction>
       <note>
@@ -113,7 +108,7 @@
       <attributes />
       <direction placement="above">
         <direction-type>
-          <rehearsal>AZ</rehearsal>
+          <rehearsal>AA</rehearsal>
         </direction-type>
       </direction>
       <note>
@@ -130,7 +125,7 @@
       <attributes />
       <direction placement="above">
         <direction-type>
-          <rehearsal>BA</rehearsal>
+          <rehearsal>AZ</rehearsal>
         </direction-type>
       </direction>
       <note>
@@ -145,6 +140,11 @@
     </measure>
     <measure number="8">
       <attributes />
+      <direction placement="above">
+        <direction-type>
+          <rehearsal>BA</rehearsal>
+        </direction-type>
+      </direction>
     </measure>
   </part>
 </score-partwise>
