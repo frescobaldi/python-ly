@@ -336,11 +336,12 @@ class Mediator():
             self.new_bar()
         self.bar.add(obj)
 
-    def create_barline(self, bl):
-        barline = xml_objs.BarAttr()
-        barline.set_barline(bl)
-        self.bar.add(barline)
-        self.new_bar()
+    def new_barline(self, bl):
+        if not self.bar:
+            # \bar at the very beginning is ignored
+            return
+        ends_bar = not self.bar.has_music()
+        self.bar.add(xml_objs.BarLine(bl, ends_bar))
 
     def new_repeat(self, rep):
         barline = xml_objs.BarAttr()
