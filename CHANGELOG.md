@@ -7,6 +7,18 @@ defined at the bottom of this file.
 
 All notable changes to the python-ly project are documented in this file.
 
+## [0.9.9] - 2024-12-20
+
+### Changed
+
+- LilyPond syntax updates
+- Use hatchling as build backend (#165)
+
+### Fixed
+
+- Never use MUP as format guess (#164). Fixes frescobaldi/frescobaldi#1635
+- Fix tests (#170)
+
 ## [0.9.8] - 2023-06-15
 
 ### Added
@@ -254,3 +266,4 @@ Initial release.
 [0.9.6]: https://github.com/frescobaldi/frescobaldi/compare/v0.9.5..v0.9.6
 [0.9.7]: https://github.com/frescobaldi/frescobaldi/compare/v0.9.6..v0.9.7
 [0.9.8]: https://github.com/frescobaldi/frescobaldi/compare/v0.9.7..v0.9.8
+[0.9.9]: https://github.com/frescobaldi/frescobaldi/compare/v0.9.8..v0.9.9
