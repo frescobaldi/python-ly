@@ -49,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'python-ly'
-copyright = '2015, Wilbert Berendsen'
+copyright = '2025, Wilbert Berendsen'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -272,7 +272,7 @@ texinfo_documents = [
 epub_title = 'python-ly'
 epub_author = 'Wilbert Berendsen'
 epub_publisher = 'Wilbert Berendsen'
-epub_copyright = '2015, Wilbert Berendsen'
+epub_copyright = '2025, Wilbert Berendsen'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = 'ly'
