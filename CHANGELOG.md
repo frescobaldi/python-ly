@@ -145,7 +145,7 @@ All notable changes to the python-ly project are documented in this file.
   - support for isolated durations (a single duration without
     explicit pitch)
   - support for implicit starting pitch in relative mode
-    (issues #18 and wbsoft/frescobaldi#648)
+    (issues #18 and frescobaldi/frescobaldi#648)
 
 ### Fixed
 
@@ -179,7 +179,7 @@ All notable changes to the python-ly project are documented in this file.
 ### Fixed
 
 - Don't yield the duration in a \tuplet command as a music token (issue
-  wbsoft/frescobaldi#631)
+  frescobaldi/frescobaldi#631)
 
 
 ## [0.8] -- 2015-01-24
