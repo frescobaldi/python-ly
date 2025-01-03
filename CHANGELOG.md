@@ -7,7 +7,7 @@ defined at the bottom of this file.
 
 All notable changes to the python-ly project are documented in this file.
 
-## [0.9.9] - 2024-12-20
+## [0.9.9] - 2025-01-04
 
 ### Changed
 
