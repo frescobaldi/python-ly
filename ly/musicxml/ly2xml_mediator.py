@@ -298,7 +298,10 @@ class Mediator():
             self.part.merge_voice(self.sections[-1])
         elif len(self.sections)>1:
              self.sections[-2].merge_voice(self.sections[-1])
-        self.sections.pop()
+
+        print("\n\nAchtung, sections: {}\n\n".format(self.sections))
+        if (len(self.sections) > 0):
+            self.sections.pop()
 
     def check_score(self):
         """
