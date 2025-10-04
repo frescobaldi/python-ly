@@ -125,11 +125,13 @@ class IterateXmlObjs():
             elif isinstance(obj, BarBackup):
                 divdur = self.count_duration(obj.duration, self.divisions)
                 self.musxml.add_backup(divdur)
+            elif isinstance(obj, BarLine):
+                self.musxml.create_barline(obj.bar_style, obj.ends_bar)
 
     def new_xml_bar_attr(self, obj):
         """Create bar attribute xml-nodes."""
         if obj.has_attr():
-            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode, 
+            self.musxml.new_bar_attr(obj.clef, obj.time, obj.key, obj.mode,
                 obj.divs, obj.multirest)
         if obj.new_system:
             self.musxml.new_system(obj.new_system)
@@ -569,6 +571,17 @@ class Bar():
 
                             if slur.start_node:
                                 slur.nr = slur.start_node.nr
+
+class BarLine():
+    """ Represents a manual bar line, needed for in-measure barlines
+    or for special-style barlines."""
+    def __init__(self, bar_style, ends_bar):
+        self.bar_style = convert_barl(bar_style)
+        self.ends_bar = ends_bar
+
+    def __repr__(self):
+        return '<{0} {1}>'.format(self.__class__.__name__, self.bar_style)
+
 
 class BarMus():
     """ Common class for notes and rests. """
