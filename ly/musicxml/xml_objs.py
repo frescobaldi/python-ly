@@ -134,9 +134,11 @@ class IterateXmlObjs():
         if obj.new_system:
             self.musxml.new_system(obj.new_system)
         if obj.repeat:
-            self.musxml.add_barline(obj.barline, obj.repeat)
+            self.musxml.add_barline(obj.barline, obj.repeat, obj.repeat_times)
         elif obj.barline:
             self.musxml.add_barline(obj.barline)
+        elif obj.ending:
+            self.musxml.add_ending(obj.ending, obj.ending_number)
         if obj.staves:
             self.musxml.add_staves(obj.staves)
         if obj.multiclef:
@@ -477,7 +479,20 @@ class Bar():
         return '<{0} {1}>'.format(self.__class__.__name__, self.obj_list)
 
     def add(self, obj):
-        self.obj_list.append(obj)
+        if isinstance(obj, BarAttr):
+            # Find first idx of instance which is not a BarAttr
+            idx = len(self.obj_list)
+            for (i, x) in enumerate(self.obj_list):
+                if not isinstance(x, BarAttr):
+                    idx = i
+                    break
+
+            if (obj not in self.obj_list):
+                # The candidate does not exists in our obj_list, add it at a fitting
+                # location in the list
+                self.obj_list.insert(idx, obj)
+        else:
+            self.obj_list.append(obj)
 
     def has_music(self):
         """ Check if bar contains music. """
@@ -802,6 +817,7 @@ class BarAttr():
         self.divs = 0
         self.barline = None
         self.repeat = None
+        self.repeat_times = None
         self.staves = 0
         self.multiclef = []
         self.tempo = None
@@ -810,8 +826,18 @@ class BarAttr():
         self.word = None
         self.new_system = None
 
+        # Ending type, 'start', 'stop' or 'discontinue'
+        self.ending = None
+        # Ending number should either be a number, or a list of numbers
+        self.ending_number = None
+
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.time)
+
+    def __eq__(self, other):
+        if self.__class__ != other.__class__:
+            return False
+        return self.__dict__ == other.__dict__
 
     def add_break(self, force_break):
         self.new_system = force_break
@@ -833,6 +859,10 @@ class BarAttr():
 
     def set_tempo(self, unit=0, unittype='', beats=0, dots=0, text=""):
         self.tempo = TempoDir(unit, unittype, beats, dots, text)
+
+    def set_ending(self, type, number):
+        self.ending = type
+        self.ending_number = number
 
     def set_multp_rest(self, size=0):
         self.multirest = size

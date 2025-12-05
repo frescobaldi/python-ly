@@ -76,6 +76,12 @@ def test_no_barcheck():
     compare_output('no_barcheck')
 
 
+def test_repeat():
+    compare_output('repeat')
+
+def test_repeat_with_alternative():
+    compare_output('repeat_with_alternative')
+
 def ly_to_xml(filename):
     """Read Lilypond file and return XML string."""
     writer = ly.musicxml.writer()
