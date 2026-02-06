@@ -294,11 +294,12 @@ class Mediator():
 
     def check_simultan(self):
         """Check done after simultanoues (<< >>) section."""
-        if self.part:
-            self.part.merge_voice(self.sections[-1])
-        elif len(self.sections)>1:
-             self.sections[-2].merge_voice(self.sections[-1])
-        self.sections.pop()
+        if self.sections:
+            if self.part:
+                self.part.merge_voice(self.sections[-1])
+            elif len(self.sections)>1:
+                self.sections[-2].merge_voice(self.sections[-1])
+            self.sections.pop()
 
     def check_score(self):
         """
