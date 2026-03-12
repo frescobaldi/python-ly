@@ -1,12 +1,12 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
 name = "python-ly"
 description = "Tool and library for manipulating LilyPond files"
 readme = "README.rst"
-license.text = "GPL"
+license = "GPL-3.0-or-later"
 maintainers = [{name = "Wilbert Berendsen", email = "info@frescobaldi.org"}]
 requires-python = ">= 3.8"
 classifiers = [
