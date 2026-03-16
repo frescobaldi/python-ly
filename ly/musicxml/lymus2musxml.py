@@ -197,6 +197,10 @@ class ParseSource():
                 self.sims_and_seqs.append('sim')
         elif musicList.token == '{':
             self.sims_and_seqs.append('seq')
+            if isinstance(musicList.parent().parent(), ly.music.items.Alternative):
+                # The grandparent node is an instance of \alternative,
+                # this indicates that this musiclist instance is an ending to a \repeat
+                self.alternative_handler(musicList, 'start')
 
     def Chord(self, chord):
         self.mediator.clear_chord()
@@ -450,6 +454,54 @@ class ParseSource():
         elif repeat.specifier() == 'tremolo':
             self.trem_rep = repeat.repeat_count()
 
+    def Alternative(self, alternative):
+        """\alternative"""
+        pass
+
+    def alternative_handler(self, node, type):
+        """
+        Helper method for handling alternative endings.
+        Generates number lists for the number attribute in MusicXML's ending element.
+
+        It tries to follow the same pattern as the default in Lilypond
+        (see http://lilypond.org/doc/v2.18/Documentation/notation/long-repeats#normal-repeats)
+        """
+
+        # Should contain an array of MusicLists
+        alternative_container = node.parent()
+
+        # Instance of \alternative
+        alternative_instance = alternative_container.parent()
+
+        # instance of \repeat
+        repeat_instance = alternative_instance.parent()
+
+        num_repeats = repeat_instance.repeat_count()
+        num_alternatives = len(alternative_container._children)
+
+        idx = alternative_container.index(node) + 1
+        ending_numbers = [idx]
+
+        if num_alternatives < num_repeats:
+            # If there are fewer ending alternatives than repeats, generate
+            # ending numbers following the same order as Lilypond.
+            if idx == 1:
+                ending_numbers = list(range(1, num_repeats - num_alternatives + 2))
+            else:
+                ending_numbers = [idx + num_repeats - num_alternatives]
+
+        if type == 'start':
+            self.mediator.new_ending(type, ending_numbers)
+        elif type == 'stop':
+            if idx == 1 and num_alternatives < num_repeats:
+                self.mediator.new_repeat('backward', len(ending_numbers)+1)
+            elif idx < num_alternatives:
+                self.mediator.new_repeat('backward')
+            if idx == num_alternatives:
+                type = 'discontinue'
+
+            self.mediator.new_ending(type, ending_numbers)
+
     def Tremolo(self, tremolo):
         """A tremolo item ":"."""
         if self.look_ahead(tremolo, ly.music.items.Duration):
@@ -624,7 +676,9 @@ class ParseSource():
             self.grace_seq = False
         elif end.node.token == '\\repeat':
             if end.node.specifier() == 'volta':
-                self.mediator.new_repeat('backward')
+                if not end.node.find_child(ly.music.items.Alternative, 1):
+                    # the repeat does not contain alternative endings, treat as normal repeat
+                    self.mediator.new_repeat('backward', end.node.repeat_count())
             elif end.node.specifier() == 'tremolo':
                 if self.look_ahead(end.node, ly.music.items.MusicList):
                     self.mediator.set_tremolo(trem_type="stop")
@@ -658,6 +712,8 @@ class ParseSource():
                 if self.sims_and_seqs:
                     self.sims_and_seqs.pop()
         elif end.node.token == '{':
+            if isinstance(end.node.parent().parent(), ly.music.items.Alternative):
+                self.alternative_handler(end.node, 'stop')
             if self.sims_and_seqs:
                 self.sims_and_seqs.pop()
         elif end.node.token == '<': #chord
