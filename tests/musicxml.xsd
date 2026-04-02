@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xlink="http://www.w3.org/1999/xlink" elementFormDefault="qualified" attributeFormDefault="unqualified">
+<xs:import namespace="http://www.w3.org/XML/1998/namespace"
+           schemaLocation="xml.xsd"/>
+<xs:import namespace="http://www.w3.org/1999/xlink"
+           schemaLocation="xlink.xsd"/>
 	<xs:annotation>
 		<xs:documentation>MusicXML™ W3C XML schema (XSD)
 
