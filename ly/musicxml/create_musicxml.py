@@ -391,7 +391,7 @@ class CreateMusicXML():
             etree.SubElement(self.current_note, "grace")
 
     def add_notations(self):
-        if not self.current_notation:
+        if self.current_notation is None:
             self.current_notation = etree.SubElement(self.current_note, "notations")
 
     def add_tied(self, tie_type):
@@ -458,7 +458,7 @@ class CreateMusicXML():
 
     def add_articulations(self):
         """Common function for creating all types of articulations. """
-        if not self.current_artic:
+        if self.current_artic is None:
             self.current_artic = etree.SubElement(self.current_notation, "articulations")
 
     def add_named_artic(self, artic):
@@ -466,7 +466,7 @@ class CreateMusicXML():
         etree.SubElement(self.current_artic, artic)
 
     def add_ornaments(self):
-        if not self.current_ornament:
+        if self.current_ornament is None:
             self.add_notations()
             self.current_ornament = etree.SubElement(self.current_notation, "ornaments")
 
@@ -497,7 +497,7 @@ class CreateMusicXML():
         etree.SubElement(self.current_notation, "glissando", nodedict)
 
     def add_technical(self):
-        if not self.current_tech:
+        if self.current_tech is None:
             self.add_notations()
             self.current_tech = etree.SubElement(self.current_notation, "technical")
 
@@ -624,7 +624,7 @@ class CreateMusicXML():
 
     def add_dirwords(self, words):
         """Add words in direction, e. g. a tempo mark."""
-        if self.current_bar.find('direction') == None:
+        if self.current_bar.find('direction') is None:
             self.add_direction()
         dirtypenode = etree.SubElement(self.direction, "direction-type")
         wordsnode = etree.SubElement(dirtypenode, "words")
@@ -632,7 +632,7 @@ class CreateMusicXML():
 
     def add_mark(self, mark):
         """Add rehearsal mark in direction"""
-        if self.current_bar.find('direction') == None:
+        if self.current_bar.find('direction') is None:
             self.add_direction()
         dirtypenode = etree.SubElement(self.direction, "direction-type")
         rehearsalnode = etree.SubElement(dirtypenode, "rehearsal")
