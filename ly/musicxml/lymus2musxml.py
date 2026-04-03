@@ -426,11 +426,11 @@ class ParseSource():
 
     def PhrasingSlur(self, phrslur):
         r"""A \( or \)."""
-        if phrslur.token == '\(':
+        if phrslur.token == r'\(':
             self.slurcount += 1
             self.phrslurnr = self.slurcount
             self.mediator.set_slur(self.phrslurnr, "start", phrasing=True)
-        elif phrslur.token == '\)':
+        elif phrslur.token == r'\)':
             self.mediator.set_slur(self.phrslurnr, "stop", phrasing=True)
             self.slurcount -= 1
 
