@@ -7,6 +7,20 @@ defined at the bottom of this file.
 
 All notable changes to the python-ly project are documented in this file.
 
+## [0.9.10] - 2026-04-04
+
+### Fixed
+
+- Fix MusicXML export losing measure boundaries with chords (#183)
+- Add more robust logic to find the last Bar in a ScorePart (#180)
+- ly2xml, check that list is not empty before working on it (#184). This fixes an error when exporting a LilyPond file to MusicXML: frescobaldi/frescobaldi#1712
+- Fix tests errors (#189)
+
+### Changed
+
+- License changed from GPL-2.0-or-later to GPL-3.0-or-later (#187)
+
+
 ## [0.9.9] - 2025-01-04
 
 ### Changed
@@ -255,7 +269,7 @@ All notable changes to the python-ly project are documented in this file.
 Initial release.
 
 
-
+[0.9.10]: https://github.com/frescobaldi/python-ly/compare/v0.9.9...v0.9.10
 [0.9.9]: https://github.com/frescobaldi/python-ly/compare/v0.9.8...v0.9.9
 [0.9.8]: https://github.com/frescobaldi/python-ly/compare/v0.9.7...v0.9.8
 [0.9.7]: https://github.com/frescobaldi/python-ly/compare/v0.9.6...v0.9.7
