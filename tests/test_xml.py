@@ -76,6 +76,10 @@ def test_no_barcheck():
     compare_output('no_barcheck')
 
 
+def test_chord_duration():
+    compare_output('chord_duration')
+
+
 def ly_to_xml(filename):
     """Read Lilypond file and return XML string."""
     writer = ly.musicxml.writer()

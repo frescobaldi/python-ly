@@ -565,6 +565,7 @@ class Mediator():
         self.current_note.set_duration(duration)
         self.current_lynote = note
         self.check_current_note(rel)
+        self.increase_bar_dura(duration)
 
     def new_chordnote(self, note, rel):
         chord_note = self.create_barnote_from_note(note)
@@ -601,6 +602,7 @@ class Mediator():
                 cn.set_tie('stop')
             self.bar.add(cn)
         self.tied = False
+        self.increase_bar_dura(duration)
 
     def clear_chord(self):
         self.q_chord = self.current_chord
