@@ -27,7 +27,7 @@ The Mapping object normally maps a token's class basically to a CSS class and
 possibly a base CSS class. This way you can define base styles (e.g. string,
 comment, etc) and have specific classes (e.g. LilyPond string, Scheme
 comment) inherit from that base style. This CSS class is described by the
-css_class named tuple, with its three fields: mode, name, base. E.g.
+c_class named tuple, with its three fields: mode, name, base. E.g.
 ('lilypond', 'articulation', 'keyword'). The base field may be None.
 
 The css classes are mapped to dictionaries of css properties, like
@@ -388,7 +388,7 @@ class css_style_attribute_formatter(object):
             return 'style="{0}"'.format(' '.join(map(css_item, sorted(d.items()))))
 
 
-def format_stylesheet(scheme=default_scheme):
+def format_stylesheet(scheme=default_scheme, parent_selector=None):
     """Return a formatted stylesheet for the stylesheet scheme dictionary."""
     sheet = []
     key = lambda i: '' if i[0] is None else i[0]
@@ -401,6 +401,8 @@ def format_stylesheet(scheme=default_scheme):
                 selector = 'span.{0}-{1}'.format(mode, css_class)
             else:
                 selector = '.' + css_class
+            if parent_selector:
+                selector = '{0} {1}'.format(parent_selector, selector)
             sheet.append(css_group(selector, d))
     return '\n'.join(sheet)
 
@@ -588,10 +590,11 @@ class HtmlWriter(object):
         else:
             formatter = format_css_span_class
             wrap_type = '#' if self.wrapper_attribute == 'id' else '.'
-            css.append(css_group(wrap_type + self.document_id, doc_style))
+            parent_selector = wrap_type + self.document_id
+            css.append(css_group(parent_selector, doc_style))
             if self.number_lines:
                 css.append(css_group(wrap_type + self.linenumbers_id, num_style))
-            css.append(format_stylesheet(self.css_scheme))
+            css.append(format_stylesheet(self.css_scheme, parent_selector))
 
         body = html(cursor, self.css_mapper or css_mapper(), formatter)
 
