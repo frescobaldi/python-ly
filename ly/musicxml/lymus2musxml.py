@@ -91,6 +91,7 @@ class ParseSource():
         self.phrslurnr = 0
         self.mark = False
         self.pickup = False
+        self.markup_trails_note = False
 
     def parse_text(self, ly_text, filename=None):
         """Parse the LilyPond source specified as text.
@@ -346,7 +347,7 @@ class ParseSource():
             self.mediator.set_tuplspan_dur(duration.token, duration.tokens)
             self.tupl_span = False
         elif self.pickup:
-            self.mediator.set_pickup()
+            self.mediator.set_pickup(duration.token, duration.tokens)
             self.pickup = False
         else:
             self.mediator.new_duration_token(duration.token, duration.tokens)
@@ -440,6 +441,7 @@ class ParseSource():
 
     def Grace(self, grace):
         self.grace_seq = True
+        self.mediator.set_grace_seq(True)
 
     def TimeSignature(self, timeSign):
         self.mediator.new_time(timeSign.numerator(), timeSign.fraction(), self.numericTime)
@@ -529,10 +531,13 @@ class ParseSource():
             self.tupl_span = True
 
     def Markup(self, markup):
-        pass
+        # Only markup written as a postfix event (-, ^ or _) follows its note;
+        # \mark, \tempo and standalone markup precede it.
+        self.markup_trails_note = isinstance(markup.parent(),
+                                             ly.music.items.Postfix)
 
     def MarkupWord(self, markupWord):
-        self.mediator.new_word(markupWord.token)
+        self.mediator.new_word(markupWord.token, self.markup_trails_note)
 
     def MarkupList(self, markuplist):
         pass
@@ -622,6 +627,7 @@ class ParseSource():
             self.fraction = None
         elif isinstance(end.node, ly.music.items.Grace): #Grace
             self.grace_seq = False
+            self.mediator.set_grace_seq(False)
         elif end.node.token == '\\repeat':
             if end.node.specifier() == 'volta':
                 self.mediator.new_repeat('backward')

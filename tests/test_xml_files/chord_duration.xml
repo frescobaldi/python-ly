@@ -5,7 +5,7 @@
   <identification>
     <encoding>
       <software>python-ly 0.9.10</software>
-      <encoding-date>2026-01-26</encoding-date>
+      <encoding-date>2026-08-17</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -52,8 +52,6 @@
         <voice>1</voice>
         <type>whole</type>
       </note>
-    </measure>
-    <measure number="3">
       <note>
         <chord />
         <pitch>
@@ -74,6 +72,8 @@
         <voice>1</voice>
         <type>whole</type>
       </note>
+    </measure>
+    <measure number="3">
       <note>
         <pitch>
           <step>E</step>
