@@ -83,6 +83,7 @@ class Mediator():
         self.multiple_rest_bar = None
         self.current_mark = 1
         self.bar_is_pickup = False
+        self.obj_bar = None
         self.stem_dir = None
 
     def new_header_assignment(self, name, value):
@@ -335,6 +336,7 @@ class Mediator():
     def add_to_bar(self, obj):
         if self.bar is None:
             self.new_bar()
+        self.obj_bar = self.bar
         self.bar.add(obj)
 
     def create_barline(self, bl):
@@ -636,8 +638,9 @@ class Mediator():
         pos = [self.current_note.base_note, self.current_note.octave]
         self.current_note = xml_objs.BarRest(dur, voice, pos=pos)
         self.check_duration(rest=True)
-        self.bar.obj_list.pop()
-        self.bar.add(self.current_note)
+        # The note may have completed its bar, leaving self.bar on the next one.
+        self.obj_bar.obj_list.pop()
+        self.obj_bar.add(self.current_note)
 
     def set_mult_rest(self):
         self.multiple_rest = True
