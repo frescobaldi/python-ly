@@ -122,7 +122,10 @@ class CreateMusicXML():
         """Create new measure """
         if pickup and self.bar_nr == 1:
             self.bar_nr = 0
-        self.current_bar = etree.SubElement(self.current_part, "measure", number=str(self.bar_nr))
+        attrs = {'number': str(self.bar_nr)}
+        if self.bar_nr == 0:
+            attrs['implicit'] = 'yes'
+        self.current_bar = etree.SubElement(self.current_part, "measure", **attrs)
         self.bar_nr +=1
         if bar_attrs:
             self.new_bar_attr(**bar_attrs)

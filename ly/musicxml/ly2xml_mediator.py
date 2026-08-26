@@ -61,6 +61,7 @@ class Mediator():
         self.group = None
         self.group_num = 0
         self.current_chord = []
+        self.chord_bar = None
         self.q_chord = []
         self.prev_pitch = None
         self.prev_chord_pitch = None
@@ -83,6 +84,8 @@ class Mediator():
         self.multiple_rest_bar = None
         self.current_mark = 1
         self.bar_is_pickup = False
+        self.pickup_dura = None
+        self.in_grace = False
         self.stem_dir = None
 
     def new_header_assignment(self, name, value):
@@ -160,6 +163,7 @@ class Mediator():
                 self.score.partlist.append(self.part)
         self.insert_into = self.part
         self.bar = None
+        self.reset_bar_progress()
 
     def part_not_empty(self):
         return self.part and self.part.barlist
@@ -318,8 +322,11 @@ class Mediator():
         if self.sections:
             return self.sections[0].barlist
 
-    def set_pickup(self):
+    def set_pickup(self, token, tokens):
+        r"""Set the length of the incomplete bar declared by \partial."""
         self.bar_is_pickup = True
+        # A zero-length \partial declares no pickup bar at all.
+        self.pickup_dura = ly.duration.fraction((token,) + tokens) or None
 
     def new_bar(self, fill_prev=True):
         if self.bar and fill_prev:
@@ -388,15 +395,21 @@ class Mediator():
             self.current_attr.set_mark(self.bijective(self.current_mark))
         self.current_mark += 1
 
-    def new_word(self, word):
+    def new_word(self, word, trails_note=False):
         if self.bar is None:
             self.new_bar()
-        if self.bar.has_attr():
-            self.current_attr.set_word(word)
-        else:
-            new_bar_attr = xml_objs.BarAttr()
-            new_bar_attr.set_word(word)
-            self.add_to_bar(new_bar_attr)
+        bar = self.bar
+        barlist = self.insert_into.barlist
+        if (trails_note and not bar.has_music()
+                and len(barlist) > 1 and bar is barlist[-1]):
+            # The note this markup trails completed the previous bar.
+            bar = barlist[-2]
+        attr = next((obj for obj in bar.obj_list
+                     if isinstance(obj, xml_objs.BarAttr)), None)
+        if attr is None:
+            attr = xml_objs.BarAttr()
+            bar.add(attr)
+        attr.set_word(word)
 
     def new_time(self, num, den, numeric=False):
         self.current_time = Fraction(num, den.denominator)
@@ -421,10 +434,23 @@ class Mediator():
     def set_relative(self, note):
         self.prev_pitch = note.pitch
 
+    def reset_bar_progress(self):
+        """Forget the bar position, which means nothing in the next part."""
+        self.bar_dura = Fraction(0, 4)
+        self.pickup_dura = None
+        self.bar_is_pickup = False
+
+    def set_grace_seq(self, value):
+        self.in_grace = value
+
     def increase_bar_dura(self, duration):
+        if self.in_grace:
+            # Grace notes ornament the next note; they take up no bar time.
+            return
         self.bar_dura += duration[0] * duration[1]
-        if self.bar_dura >= self.current_time:
-            self.bar_dura = 0
+        bar_length = self.current_time if self.pickup_dura is None else self.pickup_dura
+        if self.bar_dura >= bar_length:
+            self.reset_bar_progress()
             self.new_bar()
 
     def new_note(self, note, rel=False, is_unpitched=False):
@@ -565,6 +591,8 @@ class Mediator():
         self.current_note.set_duration(duration)
         self.current_lynote = note
         self.check_current_note(rel)
+        # The other chord notes follow, possibly after this bar was closed.
+        self.chord_bar = self.bar
         self.increase_bar_dura(duration)
 
     def new_chordnote(self, note, rel):
@@ -582,7 +610,7 @@ class Mediator():
         chord_note.set_octave(p.octave + 3)
         self.prev_chord_pitch = p
         chord_note.chord = True
-        self.bar.add(chord_note)
+        self.chord_bar.add(chord_note)
         return chord_note
 
     def copy_prev_chord(self, duration):
@@ -607,6 +635,7 @@ class Mediator():
     def clear_chord(self):
         self.q_chord = self.current_chord
         self.current_chord = []
+        self.chord_bar = None
         self.prev_chord_pitch = None
 
     def chord_end(self):

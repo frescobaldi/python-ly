@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 2.0 Partwise//EN"
                                 "http://www.musicxml.org/dtds/partwise.dtd">
 <score-partwise version="3.0">
@@ -14,7 +14,7 @@
     </score-part>
   </part-list>
   <part id="P1">
-    <measure number="0">
+    <measure number="0" implicit="yes">
       <attributes>
         <divisions>2</divisions>
         <time symbol="common">
