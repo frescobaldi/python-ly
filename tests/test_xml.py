@@ -80,6 +80,10 @@ def test_chord_duration():
     compare_output('chord_duration')
 
 
+def test_addlyrics():
+    compare_output('addlyrics')
+
+
 def ly_to_xml(filename):
     """Read Lilypond file and return XML string."""
     writer = ly.musicxml.writer()
