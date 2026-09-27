@@ -580,6 +580,9 @@ class ParseSource():
     def LyricMode(self, lyricmode):
         r"""A \lyricmode, \lyrics or \addlyrics expression."""
         self.alt_mode = 'lyric'
+        if lyricmode.token == '\\addlyrics':
+            self.mediator.new_addlyrics_section()
+            self.sims_and_seqs.append('lyrics')
 
     def Override(self, override):
         r"""An \override command."""
@@ -664,6 +667,9 @@ class ParseSource():
             self.mediator.chord_end()
         elif end.node.token == '\\lyricsto':
             self.mediator.check_lyrics(end.node.context_id())
+            self.sims_and_seqs.pop()
+        elif end.node.token == '\\addlyrics':
+            self.mediator.check_addlyrics()
             self.sims_and_seqs.pop()
         elif end.node.token == '\\with':
             self.with_contxt = None
