@@ -117,6 +117,14 @@ class Mediator():
         self.insert_into = lyrics
         self.lyric_sections[name] = lyrics
 
+    def new_addlyrics_section(self):
+        r"""Collect \addlyrics into a lyrics section that is merged
+        into the preceding music when the lyrics end."""
+        lyrics = xml_objs.LyricsSection('addlyrics', None)
+        lyrics.merge_into = self.insert_into
+        self.insert_into = lyrics
+        self.lyric = None
+
     def check_name(self, name, nr=1):
         n = self.get_var_byname(name)
         if n:
@@ -274,6 +282,14 @@ class Mediator():
             voice_section.merge_lyrics(lyrics_section)
         else:
             print("Warning can't merge in lyrics!", voice_section)
+
+    def check_addlyrics(self):
+        r"""Merge the finished \addlyrics section into the music it follows."""
+        lyrics_section = self.insert_into
+        if self.lyric and self.lyric[1] == 'middle':
+            self.lyric[1] = 'end'
+        self.insert_into = lyrics_section.merge_into
+        self.insert_into.merge_lyrics(lyrics_section)
 
     def check_part(self):
         """Adds the latest active section to the part."""
