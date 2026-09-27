@@ -76,6 +76,7 @@ class ParseSource():
         self.numericTime = False
         self.voice_sep = False
         self.sims_and_seqs = []
+        self.implicit_staff = []
         self.override_dict = {}
         self.ottava = False
         self.with_contxt = None
@@ -235,6 +236,10 @@ class ParseSource():
             self.mediator.add_staff_id(context_id)
         elif context == 'Voice':
             self.sims_and_seqs.append('voice')
+            # A Voice outside any Staff gets an implicit Staff (and part)
+            self.implicit_staff.append(self.mediator.part is None)
+            if self.implicit_staff[-1]:
+                self.mediator.new_part()
             if context_id:
                 self.mediator.new_section(context_id)
             else:
@@ -639,6 +644,8 @@ class ParseSource():
             if end.node.context() == 'Voice':
                 self.mediator.check_voices()
                 self.sims_and_seqs.pop()
+                if self.implicit_staff.pop():
+                    self.mediator.check_part()
             elif end.node.context() in group_contexts:
                 self.mediator.close_group()
             elif end.node.context() in staff_contexts:
