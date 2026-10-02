@@ -70,7 +70,7 @@ class IterateXmlObjs():
         for ctag in score.creators:
             self.musxml.add_creator(ctag, score.creators[ctag])
         for itag in score.info:
-            self.musxml.create_score_info(itag, score.info[itag])
+            self.musxml.add_miscellaneous(itag, score.info[itag])
         if score.rights:
             if len(score.rights) > 1:
                 for right in score.rights:

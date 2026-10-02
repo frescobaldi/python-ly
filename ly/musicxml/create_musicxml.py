@@ -50,7 +50,7 @@ class CreateMusicXML():
 
     def __init__(self):
         """Creates the basic structure of the XML without any music."""
-        self.root = etree.Element("score-partwise", version="3.0")
+        self.root = etree.Element("score-partwise", version="4.0")
         self.tree = etree.ElementTree(self.root)
         self.score_info = etree.SubElement(self.root, "identification")
         encoding = etree.SubElement(self.score_info, "encoding")
@@ -73,9 +73,19 @@ class CreateMusicXML():
         self.root.insert(0, mov_title)
 
     def create_score_info(self, tag, info, attr={}):
-        """Create score info."""
-        info_node = etree.SubElement(self.score_info, tag, attr)
+        """Create score info (creator or rights), which precedes the encoding."""
+        info_node = etree.Element(tag, attr)
         info_node.text = info
+        self.score_info.insert(get_tag_index(self.score_info, "encoding"), info_node)
+
+    def add_miscellaneous(self, name, text):
+        """Add a miscellaneous field, e.g. for a header field without a
+        MusicXML element of its own."""
+        misc = self.score_info.find("miscellaneous")
+        if misc is None:
+            misc = etree.SubElement(self.score_info, "miscellaneous")
+        field = etree.SubElement(misc, "miscellaneous-field", name=name)
+        field.text = text
 
     def create_partgroup(self, gr_type, num, name=None, abbr=None, symbol=None):
         """Create a new part group."""
@@ -168,8 +178,8 @@ class CreateMusicXML():
         self.add_unpitched(step, octave)
         if not grace[0]:
             self.add_div_duration(divdur)
-        self.add_duration_type(durtype)
         self.add_voice(voice)
+        self.add_duration_type(durtype)
         if dot:
             for i in range(dot):
                 self.add_dot()
@@ -185,7 +195,7 @@ class CreateMusicXML():
         from fractions import Fraction
         self.mult = Fraction(fraction[1], fraction[0])
         timemod_node = self.get_time_modify()
-        if timemod_node:
+        if timemod_node is not None:
             self.adjust_time_modify(timemod_node, fraction)
         else:
             self.add_time_modify(fraction)
@@ -721,5 +731,5 @@ def get_tag_index(node, tag):
 
 xml_decl_txt = """<?xml version="1.0" encoding="{encoding}"?>"""
 
-doctype_txt = """<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 2.0 Partwise//EN"
+doctype_txt = """<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN"
                                 "http://www.musicxml.org/dtds/partwise.dtd">"""
