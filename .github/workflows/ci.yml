@@ -6,8 +6,11 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - 3.8 # oldest officially supported by python-ly
-          - 3.12 # latest
+          - "3.10" # oldest officially supported by python-ly
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14" # latest
 
     steps:
       - name: Check out code

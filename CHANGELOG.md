@@ -7,6 +7,12 @@ defined at the bottom of this file.
 
 All notable changes to the python-ly project are documented in this file.
 
+## [Unreleased]
+
+### Changed
+
+- Require Python 3.10, and test with Python 3.10 to 3.14
+
 ## [0.9.10] - 2026-04-04
 
 ### Fixed
@@ -269,6 +275,7 @@ All notable changes to the python-ly project are documented in this file.
 Initial release.
 
 
+[Unreleased]: https://github.com/frescobaldi/python-ly/compare/v0.9.10...HEAD
 [0.9.10]: https://github.com/frescobaldi/python-ly/compare/v0.9.9...v0.9.10
 [0.9.9]: https://github.com/frescobaldi/python-ly/compare/v0.9.8...v0.9.9
 [0.9.8]: https://github.com/frescobaldi/python-ly/compare/v0.9.7...v0.9.8

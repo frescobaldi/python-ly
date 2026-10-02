@@ -8,7 +8,7 @@ description = "Tool and library for manipulating LilyPond files"
 readme = "README.rst"
 license = "GPL-3.0-or-later"
 maintainers = [{name = "Wilbert Berendsen", email = "info@frescobaldi.org"}]
-requires-python = ">= 3.8"
+requires-python = ">= 3.10"
 classifiers = [
     'Development Status :: 4 - Beta',
     #'Development Status :: 5 - Production/Stable',
@@ -16,10 +16,11 @@ classifiers = [
     'Operating System :: MacOS :: MacOS X',
     'Operating System :: Microsoft :: Windows',
     'Operating System :: POSIX',
-    'Programming Language :: Python :: 3.8',
-    'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
     'Topic :: Multimedia :: Sound/Audio',
     'Topic :: Text Editors',
 ]
