@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 2.0 Partwise//EN"
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN"
                                 "http://www.musicxml.org/dtds/partwise.dtd">
-<score-partwise version="3.0">
+<score-partwise version="4.0">
   <movement-title>Somebody to love</movement-title>
   <identification>
     <encoding>
@@ -16,6 +16,7 @@
     <score-part id="P1">
       <part-name />
     </score-part>
+    <part-group type="stop" number="1" />
     <part-group type="start" number="2">
       <group-symbol>bracket</group-symbol>
     </part-group>
@@ -23,7 +24,6 @@
       <part-name />
     </score-part>
     <part-group type="stop" number="2" />
-    <part-group type="stop" number="1" />
   </part-list>
   <part id="P1">
     <measure number="1">

@@ -373,6 +373,7 @@ lilypond_music_commands = (
     'palmMuteOn',  # since 2.16
     'parallelMusic',
     'parenthesize',
+    'partcombine', # deprecated, till 2.20
     'partCombine',
     'partCombineApart',
     'partCombineAutomatic',

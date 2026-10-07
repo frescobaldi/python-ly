@@ -29,7 +29,9 @@ from __future__ import division
 from fractions import Fraction
 
 import ly.duration
+import ly.music.items
 import ly.pitch
+import ly.pitch.transpose
 
 from . import xml_objs
 
@@ -48,9 +50,12 @@ class Mediator():
         self.current_lynote = None
         self.current_is_rest = False
         self.current_time = Fraction(4, 4)
-        self.bar_dura = Fraction(0, 4)
+        self.moment = Fraction(0)
+        self.time_changes = {Fraction(0): Fraction(1)}
+        self.partials = {}
+        self.simultaneous = []
+        self.note_tail = None
         self.action_onnext = []
-        self.divisions = 1
         self.dur_token = "4"
         self.dur_tokens = ()
         self.dots = 0
@@ -68,12 +73,17 @@ class Mediator():
         self.staff_id_dict = {}
         self.store_unset_staff = False
         self.staff_unset_notes = {}
-        self.lyric_sections = {}
+        self.notes = []
+        self.voice_starts = {}
+        self.voice_notes = {}
+        self.lyric_sections = []
         self.lyric = None
         self.lyric_syll = False
         self.lyric_nr = 1
         self.ongoing_wedge = False
         self.ongoing_dashes = False
+        self.after_empty_chord = False
+        self.dynamics_onnext = []
         self.octdiff = 0
         self.prev_tremolo = 8
         self.tupl_dur = 0
@@ -82,8 +92,11 @@ class Mediator():
         self.multiple_rest = False
         self.multiple_rest_bar = None
         self.current_mark = 1
-        self.bar_is_pickup = False
         self.stem_dir = None
+        self.grace = None
+        self.prev_bar = None
+        self.after_grace_bar = None
+        self.transposers = []
 
     def new_header_assignment(self, name, value):
         """Distributing header information."""
@@ -114,8 +127,21 @@ class Mediator():
     def new_lyric_section(self, name, voice_id):
         name = self.check_name(name)
         lyrics = xml_objs.LyricsSection(name, voice_id)
+        # each lyrics section of a voice is a new stanza
+        self.lyric_nr = 1 + sum(l.voice_id == voice_id for l in self.lyric_sections)
+        self.lyric = None
+        self.lyric_syll = False
         self.insert_into = lyrics
-        self.lyric_sections[name] = lyrics
+        self.lyric_sections.append(lyrics)
+
+    def new_lyrics_voice(self, voice):
+        """Start collecting the notes of a voice lyrics can refer to."""
+        self.voice_starts[voice] = len(self.notes)
+
+    def end_lyrics_voice(self, voice):
+        """Stop collecting the notes of the voice."""
+        start = self.voice_starts.pop(voice)
+        self.voice_notes.setdefault(voice, []).extend(self.notes[start:])
 
     def check_name(self, name, nr=1):
         n = self.get_var_byname(name)
@@ -148,11 +174,12 @@ class Mediator():
     def change_group_bracket(self, system_start):
         self.group.set_bracket(get_group_symbol(system_start))
 
-    def new_part(self, pid=None, to_part=None, piano=False):
+    def new_part(self, pid=None, to_part=None, piano=False, chord_names=False):
         if piano:
             self.part = xml_objs.ScorePart(2, pid, to_part)
         else:
-            self.part = xml_objs.ScorePart(part_id=pid, to_part=to_part)
+            self.part = xml_objs.ScorePart(part_id=pid, to_part=to_part,
+                                           chord_names=chord_names)
         if not to_part:
             if self.group:
                 self.group.partlist.append(self.part)
@@ -227,8 +254,10 @@ class Mediator():
         snippet = self.get_var_byname(snippet_name)
         continue_barlist(snippet.merge_barlist)
         for bb in snippet.barlist:
-            for b in bb.obj_list:
-                self.bar.add(b)
+            # skip the empty bar started at the end of the snippet
+            if len(bb.obj_list) > 1 or bb.obj_list[0].has_attr():
+                for b in bb.obj_list:
+                    self.bar.add(b)
             if bb.list_full:
                 self.new_bar()
 
@@ -268,12 +297,10 @@ class Mediator():
         the referenced voice."""
         if self.lyric[1] == 'middle':
             self.lyric[1] = 'end'
-        lyrics_section = self.lyric_sections['lyricsto'+voice_id]
-        voice_section = self.get_var_byname(lyrics_section.voice_id)
-        if voice_section:
-            voice_section.merge_lyrics(lyrics_section)
+        if voice_id in self.voice_notes:
+            self.lyric_sections[-1].attach_to(self.voice_notes[voice_id])
         else:
-            print("Warning can't merge in lyrics!", voice_section)
+            print("Warning can't merge in lyrics!", voice_id)
 
     def check_part(self):
         """Adds the latest active section to the part."""
@@ -312,23 +339,69 @@ class Mediator():
         if self.score.is_empty():
             self.new_part()
             self.part.barlist.extend(self.get_first_var())
+        self.score.merge_chord_names()
         self.score.merge_globally(self.score.glob_section, override=True)
 
     def get_first_var(self):
         if self.sections:
             return self.sections[0].barlist
 
-    def set_pickup(self):
-        self.bar_is_pickup = True
+    def set_pickup(self, length):
+        self.partials[self.moment] = length
+        if self.bar is None:
+            self.new_bar()
+        self.bar.pickup = not self.moment
+
+    def measure_grid(self, moment):
+        """Return the start of the time signature or \\partial in effect at
+        moment, the measure length and the first barline after the start."""
+        start = max(m for m in self.grid_changes() if m <= moment)
+        length = self.time_changes[max(m for m in self.time_changes if m <= moment)]
+        return start, length, start + self.partials.get(start, length)
+
+    def grid_changes(self):
+        """Return the moments where the barlines are laid out anew."""
+        return set(self.time_changes) | set(self.partials)
+
+    def next_barline(self, moment):
+        """Return the moment of the first barline after moment."""
+        start, length, barline = self.measure_grid(moment)
+        if barline <= moment:
+            barline += ((moment - barline) // length + 1) * length
+        return min([barline] + [m for m in self.grid_changes() if m > moment])
+
+    def is_barline(self, moment):
+        """Return True if there is a barline at moment."""
+        start, length, barline = self.measure_grid(moment)
+        return moment == start or moment >= barline and (moment - barline) % length == 0
+
+    def bar_check(self):
+        if not self.is_barline(self.moment):
+            print("Warning: bar check failed at", self.moment)
+
+    def new_simultaneous(self):
+        """Store the start of a simultaneous expression (<< >>)."""
+        self.simultaneous.append([self.moment, self.moment])
+
+    def next_simultaneous(self):
+        """A part of a simultaneous expression is parsed: the next one
+        starts again at the start."""
+        sim = self.simultaneous[-1]
+        sim[1] = max(sim[1], self.moment)
+        self.moment = sim[0]
+
+    def end_simultaneous(self):
+        """A simultaneous expression ends with its longest part."""
+        self.moment = max(self.simultaneous.pop()[1], self.moment)
 
     def new_bar(self, fill_prev=True):
+        self.prev_bar = self.bar
         if self.bar and fill_prev:
             self.bar.list_full = True
         self.current_attr = xml_objs.BarAttr()
         self.bar = xml_objs.Bar()
-        if self.bar_is_pickup:
+        if not self.moment and 0 in self.partials:
             self.bar.pickup = True
-            self.bar_is_pickup = False
         self.bar.obj_list = [self.current_attr]
         self.insert_into.barlist.append(self.bar)
 
@@ -338,18 +411,58 @@ class Mediator():
         self.bar.add(obj)
 
     def create_barline(self, bl):
+        # Barlines are written at the right side of a measure, so a barline
+        # before any music in the part has no place and is left out.
+        if self.bar is None:
+            return
         barline = xml_objs.BarAttr()
         barline.set_barline(bl)
         self.bar.add(barline)
         self.new_bar()
 
-    def new_repeat(self, rep):
+    def ended_bar(self):
+        """Return the bar in which the music read so far ends.
+
+        That is the current bar, unless it was just started by the last note
+        filling up the previous one.
+        """
+        if self.bar.has_music():
+            return self.bar
+        return self.insert_into.barlist[-2]
+
+    def new_repeat(self, rep, times=None):
+        """A forward repeat is set on the left barline of the current bar,
+        a backward repeat on the right barline of the bar that just ended."""
         barline = xml_objs.BarAttr()
         barline.set_barline(rep)
         barline.repeat = rep
-        if self.bar is None:
-            self.new_bar()
-        self.bar.add(barline)
+        if rep == 'forward':
+            barline.location = 'left'
+            self.add_to_bar(barline)
+        else:
+            barline.repeat_times = times
+            self.ended_bar().add(barline)
+
+    def start_ending(self, number):
+        """Start an alternative ending (volta bracket) on the current bar."""
+        barline = xml_objs.BarAttr()
+        barline.location = 'left'
+        barline.ending = (number, 'start')
+        self.add_to_bar(barline)
+
+    def stop_ending(self, number, times=None):
+        """Stop an alternative ending, followed by a backward repeat
+        played the given number of times. Without times the ending is the
+        last one and its bracket is left open."""
+        barline = xml_objs.BarAttr()
+        if times:
+            barline.set_barline('backward')
+            barline.repeat = 'backward'
+            barline.repeat_times = times
+            barline.ending = (number, 'stop')
+        else:
+            barline.ending = (number, 'discontinue')
+        self.ended_bar().add(barline)
 
     def new_key(self, key_name, mode):
         if self.bar is None:
@@ -400,7 +513,8 @@ class Mediator():
 
     def new_time(self, num, den, numeric=False):
         self.current_time = Fraction(num, den.denominator)
-        if self.bar is None:
+        self.time_changes[self.moment] = self.current_time
+        if self.bar is None or self.bar.has_music():
             self.new_bar()
         self.current_attr.set_time([num, den.denominator], numeric)
 
@@ -418,14 +532,68 @@ class Mediator():
             else:
                 self.current_attr.set_clef(self.clef)
 
+    def push_transposition(self, from_pitch, to_pitch):
+        r"""Start transposing the pitches of new notes and keys (\transpose)."""
+        self.transposers.append(
+            ly.pitch.transpose.Transposer(from_pitch, to_pitch))
+
+    def pop_transposition(self):
+        self.transposers.pop()
+
+    def transpose(self, pitch):
+        """Return a copy of pitch transposed by all current transpositions.
+
+        The innermost transposition is applied first.
+        """
+        p = pitch.copy()
+        for t in reversed(self.transposers):
+            t.transpose(p)
+        return p
+
     def set_relative(self, note):
         self.prev_pitch = note.pitch
 
-    def increase_bar_dura(self, duration):
-        self.bar_dura += duration[0] * duration[1]
-        if self.bar_dura >= self.current_time:
-            self.bar_dura = 0
+    def end_note(self):
+        """The current note, rest or chord is complete: move the moment
+        to its end. A note that crosses a barline is split and tied over it,
+        and a new bar is started at the barline."""
+        notes = self.current_chord or [self.current_note]
+        end = self.moment + notes[0].length()
+        barline = self.next_barline(self.moment)
+        if end > barline:
+            while end > barline:
+                notes = self.set_length(notes, barline - self.moment)
+                self.moment = barline
+                self.new_bar()
+                notes = self.continue_notes(notes)
+                barline = self.next_barline(barline)
+            notes = self.set_length(notes, end - self.moment)
+        self.moment = end
+        if end == barline:
             self.new_bar()
+        self.note_tail = notes[0]
+
+    def set_length(self, notes, length):
+        """Give the notes (of a note or chord) the length, tying more notes
+        to them when one note value is not enough. Return the last notes."""
+        scaling = notes[0].tuplet_scaling()
+        for i, (value, dots, durtype) in enumerate(note_values(length / scaling)):
+            if i:
+                notes = self.continue_notes(notes)
+            for n in notes:
+                n.set_duration((value, Fraction(1)), durtype)
+                n.dot = dots
+        return notes
+
+    def continue_notes(self, notes):
+        """Add and return the continuations of the notes of a note or chord."""
+        conts = [n.continuation() for n in notes]
+        for c in conts[1:]:
+            # the notes of a chord share their ties, see new_chordnote
+            c.tie = conts[0].tie
+        for c in conts:
+            self.bar.add(c)
+        return conts
 
     def new_note(self, note, rel=False, is_unpitched=False):
         self.current_is_rest = False
@@ -437,11 +605,12 @@ class Mediator():
             self.current_note = self.create_barnote_from_note(note)
             self.current_lynote = note
             self.check_current_note(rel)
+        if self.grace:
+            self.current_note.set_grace(*self.grace)
         if self.stem_dir:
             self.current_note.set_stem_direction(self.stem_dir)
         self.do_action_onnext(self.current_note)
         self.action_onnext = []
-        self.increase_bar_dura(note.duration)
 
     def new_iso_dura(self, note, rel=False, is_unpitched=False):
         """
@@ -457,7 +626,11 @@ class Mediator():
             self.copy_prev_chord(note.duration)
         else:
             if not is_unpitched:
-                note.pitch = self.current_lynote.pitch
+                if self.current_lynote:
+                    note.pitch = self.current_lynote.pitch
+                else:
+                    # like LilyPond, use c' if there is no previous pitch
+                    note.pitch = ly.pitch.Pitch(octave=1)
             self.new_note(note, rel, is_unpitched)
 
     def create_unpitched(self, unpitched):
@@ -467,8 +640,9 @@ class Mediator():
 
     def create_barnote_from_note(self, note):
         """Create a xml_objs.BarNote from ly.music.items.Note."""
-        p = getNoteName(note.pitch.note)
-        alt = get_xml_alter(note.pitch.alter)
+        pitch = self.transpose(note.pitch)
+        p = getNoteName(pitch.note)
+        alt = get_xml_alter(pitch.alter)
         try:
             acc = note.accidental_token
         except AttributeError:
@@ -501,8 +675,9 @@ class Mediator():
             if self.tied:
                 self.current_note.set_tie('stop')
                 self.tied = False
+            self.notes.append(self.current_note)
+        self.note_tail = self.current_note
         self.check_duration(rest)
-        self.check_divs()
         if self.staff:
             self.current_note.set_staff(self.staff)
             if self.store_unset_staff:
@@ -511,6 +686,10 @@ class Mediator():
                 else:
                     self.staff_unset_notes[self.staff] = [self.current_note]
         self.add_to_bar(self.current_note)
+        self.after_empty_chord = False
+        for dynamics in self.dynamics_onnext:
+            self.set_dynamics(dynamics)
+        self.dynamics_onnext = []
 
     def stem_direction(self, direction):
         if direction == '\\stemUp':
@@ -522,7 +701,7 @@ class Mediator():
 
     def set_octave(self, relative):
         """Set octave by getting the octave of an absolute note + 3."""
-        p = self.current_lynote.pitch.copy()
+        p = self.transpose(self.current_lynote.pitch)
         if relative:
             p.makeAbsolute(self.prev_pitch)
         self.prev_pitch = p
@@ -558,6 +737,8 @@ class Mediator():
             self.current_chord.append(self.current_note)
         else:
             self.current_chord.append(self.new_chordnote(note, rel))
+        if self.grace:
+            self.current_chord[-1].set_grace(*self.grace)
         self.do_action_onnext(self.current_chord[-1])
 
     def new_chordbase(self, note, duration, rel=False):
@@ -565,7 +746,6 @@ class Mediator():
         self.current_note.set_duration(duration)
         self.current_lynote = note
         self.check_current_note(rel)
-        self.increase_bar_dura(duration)
 
     def new_chordnote(self, note, rel):
         chord_note = self.create_barnote_from_note(note)
@@ -576,7 +756,7 @@ class Mediator():
         chord_note.tuplet = self.current_note.tuplet
         if not self.prev_chord_pitch:
             self.prev_chord_pitch = self.prev_pitch
-        p = note.pitch.copy()
+        p = self.transpose(note.pitch)
         if(rel):
             p.makeAbsolute(self.prev_chord_pitch)
         chord_note.set_octave(p.octave + 3)
@@ -584,6 +764,48 @@ class Mediator():
         chord_note.chord = True
         self.bar.add(chord_note)
         return chord_note
+
+    def new_drum_chordnote(self, duration):
+        """A note of a chord in drum mode; the first one is the chord base."""
+        if self.current_chord:
+            chord_note = xml_objs.Unpitched(self.current_note.duration)
+            chord_note.set_durtype(self.current_note.type)
+            chord_note.dot = self.current_note.dot
+            chord_note.tuplet = self.current_note.tuplet
+            chord_note.chord = True
+            self.bar.add(chord_note)
+        else:
+            self.current_note = chord_note = xml_objs.Unpitched(duration)
+            self.check_current_note(is_unpitched=True)
+        self.current_chord.append(chord_note)
+        self.do_action_onnext(chord_note)
+
+    def new_chordmode_chord(self, note, chord):
+        """A note in chord mode, written as the notes of the
+        ly.musicxml.chords.Chord."""
+        self.clear_chord()
+        for i, pitch in enumerate(chord.pitches()):
+            chord_note = ly.music.items.Note()
+            chord_note.pitch = pitch
+            self.new_chord(chord_note, note.duration, chord_base=not i)
+        self.chord_end()
+
+    def new_harmony(self, note, chord):
+        """A note in chord mode, written as a chord name (harmony) on an
+        invisible rest."""
+        kind, degrees = chord.kind()
+        root = self.transpose(chord.root)
+        bass = chord.bass_pitch()
+        if bass:
+            bass = self.transpose(bass)
+            bass = (getNoteName(bass.note), get_xml_alter(bass.alter))
+        self.current_is_rest = True
+        self.clear_chord()
+        self.current_note = xml_objs.BarRest(note.duration, self.voice, invisible=True)
+        self.current_note.harmonies = [xml_objs.Harmony(
+            getNoteName(root.note), get_xml_alter(root.alter),
+            kind, bass, degrees)]
+        self.check_current_note(rest=True)
 
     def copy_prev_chord(self, duration):
         if self.current_chord:
@@ -602,7 +824,6 @@ class Mediator():
                 cn.set_tie('stop')
             self.bar.add(cn)
         self.tied = False
-        self.increase_bar_dura(duration)
 
     def clear_chord(self):
         self.q_chord = self.current_chord
@@ -627,7 +848,6 @@ class Mediator():
         elif rtype == 's' or rtype == '\\skip':
             self.current_note = xml_objs.BarRest(dur, self.voice, skip=True)
         self.check_current_note(rest=True)
-        self.increase_bar_dura(dur)
 
     def note2rest(self):
         """Note used as rest position transformed to rest."""
@@ -660,6 +880,7 @@ class Mediator():
         sk = self.current_note.skip
         multp = int(bs[1] * (bs[0]/self.current_time))
         for i in range(1, int(multp)):
+            self.moment += dur[0] * dur[1]
             self.new_bar()
             rest_copy = xml_objs.BarRest(dur, voice=voc, show_type=st, skip=sk)
             self.add_to_bar(rest_copy)
@@ -670,7 +891,7 @@ class Mediator():
         if self.tupl_dur:
             if self.tupl_sum == 0:
                 ttype = "start"
-            base, scaling = self.current_lynote.duration
+            base, scaling = self.current_note.duration
             self.tupl_sum += (1 / tuplscaling) * base * scaling
             if self.tupl_sum == self.tupl_dur:
                 ttype = "stop"
@@ -682,7 +903,7 @@ class Mediator():
             self.current_note.set_tuplet(tfraction, ttype, nr)
 
     def change_tuplet_type(self, index, newtype):
-        self.current_note.tuplet[index].ttype = newtype
+        self.note_tail.tuplet[index].ttype = newtype
 
     def set_tuplspan_dur(self, token=None, tokens=None, fraction=None):
         """
@@ -709,7 +930,7 @@ class Mediator():
     def tie_to_next(self):
         tie_type = 'start'
         self.tied = True
-        self.current_note.set_tie(tie_type)
+        self.note_tail.set_tie(tie_type)
 
     def set_slur(self, nr, slur_type, phrasing=False):
         """
@@ -744,7 +965,18 @@ class Mediator():
             elif ret:
                 self.current_note.add_articulation(ret)
 
+    def empty_chord(self):
+        """An empty chord <>, its dynamics belong to the next note or rest."""
+        self.after_empty_chord = True
+
     def new_dynamics(self, dynamics):
+        if self.after_empty_chord:
+            self.dynamics_onnext.append(dynamics)
+        else:
+            self.set_dynamics(dynamics)
+
+    def set_dynamics(self, dynamics):
+        """Set the dynamics on the current note."""
         hairpins = {'<': 'crescendo', '>': 'diminuendo'}
         text_dyn = {'cresc': 'cresc.', 'decresc': 'descresc.',
                     'dim': 'dim.'}
@@ -773,11 +1005,20 @@ class Mediator():
         else:
             self.current_note.set_dynamics_mark(dynamics)
 
-    def new_grace(self, slash=0):
-        self.current_note.set_grace(slash)
+    def start_grace(self, slash=0, steal_time_previous=0):
+        """The following notes are grace notes, after-graces if
+        steal_time_previous is set."""
+        self.grace = (slash, steal_time_previous)
+        if steal_time_previous and not self.bar.has_music():
+            # the main note filled its bar, the after-graces belong to its end
+            self.after_grace_bar = self.bar
+            self.bar = self.prev_bar
 
-    def new_chord_grace(self, slash=0):
-        self.current_chord[-1].set_grace(slash)
+    def end_grace(self):
+        self.grace = None
+        if self.after_grace_bar:
+            self.bar = self.after_grace_bar
+            self.after_grace_bar = None
 
     def new_gliss(self, line=None):
         if line:
@@ -926,7 +1167,7 @@ class Mediator():
                 self.lyric_syll = True
         elif item == '__':
             self.lyric.append("extend")
-        elif item == '\\skip':
+        elif item in ('\\skip', '_'):
             self.insert_into.barlist.append("skip")
 
     def duration_from_tokens(self, tokens):
@@ -939,33 +1180,6 @@ class Mediator():
             elif '*' in t and '/' not in t:
                 rs = int(t[1:])
         return (dots, rs)
-
-    def check_divs(self):
-        """ The new duration is checked against current divisions """
-        base = self.current_note.duration[0]
-        scaling = self.current_note.duration[1]
-        divs = self.divisions
-        tupl = self.current_note.tuplet
-        if not tupl:
-            a = 4
-            if base:
-                b = 1/base
-            else:
-                b = 1
-                print("Warning problem checking duration!")
-        else:
-            num = 1
-            den = 1
-            for t in tupl:
-                num *= t.fraction[0]
-                den *= t.fraction[1]
-            a = 4*den
-            b = (1/base)*num
-        c = a * divs * scaling
-        predur, mod = divmod(c, b)
-        if mod > 0:
-            mult = get_mult(a, b)
-            self.divisions = divs*mult
 
     def add_break(self):
         if self.bar is None:
@@ -1069,9 +1283,26 @@ def clefname2clef(clefname):
         clef = 0
     return clef
 
-def get_mult(num, den):
-    simple = Fraction(num, den)
-    return simple.denominator
+def note_values(length):
+    """Split a length (in whole notes) into the values of plain or dotted
+    notes, as (value, dots, type) tuples."""
+    values = []
+    while length:
+        log, base = 0, Fraction(1)
+        while base > length:
+            log, base = log + 1, base / 2
+        while log > -3 and base * 2 <= length:
+            log, base = log - 1, base * 2
+        value, dots = base, 0
+        if length.denominator & (length.denominator - 1):
+            # not a sum of note values, e.g. in a 4:3 tuplet
+            value = length
+        while value + base / 2 ** (dots + 1) <= length:
+            dots += 1
+            value += base / 2 ** dots
+        values.append((value, dots, durval2type(ly.duration.tostring(log))))
+        length -= value
+    return values
 
 def get_voice(c):
     voices = ["voiceOne", "voiceTwo", "voiceThree", "voiceFour"]
@@ -1114,7 +1345,7 @@ def calc_trem_dur(repeats, base_scaling, duration):
         trem_length = ly.duration.tostring(int((repeats // duration) * -0.5))
     else:
         trem_length = str(duration // repeats)
-    new_type = xml_objs.durval2type(trem_length)
+    new_type = durval2type(trem_length)
     return (new_base, scale), new_type
 
 def get_line_style(style):

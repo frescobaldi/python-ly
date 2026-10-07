@@ -406,6 +406,13 @@ class Command(_token.Item, IdentifierRef):
             return s in words.lilypond_music_commands
         return False
 
+    def update_state(self, state):
+        super().update_state(state)
+        # at toplevel, a music function (e.g. \afterGrace) is followed by its
+        # music arguments, like the value of an assignment
+        if isinstance(state.parser(), ParseGlobal):
+            state.enter(ParseGlobalAssignment())
+
 
 class Keyword(_token.Item, IdentifierRef):
     @classmethod
@@ -889,6 +896,13 @@ class Name(UserVariable):
     r"""A variable name without \ prefix."""
 
 
+class AssignmentName(Name):
+    r"""The name of a new assignment, ending a toplevel assignment value."""
+    rx = Identifier.rx + r"(?=\s*=(?![=,']))"
+    def update_state(self, state):
+        state.leave()
+
+
 class EqualSign(_token.Token):
     rx = r"="
 
@@ -1008,11 +1022,13 @@ class ParseGlobal(ParseLilyPond):
 
 class ParseGlobalAssignment(FallthroughParser, ParseLilyPond):
     items = space_items + (
+        AssignmentName,
         Skip,
         Spacer,
         Q,
         Rest,
         Note,
+        Octave,
         Length,
         Fraction,
         DecimalValue,

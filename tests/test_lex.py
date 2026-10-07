@@ -59,3 +59,31 @@ def entity_refs(text):
 def test_only_ascii_digits_form_a_numeric_entity():
     assert entity_refs('&#65;') == ['&#65;']
     assert entity_refs('&#65;'.translate(TO_FULLWIDTH)) == []
+
+
+def token_types(text):
+    return [type(t).__name__ for t in ly.lex.state('lilypond').tokens(text)
+            if not isinstance(t, ly.lex._token.Space)]
+
+
+def test_toplevel_assignment_keeps_command_lexers():
+    # commands with their own lexer are still recognized in an assignment
+    assert token_types("foo = \\markup { \\bold x }") == [
+        'Name', 'EqualSign', 'MarkupStart', 'OpenBracketMarkup',
+        'MarkupCommand', 'MarkupWord', 'CloseBracketMarkup']
+    assert token_types("foo = \\relative c' { c4 }")[2] == 'PitchCommand'
+    assert token_types("foo = \\new Staff { c4 }")[2:4] == ['New', 'ContextName']
+    assert token_types("foo = \\chordmode { c:7 }")[2] == 'ChordMode'
+
+
+def test_toplevel_music_function_arguments():
+    assert token_types("foo = \\afterGrace c'2 { d'16 }")[:6] == [
+        'Name', 'EqualSign', 'Command', 'Note', 'Octave', 'Length']
+    assert token_types("\\afterGrace c'2 { d'16 }")[:4] == [
+        'Command', 'Note', 'Octave', 'Length']
+
+
+def test_toplevel_assignments_in_a_row():
+    assert token_types("foo = c4 bar = d4") == [
+        'Name', 'EqualSign', 'Note', 'Length',
+        'AssignmentName', 'EqualSign', 'Note', 'Length']

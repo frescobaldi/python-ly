@@ -626,10 +626,19 @@ class Reader(object):
     @_commands('\\afterGrace')
     def handle_after_grace(self, t, source):
         item = self.factory(AfterGrace, t)
-        for i in itertools.islice(self.read(source), 2):
+        post_events = (Postfix, Tie, Slur, PhrasingSlur, Beam, Dynamic, Articulation)
+        items = self.read(source)
+        item.extend(itertools.islice(items, 1))
+        # the main music may be preceded by an optional fraction
+        if len(item) and isinstance(item[0], Number):
+            item.extend(itertools.islice(items, 1))
+        # the post-events of the main music come before the grace music
+        for i in items:
             item.append(i)
+            if not isinstance(i, post_events):
+                break
         # put the grace music in a Grace item
-        if len(item) > 1:
+        if len(item) > 1 and not isinstance(item[-1], post_events):
             i = self.factory(Grace, position=item[-1].position)
             i.append(item[-1])
             item.append(i)
@@ -841,7 +850,7 @@ class Reader(object):
             break
         return item
     
-    @_commands('\\partcombine')
+    @_commands('\\partcombine', '\\partCombine')
     def handle_partcombine(self, t, source=None):
         item = self.factory(PartCombine, t)
         item.extend(itertools.islice(self.read(), 2))

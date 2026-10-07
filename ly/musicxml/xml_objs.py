@@ -42,7 +42,7 @@ Example::
     c.set_durtype(1)
     bar.obj_list.append(c)
 
-    xml_objs.IterateXmlObjs(score, musxml, 1)
+    xml_objs.IterateXmlObjs(score, musxml)
     xml = musxml.musicxml()
     xml.write(filename)
 
@@ -51,7 +51,9 @@ Example::
 from __future__ import unicode_literals
 from __future__ import print_function
 
+import copy
 from fractions import Fraction
+from math import gcd
 
 class IterateXmlObjs():
     """
@@ -59,18 +61,18 @@ class IterateXmlObjs():
     is constructed.
 
     """
-    def __init__(self, score, musxml, div):
+    def __init__(self, score, musxml):
         """Create the basic score information, and initiate the
         iteration of the parts."""
         # score.debug_score([])
         self.musxml = musxml
-        self.divisions = div
+        self.divisions = score.divisions()
         if score.title:
             self.musxml.create_title(score.title)
         for ctag in score.creators:
             self.musxml.add_creator(ctag, score.creators[ctag])
         for itag in score.info:
-            self.musxml.create_score_info(itag, score.info[itag])
+            self.musxml.add_miscellaneous(itag, score.info[itag])
         if score.rights:
             if len(score.rights) > 1:
                 for right in score.rights:
@@ -123,8 +125,7 @@ class IterateXmlObjs():
                 self.gener_xml_mus(obj)
                 self.after_note(obj)
             elif isinstance(obj, BarBackup):
-                divdur = self.count_duration(obj.duration, self.divisions)
-                self.musxml.add_backup(divdur)
+                self.musxml.add_backup(self.count_duration(obj.length))
 
     def new_xml_bar_attr(self, obj):
         """Create bar attribute xml-nodes."""
@@ -133,10 +134,9 @@ class IterateXmlObjs():
                 obj.divs, obj.multirest)
         if obj.new_system:
             self.musxml.new_system(obj.new_system)
-        if obj.repeat:
-            self.musxml.add_barline(obj.barline, obj.repeat)
-        elif obj.barline:
-            self.musxml.add_barline(obj.barline)
+        if obj.has_barline():
+            self.musxml.add_barline(obj.barline, obj.location, obj.ending,
+                                    obj.repeat, obj.repeat_times)
         if obj.staves:
             self.musxml.add_staves(obj.staves)
         if obj.multiclef:
@@ -152,6 +152,10 @@ class IterateXmlObjs():
 
     def before_note(self, obj):
         """Xml-nodes before note."""
+        for h in obj.harmonies:
+            offset = self.count_duration(h.offset)
+            self.musxml.add_harmony(h.root, h.root_alter, h.kind, h.bass,
+                                    h.degrees, offset)
         self._add_dynamics([d for d in obj.dynamic if d.before])
         if obj.oct_shift and not obj.oct_shift.octdir == 'stop':
             self.musxml.add_octave_shift(obj.oct_shift.plac, obj.oct_shift.octdir, obj.oct_shift.size)
@@ -176,10 +180,10 @@ class IterateXmlObjs():
 
     def gener_xml_mus(self, obj):
         """Nodes generic for both notes and rests."""
-        if obj.tuplet:
+        if obj.tuplet and not obj.skip:
             for t in obj.tuplet:
-                self.musxml.tuplet_note(t.fraction, obj.duration, t.ttype, t.nr,
-                                        self.divisions, t.acttype, t.normtype)
+                self.musxml.tuplet_note(t.fraction, t.ttype, t.nr,
+                                        t.acttype, t.normtype)
         if obj.staff and not obj.skip:
             self.musxml.add_staff(obj.staff)
         if obj.other_notation:
@@ -187,7 +191,7 @@ class IterateXmlObjs():
 
     def new_xml_note(self, obj):
         """Create note specific xml-nodes."""
-        divdur = self.count_duration(obj.duration, self.divisions)
+        divdur = self.count_duration(obj.length())
         if isinstance(obj, Unpitched):
             self.musxml.new_unpitched_note(obj.base_note, obj.octave, obj.type, divdur,
                 obj.voice, obj.dot, obj.chord, obj.grace)
@@ -220,19 +224,16 @@ class IterateXmlObjs():
 
     def new_xml_rest(self, obj):
         """Create rest specific xml-nodes."""
-        divdur = self.count_duration(obj.duration, self.divisions)
+        divdur = self.count_duration(obj.length())
         if obj.skip:
             self.musxml.add_skip(divdur)
         else:
             self.musxml.new_rest(divdur, obj.type, obj.pos,
-            obj.dot, obj.voice)
+            obj.dot, obj.voice, obj.invisible)
 
-    def count_duration(self, base_scaling, divs):
-        base = base_scaling[0]
-        scaling = base_scaling[1]
-        duration = divs*4*base
-        duration = duration * scaling
-        return int(duration)
+    def count_duration(self, length):
+        """Convert a length in whole notes to divisions."""
+        return int(self.divisions * 4 * length)
 
 
 class Score():
@@ -259,6 +260,43 @@ class Score():
         """Merge section to all parts."""
         for p in self.partlist:
             p.merge_voice(section, override)
+
+    def divisions(self):
+        """Return the smallest number of divisions per quarter note
+        that gives every note, rest and backup an integer duration, and
+        every chord name offset an integer offset.
+
+        Grace notes have no duration and are not counted.
+        """
+        divs = 1
+        for partlist, part in iter_parts(self.partlist):
+            for bar in part.barlist:
+                for obj in bar.obj_list:
+                    if isinstance(obj, BarBackup):
+                        lengths = [obj.length]
+                    elif isinstance(obj, BarMus) and not obj.grace[0]:
+                        lengths = [obj.length()]
+                        lengths += [h.offset for h in obj.harmonies]
+                    else:
+                        continue
+                    for length in lengths:
+                        den = (length * 4).denominator
+                        divs = divs * den // gcd(divs, den)
+        return divs
+
+    def merge_chord_names(self):
+        """Attach the chord names to the staff part below them, or above them
+        if no staff part follows. Without staff parts they remain a part."""
+        parts = list(iter_parts(self.partlist))
+        staves = [p for l, p in parts if not p.chord_names]
+        if not staves:
+            return
+        for i, (partlist, part) in enumerate(parts):
+            if part.chord_names:
+                below = [p for l, p in parts[i+1:] if not p.chord_names]
+                target = below[0] if below else staves[-1]
+                target.merge_harmonies(part)
+                partlist.remove(part)
 
     def debug_score(self, attr=[]):
         """
@@ -344,30 +382,6 @@ class ScoreSection():
         if len(voice.barlist) > bl_len:
             self.barlist += voice.barlist[bl_len:]
 
-    def merge_lyrics(self, lyrics):
-        """Merge in lyrics in music section."""
-        i = 0
-        ext = False
-        for bar in self.barlist:
-            for obj in bar.obj_list:
-                if isinstance(obj, BarNote):
-                    if ext:
-                        if obj.slur:
-                            ext = False
-                    else:
-                        try:
-                            l = lyrics.barlist[i]
-                        except IndexError:
-                            break
-                        if l != 'skip':
-                            try:
-                                if l[3] == "extend" and obj.slur:
-                                    ext = True
-                            except IndexError:
-                                pass
-                            obj.add_lyric(l)
-                        i += 1
-
 
 class Snippet(ScoreSection):
     """ Short section intended to be merged.
@@ -384,16 +398,40 @@ class LyricsSection(ScoreSection):
         ScoreSection.__init__(self, name)
         self.voice_id = voice_id
 
+    def attach_to(self, notes):
+        """Give the syllables to the notes like LilyPond's \\lyricsto does.
+
+        Chord notes and melismata (notes tied from the previous note and the
+        notes of a slur after its first note) get no syllable.
+        """
+        syllables = iter(self.barlist)
+        slurs = 0
+        for note in notes:
+            if note.chord:
+                continue
+            melisma = slurs or 'stop' in note.tie
+            for s in note.slur:
+                if not s.phrasing:
+                    slurs += 1 if s.slurtype == 'start' else -1
+            if not melisma:
+                l = next(syllables, None)
+                if l is None:
+                    break
+                if l != 'skip':
+                    note.add_lyric(l)
+
 
 class ScorePart(ScoreSection):
     """ object to keep track of part """
-    def __init__(self, staves=0, part_id=None, to_part=None, name=''):
+    def __init__(self, staves=0, part_id=None, to_part=None, name='',
+                 chord_names=False):
         ScoreSection.__init__(self, name)
         self.part_id = part_id
         self.to_part = to_part
         self.abbr = ''
         self.midi = ''
         self.staves = staves
+        self.chord_names = chord_names
 
     def __repr__(self):
         return '<{0} {1} {2}>'.format(
@@ -440,6 +478,14 @@ class ScorePart(ScoreSection):
         else:
             self.to_part.barlist.extend(self.barlist)
 
+    def merge_harmonies(self, chord_names):
+        """Attach the harmonies of a chord names part to the notes (or rests)
+        sounding at the same moment."""
+        for bar, chord_bar in zip(self.barlist, chord_names.barlist):
+            for pos, obj in chord_bar.positions():
+                for harmony in obj.harmonies:
+                    bar.attach_harmony(harmony, pos)
+
     def extract_global_to_section(self, name):
         """Extract only elements that is relevant for the score globally into a given section."""
         section = ScoreSection(name, True)
@@ -453,6 +499,9 @@ class ScorePart(ScoreSection):
                     glob_barattr.mode = obj.mode
                     glob_barattr.barline = obj.barline
                     glob_barattr.repeat = obj.repeat
+                    glob_barattr.repeat_times = obj.repeat_times
+                    glob_barattr.ending = obj.ending
+                    glob_barattr.location = obj.location
                     glob_barattr.tempo = obj.tempo
                     section_bar.obj_list.append(glob_barattr)
             section.barlist.append(section_bar)
@@ -493,18 +542,41 @@ class Bar():
                 return True
         return False
 
+    def positions(self):
+        """Yield the position in the bar and object of all notes and rests,
+        except chord and grace notes."""
+        pos = 0
+        for obj in self.obj_list:
+            if isinstance(obj, BarMus) and not obj.chord and not obj.is_grace():
+                yield pos, obj
+                pos += obj.length()
+            elif isinstance(obj, BarBackup):
+                pos -= obj.length
+
+    def attach_harmony(self, harmony, pos):
+        """Attach the harmony to the note starting at pos, or with an offset
+        to the note sounding at pos."""
+        for start, obj in self.positions():
+            if start == pos:
+                obj.harmonies.append(harmony)
+                return
+        for start, obj in self.positions():
+            if start < pos < start + obj.length():
+                harmony.offset = pos - start
+                obj.harmonies.append(harmony)
+                return
+        print("Warning: no note to attach chord name to!")
+
     def create_backup(self):
         """ Calculate and create backup object."""
-        b = 0
-        s = 1
+        length = 0
         for obj in self.obj_list:
             if isinstance(obj, BarMus):
-                if not obj.chord:
-                    b += obj.duration[0]
-                    s *= obj.duration[1]
+                if not obj.chord and not obj.grace[0]:
+                    length += obj.length()
             elif isinstance(obj, BarBackup):
                 break
-        self.add(BarBackup((b, s)))
+        self.add(BarBackup(length))
 
     def is_skip(self, obj_list=None):
         """ Check if bar has nothing but skips. """
@@ -532,11 +604,12 @@ class Bar():
             backup_list = new_voice.obj_list[1:]
         else:
             backup_list = new_voice.obj_list
-        try:
-            if self.obj_list[-1].barline and new_voice.obj_list[-1].barline:
-                self.obj_list.pop()
-        except AttributeError:
-            pass
+        barlines = [obj for obj in backup_list
+                    if isinstance(obj, BarAttr) and obj.has_barline()]
+        backup_list = [obj for obj in backup_list if obj not in barlines]
+        # a barline is added only where the bar doesn't have one yet
+        locations = [obj.location for obj in self.obj_list
+                     if isinstance(obj, BarAttr) and obj.has_barline()]
         if not self.is_skip(backup_list):
             self.create_backup()
 
@@ -569,6 +642,9 @@ class Bar():
 
                             if slur.start_node:
                                 slur.nr = slur.start_node.nr
+        for barline in barlines:
+            if barline.location not in locations:
+                self.add(barline)
 
 class BarMus():
     """ Common class for notes and rests. """
@@ -580,9 +656,11 @@ class BarMus():
         self.voice = voice
         self.staff = 0
         self.chord = False
+        self.grace = (0, 0, 0)
         self.other_notation = None
         self.dynamic = []
         self.oct_shift = None
+        self.harmonies = []
 
     def __repr__(self):
         return '<{0} {1}>'.format(self.__class__.__name__, self.duration)
@@ -590,8 +668,41 @@ class BarMus():
     def set_tuplet(self, fraction, ttype, nr, acttype='', normtype=''):
         self.tuplet.append(Tuplet(fraction, ttype, nr, acttype, normtype))
 
+    def tuplet_scaling(self):
+        """Return the factor by which the tuplets scale the duration."""
+        scaling = Fraction(1)
+        for t in self.tuplet:
+            scaling *= Fraction(t.fraction[1], t.fraction[0])
+        return scaling
+
+    def length(self):
+        """Return the time taken, in whole notes."""
+        return self.duration[0] * self.duration[1] * self.tuplet_scaling()
+
+    def continuation(self):
+        """Return a copy that continues this note or rest (e.g. after a
+        barline), without the markings belonging to the start of it."""
+        cont = copy.copy(self)
+        cont.tuplet = [Tuplet(t.fraction, '', t.nr, t.acttype, t.normtype)
+                       for t in self.tuplet]
+        cont.other_notation = None
+        cont.dynamic = []
+        cont.harmonies = []
+        cont.oct_shift = None
+        return cont
+
     def set_staff(self, staff):
         self.staff = staff
+
+    def length(self):
+        """The length of the note or rest, tuplets included."""
+        length = self.duration[0] * self.duration[1]
+        for t in self.tuplet:
+            length *= Fraction(t.fraction[1], t.fraction[0])
+        return length
+
+    def is_grace(self):
+        return False
 
     def add_dot(self):
         self.dot += 1
@@ -690,7 +801,6 @@ class BarNote(BarMus):
         self.octave = None
         self.accidental_token = accidental
         self.tie = []
-        self.grace = (0, 0)
         self.gliss = None
         self.tremolo = ('', 0)
         self.skip = False
@@ -701,6 +811,26 @@ class BarNote(BarMus):
         self.fingering = None
         self.lyric = None
         self.stem_direction = None
+
+    def length(self):
+        if self.grace[0]:
+            return 0
+        return BarMus.length(self)
+
+    def continuation(self):
+        """The continuation of a note is tied to it."""
+        cont = BarMus.continuation(self)
+        # the tie list can be shared by the notes of a chord
+        self.tie = self.tie + ['start']
+        cont.tie = ['stop']
+        cont.accidental_token = ''
+        cont.slur = []
+        cont.artic = []
+        cont.ornament = None
+        cont.adv_ornament = None
+        cont.gliss = None
+        cont.fingering = None
+        return cont
 
     def set_duration(self, duration, durtype=''):
         self.duration = duration
@@ -729,8 +859,11 @@ class BarNote(BarMus):
     def add_adv_ornament(self, ornament, end_type="start"):
         self.adv_ornament = (ornament, {"type": end_type})
 
-    def set_grace(self, slash):
-        self.grace = (1, slash)
+    def set_grace(self, slash, steal_time_previous=0):
+        self.grace = (1, slash, steal_time_previous)
+
+    def is_grace(self):
+        return bool(self.grace[0])
 
     def set_gliss(self, line, endtype = "start", nr=1):
         if not line:
@@ -772,12 +905,14 @@ class Unpitched(BarNote):
 
 class BarRest(BarMus):
     """ object to keep track of different rests and skips """
-    def __init__(self, duration, voice=1, show_type=True, skip=False, pos=0):
+    def __init__(self, duration, voice=1, show_type=True, skip=False, pos=0,
+                 invisible=False):
         BarMus.__init__(self, duration, voice)
         self.show_type = show_type
         self.type = None
         self.skip = skip
         self.pos = pos
+        self.invisible = invisible
 
     def set_duration(self, duration, durtype=''):
         self.duration = duration
@@ -801,7 +936,10 @@ class BarAttr():
         self.mode = ''
         self.divs = 0
         self.barline = None
+        self.location = 'right'
         self.repeat = None
+        self.repeat_times = None
+        self.ending = None
         self.staves = 0
         self.multiclef = []
         self.tempo = None
@@ -845,6 +983,9 @@ class BarAttr():
             self.word = ''
         self.word += words + ' '
 
+    def has_barline(self):
+        return bool(self.barline or self.ending)
+
     def has_attr(self):
         check = False
         if self.key is not None:
@@ -881,9 +1022,20 @@ class BarAttr():
 
 
 class BarBackup():
-    """ Object that stores duration for backup """
-    def __init__(self, duration):
-        self.duration = duration
+    """ Object that stores the length (in whole notes) of a backup """
+    def __init__(self, length):
+        self.length = length
+
+
+class Harmony():
+    """ Object that stores a chord name """
+    def __init__(self, root, root_alter, kind, bass=None, degrees=()):
+        self.root = root
+        self.root_alter = root_alter
+        self.kind = kind
+        self.bass = bass
+        self.degrees = degrees
+        self.offset = 0
 
 
 class TempoDir():
@@ -912,6 +1064,15 @@ class TempoDir():
 ##
 # Translation functions
 ##
+
+def iter_parts(partlist):
+    """Yield (partlist, part) for all parts, also those inside groups."""
+    for p in partlist:
+        if isinstance(p, ScorePartGroup):
+            for pp in iter_parts(p.partlist):
+                yield pp
+        else:
+            yield partlist, p
 
 def dur2lines(dur):
     if dur == 8:

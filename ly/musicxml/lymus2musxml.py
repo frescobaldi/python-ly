@@ -29,9 +29,14 @@ is captured.
 from __future__ import unicode_literals
 from __future__ import print_function
 
+import itertools
+from fractions import Fraction
+
 import ly.document
 import ly.music
+import ly.pitch
 
+from . import chords
 from . import create_musicxml
 from . import ly2xml_mediator
 from . import xml_objs
@@ -61,6 +66,20 @@ class End():
         return '<{0} {1}>'.format(self.__class__.__name__, self.node)
 
 
+class LyricsVoice():
+    r""" Extra class that marks the start of music that is followed by
+    \addlyrics expressions in the node list. """
+    def __init__(self, node):
+        self.node = node
+
+    def __repr__(self):
+        return '<{0} {1}>'.format(self.__class__.__name__, self.node)
+
+
+def is_addlyrics(node):
+    return isinstance(node, ly.music.items.LyricMode) and node.token == '\\addlyrics'
+
+
 class ParseSource():
     """ creates the XML-file from the source code according to the Music XML standard """
 
@@ -70,12 +89,12 @@ class ParseSource():
         self.relative = False
         self.tuplet = []
         self.scale = ''
-        self.grace_seq = False
         self.trem_rep = 0
         self.piano_staff = 0
         self.numericTime = False
         self.voice_sep = False
         self.sims_and_seqs = []
+        self.voice_parts = []
         self.override_dict = {}
         self.ottava = False
         self.with_contxt = None
@@ -85,12 +104,15 @@ class ParseSource():
         self.tupl_span = False
         self.unset_tuplspan = False
         self.alt_mode = None
+        self.chord_names = False
         self.rel_pitch_isset = False
         self.slurcount = 0
         self.slurnr = 0
         self.phrslurnr = 0
         self.mark = False
         self.pickup = False
+        self.note_node = None
+        self.alternatives = {}
 
     def parse_text(self, ly_text, filename=None):
         """Parse the LilyPond source specified as text.
@@ -140,22 +162,39 @@ class ParseSource():
         if nodes:
             for m in nodes:
                 # print(m)
+                self.leave_note(m)
                 func_name = m.__class__.__name__ #get instance name
                 if func_name not in excl_list:
-                    try:
-                        func_call = getattr(self, func_name)
+                    func_call = getattr(self, func_name, None)
+                    if func_call:
                         func_call(m)
-                    except AttributeError as ae:
+                    else:
                         print("Warning:", func_name, "not implemented!")
-                        print(ae)
-                        pass
+            self.leave_note()
         else:
             print("Warning! Couldn't parse source!")
+
+    def leave_note(self, node=None):
+        """Complete the current note (or rest or chord) when the node,
+        if given, is not part of it. The postfix events after a note
+        (-., ^\\markup, ...) are part of it, so that e.g. its markup is in
+        the measure of the note, also when the note completes the measure."""
+        if self.note_node:
+            n = node.node if isinstance(node, End) else node
+            if isinstance(n, ly.music.items.Command) and n.token == '\\rest':
+                # makes the note before it a rest
+                return
+            while n:
+                if n is self.note_node or isinstance(n, ly.music.items.Postfix):
+                    return
+                n = n.parent()
+            self.mediator.end_note()
+            self.note_node = None
 
     def musicxml(self, prettyprint=True):
         self.mediator.check_score()
         xml_objs.IterateXmlObjs(
-            self.mediator.score, self.musxml, self.mediator.divisions)
+            self.mediator.score, self.musxml)
         xml = self.musxml.musicxml(prettyprint)
         return xml
 
@@ -195,14 +234,23 @@ class ParseSource():
             else:
                 self.mediator.new_section('simultan')
                 self.sims_and_seqs.append('sim')
+            self.mediator.new_simultaneous()
         elif musicList.token == '{':
             self.sims_and_seqs.append('seq')
+            if musicList in self.alternatives:
+                self.mediator.start_ending(self.alternatives[musicList][0])
 
     def Chord(self, chord):
         self.mediator.clear_chord()
+        if chord.find_child((ly.music.items.Note, ly.music.items.DrumNote), 1):
+            self.note_node = chord
+        else:
+            # an empty chord <> takes no time, its dynamics apply to the next note
+            self.mediator.empty_chord()
 
     def Q(self, q):
         self.mediator.copy_prev_chord(q.duration)
+        self.note_node = q
 
     def Context(self, context):
         r""" \context """
@@ -235,14 +283,29 @@ class ParseSource():
             self.mediator.add_staff_id(context_id)
         elif context == 'Voice':
             self.sims_and_seqs.append('voice')
+            # a Voice outside any Staff gets a part of its own, as LilyPond
+            # creates a Staff for it
+            self.voice_parts.append(self.mediator.part is None)
+            if self.voice_parts[-1]:
+                self.mediator.new_part()
             if context_id:
                 self.mediator.new_section(context_id)
+                self.mediator.new_lyrics_voice(context_id)
             else:
                 self.mediator.new_section('voice')
         elif context == 'Devnull':
             self.mediator.new_section('devnull', True)
+        elif context == 'ChordNames':
+            self.mediator.new_part(context_id, chord_names=True)
+            self.chord_names = True
+        elif context == 'Lyrics':
+            pass # the lyrics are attached to their voice by \lyricsto
         else:
             print("Context not implemented:", context)
+
+    def PartCombine(self, partcombine):
+        r"""A \partCombine expression, rendered as << music1 \\ music2 >>."""
+        self.mediator.new_snippet('sim-snip')
 
     def VoiceSeparator(self, voice_sep):
         self.mediator.new_snippet('sim')
@@ -255,27 +318,38 @@ class ParseSource():
 
     def PipeSymbol(self, barcheck):
         """ PipeSymbol = | """
-        pass
+        if not self.look_behind(barcheck, (ly.music.items.LyricMode, ly.music.items.LyricsTo)):
+            self.mediator.bar_check()
 
     def Clef(self, clef):
         r""" Clef \clef"""
         self.mediator.new_clef(clef.specifier())
 
     def KeySignature(self, key):
-        self.mediator.new_key(key.pitch().output(), key.mode())
+        pitch = self.mediator.transpose(key.pitch())
+        # only the pitch name, transposing can change the octave of the key
+        key_name = ly.pitch.pitchWriter('nederlands')(pitch.note, pitch.alter)
+        self.mediator.new_key(key_name, key.mode())
 
     def Relative(self, relative):
         r"""A \relative music expression."""
         self.relative = True
 
+    def Transpose(self, transpose):
+        r"""A \transpose music expression."""
+        self.mediator.push_transposition(transpose[0].pitch, transpose[1].pitch)
+
     def Partial(self, partial):
+        self.mediator.set_pickup(partial.partial_length())
         self.pickup = True
 
     def Note(self, note):
         """ notename, e.g. c, cis, a bes ... """
         #print(note.token)
         if note.length():
-            if self.relative and not self.rel_pitch_isset:
+            if self.alt_mode == 'chord':
+                self.chordmode_note(note)
+            elif self.relative and not self.rel_pitch_isset:
                 self.mediator.new_note(note, False)
                 self.mediator.set_relative(note)
                 self.rel_pitch_isset = True
@@ -292,13 +366,34 @@ class ParseSource():
                 else:
                     self.mediator.new_chord(note, note.parent().duration, self.relative)
                     self.check_tuplet()
-                # chord as grace note
-                if self.grace_seq:
-                    self.mediator.new_chord_grace()
+
+    def chordmode_note(self, note):
+        """A note in chord mode, with the ChordSpecifier following it."""
+        spec = self.get_next_node(note)
+        if not isinstance(spec, ly.music.items.ChordSpecifier):
+            spec = None
+        chord = chords.Chord(note.pitch, spec)
+        if self.chord_names:
+            self.mediator.new_harmony(note, chord)
+        else:
+            self.mediator.new_chordmode_chord(note, chord)
+        self.check_note(note)
+
+    def ChordSpecifier(self, specifier):
+        """Read with the note before it."""
+        pass
+
+    def ChordItem(self, item):
+        """Read with the note before it."""
+        pass
 
     def Unpitched(self, unpitched):
-        """A note without pitch, just a standalone duration."""
-        if unpitched.length():
+        """A note without pitch, just a standalone duration.
+
+        In FigureMode it is a bass figure, which is not supported.
+
+        """
+        if unpitched.length() and self.alt_mode != 'figure':
             if self.alt_mode == 'drum':
                 self.mediator.new_iso_dura(unpitched, self.relative, True)
             else:
@@ -310,12 +405,16 @@ class ParseSource():
         if drumnote.length():
             self.mediator.new_note(drumnote, is_unpitched=True)
             self.check_note(drumnote)
+        elif isinstance(drumnote.parent(), ly.music.items.Chord):
+            chord_base = not self.mediator.current_chord
+            self.mediator.new_drum_chordnote(drumnote.parent().duration)
+            if chord_base:
+                self.check_tuplet()
 
     def check_note(self, note):
         """Generic check for all notes, both pitched and unpitched."""
+        self.note_node = note
         self.check_tuplet()
-        if self.grace_seq:
-            self.mediator.new_grace()
         if self.trem_rep and not self.look_ahead(note, ly.music.items.Duration):
             self.mediator.set_tremolo(trem_type='start', repeats=self.trem_rep)
 
@@ -332,7 +431,6 @@ class ParseSource():
                     self.mediator.change_to_tuplet(td['fraction'], td['ttype'],
                                                 td['nr'])
                 td['ttype'] = ""
-            self.mediator.check_divs()
 
     def Duration(self, duration):
         """A written duration"""
@@ -346,7 +444,6 @@ class ParseSource():
             self.mediator.set_tuplspan_dur(duration.token, duration.tokens)
             self.tupl_span = False
         elif self.pickup:
-            self.mediator.set_pickup()
             self.pickup = False
         else:
             self.mediator.new_duration_token(duration.token, duration.tokens)
@@ -369,6 +466,8 @@ class ParseSource():
         if rest.token == 'R':
             self.scale = 'R'
         self.mediator.new_rest(rest)
+        self.note_node = rest
+        self.check_tuplet()
 
     def Skip(self, skip):
         r""" invisible rest/spacer rest (s or command \skip)"""
@@ -376,6 +475,8 @@ class ParseSource():
             self.mediator.new_lyrics_item(skip.token)
         else:
             self.mediator.new_rest(skip)
+            self.note_node = skip
+            self.check_tuplet()
 
     def Scaler(self, scaler):
         r"""
@@ -384,7 +485,8 @@ class ParseSource():
         """
         if scaler.token == '\\scaleDurations':
             ttype = ""
-            fraction = (scaler.denominator, scaler.numerator)
+            scaling = Fraction(scaler.scaling)
+            fraction = (scaling.denominator, scaling.numerator)
         elif scaler.token == '\\times':
             ttype = "start"
             fraction = (scaler.denominator, scaler.numerator)
@@ -439,7 +541,16 @@ class ParseSource():
         self.mediator.new_dynamics(dynamic.token[1:])
 
     def Grace(self, grace):
-        self.grace_seq = True
+        slash = grace.token in ('\\acciaccatura', '\\slashedGrace')
+        steal = 0
+        if isinstance(grace.parent(), ly.music.items.AfterGrace):
+            # the percentage of the main note's duration taken by the graces
+            steal = (1 - grace.parent().fraction()) * 100
+        self.mediator.start_grace(slash, steal)
+
+    def AfterGrace(self, aftergrace):
+        r"""\afterGrace; the grace notes are handled by Grace."""
+        pass
 
     def TimeSignature(self, timeSign):
         self.mediator.new_time(timeSign.numerator(), timeSign.fraction(), self.numericTime)
@@ -449,6 +560,23 @@ class ParseSource():
             self.mediator.new_repeat('forward')
         elif repeat.specifier() == 'tremolo':
             self.trem_rep = repeat.repeat_count()
+
+    def Alternative(self, alternative):
+        r"""An \alternative of a volta repeat.
+
+        With N repeats and k alternatives the first alternative is played
+        the first N-k+1 times, the others once each.
+        """
+        repeat = alternative.find_parent(ly.music.items.Repeat)
+        if repeat.specifier() == 'volta':
+            count = repeat.repeat_count()
+            alts = alternative[0]
+            first = count - len(alts) + 1
+            numbers = [', '.join(str(n) for n in range(1, first + 1))]
+            numbers += [str(n) for n in range(first + 1, count + 1)]
+            for alt, number in zip(alts, numbers):
+                times = None if alt is alts[-1] else count
+                self.alternatives[alt] = (number, times)
 
     def Tremolo(self, tremolo):
         """A tremolo item ":"."""
@@ -472,6 +600,8 @@ class ParseSource():
                     self.mediator.unset_tuplspan_dur()
                 return
             val = cont_set.value().get_string()
+        elif isinstance(cont_set.value(), ly.music.items.Markup):
+            val = cont_set.value().plaintext()
         else:
             val = cont_set.value().value()
         if cont_set.context() in part_contexts:
@@ -532,7 +662,10 @@ class ParseSource():
         pass
 
     def MarkupWord(self, markupWord):
-        self.mediator.new_word(markupWord.token)
+        # markup assigned to a property or a header field is read as a whole
+        # by Assignment or Set
+        if not self.look_behind(markupWord, (ly.music.items.Assignment, ly.music.items.Set)):
+            self.mediator.new_word(markupWord.token)
 
     def MarkupList(self, markuplist):
         pass
@@ -560,7 +693,13 @@ class ParseSource():
         self.alt_mode = 'note'
 
     def ChordMode(self, chordmode):
-        r"""A \chordmode or \chords expression."""
+        r"""A \chordmode or \chords expression.
+
+        If the shorthand form \chords is found, ChordNames is implicit.
+
+        """
+        if chordmode.token == '\\chords':
+            self.check_context('ChordNames')
         self.alt_mode = 'chord'
 
     def DrumMode(self, drummode):
@@ -580,14 +719,30 @@ class ParseSource():
     def LyricMode(self, lyricmode):
         r"""A \lyricmode, \lyrics or \addlyrics expression."""
         self.alt_mode = 'lyric'
+        if is_addlyrics(lyricmode):
+            music = self.addlyrics_music(lyricmode)
+            if not is_addlyrics(lyricmode.previous_sibling()):
+                self.mediator.end_lyrics_voice(music)
+            self.mediator.new_lyric_section('addlyrics', music)
+            self.sims_and_seqs.append('lyrics')
+
+    def LyricsVoice(self, voice):
+        r"""Start of music that is followed by \addlyrics."""
+        self.mediator.new_lyrics_voice(voice.node)
 
     def Override(self, override):
         r"""An \override command."""
         self.override_key = ''
 
     def PathItem(self, item):
-        r"""An item in the path of an \override or \revert command."""
-        self.override_key += item.token
+        r"""An item in the path of an \override, \revert or \tweak command.
+
+        Only the path of an \override is collected, \revert and \tweak are
+        not supported.
+
+        """
+        if isinstance(item.parent(), ly.music.items.Override):
+            self.override_key += item.token
 
     def Scheme(self, scheme):
         """A Scheme expression inside LilyPond."""
@@ -621,10 +776,11 @@ class ParseSource():
             self.tuplet.pop()
             self.fraction = None
         elif isinstance(end.node, ly.music.items.Grace): #Grace
-            self.grace_seq = False
+            self.mediator.end_grace()
         elif end.node.token == '\\repeat':
-            if end.node.specifier() == 'volta':
-                self.mediator.new_repeat('backward')
+            if (end.node.specifier() == 'volta' and
+                    not end.node.find_child(ly.music.items.Alternative, 2)):
+                self.mediator.new_repeat('backward', end.node.repeat_count())
             elif end.node.specifier() == 'tremolo':
                 if self.look_ahead(end.node, ly.music.items.MusicList):
                     self.mediator.set_tremolo(trem_type="stop")
@@ -634,7 +790,12 @@ class ParseSource():
         elif isinstance(end.node, ly.music.items.Context):
             self.in_context = False
             if end.node.context() == 'Voice':
-                self.mediator.check_voices()
+                if end.node.context_id():
+                    self.mediator.end_lyrics_voice(end.node.context_id())
+                if self.voice_parts.pop():
+                    self.mediator.check_part()
+                else:
+                    self.mediator.check_voices()
                 self.sims_and_seqs.pop()
             elif end.node.context() in group_contexts:
                 self.mediator.close_group()
@@ -648,7 +809,17 @@ class ParseSource():
                 self.mediator.set_voicenr(nr=1)
             elif end.node.context() == 'Devnull':
                 self.mediator.check_voices()
+            elif end.node.context() == 'ChordNames':
+                self.end_chord_names()
+        elif isinstance(end.node, ly.music.items.ChordMode):
+            self.alt_mode = None
+            if end.node.token == '\\chords':
+                self.end_chord_names()
+        elif isinstance(end.node, ly.music.items.PartCombine):
+            self.mediator.check_voices_by_nr()
+            self.mediator.revert_voicenr()
         elif end.node.token == '<<':
+            self.mediator.end_simultaneous()
             if self.voice_sep:
                 self.mediator.check_voices_by_nr()
                 self.mediator.revert_voicenr()
@@ -660,21 +831,35 @@ class ParseSource():
         elif end.node.token == '{':
             if self.sims_and_seqs:
                 self.sims_and_seqs.pop()
+            if end.node in self.alternatives:
+                self.mediator.stop_ending(*self.alternatives.pop(end.node))
         elif end.node.token == '<': #chord
             self.mediator.chord_end()
         elif end.node.token == '\\lyricsto':
             self.mediator.check_lyrics(end.node.context_id())
             self.sims_and_seqs.pop()
+        elif is_addlyrics(end.node):
+            self.mediator.check_lyrics(self.addlyrics_music(end.node))
+            self.sims_and_seqs.pop()
         elif end.node.token == '\\with':
             self.with_contxt = None
         elif end.node.token == '\\drums':
             self.mediator.check_part()
+        elif isinstance(end.node, ly.music.items.Transpose):
+            self.mediator.pop_transposition()
         elif isinstance(end.node, ly.music.items.Relative):
             self.relative = False
             self.rel_pitch_isset = False
         else:
             # print("end:", end.node.token)
             pass
+        parent = end.node.parent()
+        if isinstance(parent, ly.music.items.MusicList) and parent.token == '<<':
+            self.mediator.next_simultaneous()
+
+    def end_chord_names(self):
+        self.chord_names = False
+        self.mediator.check_part()
 
     ##
     # Additional node manipulation
@@ -689,6 +874,21 @@ class ParseSource():
             return parent[i-1]
         else:
             return False
+
+    def get_next_node(self, node):
+        """ Returns the nodes next node
+        or None if the node is last in its branch. """
+        parent = node.parent()
+        i = parent.index(node)
+        if i + 1 < len(parent):
+            return parent[i+1]
+
+    def addlyrics_music(self, addlyrics):
+        r"""Returns the music node an \addlyrics node refers to."""
+        node = addlyrics.previous_sibling()
+        while is_addlyrics(node):
+            node = node.previous_sibling()
+        return node
 
     def simple_node_gen(self, node):
         """Unlike iter_score are the subnodes yielded without substitution."""
@@ -716,37 +916,71 @@ class ParseSource():
 
         Similarly to items.Document.iter_music user commands are substituted.
 
-        Furthermore \repeat unfold expressions are unfolded.
+        Furthermore \repeat unfold and \repeat percent expressions are
+        unfolded, and the two arguments of \partCombine are separated by a
+        voice separator.
         """
-        for s in scorenode:
-            if isinstance(s, ly.music.items.Repeat) and s.specifier() == 'unfold':
-                for u in self.unfold_repeat(s, s.repeat_count(), doc):
+        return self.iter_nodes(scorenode, doc)
+
+    def iter_nodes(self, nodes, doc):
+        """Iter over the nodes and their children, see iter_score."""
+        for i, s in enumerate(nodes):
+            if i == 1 and isinstance(nodes, ly.music.items.PartCombine):
+                yield ly.music.items.VoiceSeparator()
+            if is_addlyrics(s.next_sibling()) and not is_addlyrics(s):
+                yield LyricsVoice(s)
+            n = doc.substitute_for_node(s) or s
+            if (isinstance(n, ly.music.items.Repeat) and
+                    n.specifier() in ('unfold', 'percent')):
+                for u in self.unfold_repeat(n, n.repeat_count(), doc):
                     yield u
             else:
-                n = doc.substitute_for_node(s) or s
                 yield n
                 for c in self.iter_score(n, doc):
                     yield c
-                if isinstance(s, ly.music.items.Container):
-                    yield End(s)
+                if isinstance(n, ly.music.items.Container):
+                    yield End(n)
 
     def unfold_repeat(self, repeat_node, repeat_count, doc):
         r"""
         Iter over node which represent a \repeat unfold expression
         and do the unfolding directly.
+
+        As in LilyPond, the repetitions end with the alternatives in turn, the
+        first alternative being used for the first repetitions if there are
+        fewer alternatives than repetitions.
         """
+        alternative = repeat_node.find_child(ly.music.items.Alternative, 2)
+        if alternative:
+            # the \alternative follows the repeated music or (LilyPond 2.24)
+            # is its last item
+            music = [n for n in alternative.parent() if n is not alternative]
+            alts = list(alternative[0])[:repeat_count]
+            alts[0:0] = [alts[0]] * (repeat_count - len(alts))
+        else:
+            music = list(repeat_node)
+            alts = []
         for r in range(repeat_count):
-            for n in repeat_node:
-                for c in self.iter_score(n, doc):
+            for c in self.iter_score(music, doc):
+                yield c
+            if alts:
+                for c in self.iter_score([alts[r]], doc):
                     yield c
 
     def find_score_sub(self, doc):
-        """Find substitute for scorenode. Takes first music node that isn't
-        an assignment."""
+        r"""Find substitute for scorenode. Takes first music node that isn't
+        an assignment, and the \addlyrics expressions following it."""
         for n in doc:
             if not isinstance(n, ly.music.items.Assignment):
                 if isinstance(n, ly.music.items.Music):
-                    return self.iter_score(n, doc)
+                    lyrics = []
+                    node = n.next_sibling()
+                    while is_addlyrics(node):
+                        lyrics.append(node)
+                        node = node.next_sibling()
+                    voice = [LyricsVoice(n)] if lyrics else []
+                    return itertools.chain(voice, self.iter_score([n], doc),
+                                           self.iter_nodes(lyrics, doc))
 
     def look_ahead(self, node, find_node):
         """Looks ahead in a container node and returns True

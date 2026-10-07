@@ -50,7 +50,7 @@ class CreateMusicXML():
 
     def __init__(self):
         """Creates the basic structure of the XML without any music."""
-        self.root = etree.Element("score-partwise", version="3.0")
+        self.root = etree.Element("score-partwise", version="4.0")
         self.tree = etree.ElementTree(self.root)
         self.score_info = etree.SubElement(self.root, "identification")
         encoding = etree.SubElement(self.score_info, "encoding")
@@ -73,9 +73,19 @@ class CreateMusicXML():
         self.root.insert(0, mov_title)
 
     def create_score_info(self, tag, info, attr={}):
-        """Create score info."""
-        info_node = etree.SubElement(self.score_info, tag, attr)
+        """Create score info (creator or rights), which precedes the encoding."""
+        info_node = etree.Element(tag, attr)
         info_node.text = info
+        self.score_info.insert(get_tag_index(self.score_info, "encoding"), info_node)
+
+    def add_miscellaneous(self, name, text):
+        """Add a miscellaneous field, e.g. for a header field without a
+        MusicXML element of its own."""
+        misc = self.score_info.find("miscellaneous")
+        if misc is None:
+            misc = etree.SubElement(self.score_info, "miscellaneous")
+        field = etree.SubElement(misc, "miscellaneous-field", name=name)
+        field.text = text
 
     def create_partgroup(self, gr_type, num, name=None, abbr=None, symbol=None):
         """Create a new part group."""
@@ -120,9 +130,12 @@ class CreateMusicXML():
 
     def create_measure(self, pickup = False, **bar_attrs):
         """Create new measure """
-        if pickup and self.bar_nr == 1:
+        implicit = pickup and self.bar_nr == 1
+        if implicit:
             self.bar_nr = 0
         self.current_bar = etree.SubElement(self.current_part, "measure", number=str(self.bar_nr))
+        if implicit:
+            self.current_bar.set('implicit', 'yes')
         self.bar_nr +=1
         if bar_attrs:
             self.new_bar_attr(**bar_attrs)
@@ -132,11 +145,11 @@ class CreateMusicXML():
     ##
 
     def new_note(self, step, octave, durtype, divdur, alter=0,
-                 acc_token=0, voice=1, dot=0, chord=0, grace=(0, 0), stem_dir=0):
+                 acc_token=0, voice=1, dot=0, chord=0, grace=(0, 0, 0), stem_dir=0):
         """Create all nodes needed for a normal note. """
         self.create_note()
         if grace[0]:
-            self.add_grace(grace[1])
+            self.add_grace(*grace[1:])
         if chord:
             self.add_chord()
         self.add_pitch(step, alter, octave)
@@ -158,34 +171,26 @@ class CreateMusicXML():
             self.set_stem_dir(stem_dir)
 
     def new_unpitched_note(self, step, octave, durtype, divdur, voice=1,
-                            dot=0, chord=0, grace=(0, 0)):
+                            dot=0, chord=0, grace=(0, 0, 0)):
         """Create all nodes needed for an unpitched note. """
         self.create_note()
         if grace[0]:
-            self.add_grace(grace[1])
+            self.add_grace(*grace[1:])
         if chord:
             self.add_chord()
         self.add_unpitched(step, octave)
         if not grace[0]:
             self.add_div_duration(divdur)
-        self.add_duration_type(durtype)
         self.add_voice(voice)
+        self.add_duration_type(durtype)
         if dot:
             for i in range(dot):
                 self.add_dot()
 
-    def tuplet_note(self, fraction, bs, ttype, nr, divs, atyp='', ntyp=''):
+    def tuplet_note(self, fraction, ttype, nr, atyp='', ntyp=''):
         """Convert current note to tuplet """
-        base = self.mult * bs[0]
-        scaling = bs[1]
-        a = divs*4*fraction[1]
-        b = (1/base)*fraction[0]
-        duration = (a/b)*scaling
-        self.change_div_duration(duration)
-        from fractions import Fraction
-        self.mult = Fraction(fraction[1], fraction[0])
         timemod_node = self.get_time_modify()
-        if timemod_node:
+        if timemod_node is not None:
             self.adjust_time_modify(timemod_node, fraction)
         else:
             self.add_time_modify(fraction)
@@ -201,9 +206,11 @@ class CreateMusicXML():
         self.add_notations()
         self.add_tied(tie_type)
 
-    def new_rest(self, duration, durtype, pos, dot, voice):
+    def new_rest(self, duration, durtype, pos, dot, voice, invisible=False):
         """Create all nodes needed for a rest. """
         self.create_note()
+        if invisible:
+            self.current_note.set("print-object", "no")
         if pos:
             self.add_rest_w_pos(pos[0], pos[1])
         else:
@@ -354,13 +361,8 @@ class CreateMusicXML():
 
     def add_div_duration(self, divdur):
         """Create new duration """
-        self.duration = etree.SubElement(self.current_note, "duration")
-        self.duration.text = str(divdur)
-        self.mult = 1
-
-    def change_div_duration(self, newdura):
-        """Set new duration when tuplet """
-        self.duration.text = str(newdura)
+        duration = etree.SubElement(self.current_note, "duration")
+        duration.text = str(divdur)
 
     def add_duration_type(self, durtype):
         """Create new type """
@@ -378,17 +380,19 @@ class CreateMusicXML():
 
     def add_tie(self, tie_type):
         """Create node tie (used for sound of tie) """
-        # A tie must be directly after a duration
-        insert_at = get_tag_index(self.current_note, "duration") + 1
+        # A tie must be directly after a duration (or a previous tie)
+        insert_at = (get_tag_index(self.current_note, "duration") + 1
+                     + len(self.current_note.findall("tie")))
         tie_element = etree.Element("tie", type=tie_type)
         self.current_note.insert(insert_at, tie_element)
 
-    def add_grace(self, slash):
+    def add_grace(self, slash, steal_time_previous=0):
         """Create grace node """
+        grace = etree.SubElement(self.current_note, "grace")
+        if steal_time_previous:
+            grace.set("steal-time-previous", "{:g}".format(float(steal_time_previous)))
         if slash:
-            etree.SubElement(self.current_note, "grace", slash="yes")
-        else:
-            etree.SubElement(self.current_note, "grace")
+            grace.set("slash", "yes")
 
     def add_notations(self):
         if self.current_notation is None:
@@ -554,12 +558,17 @@ class CreateMusicXML():
     def new_system(self, force_break):
         etree.SubElement(self.current_bar, "print", {'new-system':force_break})
 
-    def add_barline(self, bl_type, repeat=None):
-        barnode = etree.SubElement(self.current_bar, "barline", location="right")
-        barstyle = etree.SubElement(barnode, "bar-style")
-        barstyle.text = bl_type
+    def add_barline(self, bl_type, location="right", ending=None, repeat=None, times=None):
+        barnode = etree.SubElement(self.current_bar, "barline", location=location)
+        if bl_type:
+            barstyle = etree.SubElement(barnode, "bar-style")
+            barstyle.text = bl_type
+        if ending:
+            etree.SubElement(barnode, "ending", number=ending[0], type=ending[1])
         if repeat:
             repeatnode = etree.SubElement(barnode, "repeat", direction=repeat)
+            if times:
+                repeatnode.attrib['times'] = str(times)
 
     def add_backup(self, duration):
         if duration <= 0:
@@ -621,6 +630,28 @@ class CreateMusicXML():
         direction = etree.SubElement(self.current_bar, "direction", placement=plac)
         dirtypenode = etree.SubElement(direction, "direction-type")
         dyn_node = etree.SubElement(dirtypenode, "octave-shift", oct_dict)
+
+    def add_harmony(self, root, root_alter, kind, bass=None, degrees=(), offset=0):
+        """Add a chord symbol. Bass is a (step, alter) tuple, degrees are
+        (value, alter, type) tuples."""
+        harmony = etree.SubElement(self.current_bar, "harmony")
+        rootnode = etree.SubElement(harmony, "root")
+        etree.SubElement(rootnode, "root-step").text = root
+        if root_alter:
+            etree.SubElement(rootnode, "root-alter").text = str(root_alter)
+        etree.SubElement(harmony, "kind").text = kind
+        if bass:
+            bassnode = etree.SubElement(harmony, "bass")
+            etree.SubElement(bassnode, "bass-step").text = bass[0]
+            if bass[1]:
+                etree.SubElement(bassnode, "bass-alter").text = str(bass[1])
+        for value, alter, degree_type in degrees:
+            degreenode = etree.SubElement(harmony, "degree")
+            etree.SubElement(degreenode, "degree-value").text = str(value)
+            etree.SubElement(degreenode, "degree-alter").text = str(alter)
+            etree.SubElement(degreenode, "degree-type").text = degree_type
+        if offset:
+            etree.SubElement(harmony, "offset").text = str(offset)
 
     def add_dirwords(self, words):
         """Add words in direction, e. g. a tempo mark."""
@@ -721,5 +752,5 @@ def get_tag_index(node, tag):
 
 xml_decl_txt = """<?xml version="1.0" encoding="{encoding}"?>"""
 
-doctype_txt = """<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 2.0 Partwise//EN"
+doctype_txt = """<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN"
                                 "http://www.musicxml.org/dtds/partwise.dtd">"""
