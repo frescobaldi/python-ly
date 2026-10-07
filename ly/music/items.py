@@ -629,9 +629,20 @@ class Grace(Music):
 class AfterGrace(Music):
     r"""The \afterGrace function with its two arguments.
     
-    Only the duration of the first is counted.
+    Only the duration of the first is counted. The music arguments may be
+    preceded by a fraction (a Number).
     
     """
+    def fraction(self):
+        """Return the fraction of the main note after which the graces start.
+        
+        This is the optional fraction argument, or LilyPond's default
+        afterGraceFraction 3/4.
+        
+        """
+        if isinstance(self[0], Number):
+            return self[0].value()
+        return Fraction(3, 4)
 
 
 class PartCombine(Music):
